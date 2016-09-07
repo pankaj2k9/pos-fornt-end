@@ -1,0 +1,92 @@
+import React from 'react'
+import { FormattedDate, FormattedTime, FormattedMessage } from 'react-intl'
+import DataListItem from './DataListItem'
+import POSTransList from './POSTransList'
+
+const DataList = ({ data, listName }) => {
+  return (
+    <div className='tile is-ancestor is-vertical'>
+      {Object.keys(data).map(key => {
+        const keyValue = data[key]
+        let keyName
+        let value = keyValue || keyValue === 0 ? keyValue : 'N/A'
+        const fieldKey = `order-modal-${key}`
+
+        switch (key) {
+          case 'id':
+            keyName = <FormattedMessage id='app.modal.orderId' />
+            break
+          case 'userId':
+            keyName = <FormattedMessage id='app.modal.userId' />
+            break
+          case 'dateCreated':
+            keyName = <FormattedMessage id='app.modal.dateCreated' />
+
+            value = (
+              <span>
+                <FormattedDate value={keyValue} /> <FormattedTime value={keyValue} />
+              </span>
+            )
+            break
+          case 'dateUpdated':
+            keyName = <FormattedMessage id='app.modal.dateUpdated' />
+            value = (
+              <span>
+                <FormattedDate value={keyValue} /> <FormattedTime value={keyValue} />
+              </span>
+            )
+            break
+          case 'dateOrdered':
+            keyName = <FormattedMessage id='app.modal.dateOrdered' />
+            value = (
+              <span>
+                <FormattedDate value={keyValue} /> <FormattedTime value={keyValue} />
+              </span>)
+            break
+          case 'dateFulfilled':
+            keyName = <FormattedMessage id='app.modal.dateFulfilled' />
+            value = keyValue
+              ? (<span>
+                <FormattedDate value={keyValue} /> <FormattedTime value={keyValue} />
+              </span>)
+              : 'N/A'
+            break
+          case 'currency':
+            keyName = <FormattedMessage id='app.modal.currency' />
+            break
+          case 'totalQuantity':
+            keyName = <FormattedMessage id='app.modal.totalQuantity' />
+            break
+          case 'subtotal':
+            keyName = <FormattedMessage id='app.modal.subtotal' />
+            break
+          case 'redemptionPoints':
+            keyName = <FormattedMessage id='app.modal.redemptionPoints' />
+            break
+          case 'source':
+            keyName = <FormattedMessage id='app.modal.source' />
+            break
+          case 'posTrans':
+            keyName = <FormattedMessage id='app.modal.posTrans' />
+            value = <POSTransList posTrans={keyValue} />
+            break
+          case 'stripeChargeId':
+            keyName = <FormattedMessage id='app.modal.stripeChargeId' />
+            break
+          case 'isFulfilled':
+            keyName = <FormattedMessage id='app.modal.isFulfilled' />
+            value = keyValue.toString()
+            break
+          case 'shippingDetails':
+            keyName = <FormattedMessage id='app.modal.shippingDetails' />
+            value = keyValue ? 'Can\'t show' : 'N/A'
+            break
+        }
+
+        return <DataListItem key={fieldKey} dataName={keyName} dataValue={value} />
+      })}
+    </div>
+  )
+}
+
+export default DataList
