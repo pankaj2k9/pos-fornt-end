@@ -1,0 +1,17 @@
+! Whoops, before you hit that _Create pull request_ button make sure you have
+completed and checked these requirements where applicable.
+
+## Checklist
+- [ ] Applied appropriate labels and milestone
+- [ ] Assigned to possible code reviewers
+- [ ] Referenced related Trello cards, Slack message or Github issues (Possible also to closing
+  reference, e.g. Closes #{issue number})
+- [ ] No debugging codes committed
+- [ ] No non-essential commits (e.g. "This is test only. ignore")
+- [ ] ! Removed lines starting with "!" (including this line)
+
+## Description
+! Put pull request description here.
+
+
+! Thanks for creating a beautiful pull request!
