@@ -31,6 +31,7 @@
     "bulma": "0.1.0",
     "feathers-client": "1.5.0",
     "font-awesome": "4.6.3",
+    "intl": "1.2.4",
     "object-assign": "4.1.0",
     "react": "15.2.0",
     "react-dom": "15.2.0",
@@ -41,7 +42,8 @@
     "react-router-redux": "4.0.5",
     "redux": "3.5.2",
     "redux-logger": "2.6.1",
-    "redux-thunk": "2.1.0"
+    "redux-thunk": "2.1.0",
+    "whatwg-fetch": "1.0.0"
   },
   "devDependencies": {
     "babel-cli": "6.10.1",

@@ -14,6 +14,7 @@ export default {
   noInfo: true, // set to false to see a list of every file being bundled.
   entry: [
     'webpack-hot-middleware/client?reload=true',
+    'whatwg-fetch',
     './src/index'
   ],
   target: 'web', // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
