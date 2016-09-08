@@ -1,4 +1,9 @@
 import feathers from 'feathers-client'
+import 'whatwg-fetch'
+
+if (!global.fetch) {
+  global.fetch = require('whatwg-fetch')
+}
 
 const api = (function () {
   let instance

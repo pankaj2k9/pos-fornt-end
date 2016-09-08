@@ -1,3 +1,8 @@
+// No `Intl`, so use and load the polyfill.
+if (!global.Intl) {
+  global.Intl = require('intl')
+}
+
 import React from 'react'
 import { render } from 'react-dom'
 import { Router, browserHistory } from 'react-router'

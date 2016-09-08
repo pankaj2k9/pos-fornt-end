@@ -40,3 +40,6 @@ dist
 
 # tern
 .tern-port
+
+# Vim
+*.swp
