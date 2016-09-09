@@ -22,6 +22,7 @@ import {
   ACCOUNT_CHANGEPW_REQUEST,
   ACCOUNT_CHANGEPW_SUCCESS,
   ACCOUNT_CHANGEPW_FAILURE,
+  ACCOUNT_CHANGEPW_OLDPW_SET_VALUE,
   ACCOUNT_CHANGEPW_NEWPW_SET_VALUE,
   ACCOUNT_CHANGEPW_CONFIRMPW_SET_VALUE,
   ACCOUNT_CHANGEPW_CLEAR_MESSAGES
@@ -52,6 +53,10 @@ function account (state, action) {
       return Object.assign({}, state, {
         isChangingPw: false,
         errorMessage: action.message
+      })
+    case ACCOUNT_CHANGEPW_OLDPW_SET_VALUE:
+      return Object.assign({}, state, {
+        oldPw: action.oldPw
       })
     case ACCOUNT_CHANGEPW_NEWPW_SET_VALUE:
       return Object.assign({}, state, {
@@ -123,6 +128,7 @@ function settings (state = {
   account: {
     isChangePwActive: false,
     isChangingPw: false,
+    oldPw: '',
     newPw: '',
     confirmPw: '',
     errorMessage: '',
@@ -218,6 +224,7 @@ function settings (state = {
     case ACCOUNT_CHANGEPW_REQUEST:
     case ACCOUNT_CHANGEPW_SUCCESS:
     case ACCOUNT_CHANGEPW_FAILURE:
+    case ACCOUNT_CHANGEPW_OLDPW_SET_VALUE:
     case ACCOUNT_CHANGEPW_NEWPW_SET_VALUE:
     case ACCOUNT_CHANGEPW_CONFIRMPW_SET_VALUE:
     case ACCOUNT_CHANGEPW_CLEAR_MESSAGES:

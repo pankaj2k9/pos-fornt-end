@@ -6,10 +6,12 @@ class AccountChangePw extends Component {
     const {
       intl,
       isChangingPw,
+      oldPw,
       newPw,
       confirmPw,
       errorMessage,
       onChangePw,
+      onOldPwChange,
       onNewPwChange,
       onConfirmPwChange,
       onToggleChangePwView
@@ -22,7 +24,22 @@ class AccountChangePw extends Component {
     return (
       <form className='form' onSubmit={onChangePw}>
         <label className='label'>
-          <FormattedMessage id='app.page.settings.newPw' />
+          <FormattedMessage id={'app.page.settings.oldPw'} />
+        </label>
+        <p className='control has-icon'>
+          <input className={`input ${hasError ? 'is-danger' : ''}`}
+            autofocus
+            type='password'
+            placeholder={intl.formatMessage({ id: 'app.page.settings.oldPw' })}
+            disabled={inputDisabled}
+            onChange={onOldPwChange}
+            value={oldPw}
+          />
+          <i className='fa fa-lock'></i>
+        </p>
+
+        <label className='label'>
+          <FormattedMessage id={'app.page.settings.newPw'} />
         </label>
         <p className='control has-icon'>
           <input className={`input ${hasError ? 'is-danger' : ''}`}
@@ -36,9 +53,6 @@ class AccountChangePw extends Component {
           <i className='fa fa-lock'></i>
         </p>
 
-        <label className='label'>
-          <FormattedMessage id='app.page.settings.confirmPw' />
-        </label>
         <p className='control has-icon'>
           <input className={`input ${hasError ? 'is-danger' : ''}`}
             type='password'

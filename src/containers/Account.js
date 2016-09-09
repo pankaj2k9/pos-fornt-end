@@ -7,6 +7,7 @@ import AccountChangePw from '../components/AccountChangePw'
 
 import {
   accountChangePwToggleView,
+  accountChangePwOldPwSetValue,
   accountChangePwNewPwSetValue,
   accountChangePwConfirmPwSetValue,
   accountChangePw,
@@ -21,6 +22,7 @@ class Account extends Component {
     dispatch(accountChangePwClearMessages())
     dispatch(accountChangePwConfirmPwSetValue(''))
     dispatch(accountChangePwNewPwSetValue(''))
+    dispatch(accountChangePwOldPwSetValue(''))
   }
 
   handleToggleChangePwView (event) {
@@ -31,6 +33,14 @@ class Account extends Component {
     dispatch(accountChangePwToggleView())
     dispatch(accountChangePwConfirmPwSetValue(''))
     dispatch(accountChangePwNewPwSetValue(''))
+    dispatch(accountChangePwOldPwSetValue(''))
+  }
+
+  handleOldPwChange (event) {
+    event.preventDefault()
+    const { dispatch } = this.props
+
+    dispatch(accountChangePwOldPwSetValue(event.target.value))
   }
 
   handleNewPwChange (event) {
@@ -49,14 +59,14 @@ class Account extends Component {
 
   handleChangePw (event) {
     event.preventDefault()
-    const { dispatch, staff, newPw, confirmPw } = this.props
+    const { dispatch, staff, oldPw, newPw, confirmPw } = this.props
 
     if (newPw !== confirmPw) {
       dispatch(accountChangePwFailure('app.page.settings.changePwDoNotMatch'))
     } else if (newPw.length < 3) {
       dispatch(accountChangePwFailure('app.page.settings.changePwMin3Chars'))
     } else {
-      dispatch(accountChangePw(staff.id, newPw))
+      dispatch(accountChangePw(staff.id, newPw, oldPw))
     }
   }
 
@@ -73,6 +83,7 @@ class Account extends Component {
       staff,
       isChangePwActive,
       isChangingPw,
+      oldPw,
       newPw,
       confirmPw,
       successMessage,
@@ -114,10 +125,12 @@ class Account extends Component {
               ? <AccountChangePw
                 intl={intl}
                 isChangingPw={isChangingPw}
+                oldPw={oldPw}
                 newPw={newPw}
                 confirmPw={confirmPw}
                 errorMessage={errorMessage}
                 onChangePw={this.handleChangePw.bind(this)}
+                onOldPwChange={this.handleOldPwChange.bind(this)}
                 onNewPwChange={this.handleNewPwChange.bind(this)}
                 onConfirmPwChange={this.handleConfirmPwChange.bind(this)}
                 onToggleChangePwView={this.handleToggleChangePwView.bind(this)}
@@ -145,6 +158,7 @@ const mapStateToProps = (state) => {
     staff: state.application.staff.data,
     isChangePwActive: state.settings.account.isChangePwActive,
     isChangingPw: state.settings.account.isChangingPw,
+    oldPw: state.settings.account.oldPw,
     newPw: state.settings.account.newPw,
     confirmPw: state.settings.account.confirmPw,
     successMessage: state.settings.account.successMessage,
