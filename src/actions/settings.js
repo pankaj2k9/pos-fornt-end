@@ -1,9 +1,19 @@
 import ordersService from '../services/orders'
 import usersService from '../services/users'
+import noSalesService from '../services/noSales'
+
+import { setActiveModal } from './application'
+
+import print from '../utils/printReceipt/print'
 
 export const RESET_SETTINGS_STATE = 'RESET_SETTINGS_STATE'
 export function resetSettingsState () {
   return { type: RESET_SETTINGS_STATE }
+}
+
+export const SETTINGS_ERROR = 'SETTINGS_ERROR'
+export function settingsError () {
+  return { type: SETTINGS_ERROR }
 }
 
 export const STOREORDER_SET_SEARCH_KEY = 'STOREORDER_SET_SEARCH_KEY'
@@ -65,6 +75,45 @@ export function storeOrderFetch (orderId) {
       })
       .catch(error => {
         dispatch(storeOrderFetchFailure(error))
+      })
+  }
+}
+
+export const VERIFY_STORE_PIN_REQUEST = 'VERIFY_STORE_PIN_REQUEST'
+export const VERIFY_STORE_PIN_SUCCESS = 'VERIFY_STORE_PIN_SUCCESS'
+export const VERIFY_STORE_PIN_FAILURE = 'VERIFY_STORE_PIN_FAILURE'
+export function verifyStorePinRequest () {
+  return { type: VERIFY_STORE_PIN_REQUEST }
+}
+
+export function verifyStorePinSuccess () {
+  return { type: VERIFY_STORE_PIN_SUCCESS }
+}
+
+export function verifyStorePinFailure (error) {
+  return { type: VERIFY_STORE_PIN_FAILURE, error }
+}
+
+export function verifyStorePin (query, staff) {
+  return (dispatch) => {
+    dispatch(verifyStorePinRequest())
+    return noSalesService.find(query)
+      .then(response => {
+        const receipt = {
+          info: {
+            date: new Date(),
+            staff: `${staff.lastName}, ${staff.firstName}`
+          },
+          footerText: ['No sales']
+        }
+        print(receipt)
+        dispatch(setActiveModal(''))
+        dispatch(resetSettingsState())
+        document.getElementById('storePin').value = ''
+      })
+      .catch(error => {
+        dispatch(verifyStorePinFailure(error))
+        dispatch(settingsError())
       })
   }
 }

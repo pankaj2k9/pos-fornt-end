@@ -6,6 +6,8 @@ export const SET_ORDER_NOTE = 'SET_ORDER_NOTE'
 export const SET_PIN_CODE = 'SET_PIN_CODE'
 export const SET_CARD_TYPE = 'SET_CARD_TYPE'
 export const SET_CARD_PROVIDER = 'SET_CARD_PROVIDER'
+export const REMOVE_NOTE = 'REMOVE_NOTE'
+export const PANEL_CHECKOUT_SHOULD_UPDATE = ' PANEL_CHECKOUT_SHOULD_UPDATE'
 export const PANEL_CHECKOUT_RESET = 'PANEL_CHECKOUT_RESET'
 export const CHECKOUT_FIELDS_RESET = 'CHECKOUT_FIELDS_RESET'
 
@@ -21,6 +23,13 @@ export function setPaymentMode (mode) {
   return {
     type: SET_PAYMENT_MODE,
     mode
+  }
+}
+
+export function removeNote (message) {
+  return {
+    type: REMOVE_NOTE,
+    message
   }
 }
 
@@ -70,6 +79,12 @@ export function setPinCode (pincode) {
   return {
     type: SET_PIN_CODE,
     pincode
+  }
+}
+
+export function panelCheckoutShouldUpdate () {
+  return {
+    type: PANEL_CHECKOUT_SHOULD_UPDATE
   }
 }
 

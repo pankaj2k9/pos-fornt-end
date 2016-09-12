@@ -1,11 +1,14 @@
 import {
   SET_PAYMENT_MODE,
+  SET_DISCOUNT,
   SET_CASH_TENDERED,
   SET_TRANS_NUMBER,
   SET_CARD_TYPE,
   SET_CARD_PROVIDER,
   SET_PIN_CODE,
   SET_ORDER_NOTE,
+  REMOVE_NOTE,
+  PANEL_CHECKOUT_SHOULD_UPDATE,
   PANEL_CHECKOUT_RESET,
   CHECKOUT_FIELDS_RESET,
 
@@ -21,21 +24,22 @@ function checkout (state = {
     type: 'credit',
     provider: 'master'
   },
-  voucher: {
-    verifying: false,
-    retry: false,
-    discount: null,
-    code: null
-  },
-  customDiscount: null,
+  customDiscount: undefined,
   transNumber: '',
   pincode: '',
-  orderNote: []
+  orderNote: [],
+  shouldUpdate: false
 }, action) {
   switch (action.type) {
     case SET_PAYMENT_MODE:
       return Object.assign({}, state, {
         paymentMode: action.mode
+      })
+    case SET_DISCOUNT:
+      state.shouldUpdate = true
+      return Object.assign({}, state, {
+        customDiscount: action.discountValue,
+        shouldUpdate: false
       })
     case SET_CASH_TENDERED:
       const cash = (action.cash === '') ? 0 : action.cash
@@ -68,11 +72,28 @@ function checkout (state = {
       return Object.assign({}, state, {
         orderNote: action.note
       })
+    case REMOVE_NOTE:
+      state.orderNote.forEach(function (item, index, object) {
+        if (item.message === action.message) {
+          object.splice(index, 1)
+          state.shouldUpdate = true
+        }
+      })
+      return Object.assign({}, state, {
+        orderNote: state.orderNote,
+        shouldUpdate: false
+      })
+    case PANEL_CHECKOUT_SHOULD_UPDATE:
+      return Object.assign({}, state, {
+        orderNote: state.orderNote,
+        shouldUpdate: true
+      })
     case PANEL_CHECKOUT_RESET:
       return Object.assign({}, state, {
         isProcessing: false,
         paymentMode: 'cash',
         cashTendered: 0,
+        customDiscount: undefined,
         transNumber: '',
         pincode: '',
         orderNote: ''

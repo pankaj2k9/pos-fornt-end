@@ -9,6 +9,7 @@ export const SET_CURRENCY_TYPE = 'SET_CURRENCY_TYPE'
 export const SET_VOUCHER_DISCOUNT = 'SET_VOUCHER_DISCOUNT'
 export const ADD_CART_ITEM = 'ADD_CART_ITEM'
 export const REMOVE_CART_ITEM = 'REMOVE_CART_ITEM'
+export const REMOVE_VOUCHER = 'REMOVE_VOUCHER'
 export const SET_CART_ITEM_QTY = 'SET_CART_ITEM_QTY'
 export const SET_CUSTOM_DISCOUNT = 'SET_CUSTOM_DISCOUNT'
 export const PANEL_CART_RESET = 'PANEL_CART_RESET'
@@ -87,6 +88,12 @@ export function removeCartItem (cartItemId) {
   return {
     type: REMOVE_CART_ITEM,
     cartItemId
+  }
+}
+
+export function removeVoucher () {
+  return {
+    type: REMOVE_VOUCHER
   }
 }
 

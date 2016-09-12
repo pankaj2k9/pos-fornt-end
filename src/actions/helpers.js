@@ -7,6 +7,10 @@ import {
 } from './panelCart'
 
 import {
+  reportsStateReset
+} from './reports'
+
+import {
   holdOrder,
   recallOrder,
   setOrderSearchKey
@@ -86,6 +90,15 @@ export function recallOrderOnHold (dispatch, cartData, key) {
 export function searchCustomer (query) {
   return (dispatch) => {
     dispatch(fetchCustomers(query))
+  }
+}
+
+export function onLogout () {
+  return (dispatch) => {
+    dispatch(panelCartReset())
+    dispatch(panelCheckoutReset())
+    dispatch(reportsStateReset())
+    dispatch(orderStateReset())
   }
 }
 

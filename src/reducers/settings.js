@@ -8,6 +8,10 @@ import {
   STOREORDER_FETCH_SUCCESS,
   STOREORDER_FETCH_FAILURE,
   RESET_SETTINGS_STATE,
+  VERIFY_STORE_PIN_REQUEST,
+  VERIFY_STORE_PIN_SUCCESS,
+  VERIFY_STORE_PIN_FAILURE,
+  SETTINGS_ERROR,
   ACCOUNT_CHANGEPW_TOGGLE_VIEW,
   ACCOUNT_CHANGEPW_REQUEST,
   ACCOUNT_CHANGEPW_SUCCESS,
@@ -72,12 +76,13 @@ function settings (state = {
     {name: 'app.page.settings.tabAccount', value: 'account'}
   ],
   error: false,
+  errorMessage: null,
   orderSearchKey: '',
   customerSearchKey: '',
   customerFilter: '',
   refundSuccess: false,
   reprintSuccess: null,
-  isProcessing: 'false',
+  isProcessing: false,
   account: {
     isChangePwActive: false,
     isChangingPw: false,
@@ -140,6 +145,23 @@ function settings (state = {
         isProcessing: false
       })
     }
+    case VERIFY_STORE_PIN_REQUEST:
+      return Object.assign({}, state, {
+        isProcessing: true
+      })
+    case VERIFY_STORE_PIN_SUCCESS:
+      return Object.assign({}, state, {
+        isProcessing: false
+      })
+    case VERIFY_STORE_PIN_FAILURE:
+      return Object.assign({}, state, {
+        errorMessage: action.error,
+        isProcessing: false
+      })
+    case SETTINGS_ERROR:
+      return Object.assign({}, state, {
+        error: true
+      })
     case ACCOUNT_CHANGEPW_TOGGLE_VIEW:
     case ACCOUNT_CHANGEPW_REQUEST:
     case ACCOUNT_CHANGEPW_SUCCESS:
