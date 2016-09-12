@@ -16,8 +16,16 @@ import { setActiveModal } from '../actions/application'
 import {
   setPaymentMode,
   setOrderNote,
-  verifyVoucherCode
+  verifyVoucherCode,
+  setDiscount,
+  removeNote,
+  panelCheckoutShouldUpdate
 } from '../actions/panelCheckout'
+
+import {
+  removeVoucher
+} from '../actions/panelCart'
+
 import { resetStore } from '../actions/helpers'
 
 class PanelCheckout extends Component {
@@ -37,6 +45,11 @@ class PanelCheckout extends Component {
     dispatch(resetStore())
   }
 
+  onClickRemoveVoucher () {
+    const { dispatch } = this.props
+    dispatch(removeVoucher())
+  }
+
   sumOfCartItems () {
     const {cartItemsArray, currency} = this.props
     let x = cartItemsArray
@@ -54,7 +67,7 @@ class PanelCheckout extends Component {
   }
 
   sumOfCartDiscounts () {
-    const {cartItemsArray, currency} = this.props
+    const {cartItemsArray, currency, shouldUpdate} = this.props
     let x = cartItemsArray
     let sumOfDiscounts = 0.00
     for (var i = 0; i < x.length; i++) {
@@ -74,7 +87,10 @@ class PanelCheckout extends Component {
           ? (x[i].qty * (Number(x[i].customDiscount) / 100) * x[i].price) + sumOfDiscounts
           : (x[i].qty * (Number(x[i].customDiscount) / 100) * x[i].odboPrice) + sumOfDiscounts
     }
-    return sumOfDiscounts
+    let updatedDiscount = shouldUpdate // detects changes in discount
+      ? null
+      : sumOfDiscounts
+    return updatedDiscount
   }
 
   onClickAddNote () {
@@ -129,10 +145,20 @@ class PanelCheckout extends Component {
     )
   }
 
+  overAllDeduct () {
+    const {customDiscount} = this.props
+    let discount = !customDiscount || customDiscount === '' || customDiscount === 0
+      ? 0 : customDiscount
+    let overAllDeduct = (Number(discount) / 100) * this.sumOfCartItems()
+    return Number(overAllDeduct).toFixed(2)
+  }
+
   overAllTotal () {
-    const { voucher, currency } = this.props
+    const { voucher, currency, customDiscount } = this.props
     var voucherDiscount = !voucher ? 0.00 : voucher.amount
-    var subtotal = this.sumOfCartItems() - this.sumOfCartDiscounts()
+    let subtotal = !customDiscount || customDiscount === 0
+      ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
+      : this.sumOfCartItems() - this.overAllDeduct()
     let sgdMinusVc = Number(subtotal).toFixed(2) - Number(voucherDiscount) < 0
       ? 0.00
       : Number(subtotal).toFixed(2) - Number(voucherDiscount).toFixed(2)
@@ -140,6 +166,15 @@ class PanelCheckout extends Component {
       ? sgdMinusVc
       : subtotal
     return overAllTotal
+  }
+
+  setOverallDiscount (value) {
+    const {dispatch} = this.props
+    dispatch(panelCheckoutShouldUpdate())
+    let discount = value === ''
+      ? ''
+      : Number(value) > 100 ? 100 : value
+    dispatch(setDiscount(discount))
   }
 
   renderVoucherModal () {
@@ -173,7 +208,7 @@ class PanelCheckout extends Component {
   }
 
   renderNoteModal () {
-    const {orderNote, activeModalId} = this.props
+    const {dispatch, orderNote, activeModalId, cpShouldUpdate} = this.props
     const active = activeModalId === 'notesModal' ? 'is-active' : ''
     return (
       <div id='notesModal' className={`modal ${active}`}>
@@ -182,17 +217,28 @@ class PanelCheckout extends Component {
           <div className='box'>
             <div className='content'>
               <h1 className='title'><FormattedMessage id='app.general.notes' /></h1>
-              <ul>
-                {
-                  orderNote.map(function (item, key) {
-                    return (
-                      <li key={key}>
-                        {item.message}
-                      </li>
-                    )
-                  }, this)
-                }
-              </ul>
+              {!cpShouldUpdate
+                ? <ul>
+                  {
+                    orderNote.map(function (item, key) {
+                      function remove () {
+                        dispatch(panelCheckoutShouldUpdate())
+                        dispatch(removeNote(item.message))
+                      }
+                      return (
+                        <li key={key}>
+                          {`${item.message} `}
+                          <span className='tag is-danger' style={{marginLeft: 10}}>
+                            <FormattedMessage id='app.button.removeNote' />
+                            <button className='delete' onClick={remove}></button>
+                          </span>
+                        </li>
+                      )
+                    }, this)
+                  }
+                </ul>
+                : null
+              }
             </div>
           </div>
         </div>
@@ -202,8 +248,18 @@ class PanelCheckout extends Component {
   }
 
   render () {
-    const { cartItemsArray, currency, intl,
-            orderNote, voucher } = this.props
+    const { cartItemsArray, currency, intl, shouldUpdate,
+            orderNote, voucher, customDiscount } = this.props
+            // placeholder value: displays default discount
+    let discountPH = customDiscount === '' || !customDiscount
+      ? 0
+      : Number(customDiscount)
+    let discount = customDiscount === ''
+      ? ''
+      : Number(customDiscount) > 100 ? 100 : customDiscount
+    let subtotal = !customDiscount || customDiscount === 0
+      ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
+      : Number(this.sumOfCartItems()).toFixed(2)
     var voucherDiscount = !voucher ? 0.00 : voucher.amount
     const orderNoteCount = orderNote.length === 0 ? 0 : orderNote.length
     const empty = cartItemsArray.length === 0
@@ -246,18 +302,52 @@ class PanelCheckout extends Component {
                 right={
                   <p className='control'>
                     <strong>
-                    {
-                      Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
-                    }
+                    {subtotal}
                     </strong>
                   </p>
               } />
-              <Level left={<FormattedMessage id='app.general.discount' />}
-                right={<strong>{Number(voucherDiscount).toFixed(2)}</strong>} />
+              {!shouldUpdate
+                ? <div>
+                  {this.sumOfCartDiscounts() === 0
+                    ? <Level left={<FormattedMessage id='app.general.overallDiscount' />}
+                      center={
+                        <div>
+                          <p className='control has-addons' style={{width: 50, marginLeft: 100}}>
+                            <input id='itemDiscount' className='input is-small' type='Number'
+                              placeholder={discountPH} value={discount}
+                              onChange={e => this.setOverallDiscount(e.target.value)} />
+                            <a className='button is-small'>%</a>
+                          </p>
+                        </div>
+                      }
+                      right={
+                        <p>
+                          <strong>
+                            {
+                              this.overAllDeduct()
+                            }
+                          </strong>
+                        </p>
+                    } />
+                    : null
+                  }
+                </div>
+                : null
+              }
+              <Level left={<FormattedMessage id='app.general.voucherDiscount' />}
+                right={
+                  <strong>
+                  {!voucher ? null
+                    : <a onClick={this.onClickRemoveVoucher.bind(this)} style={{marginRight: 50}}>
+                      <FormattedMessage id='app.button.removeVoucher' /> </a>}
+                  {Number(voucherDiscount).toFixed(2)}</strong>
+                } />
             </div>
             <div>
               <div className='panel-block' style={{paddingTop: 0}}>
-                <Level left={<FormattedMessage id='app.general.total' />}
+                <Level left={
+                  <strong><FormattedMessage id='app.general.total' /></strong>
+                  }
                   right={
                     <h3 className='is-marginless'>
                       <strong>
@@ -343,8 +433,11 @@ function mapStateToProps (state) {
     walkinCustomer: state.panelCart.walkinCustomer,
     activeCustomer: state.panelCart.activeCustomer,
     activeCashier: state.application.activeCashier,
+    shouldUpdate: state.panelCart.shouldUpdate,
+    cpShouldUpdate: state.panelCheckout.shouldUpdate,
     totalFromCart: state.panelCart.totalPrice,
     panelCartItems: state.panelCart.items,
+    customDiscount: state.panelCheckout.customDiscount,
     voucher: state.panelCart.voucher,
     card: state.panelCheckout.card,
     locale: state.intl.locale,

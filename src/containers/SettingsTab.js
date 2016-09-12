@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { injectIntl, FormattedMessage } from 'react-intl'
 
 import SearchModal from './SearchModal'
 import SearchBar from '../components/SearchBar'
@@ -19,10 +20,10 @@ import {
   customersSetSearchKey,
   customersSetFilter,
   customersSetActiveId,
-  setSettingsActiveTab
+  setSettingsActiveTab,
+  verifyStorePin,
+  resetSettingsState
 } from '../actions/settings'
-
-import { FormattedMessage } from 'react-intl'
 
 import {
   searchCustomer,
@@ -35,6 +36,11 @@ class SettingsTab extends Component {
     dispatch(setActiveModal('refundModal'))
   }
 
+  onClickNoSales (value) {
+    const {dispatch} = this.props
+    dispatch(setActiveModal(value))
+  }
+
   onClickReprint () {
     const {dispatch} = this.props
     dispatch(setActiveModal('reprintModal'))
@@ -43,6 +49,7 @@ class SettingsTab extends Component {
   onClickCloseModal () {
     const {dispatch} = this.props
     dispatch(closeActiveModal())
+    dispatch(resetSettingsState())
   }
 
   onClickOption (tabName) {
@@ -101,7 +108,24 @@ class SettingsTab extends Component {
     return (
       <div>
         <div className='columns'>
-          <div className='column is-one-third'>
+          <div className='column'>
+            <div className='box has-text-centered'>
+              <span>
+                <i className='fa fa-caret-square-o-down fa-4x' />
+              </span>
+              <p className='title'>
+                <FormattedMessage id={'app.page.settings.noSales'} />
+              </p>
+              <p className='subtitle'>
+                <FormattedMessage id={'app.page.settings.noSalesDesc'} />
+              </p>
+              <a className='button is-info'
+                onClick={this.onClickNoSales.bind(this, 'verifyStorePin')}>
+                <FormattedMessage id={'app.page.settings.noSales'} />
+              </a>
+            </div>
+          </div>
+          <div className='column'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-list-alt fa-4x' />
@@ -118,7 +142,7 @@ class SettingsTab extends Component {
               </a>
             </div>
           </div>
-          <div className='column is-one-third'>
+          <div className='column'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-users fa-4x' />
@@ -135,7 +159,7 @@ class SettingsTab extends Component {
               </a>
             </div>
           </div>
-          <div className='column is-one-third'>
+          <div className='column'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-user fa-4x' />
@@ -229,6 +253,7 @@ class SettingsTab extends Component {
                 onChange={this.setCustomerFilter.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
+                confirmEvent={this.onSubmit.bind(this)}
               />
             </LabeledControl>
           </div>
@@ -243,7 +268,8 @@ class SettingsTab extends Component {
                 confirmButton={<i className='fa fa-search'></i>}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
-              />
+                confirmEvent={this.onSubmit.bind(this)}
+                />
             </LabeledControl>
           </div>
           <div className='column is-3'>
@@ -257,7 +283,8 @@ class SettingsTab extends Component {
                 onChange={this.setCustomerSearchKey.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
-              />
+                confirmEvent={this.onSubmit.bind(this)}
+                />
             </LabeledControl>
           </div>
         </div>
@@ -274,6 +301,11 @@ class SettingsTab extends Component {
                     dispatch(setActiveModal('customerDetails'))
                     dispatch(customersSetActiveId(customer.odboId))
                   }
+                  let zeroes = ''
+                  var i
+                  for (i = customer.odboId.length; i < 7; i++) {
+                    zeroes += 0
+                  }
                   let stat = customer.status === 'active'
                     ? <FormattedMessage id={'app.general.active'} />
                     : <FormattedMessage id={'app.general.notActive'} />
@@ -287,6 +319,10 @@ class SettingsTab extends Component {
                         image={{icon: 'fa fa-user fa-4x'}}
                         button={{name: 'app.button.view', onClick: view}}>
                         <ul className='is-marginless'>
+                          <li>
+                            <strong>ODBO ID: </strong>
+                            {`${zeroes}${customer.odboId}`}
+                          </li>
                           <li>
                             <strong><FormattedMessage id={'app.general.membership'} />: </strong>
                             {customer.membership}
@@ -349,7 +385,7 @@ class SettingsTab extends Component {
     return <Account />
   }
 
-  renderModal () {
+  renderOrderSearchModal () {
     const {activeModalId, orderSearchKey,
            orderDetails, refundSuccess,
            isProcessing} = this.props
@@ -374,6 +410,61 @@ class SettingsTab extends Component {
     )
   }
 
+  onClickVerifyPin () {
+    const {dispatch, storeId, activeCashier, staff} = this.props
+    let query = {
+      query: {
+        store: storeId,
+        pinCode: document.getElementById('storePinCode').value
+      }
+    }
+    let staffName = !activeCashier ? staff : activeCashier
+    dispatch(verifyStorePin(query, staffName))
+  }
+
+  renderVerifyStorePinCode () {
+    const {intl, activeModalId, error, isProcessing} = this.props
+    const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
+    return (
+      <div id='verifyStorePin' className={`modal ${active}`}>
+        <div className='modal-background'></div>
+        <div className='modal-content'>
+          <div className='box'>
+            <div className='content has-text-centered'>
+              <h1 className='title'><FormattedMessage id='app.general.storePin' /></h1>
+              {!error
+                ? null
+                : <p className='subtitle'>
+                  {'error'}
+                </p>
+              }
+              <p className='control is-expanded'>
+                <input id='storePinCode' className='input is-large' type='password'
+                  placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
+              </p>
+              <div className='columns'>
+                <div className='column is-6 is-offset-3'>
+                  {!isProcessing
+                    ? <a className='button is-large is-fullwidth is-success'
+                      onClick={this.onClickVerifyPin.bind(this)}>
+                      <FormattedMessage id='app.button.verify' />
+                    </a>
+                    : <a className='button is-large is-fullwidth is-success is-disabled'>
+                      <p className='has-text-centered'>
+                        <i className='fa fa-spinner fa-pulse fa-fw'></i>
+                      </p>
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button className='modal-close' onClick={this.onClickCloseModal.bind(this)} />
+      </div>
+    )
+  }
+
   render () {
     const {activeTab} = this.props
 
@@ -394,7 +485,8 @@ class SettingsTab extends Component {
     return (
       <div className=''>
         {visibleContent}
-        {this.renderModal()}
+        {this.renderOrderSearchModal()}
+        {this.renderVerifyStorePinCode()}
       </div>
     )
   }
@@ -404,10 +496,13 @@ function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
     activeModalId: state.application.activeModalId,
+    staff: state.application.staff.data,
+    activeCashier: state.application.activeCashier,
     storeId: state.application.storeId,
     customers: state.data.customers.customersArray,
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,
+    error: state.settings.error,
     customerSearchKey: state.settings.customerSearchKey,
     customerFilter: state.settings.customerFilter,
     activeCustomerId: state.settings.activeCustomerId,
@@ -417,8 +512,9 @@ function mapStateToProps (state) {
     orderSearchKey: state.settings.orderSearchKey,
     isProcessing: state.settings.isProcessing,
     refundSuccess: state.settings.refundSuccess,
-    reprintSuccess: state.settings.reprintSuccess
+    reprintSuccess: state.settings.reprintSuccess,
+    intl: state.intl
   }
 }
 
-export default connect(mapStateToProps)(SettingsTab)
+export default connect(mapStateToProps)(injectIntl(SettingsTab))

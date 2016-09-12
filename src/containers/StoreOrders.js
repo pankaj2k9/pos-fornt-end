@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { FormattedMessage } from 'react-intl'
+import { injectIntl, FormattedMessage } from 'react-intl'
 
 import ViewOrder from '../components/ViewOrder'
 import SimpleModal from '../components/SimpleModal'
@@ -28,13 +28,15 @@ class StoreOrders extends React.Component {
   }
 
   _fetchOrdersToday (query) {
-    const { dispatch, storeId, limit, skip } = this.props
+    const { dispatch, storeId, limit } = this.props
 
     // get sales today
     const from = new Date()
     from.setHours(0, 0, 0, 0)
 
     const to = new Date()
+
+    let newSkip = !query ? 0 : query.skip < 10 ? 0 : query.skip
     to.setHours(23, 59, 59, 999)
 
     const params = {
@@ -42,7 +44,7 @@ class StoreOrders extends React.Component {
       from,
       to,
       limit,
-      skip: query && query.skip || skip
+      skip: newSkip
     }
 
     dispatch(storeOrdersFetch(params))
@@ -63,7 +65,6 @@ class StoreOrders extends React.Component {
   _handlePageClick (page) {
     const { dispatch, limit } = this.props
     const skip = (page - 1) * limit
-
     dispatch(storeOrdersSetPage(page))
     this._fetchOrdersToday({ skip })
   }
@@ -73,13 +74,26 @@ class StoreOrders extends React.Component {
   }
 
   _constructOrderItems () {
-    const { orderItems } = this.props
+    const { orderItems, intl } = this.props
+    const from = new Date()
+    from.setHours(0, 0, 0, 0)
 
-    const productOrderItems = orderItems.map((order, index) => {
+    const to = new Date()
+    to.setHours(23, 59, 59, 999)
+
+    let sortedOrders = orderItems.sort(function (a, b) {
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      return new Date(b.dateCreated) - new Date(a.dateCreated)
+    })
+
+    const productOrderItems = sortedOrders.map((order, index) => {
       const currency = order.currency === 'sgd' ? 'SGD' : 'The Odbo coins'
-
+      let isRefunded = order.isRefunded
+        ? intl.formatMessage({ id: 'app.general.refundedOrder' })
+        : ''
       return {
-        id: order.id,
+        id: `${order.id} ${isRefunded}`,
         dateCreated: {
           value: order.dateCreated,
           type: 'date'
@@ -134,18 +148,6 @@ class StoreOrders extends React.Component {
         </a>
 
         <ul>
-          {CURRENT_PAGE - 1 > PAGINATION_FIRST_PAGE
-            ? <li>
-              <a className='button'
-                onClick={this._getClickPageAction(PAGINATION_FIRST_PAGE)}>
-                {PAGINATION_FIRST_PAGE}
-              </a>
-            </li> : null}
-          {CURRENT_PAGE - 2 > PAGINATION_FIRST_PAGE &&
-            (CURRENT_PAGE === PAGINATION_LAST_PAGE
-             ? PAGINATION_MAIN_PAGES[0] - 2 > PAGINATION_FIRST_PAGE : false)
-            ? <li><span>...</span></li> : null}
-
           {PAGINATION_MAIN_PAGES.map(THIS_PAGE =>
             <li key={`topups-table-page-${THIS_PAGE}`}>
               <a className={`button ${THIS_PAGE === CURRENT_PAGE ? 'is-primary' : null}`}
@@ -155,18 +157,6 @@ class StoreOrders extends React.Component {
               </a>
             </li>
           )}
-
-          {CURRENT_PAGE + 2 < PAGINATION_LAST_PAGE &&
-            (CURRENT_PAGE === PAGINATION_FIRST_PAGE
-             ? PAGINATION_MAIN_PAGES[2] + 2 < PAGINATION_LAST_PAGE : false)
-            ? <li><span>...</span></li> : null}
-          {CURRENT_PAGE + 2 <= PAGINATION_LAST_PAGE
-            ? <li>
-              <a className='button'
-                onClick={this._getClickPageAction(PAGINATION_LAST_PAGE)}>
-                {PAGINATION_LAST_PAGE}
-              </a>
-            </li> : null}
         </ul>
       </nav>
 		)
@@ -234,8 +224,9 @@ function mapStateToProps (state) {
     skip: state.reports.storeOrders.skip,
     activeModal: state.reports.storeOrders.activeModal,
     activeOrderId,
-    activeOrder
+    activeOrder,
+    intl: state.intl
   }
 }
 
-export default connect(mapStateToProps)(StoreOrders)
+export default connect(mapStateToProps)(injectIntl(StoreOrders))

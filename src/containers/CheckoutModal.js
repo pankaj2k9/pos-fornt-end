@@ -28,15 +28,15 @@ class CheckoutModal extends Component {
   }
 
   onClickSubmit (data) {
-    const { dispatch, orderItems,
-            currency, paymentMode,
+    const { dispatch, orderItems, customDiscount,
+            currency, paymentMode, activeCashier,
             activeCustomer, pincode, adminToken,
             cashTendered, locale, card,
             transNumber, storeId, voucher,
             orderNote, isDiscounted, overAllTotal
           } = this.props
 
-    let staff = 'Shiela'
+    let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
     let total = currency === 'sgd'
       ? Number(overAllTotal).toFixed(2)
       : Number(overAllTotal)
@@ -45,25 +45,55 @@ class CheckoutModal extends Component {
       return {
         id: item.id,
         quantity: item.qty,
-        discount: item.customDiscount === 0 // Check if zero custom discount
-          ? isDiscounted // if true then check for default discount
-            ? currency === 'sgd'
-              ? item.priceDiscount
-              : item.odboPriceDiscount
-            : 0.00 // if no default then return zero
-          : item.customDiscount // if custom dicount has value then return value
+        discount: !customDiscount || customDiscount === 0 || customDiscount === ''
+          ? item.customDiscount === 0 // Check if zero custom discount
+            ? isDiscounted // if true then check for default discount
+              ? currency === 'sgd'
+                ? item.priceDiscount
+                : item.odboPriceDiscount
+              : 0
+            : item.customDiscount // if custom dicount has value then return value
+          : customDiscount
       }
     })
 
     let items = []
     orderItems.forEach(item => {
+      let discountPercent = item.customDiscount === 0
+        ? item.isDiscounted
+          ? currency === 'sgd'
+            ? `${item.priceDiscount}%`
+            : `${item.odboPriceDiscount}%`
+          : undefined
+        : `${item.customDiscount}%`
+      let showDiscount = item.customDiscount === 0
+        ? item.isDiscounted
+          ? locale === 'en'
+            ? `(less ${discountPercent})`
+            : `(减去 ${discountPercent})`
+          : undefined
+        : locale === 'en'
+          ? `(less ${discountPercent})`
+          : `(减去 ${discountPercent})`
+      let discount = item.customDiscount === 0
+        ? item.isDiscounted
+          ? currency === 'sgd'
+            ? (Number(item.priceDiscount) / 100) * item.price
+            : (parseInt(item.odboPriceDiscount) / 100) * item.odboPrice
+          : 0.00
+        : currency === 'sgd'
+          ? (Number(item.customDiscount) / 100) * item.price
+          : (Number(item.customDiscount) / 100) * item.odboPrice
+      let computedDiscount = currency === 'sgd'
+        ? Number(item.price) - discount
+        : Number(item.odboPrice) - discount
       items.push({
         id: item.id,
-        name: locale === 'en' ? item.nameEn : item.nameZh,
+        name: `${item.nameEn} ${showDiscount}`,
         qty: item.qty,
         subtotal: currency === 'sgd'
-          ? item.subTotalPrice
-          : item.subTotalOdboPrice
+          ? Number(Number(item.qty) * computedDiscount).toFixed(2)
+          : parseInt(item.qty) * Number(computedDiscount)
       })
     })
 
@@ -73,9 +103,16 @@ class CheckoutModal extends Component {
         : voucher.code
       : undefined
 
+    let voucherAmount = (currency === 'sgd')
+      ? !voucher
+        ? undefined
+        : voucher.amount
+      : undefined
+
     let receiptTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
-        ? {type: 'cash', total: total, cash: cashTendered, change: data.change}
+        ? { type: 'cash', total: total, cash: cashTendered,
+            change: data.change, voucherDiscount: voucherAmount }
         : { type: 'credit', total: total, transNo: transNumber,
             cardType: card.type, provider: card.provider}
       : { type: 'odbo', total: total,
@@ -97,12 +134,16 @@ class CheckoutModal extends Component {
     }
 
     let bonus = currency === 'sgd'
-      ? 99
+      ? 100
       : 0
+
+    let payment = cashTendered === 0 || !cashTendered || cashTendered === ''
+      ? 0
+      : cashTendered
 
     let posTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
-        ? { type: 'cash', payment: overAllTotal, bonusPoints: bonus }
+        ? { type: 'cash', payment: Number(payment), bonusPoints: bonus }
         : { type: 'credit', transNumber: transNumber,
             cardType: card.type, provider: card.provider,
             bonusPoints: bonus }
@@ -257,7 +298,7 @@ class CheckoutModal extends Component {
                   (currency === 'sgd') && !orderSuccess && orderError === ''
                   ? (cashMinusTotal >= Number(0).toFixed(2)) || paymentMode === 'credit' && transNumber !== ''
                     ? <p className='column control is-marginless'>
-                      <a className='button is-large is-success is-fullwidth'
+                      <a id='confirmCheckout' className='button is-large is-success is-fullwidth'
                         onClick={this.onClickSubmit.bind(this, {change: cashChange})}>
                         <FormattedMessage id='app.button.confirm' />
                       </a>
@@ -265,7 +306,7 @@ class CheckoutModal extends Component {
                     : null
                   : (odboMinusTotal >= Number(0).toFixed(2)) && !orderSuccess && orderError === ''
                     ? <p className='column control is-marginless'>
-                      <a className='button is-large is-success is-fullwidth'
+                      <a id='confirmCheckout' className='button is-large is-success is-fullwidth'
                         onClick={this.onClickSubmit.bind(this, {odboCoins: odboCoins, odboBalance: odboMinusTotal})}>
                         <FormattedMessage id='app.button.confirm' />
                       </a>
@@ -299,6 +340,7 @@ function mapStateToProps (state) {
     storeId: state.application.storeId,
     activeModalId: state.application.activeModalId,
     adminToken: state.application.adminToken,
+    activeCashier: state.application.activeCashier,
     isProcessing: state.orders.isProcessing,
     orderError: state.orders.orderError,
     orderSuccess: state.orders.orderSuccess,
@@ -310,6 +352,7 @@ function mapStateToProps (state) {
     transNumber: state.panelCheckout.transNumber,
     activeCustomer: state.panelCart.activeCustomer,
     pincode: state.panelCheckout.pincode,
+    customDiscount: state.panelCheckout.customDiscount,
     receiptData: state.orders.receipt,
     reprinting: state.orders.reprinting
   }
