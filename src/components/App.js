@@ -11,6 +11,7 @@ import {
 } from '../actions/application'
 
 import { logout } from '../actions/login'
+import { onLogout } from '../actions/helpers'
 import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
@@ -22,6 +23,7 @@ class App extends React.Component {
   handleLogout () {
     const { dispatch } = this.props
     dispatch(logout(browserHistory))
+    dispatch(onLogout())
   }
 
   handleLogoutCashier () {
