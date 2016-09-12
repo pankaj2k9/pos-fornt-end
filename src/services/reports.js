@@ -10,9 +10,7 @@ const reports = {
    * @return {Promise}
    */
   find (source, from, to) {
-    const query = { source, from, to }
-
-    return reportsService.find({ query })
+    return reportsService.find({ query: {source, from, to} })
   }
 }
 
