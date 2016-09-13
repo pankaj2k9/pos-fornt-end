@@ -55,6 +55,9 @@ const en = {
   'app.general.storePin': 'Store PIN Code',
   'app.general.overallDiscount': 'Apply Overall Discount',
   'app.general.refundedOrder': '( Refunded Order )',
+  'app.general.bonusPoints': 'Bonus Points',
+  'app.general.enabled': ' Enabled',
+  'app.general.disabled': ' Disabled',
 
   'app.panel.products': 'Products',
   'app.panel.sales': 'Sales',

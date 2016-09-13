@@ -55,6 +55,9 @@ const zh = {
   'app.general.storePin': '商店 PIN',
   'app.general.overallDiscount': '应用总体折扣',
   'app.general.refundedOrder': '( 退还订购 )',
+  'app.general.bonusPoints': '奖励积分',
+  'app.general.enabled': ' 启用 ',
+  'app.general.disabled': ' 禁用 ',
 
   'app.panel.products': '制品',
   'app.panel.sales': '销售',

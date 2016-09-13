@@ -10,6 +10,7 @@ export const REMOVE_NOTE = 'REMOVE_NOTE'
 export const PANEL_CHECKOUT_SHOULD_UPDATE = ' PANEL_CHECKOUT_SHOULD_UPDATE'
 export const PANEL_CHECKOUT_RESET = 'PANEL_CHECKOUT_RESET'
 export const CHECKOUT_FIELDS_RESET = 'CHECKOUT_FIELDS_RESET'
+export const TOGGLE_BONUS_POINTS = 'TOGGLE_BONUS_POINTS'
 
 export const VERIFY_VOUCHER_REQUEST = 'VERIFY_VOUCHER_REQUEST'
 export const VERIFY_VOUCHER_SUCCESS = 'VERIFY_VOUCHER_SUCCESS'
@@ -100,6 +101,13 @@ export function checkoutFieldsReset () {
   }
 }
 
+export function toggleBonusPoints (value) {
+  return {
+    type: TOGGLE_BONUS_POINTS,
+    value
+  }
+}
+
 export function verifyVoucherRequest () {
   return {
     type: VERIFY_VOUCHER_REQUEST
@@ -112,9 +120,10 @@ export function verifyVoucherSuccess () {
   }
 }
 
-export function verifyVoucherFailure () {
+export function verifyVoucherFailure (error) {
   return {
-    type: VERIFY_VOUCHER_FAILURE
+    type: VERIFY_VOUCHER_FAILURE,
+    error
   }
 }
 
@@ -124,8 +133,16 @@ export function verifyVoucherCode (query) {
     return voucherService.fetch(query)
 
     .then(voucher => {
-      dispatch(setVoucherDiscount(voucher.data[0]))
-      dispatch(setActiveModal(''))
+      if (voucher.total === '1') {
+        dispatch(setVoucherDiscount(voucher.data[0]))
+        dispatch(setActiveModal(''))
+      } else {
+        let x = query.query
+        dispatch(verifyVoucherFailure(`no voucher found with ${x.code}`))
+      }
+    })
+    .catch(error => {
+      dispatch(verifyVoucherFailure(error.message))
     })
   }
 }

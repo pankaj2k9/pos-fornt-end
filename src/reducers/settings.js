@@ -151,7 +151,9 @@ function settings (state = {
       })
     case VERIFY_STORE_PIN_SUCCESS:
       return Object.assign({}, state, {
-        isProcessing: false
+        isProcessing: false,
+        error: false,
+        errorMessage: null
       })
     case VERIFY_STORE_PIN_FAILURE:
       return Object.assign({}, state, {

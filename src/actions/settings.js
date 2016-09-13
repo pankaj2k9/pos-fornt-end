@@ -109,10 +109,11 @@ export function verifyStorePin (query, staff) {
         print(receipt)
         dispatch(setActiveModal(''))
         dispatch(resetSettingsState())
-        document.getElementById('storePin').value = ''
+        document.getElementById('storePinCode').value = ''
       })
       .catch(error => {
-        dispatch(verifyStorePinFailure(error))
+        document.getElementById('storePinCode').value = ''
+        dispatch(verifyStorePinFailure(error.message))
         dispatch(settingsError())
       })
   }
