@@ -11,6 +11,7 @@ import {
   PANEL_CHECKOUT_SHOULD_UPDATE,
   PANEL_CHECKOUT_RESET,
   CHECKOUT_FIELDS_RESET,
+  TOGGLE_BONUS_POINTS,
 
   VERIFY_VOUCHER_REQUEST,
   VERIFY_VOUCHER_SUCCESS,
@@ -24,11 +25,13 @@ function checkout (state = {
     type: 'credit',
     provider: 'master'
   },
+  bonusPoints: false,
   customDiscount: undefined,
   transNumber: '',
   pincode: '',
   orderNote: [],
-  shouldUpdate: false
+  shouldUpdate: false,
+  error: null
 }, action) {
   switch (action.type) {
     case SET_PAYMENT_MODE:
@@ -106,31 +109,21 @@ function checkout (state = {
         pincode: '',
         card: {}
       })
+    case TOGGLE_BONUS_POINTS:
+      return Object.assign({}, state, {
+        bonusPoints: action.value
+      })
     case VERIFY_VOUCHER_REQUEST:
       return Object.assign({}, state, {
-        voucher: {
-          verifying: true,
-          retry: false,
-          discount: null
-        }
+        error: null
       })
     case VERIFY_VOUCHER_SUCCESS:
       return Object.assign({}, state, {
-        voucher: {
-          verifying: false,
-          retry: false,
-          discount: action.discount,
-          code: action.vc
-        }
+        error: null
       })
     case VERIFY_VOUCHER_FAILURE:
       return Object.assign({}, state, {
-        voucher: {
-          verifying: false,
-          retry: true,
-          discount: null,
-          code: null
-        }
+        error: action.error
       })
     default:
       return state

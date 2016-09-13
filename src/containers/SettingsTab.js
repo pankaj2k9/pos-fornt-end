@@ -423,19 +423,24 @@ class SettingsTab extends Component {
   }
 
   renderVerifyStorePinCode () {
-    const {intl, activeModalId, error, isProcessing} = this.props
+    const {intl, activeModalId, error, errorMessage, isProcessing} = this.props
     const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
     return (
       <div id='verifyStorePin' className={`modal ${active}`}>
         <div className='modal-background'></div>
-        <div className='modal-content'>
-          <div className='box'>
-            <div className='content has-text-centered'>
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
               <h1 className='title'><FormattedMessage id='app.general.storePin' /></h1>
+            </p>
+            <button className='delete' onClick={this.onClickCloseModal.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content has-text-centered'>
               {!error
                 ? null
                 : <p className='subtitle'>
-                  {'error'}
+                  {errorMessage}
                 </p>
               }
               <p className='control is-expanded'>
@@ -460,7 +465,6 @@ class SettingsTab extends Component {
             </div>
           </div>
         </div>
-        <button className='modal-close' onClick={this.onClickCloseModal.bind(this)} />
       </div>
     )
   }
@@ -503,6 +507,7 @@ function mapStateToProps (state) {
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,
     error: state.settings.error,
+    errorMessage: state.settings.errorMessage,
     customerSearchKey: state.settings.customerSearchKey,
     customerFilter: state.settings.customerFilter,
     activeCustomerId: state.settings.activeCustomerId,

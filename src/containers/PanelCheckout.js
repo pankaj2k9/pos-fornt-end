@@ -19,6 +19,7 @@ import {
   verifyVoucherCode,
   setDiscount,
   removeNote,
+  toggleBonusPoints,
   panelCheckoutShouldUpdate
 } from '../actions/panelCheckout'
 
@@ -127,6 +128,12 @@ class PanelCheckout extends Component {
     dispatch(setActiveModal(''))
   }
 
+  toggleBonus () {
+    const { dispatch, bonusPoints } = this.props
+    let boolVal = !bonusPoints
+    dispatch(toggleBonusPoints(boolVal))
+  }
+
   renderModal () {
     const { cartItemsArray, locale, currency, card,
             paymentMode, walkinCustomer, voucher, orderNote } = this.props
@@ -178,15 +185,26 @@ class PanelCheckout extends Component {
   }
 
   renderVoucherModal () {
-    const {intl, activeModalId} = this.props
+    const {intl, activeModalId, error} = this.props
     const active = activeModalId === 'voucherModal' ? 'is-active' : ''
     return (
       <div id='voucherModal' className={`modal ${active}`}>
         <div className='modal-background'></div>
-        <div className='modal-content'>
-          <div className='box'>
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              <FormattedMessage id='app.button.addVoucher' />
+            </p>
+            <button className='delete' onClick={this.closeNotes.bind(this)} />
+          </header>
+          <section className='modal-card-body'>
             <div className='content has-text-centered'>
-              <h1 className='title'><FormattedMessage id='app.button.addVoucher' /></h1>
+              {!error
+                ? null
+                : <p className='subtitle'>
+                  {error}
+                </p>
+              }
               <p className='control is-expanded'>
                 <input id='vcInput' className='input is-large'
                   placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
@@ -200,9 +218,8 @@ class PanelCheckout extends Component {
                 </p>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-        <button className='modal-close' onClick={this.closeNotes.bind(this)} />
       </div>
     )
   }
@@ -248,15 +265,25 @@ class PanelCheckout extends Component {
   }
 
   render () {
-    const { cartItemsArray, currency, intl, shouldUpdate,
-            orderNote, voucher, customDiscount } = this.props
-            // placeholder value: displays default discount
+    const { cartItemsArray, currency, intl, shouldUpdate, activeCustomer,
+            orderNote, voucher, customDiscount, bonusPoints } = this.props
+    /** VAIDATION OF VALUES **/
+    /** @customDiscount: prop to be validated
+        @operator: customDiscount === '' || !customDiscount
+            - this validates the customDiscount if it's an empty string, null
+              or undefined
+            - returns true if value is an empty string, null, or undefined
+    **/
+
+    // @discountPH: Discount Placeholder
     let discountPH = customDiscount === '' || !customDiscount
       ? 0
       : Number(customDiscount)
-    let discount = customDiscount === ''
+    // @discount: discount value to be displayed
+    let discount = customDiscount === '' || !customDiscount
       ? ''
       : Number(customDiscount) > 100 ? 100 : customDiscount
+    // @subtotal: display apropriate computation of discounts
     let subtotal = !customDiscount || customDiscount === 0
       ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
       : Number(this.sumOfCartItems()).toFixed(2)
@@ -265,7 +292,12 @@ class PanelCheckout extends Component {
     const empty = cartItemsArray.length === 0
     return (
       <div>
-        {cartItemsArray.length === 0
+        { /*
+            @operator: cartItemsArray.length === 0
+                      - validates if the prop array 'cartItemsArray' is null,
+                        it will display nothing else display the Panel
+          */
+          cartItemsArray.length === 0
           ? null
           : <Panel
             panelName={<FormattedMessage id='app.panel.checkout' />}
@@ -275,7 +307,13 @@ class PanelCheckout extends Component {
             buttonTwo={!empty ? {name: 'app.button.cancelOrder', class: 'is-danger',
                         onClick: this.onClickCancelOrder.bind(this)} : null}>
             <div className='panel-block control is-grouped'>
-              {orderNoteCount === 0
+              {/*
+                  @operator: !orderNoteCount
+                      - validates the variable 'orderNoteCount' is zero,
+                        it will display nothing, else, display a button showing
+                        the note count and when clicked, display the notes modal
+                */
+                orderNoteCount === 0
                 ? null
                 : <p className='control'>
                   <a className='button' onClick={this.onClickViewNotes.bind(this)}>
@@ -306,7 +344,13 @@ class PanelCheckout extends Component {
                     </strong>
                   </p>
               } />
-              {!shouldUpdate
+              { /*
+                  @operator: !shouldUpdate
+                      - validates if the prop bool 'shouldUpdate' is false,
+                        it will display nothing, else, display the overallDiscount
+                        controls and the updated overallDiscount value
+                */
+                !shouldUpdate
                 ? <div>
                   {this.sumOfCartDiscounts() === 0
                     ? <Level left={<FormattedMessage id='app.general.overallDiscount' />}
@@ -337,11 +381,50 @@ class PanelCheckout extends Component {
               <Level left={<FormattedMessage id='app.general.voucherDiscount' />}
                 right={
                   <strong>
-                  {!voucher ? null
-                    : <a onClick={this.onClickRemoveVoucher.bind(this)} style={{marginRight: 50}}>
-                      <FormattedMessage id='app.button.removeVoucher' /> </a>}
+                  {/*
+                      @operator: !voucher
+                          - validates if the prop object 'voucher' is null,
+                            it will display nothing else display the remove
+                            voucher button
+                    */
+                    !voucher
+                    ? null
+                    : <a onClick={this.onClickRemoveVoucher.bind(this)}
+                      style={{marginRight: 50}}>
+                      <FormattedMessage id='app.button.removeVoucher' /> </a>
+                  }
                   {Number(voucherDiscount).toFixed(2)}</strong>
                 } />
+              {/*
+                  @operator: !activeCustomer
+                      - validates if the prop object 'activeCustomer' is null,
+                        it will display nothing else validate currency
+                  @operator: !currency
+                      - validates if the prop string 'currency' is 'odbo',
+                        it will display nothing else display bonusPoints control
+                */
+                !activeCustomer
+                ? null
+                : currency === 'odbo'
+                  ? null
+                  : <Level left={
+                    <div>
+                      <FormattedMessage id='app.general.bonusPoints' />
+                      <strong
+                        style={{color: bonusPoints ? 'green' : 'red'}}> [ {bonusPoints
+                        ? <FormattedMessage id='app.general.enabled' />
+                        : <FormattedMessage id='app.general.disabled' />
+                      } ]</strong>
+                    </div>
+                    }
+                    right={
+                      <p className='control' onClick={this.toggleBonus.bind(this)}>
+                        <label className='checkbox'>
+                          <input type='checkbox' />
+                        </label>
+                      </p>
+                    } />
+              }
             </div>
             <div>
               <div className='panel-block' style={{paddingTop: 0}}>
@@ -428,12 +511,14 @@ function mapStateToProps (state) {
     cashTotalFromCart: state.panelCart.totalPrice,
     odboTotalFromCart: state.panelCart.totalOdboPrice,
     paymentMode: state.panelCheckout.paymentMode,
+    bonusPoints: state.panelCheckout.bonusPoints,
     staff: state.application.staff,
     orderNote: state.panelCheckout.orderNote,
     walkinCustomer: state.panelCart.walkinCustomer,
     activeCustomer: state.panelCart.activeCustomer,
     activeCashier: state.application.activeCashier,
     shouldUpdate: state.panelCart.shouldUpdate,
+    error: state.panelCheckout.error,
     cpShouldUpdate: state.panelCheckout.shouldUpdate,
     totalFromCart: state.panelCart.totalPrice,
     panelCartItems: state.panelCart.items,
