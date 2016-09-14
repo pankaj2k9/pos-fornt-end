@@ -9,6 +9,7 @@ import {
   STORE_GET_IDS_SUCCESS,
   STORE_GET_IDS_FAILURE,
   STORE_SET_ID,
+  STORE_SET_ACTIVE,
   AUTH_STAFF_SUCCESS,
   AUTH_STAFF_REQUEST,
   AUTH_STAFF_FAILURE,
@@ -57,6 +58,10 @@ function application (state = {
     case STORE_SET_ID:
       return Object.assign({}, state, {
         storeId: action.storeId
+      })
+    case STORE_SET_ACTIVE:
+      return Object.assign({}, state, {
+        store: action.store
       })
     case STORE_GET_IDS_SUCCESS:
       return Object.assign({}, state, {

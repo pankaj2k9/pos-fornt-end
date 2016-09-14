@@ -33,7 +33,8 @@ class CheckoutModal extends Component {
             activeCustomer, pincode, adminToken,
             cashTendered, locale, card,
             transNumber, storeId, voucher,
-            orderNote, isDiscounted, overAllTotal
+            orderNote, isDiscounted, overAllTotal,
+            bonusPoints, walkinCustomer, store
           } = this.props
 
     let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
@@ -64,14 +65,14 @@ class CheckoutModal extends Component {
           ? currency === 'sgd'
             ? `${item.priceDiscount}%`
             : `${item.odboPriceDiscount}%`
-          : undefined
+          : ''
         : `${item.customDiscount}%`
       let showDiscount = item.customDiscount === 0
         ? item.isDiscounted
           ? locale === 'en'
             ? `(less ${discountPercent})`
             : `(减去 ${discountPercent})`
-          : undefined
+          : ''
         : locale === 'en'
           ? `(less ${discountPercent})`
           : `(减去 ${discountPercent})`
@@ -109,9 +110,34 @@ class CheckoutModal extends Component {
         : voucher.amount
       : undefined
 
+    let bonus = bonusPoints
+      ? currency === 'sgd'
+        ? 100
+        : 0
+      : 0
+
+    let earnedPoints = bonusPoints
+      ? Number(total).toFixed(0) * 2
+      : 0
+
+    let earnedPlusPrevious = activeCustomer
+      ? Number(earnedPoints).toFixed(0) + Number(activeCustomer.odboCoins)
+      : 0
+
+    let customer = activeCustomer
+      ? `${activeCustomer.lastName}, ${activeCustomer.firstName}`
+      : undefined
+
+    let prevOdbo = activeCustomer
+      ? activeCustomer.odboCoins
+      : 0.00
+
     let receiptTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
         ? { type: 'cash', total: total, cash: cashTendered,
+            walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+            customer: customer, previousOdbo: prevOdbo,
+            points: earnedPoints, newOdbo: earnedPlusPrevious,
             change: data.change, voucherDiscount: voucherAmount }
         : { type: 'credit', total: total, transNo: transNumber,
             cardType: card.type, provider: card.provider}
@@ -122,20 +148,16 @@ class CheckoutModal extends Component {
       ? [{type: 'others', message: 'no notes'}]
       : orderNote
 
+    let storeAddress = !store
+      ? ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268']
+      : [store.name, store.storeAddress]
+
     const receipt = {
       items,
-      info: {
-        date: new Date(),
-        staff
-      },
       trans: receiptTrans,
-      headerText: ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268'],
+      headerText: storeAddress,
       footerText: ['Thank you', 'Have a nice day!']
     }
-
-    let bonus = currency === 'sgd'
-      ? 100
-      : 0
 
     let payment = cashTendered === 0 || !cashTendered || cashTendered === ''
       ? 0
@@ -158,7 +180,7 @@ class CheckoutModal extends Component {
       posTrans,
       remarks
     }
-    dispatch(processOrder(orderInfo, receipt))
+    dispatch(processOrder(orderInfo, receipt, staff))
   }
 
   onClickCancel () {
@@ -338,6 +360,7 @@ CheckoutModal.PropTypes = {
 function mapStateToProps (state) {
   return {
     storeId: state.application.storeId,
+    store: state.application.store,
     activeModalId: state.application.activeModalId,
     adminToken: state.application.adminToken,
     activeCashier: state.application.activeCashier,
@@ -347,6 +370,7 @@ function mapStateToProps (state) {
     totalPrice: state.panelCart.totalPrice,
     totalOdboPrice: state.panelCart.totalOdboPrice,
     orderNote: state.panelCheckout.orderNote,
+    bonusPoints: state.panelCheckout.bonusPoints,
     cashTendered: state.panelCheckout.cashTendered,
     card: state.panelCheckout.card,
     transNumber: state.panelCheckout.transNumber,

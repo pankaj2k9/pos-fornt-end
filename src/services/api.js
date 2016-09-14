@@ -14,7 +14,7 @@ const api = (function () {
     const app = feathers()
       .configure(feathers.rest(host).fetch(global.fetch))
       .configure(feathers.hooks())
-      .configure(feathers.authentication())
+      .configure(feathers.authentication({ storage: window.localStorage }))
 
     return app
   }

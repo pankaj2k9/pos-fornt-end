@@ -148,10 +148,13 @@ export const buildFooter = (footerText) => {
  */
 export const buildExtraInfo = (info) => {
   let extra = ''
-
+  let orderId = info.orderId
+    ? extra += `<div>Order ID : ${info.orderId}</div>`
+    : null
   extra += '<div>'
   extra += `<div>STAFF : ${info.staff}<div>`
   extra += `<div>${formatDate(info.date)}</div>`
+  orderId
   extra += '</div>'
 
   return extra
@@ -168,6 +171,8 @@ export const buildComputation = (trans) => {
     let voucherDiscount = trans.voucherDiscount
       ? `<div>${formatCurrency(trans.voucherDiscount)}</div>`
       : `<div>${'no voucher'}</div>`
+    let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
+    let customer = trans.customer ? trans.customer : trans.walkIn
     let minLabel
     let minuend
     let card
@@ -199,6 +204,16 @@ export const buildComputation = (trans) => {
     }
 
     comp += '<div>'
+    if (trans.type === 'cash') {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
+      if (trans.customer) {
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COIN BALANCE</div></div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${trans.newOdbo}<br/></div>`
+      }
+      comp += RECEIPT_DIVIDER
+    }
     comp += trans.type === 'cash'
       ? `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div> -${voucherDiscount}</div>`
       : ''

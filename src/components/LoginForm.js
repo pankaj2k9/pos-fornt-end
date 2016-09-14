@@ -25,8 +25,8 @@ class LoginForm extends Component {
     })
   }
   handleStoreIdChange (event) {
-    const { onSetStoreId } = this.props
-    onSetStoreId(event.target.value)
+    const { onSetStoreId, storeIds } = this.props
+    onSetStoreId(event.target.value, storeIds)
   }
 
   onPressLogin (event) {

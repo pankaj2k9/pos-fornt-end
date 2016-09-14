@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { injectIntl, FormattedDate, FormattedTime, FormattedMessage } from 'react-intl'
+import { injectIntl, FormattedMessage } from 'react-intl'
 
 import SearchModal from './SearchModal'
 import SearchBar from '../components/SearchBar'
