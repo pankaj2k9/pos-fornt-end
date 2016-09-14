@@ -58,6 +58,7 @@ const zh = {
   'app.general.bonusPoints': '奖励积分',
   'app.general.enabled': ' 启用 ',
   'app.general.disabled': ' 禁用 ',
+  'app.general.updateOdbo': '更新 Odbo 平衡',
 
   'app.panel.products': '制品',
   'app.panel.sales': '销售',
@@ -109,6 +110,7 @@ const zh = {
   'app.ph.enterPassword': '输入用户密码',
   'app.ph.youChoose': '您选用',
   'app.ph.storePin': '商店 PIN',
+  'app.ph.enterNewVal': '输入一个新值',
 
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noCustResults': '没有客户的搜索结果 ',

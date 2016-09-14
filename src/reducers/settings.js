@@ -12,6 +12,12 @@ import {
   VERIFY_STORE_PIN_SUCCESS,
   VERIFY_STORE_PIN_FAILURE,
   SETTINGS_ERROR,
+
+  UPDATE_CUSTOMER_SHOW,
+  UPDATE_CUSTOMER_REQUEST,
+  UPDATE_CUSTOMER_SUCCESS,
+  UPDATE_CUSTOMER_FAILURE,
+
   ACCOUNT_CHANGEPW_TOGGLE_VIEW,
   ACCOUNT_CHANGEPW_REQUEST,
   ACCOUNT_CHANGEPW_SUCCESS,
@@ -65,6 +71,37 @@ function account (state, action) {
   }
 }
 
+function customer (state, action) {
+  switch (action.type) {
+    case UPDATE_CUSTOMER_SHOW:
+      return Object.assign({}, state, {
+        showControl: action.value,
+        isProcessing: false,
+        updateSuccess: false,
+        error: null
+      })
+    case UPDATE_CUSTOMER_REQUEST:
+      return Object.assign({}, state, {
+        isProcessing: true
+      })
+    case UPDATE_CUSTOMER_SUCCESS:
+      return Object.assign({}, state, {
+        showControl: false,
+        isProcessing: false,
+        updateSuccess: true,
+        error: null
+      })
+    case UPDATE_CUSTOMER_FAILURE:
+      return Object.assign({}, state, {
+        isProcessing: false,
+        updateSuccess: false,
+        error: action.error
+      })
+    default:
+      return state
+  }
+}
+
 function settings (state = {
   orderFromGet: null,
   activeTab: 'main',
@@ -90,6 +127,12 @@ function settings (state = {
     confirmPw: '',
     errorMessage: '',
     successMessage: ''
+  },
+  customer: {
+    showControl: false,
+    isProcessing: false,
+    updateSuccess: false,
+    error: null
   }
 }, action) {
   switch (action.type) {
@@ -163,6 +206,13 @@ function settings (state = {
     case SETTINGS_ERROR:
       return Object.assign({}, state, {
         error: true
+      })
+    case UPDATE_CUSTOMER_SHOW:
+    case UPDATE_CUSTOMER_REQUEST:
+    case UPDATE_CUSTOMER_SUCCESS:
+    case UPDATE_CUSTOMER_FAILURE:
+      return Object.assign({}, state, {
+        customer: customer(state.customer, action)
       })
     case ACCOUNT_CHANGEPW_TOGGLE_VIEW:
     case ACCOUNT_CHANGEPW_REQUEST:

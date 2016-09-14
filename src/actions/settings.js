@@ -1,8 +1,10 @@
 import ordersService from '../services/orders'
 import usersService from '../services/users'
 import noSalesService from '../services/noSales'
+import customers from '../services/customers'
 
 import { setActiveModal } from './application'
+import { fetchCustomers } from './customers'
 
 import print from '../utils/printReceipt/print'
 
@@ -115,6 +117,50 @@ export function verifyStorePin (query, staff) {
         document.getElementById('storePinCode').value = ''
         dispatch(verifyStorePinFailure(error.message))
         dispatch(settingsError())
+      })
+  }
+}
+
+export const UPDATE_CUSTOMER_SHOW = 'UPDATE_CUSTOMER_SHOW'
+export function updateCustomerShow (value) {
+  return {
+    type: UPDATE_CUSTOMER_SHOW,
+    value
+  }
+}
+
+export const UPDATE_CUSTOMER_REQUEST = 'UPDATE_CUSTOMER_REQUEST'
+export function updateCustomerRequest () {
+  return {
+    type: UPDATE_CUSTOMER_REQUEST
+  }
+}
+
+export const UPDATE_CUSTOMER_SUCCESS = 'UPDATE_CUSTOMER_SUCCESS'
+export function updateCustomerSuccess () {
+  return {
+    type: UPDATE_CUSTOMER_SUCCESS
+  }
+}
+
+export const UPDATE_CUSTOMER_FAILURE = 'UPDATE_CUSTOMER_FAILURE'
+export function updateCustomerFailure (error) {
+  return {
+    type: UPDATE_CUSTOMER_FAILURE,
+    error
+  }
+}
+
+export function updateCustomer (id, params) {
+  return (dispatch) => {
+    dispatch(updateCustomerRequest())
+    customers.patch(id, params)
+      .then(() => {
+        dispatch(updateCustomerSuccess())
+        dispatch(fetchCustomers())
+      })
+      .catch((error) => {
+        dispatch(updateCustomerFailure(error.message))
       })
   }
 }

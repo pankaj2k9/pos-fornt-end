@@ -58,6 +58,7 @@ const en = {
   'app.general.bonusPoints': 'Bonus Points',
   'app.general.enabled': ' Enabled',
   'app.general.disabled': ' Disabled',
+  'app.general.updateOdbo': 'Update Odbo Balance',
 
   'app.panel.products': 'Products',
   'app.panel.sales': 'Sales',
@@ -109,6 +110,7 @@ const en = {
   'app.ph.enterPassword': 'Enter User Password',
   'app.ph.youChoose': 'You Choosed: ',
   'app.ph.storePin': 'enter PIN',
+  'app.ph.enterNewVal': 'enter new value',
 
   'app.error.update.stock': 'Update stocks on admin app',
   'app.error.noCustResults': 'No search results for customer ',

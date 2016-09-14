@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { injectIntl, FormattedMessage } from 'react-intl'
+import { injectIntl, FormattedDate, FormattedTime, FormattedMessage } from 'react-intl'
 
 import SearchModal from './SearchModal'
 import SearchBar from '../components/SearchBar'
@@ -22,7 +22,9 @@ import {
   customersSetActiveId,
   setSettingsActiveTab,
   verifyStorePin,
-  resetSettingsState
+  resetSettingsState,
+  updateCustomerShow,
+  updateCustomer
 } from '../actions/settings'
 
 import {
@@ -215,16 +217,34 @@ class SettingsTab extends Component {
     )
   }
 
+  onClickShowOdboControl () {
+    const {dispatch, showControl} = this.props
+    if (!showControl) {
+      dispatch(updateCustomerShow(true))
+    } else {
+      dispatch(updateCustomerShow(false))
+    }
+  }
+
+  updateOdboCoins (id) {
+    const {dispatch} = this.props
+    let newOdbo = document.getElementById('newOdbo').value
+    dispatch(updateCustomer(id, {odboCoins: Number(newOdbo)}))
+  }
+
   renderCustomersTab () {
-    const {dispatch, isFetching,
-           customers, customersById,
-           customerSearchKey, customerFilter,
-           activeCustomerId, activeModalId} = this.props
+    const {
+          dispatch, isFetching,
+          customers, customersById,
+          customerSearchKey, customerFilter,
+          activeCustomerId, activeModalId,
+          intl, showControl,
+          ucIsProcessing, ucError
+          } = this.props
 
     const x = customersById[activeCustomerId]
-
+    let hideDetails = showControl
     var intFrameHeight = window.innerHeight
-
     return (
       <div className='is-fullheight'>
         <div className='columns'>
@@ -368,14 +388,61 @@ class SettingsTab extends Component {
             items={[
               {name: 'app.general.custName', desc: `${x.firstName} ${x.lastName}`},
               {name: 'app.general.odboId', desc: x.odboId},
-              {name: 'app.general.dateJoined', desc: x.dateCreated},
+              {name: 'app.general.dateJoined'},
+              {desc: `Date: ${intl.formatDate(x.dateCreated)}`},
+              {desc: `Time: ${intl.formatTime(x.dateCreated)}`},
               {name: 'app.general.membership', desc: x.membership},
               {name: 'app.general.memberPoints', desc: x.membershipPoints},
               {name: 'app.general.ob', desc: x.odboCoins},
               {name: 'Email', desc: x.emailAddress},
               {name: 'Phone', desc: x.phoneNumber}
             ]}
-            close={this.onClickCloseModal.bind(this)} />
+            hideDetails={hideDetails}
+            onClick={this.onClickShowOdboControl.bind(this)}
+            close={this.onClickCloseModal.bind(this)}>
+            <div>
+              {!showControl
+                ? null
+                : <div>
+                {!ucError
+                  ? null
+                  : <p className='subtitle has-text-centered'>
+                    {ucError}
+                  </p>
+                }
+                  <p className='control is-expanded'>
+                    <form autoComplete={false}>
+                      <input id='newOdbo' className='input is-large' type='number'
+                        placeholder={intl.formatMessage({ id: 'app.ph.enterNewVal' })} />
+                    </form>
+                  </p>
+                  <div>
+                    {!ucIsProcessing
+                      ? <div className='columns'>
+                        <div className='column is-half'>
+                          <a className='button is-large is-fullwidth is-success'
+                            onClick={this.updateOdboCoins.bind(this, x.id)}>
+                            <FormattedMessage id='app.general.updateOdbo' />
+                          </a>
+                        </div>
+                        <div className='column is-half'>
+                          <a className='button is-large is-fullwidth is-danger'
+                            onClick={this.onClickShowOdboControl.bind(this)}>
+                            <FormattedMessage id='app.button.cancel' />
+                          </a>
+                        </div>
+                      </div>
+                      : <div className='column is-fullwidth'>
+                        <p className='has-text-centered'>
+                          <i className='fa fa-spinner fa-pulse fa-fw'></i>
+                        </p>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </DetailsModal>
         }
       </div>
     )
@@ -436,7 +503,7 @@ class SettingsTab extends Component {
             <button className='delete' onClick={this.onClickCloseModal.bind(this)} />
           </header>
           <div className='modal-card-body'>
-            <div className='content has-text-centered'>
+            <div className='content'>
               {!error
                 ? null
                 : <p className='subtitle'>
@@ -444,8 +511,10 @@ class SettingsTab extends Component {
                 </p>
               }
               <p className='control is-expanded'>
-                <input id='storePinCode' className='input is-large' type='password'
-                  placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
+                <form autoComplete={false}>
+                  <input id='storePinCode' className='input is-large' type='password'
+                    placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
+                </form>
               </p>
               <div className='columns'>
                 <div className='column is-6 is-offset-3'>
@@ -507,6 +576,10 @@ function mapStateToProps (state) {
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,
     error: state.settings.error,
+    showControl: state.settings.customer.showControl,
+    ucSuccess: state.settings.customer.updateSuccess,
+    ucIsProcessing: state.settings.customer.isProcessing,
+    ucError: state.settings.customer.error,
     errorMessage: state.settings.errorMessage,
     customerSearchKey: state.settings.customerSearchKey,
     customerFilter: state.settings.customerFilter,
