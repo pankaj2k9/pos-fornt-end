@@ -20,6 +20,10 @@ import {
   fetchCustomers
 } from './customers'
 
+import {
+  fetchAllProducts
+} from './products'
+
 import {closeActiveModal} from './application'
 
 import {reprintingReceipt, orderStateReset} from './orders'
@@ -45,12 +49,13 @@ export function reprintReceipt (receiptData) {
   }
 }
 
-export function resetStore () {
+export function resetStore (locale) {
   return (dispatch) => {
     dispatch(panelCheckoutReset())
     dispatch(panelCartReset())
     dispatch(closeActiveModal(''))
     dispatch(orderStateReset())
+    dispatch(fetchAllProducts(locale))
   }
 }
 

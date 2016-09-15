@@ -184,9 +184,9 @@ class CheckoutModal extends Component {
   }
 
   onClickCancel () {
-    const {dispatch, orderError, orderSuccess} = this.props
+    const {dispatch, orderError, orderSuccess, locale} = this.props
     orderError === '' && orderSuccess
-    ? dispatch(resetStore())
+    ? dispatch(resetStore(locale)) && document.getElementById('productsSearch').focus()
     : dispatch(closeActiveModal()) && document.getElementById('productsSearch').focus()
   }
 

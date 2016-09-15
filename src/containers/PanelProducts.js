@@ -95,8 +95,8 @@ class PanelProducts extends Component {
       productsFilter,
       storeId
     } = this.props
-    let columnSize = intFrameWidth <= 1024 ? 'is-4' : 'is-3'
-    let itemNameSize = intFrameWidth <= 1024 ? 25 : 40
+    let columnSize = intFrameWidth <= 1328 ? 'is-4' : 'is-3'
+    let itemNameSize = intFrameWidth <= 1024 ? 25 : 30
     let filterString = productsFilter.trim().toLowerCase()
     let searchKey = productsSearchKey.trim().toLowerCase()
     let firstFilter = []

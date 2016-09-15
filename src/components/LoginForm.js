@@ -64,8 +64,14 @@ class LoginForm extends Component {
                       <div className='control'>
                         <div className={storeIdSelectClass}>
                           <select onChange={this.handleStoreIdChange.bind(this)}>
-                            {storeIds.map(store =>
-                              <option key={`store-id-${store.source}`}>{store.source}</option>
+                            {storeIds.map(store => {
+                              let storeName = !store.name ? store.source : store.name
+                              return (
+                                <option key={`store-id-${store.source}`} value={store.source}>
+                                {storeName}
+                                </option>
+                              )
+                            }
                             )}
                           </select>
                         </div>

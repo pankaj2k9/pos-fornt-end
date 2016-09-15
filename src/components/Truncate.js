@@ -6,9 +6,9 @@ const Truncate = (props) => {
     maxLength
   } = props
   if (text.length > maxLength) {
-    return <p>{text.substring(0, maxLength) + '...'}</p>
+    return <span>{text.substring(0, maxLength) + '...'}</span>
   } else {
-    return <p>{text}</p>
+    return <span>{text}</span>
   }
 }
 
