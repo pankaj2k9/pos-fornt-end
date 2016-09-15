@@ -187,7 +187,7 @@ const en = {
   'app.page.settings.account': 'Account',
   'app.page.settings.accountDesc': 'View or Edit your account settings',
   'app.page.settings.noSales': 'No Sales',
-  'app.page.settings.noSalesDesc': 'Click and verify store pin code to open cash drawer',
+  'app.page.settings.noSalesDesc': 'Verify store pin code to open cash drawer',
 
   'app.page.settings.usernameAndPw': 'Username & Password',
   'app.page.settings.changePw': 'Change Password',

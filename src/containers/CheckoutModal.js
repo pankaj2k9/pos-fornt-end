@@ -148,7 +148,7 @@ class CheckoutModal extends Component {
       ? [{type: 'others', message: 'no notes'}]
       : orderNote
 
-    let storeAddress = !store
+    let storeAddress = !store.storeAddress
       ? ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268']
       : [store.name, store.storeAddress]
 

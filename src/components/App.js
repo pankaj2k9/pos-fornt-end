@@ -56,7 +56,7 @@ class App extends React.Component {
           isLoggingOut={isLoggingOut}
           openChooseUser={this.openChooseUserModal.bind(this)} />
         <section className='section' style={{padding: 10}}>
-          <div className='container'>
+          <div style={{paddingLeft: 15, paddingRight: 15}}>
             {this.props.children}
           </div>
         </section>

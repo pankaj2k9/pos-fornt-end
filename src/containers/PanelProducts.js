@@ -96,6 +96,7 @@ class PanelProducts extends Component {
       storeId
     } = this.props
     let columnSize = intFrameWidth <= 1024 ? 'is-4' : 'is-3'
+    let itemNameSize = intFrameWidth <= 1024 ? 25 : 40
     let filterString = productsFilter.trim().toLowerCase()
     let searchKey = productsSearchKey.trim().toLowerCase()
     let firstFilter = []
@@ -150,10 +151,10 @@ class PanelProducts extends Component {
           key={key}
           className={`column ${columnSize}`}
           onClick={this.onClickProduct.bind(this, product.id)}>
-          <div className='card is-clearfix' style={{height: 130}}>
-            <div className='section' style={{padding: 20}}>
+          <div className='card' style={{height: 140}}>
+            <div className='section' style={{padding: 20, backgroundColor: 'transparent'}}>
               <div className='title is-5'>
-                <Truncate text={productName} maxLength={20} />
+                <Truncate text={productName} maxLength={itemNameSize} />
               </div>
 
               {product.stock.length === 0 || Object.keys(productStock).length === 0

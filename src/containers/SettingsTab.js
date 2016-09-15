@@ -33,6 +33,7 @@ import {
 } from '../actions/helpers'
 
 class SettingsTab extends Component {
+
   onClickRefund () {
     const {dispatch} = this.props
     dispatch(setActiveModal('refundModal'))
@@ -110,7 +111,7 @@ class SettingsTab extends Component {
     return (
       <div>
         <div className='columns'>
-          <div className='column'>
+          <div className='column is-3'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-caret-square-o-down fa-4x' />
@@ -127,7 +128,7 @@ class SettingsTab extends Component {
               </a>
             </div>
           </div>
-          <div className='column'>
+          <div className='column is-3'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-list-alt fa-4x' />
@@ -144,7 +145,7 @@ class SettingsTab extends Component {
               </a>
             </div>
           </div>
-          <div className='column'>
+          <div className='column is-3'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-users fa-4x' />
@@ -161,7 +162,7 @@ class SettingsTab extends Component {
               </a>
             </div>
           </div>
-          <div className='column'>
+          <div className='column is-3'>
             <div className='box has-text-centered'>
               <span>
                 <i className='fa fa-user fa-4x' />
@@ -410,12 +411,12 @@ class SettingsTab extends Component {
                     {ucError}
                   </p>
                 }
-                  <p className='control is-expanded'>
+                  <div className='control is-expanded'>
                     <form autoComplete={false}>
                       <input id='newOdbo' className='input is-large' type='number'
                         placeholder={intl.formatMessage({ id: 'app.ph.enterNewVal' })} />
                     </form>
-                  </p>
+                  </div>
                   <div>
                     {!ucIsProcessing
                       ? <div className='columns'>
@@ -497,9 +498,9 @@ class SettingsTab extends Component {
         <div className='modal-background'></div>
         <div className='modal-card'>
           <header className='modal-card-head'>
-            <p className='modal-card-title is-marginless has-text-centered'>
+            <div className='modal-card-title is-marginless has-text-centered'>
               <h1 className='title'><FormattedMessage id='app.general.storePin' /></h1>
-            </p>
+            </div>
             <button className='delete' onClick={this.onClickCloseModal.bind(this)} />
           </header>
           <div className='modal-card-body'>
@@ -510,12 +511,12 @@ class SettingsTab extends Component {
                   {errorMessage}
                 </p>
               }
-              <p className='control is-expanded'>
+              <div className='control is-expanded'>
                 <form autoComplete={false}>
                   <input id='storePinCode' className='input is-large' type='password'
                     placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
                 </form>
-              </p>
+              </div>
               <div className='columns'>
                 <div className='column is-6 is-offset-3'>
                   {!isProcessing
