@@ -191,10 +191,12 @@ const en = {
 
   'app.page.settings.usernameAndPw': 'Username & Password',
   'app.page.settings.changePw': 'Change Password',
+  'app.page.settings.oldPw': 'Old Password',
   'app.page.settings.newPw': 'New Password',
   'app.page.settings.confirmPw': 'Confirm Password',
   'app.page.settings.changePwSuccess': 'Password change success!',
   'app.page.settings.changePwError': 'There was a problem processing your request. Please try again.',
+  'app.page.settings.changePwOldPwInc': 'Old password is incorrect.',
   'app.page.settings.changePwMin3Chars': 'Must be at least 3 characters.',
   'app.page.settings.changePwDoNotMatch': 'Passwords do not match.',
   'app.page.settings.changePwInfo1': 'You are logged in with ',

@@ -3,7 +3,8 @@ import api from './api'
 const users = api.service('/users')
 
 export default {
-  patch (id, params) {
-    return users.patch(id, params)
+  patch (id, newPw, oldPw) {
+    console.log('pw', { password: newPw, oldPassword: oldPw })
+    return users.patch(id, { password: newPw, oldPassword: oldPw })
   }
 }

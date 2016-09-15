@@ -191,10 +191,12 @@ const zh = {
 
   'app.page.settings.usernameAndPw': '用户名和密码',
   'app.page.settings.changePw': '更改密码',
+  'app.page.settings.oldPw': '旧密码',
   'app.page.settings.newPw': '新密码',
   'app.page.settings.confirmPw': '确认密码',
   'app.page.settings.changePwSuccess': '密码修改成功！',
   'app.page.settings.changePwError': '有一个问题，处理您的请求。请再试一次。',
+  'app.page.settings.changePwOldPwInc': '旧密码不正确。',
   'app.page.settings.changePwMin3Chars': '密码必须至少为3个字符。',
   'app.page.settings.changePwDoNotMatch': '密码不匹配。',
   'app.page.settings.changePwInfo1': '您登录使用 ',

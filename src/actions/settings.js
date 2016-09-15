@@ -170,6 +170,11 @@ export function accountChangePwToggleView () {
   return { type: ACCOUNT_CHANGEPW_TOGGLE_VIEW }
 }
 
+export const ACCOUNT_CHANGEPW_OLDPW_SET_VALUE = 'ACCOUNT_CHANGEPW_OLDPW_SET_VALUE'
+export function accountChangePwOldPwSetValue (oldPw) {
+  return { type: ACCOUNT_CHANGEPW_OLDPW_SET_VALUE, oldPw }
+}
+
 export const ACCOUNT_CHANGEPW_NEWPW_SET_VALUE = 'ACCOUNT_CHANGEPW_NEWPW_SET_VALUE'
 export function accountChangePwNewPwSetValue (newPw) {
   return { type: ACCOUNT_CHANGEPW_NEWPW_SET_VALUE, newPw }
@@ -200,12 +205,12 @@ export function accountChangePwFailure (message) {
   return { type: ACCOUNT_CHANGEPW_FAILURE, message }
 }
 
-export function accountChangePw (id, newPw) {
+export function accountChangePw (id, newPw, oldPw) {
   return (dispatch) => {
     dispatch(accountChangePwRequest())
     dispatch(accountChangePwClearMessages())
 
-    usersService.patch(id, { password: newPw })
+    usersService.patch(id, newPw, oldPw)
       .then(() => {
         dispatch(accountChangePwSuccess('app.page.settings.changePwSuccess'))
         dispatch(accountChangePwToggleView())
