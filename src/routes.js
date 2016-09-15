@@ -14,9 +14,19 @@ import Reports from './containers/Reports'
  *
  * Is called right before a route is entered.
  */
-function requireAuth (nextState, replace) {
+function requireAuth (nextState, replace, callback) {
   if (!api.get('token')) {
-    replace({ pathname: '/' })
+    api.authenticate().then(response => {
+      callback()
+    }).catch(error => {
+      let noTokenError = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
+      if (noTokenError === String(error)) {
+        replace({ pathname: '/' })
+        callback()
+      } // add fallback if needed
+    })
+  } else {
+    callback()
   }
 }
 
