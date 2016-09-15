@@ -19,7 +19,9 @@ const Level = (props) => {
       }
       {center !== null || undefined
         ? <div className='level-item has-text-centered is-fullwidth' style={{justifyContent: 'center'}}>
+          <center>
           {center}
+          </center>
         </div>
         : null
       }

@@ -6,6 +6,11 @@ export function reportsSetTab (tab) {
   return { type: REPORTS_SET_TAB, tab }
 }
 
+export const REPORTS_STATE_RESET = 'REPORTS_STATE_RESET'
+export function reportsStateReset () {
+  return { type: REPORTS_STATE_RESET }
+}
+
 export const SALESREPORT_FETCH_REQUEST = 'SALESREPORT_FETCH_REQUEST'
 export const SALESREPORT_FETCH_SUCCESS = 'SALESREPORT_FETCH_SUCCESS'
 export const SALESREPORT_FETCH_FAILURE = 'SALESREPORT_FETCH_FAILURE'

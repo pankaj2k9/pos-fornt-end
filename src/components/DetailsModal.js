@@ -8,12 +8,16 @@ const DetailsModal = (props) => {
     activeModalId,
     title,
     items,
-    close
+    close,
+    onClick,
+    hideDetails
   } = props
 
   DetailsModal.defaultProps = {
     title: 'Details Modal',
-    items: [{name: 'list name', desc: 'description'}]
+    items: [{name: 'list name', desc: 'description'}],
+    hideDetails: false,
+    onClick: function (event) { event.preventDefault() }
   }
 
   const active = activeModalId === id ? 'is-active' : ''
@@ -29,18 +33,33 @@ const DetailsModal = (props) => {
           <button className='delete' onClick={close}></button>
         </header>
         <section className='modal-card-body'>
-          <ul>
-          {
-            items.map(function (item, key) {
-              return (
-                <li key={key}>
-                  <strong><FormattedMessage id={item.name} />: </strong>
-                  {item.desc}
-                </li>
-              )
-            }, this)
+          {!hideDetails
+            ? <section>
+              <div className='is-pulled-right'>
+                <a className='button is-success' onClick={onClick}>
+                  <FormattedMessage id={'app.general.updateOdbo'} />
+                </a>
+              </div>
+              <ul style={{fontSize: 16}}>
+              {
+                items.map(function (item, key) {
+                  let listName = item.name === undefined
+                    ? null
+                    : <strong><FormattedMessage id={item.name} />: </strong>
+                  return (
+                    <li key={key}>
+                      {listName}
+                      {item.desc}
+                    </li>
+                  )
+                }, this)
+              }
+              </ul>
+            </section>
+            : <section>
+              {props.children}
+            </section>
           }
-          </ul>
         </section>
         <footer className='modal-card-foot'>
           <a className='button' onClick={close}>Close</a>

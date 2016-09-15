@@ -102,7 +102,8 @@ class PanelCart extends Component {
   }
 
   renderChildren () {
-    const { dispatch, cartItemsArray, currency, locale, shouldUpdate, subTotalPrice } = this.props
+    const { dispatch, cartItemsArray, currency,
+            locale, shouldUpdate, overallDiscount } = this.props
     const notEmpty = (cartItemsArray !== null || undefined)
     // const add = this.addProductQty
     return cartItemsArray.map(function (item, key) {
@@ -123,31 +124,35 @@ class PanelCart extends Component {
         document.getElementById('productsSearch').focus()
       }
       function setDiscount (value) {
+        let discount = Number(value) > 100 ? 100 : value
         dispatch(panelCartShouldUpdate())
-        dispatch(setCustomDiscount(value, item.id))
+        dispatch(setCustomDiscount(discount, item.id))
       }
       let productName = locale === 'en' ? item.nameEn : item.nameZh
+      // placeholder value: displays default discount
       let discountPH = item.customDiscount === 0
         ? item.isDiscounted
           ? currency === 'sgd'
-            ? parseFloat(item.priceDiscount)
-            : parseFloat(item.odboPriceDiscount).toFixed(0)
+            ? Number(item.priceDiscount)
+            : Number(item.odboPriceDiscount)
           : 0.00
-        : currency === 'sgd'
-          ? parseFloat(item.customDiscount)
-          : parseFloat(item.customDiscount).toFixed(0)
+        : Number(item.customDiscount)
+      // input value: 100 is max value
+      let discountVal = item.customDiscount === 0
+        ? ''
+        : Number(item.customDiscount)
       let discount = item.customDiscount === 0
         ? item.isDiscounted
           ? currency === 'sgd'
-            ? (parseFloat(item.priceDiscount) / 100) * item.price
+            ? (Number(item.priceDiscount) / 100) * item.price
             : (parseInt(item.odboPriceDiscount) / 100) * item.odboPrice
           : 0.00
         : currency === 'sgd'
-          ? (parseFloat(item.customDiscount) / 100) * item.price
-          : (parseFloat(item.customDiscount).toFixed(0) / 100) * item.odboPrice
+          ? (Number(item.customDiscount) / 100) * item.price
+          : (Number(item.customDiscount) / 100) * item.odboPrice
       let computedDiscount = currency === 'sgd'
-        ? parseFloat(item.price) - discount
-        : parseFloat(item.odboPrice) - discount
+        ? Number(item.price) - discount
+        : Number(item.odboPrice) - discount
       return (
         notEmpty
         ? <tr key={key}>
@@ -159,23 +164,26 @@ class PanelCart extends Component {
               minus={minus} />
           </td>
           <td><Truncate text={productName} maxLength={26} /></td>
-          <td>
-            <p className='control has-addons' style={{width: 50}}>
-              <input id='itemDiscount' className='input is-small' type='number'
-                placeholder={discountPH}
-                onChange={e => setDiscount(e.target.value)} />
-              <a className='button is-small'>%</a>
-            </p>
-          </td>
+          {
+            !overallDiscount || overallDiscount === 0
+              ? <td>
+                <p className='control has-addons' style={{width: 50}}>
+                  <input id='itemDiscount' className='input is-small' type='Number'
+                    placeholder={discountPH} value={discountVal}
+                    onChange={e => setDiscount(e.target.value)} />
+                  <a className='button is-small'>%</a>
+                </p>
+              </td>
+              : null
+          }
           <td>
             <p>
               {shouldUpdate
                 ? null
                 : currency === 'sgd'
-                  ? parseFloat(parseFloat(item.qty) * computedDiscount).toFixed(2)
-                  : parseInt(item.qty) * parseFloat(computedDiscount)}
+                  ? Number(Number(item.qty) * computedDiscount).toFixed(2)
+                  : parseInt(item.qty) * Number(computedDiscount)}
             </p>
-            <p hidden>{parseFloat(parseFloat(subTotalPrice) - computedDiscount).toFixed(2)}</p>
           </td>
           <td className='is-icon'>
             <a
@@ -232,7 +240,8 @@ class PanelCart extends Component {
       inputAction,
       searchKey,
       customerSearchError,
-      ordersOnHold
+      ordersOnHold,
+      overallDiscount
     } = this.props
     const emptyOrdersOnHold = (ordersOnHold.length === 0) || (ordersOnHold === null || undefined)
     const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
@@ -331,7 +340,10 @@ class PanelCart extends Component {
                 <tr>
                   <th><FormattedMessage id='app.general.qty' /></th>
                   <th><FormattedMessage id='app.general.product' /></th>
-                  <th><FormattedMessage id='app.general.discount' /></th>
+                  {!overallDiscount || overallDiscount === 0
+                    ? <th><FormattedMessage id='app.general.discount' /></th>
+                    : null
+                  }
                   <th><FormattedMessage id='app.general.subtotal' /></th>
                   <th></th>
                 </tr>
@@ -382,6 +394,7 @@ function mapStateToProps (state) {
     searchKey: state.panelCart.customerSearchKey,
     totalPrice: state.panelCart.totalPrice,
     totalOdboPrice: state.panelCart.totalOdboPrice,
+    overallDiscount: state.panelCheckout.customDiscount,
     ordersSearchKey: state.ordersOnHold.searchKey
   }
 }

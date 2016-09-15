@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { browserHistory } from 'react-router'
-import { storeGetIds, storeSetId } from '../actions/application'
+import { storeGetIds, storeSetId, storeSetActive } from '../actions/application'
 
 // components/containers
 import LoginForm from '../components/LoginForm'
@@ -61,8 +61,13 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(storeGetIds())
     },
 
-    handleSetStoreId: (storeId) => {
+    handleSetStoreId: (storeId, storeIds) => {
       dispatch(storeSetId(storeId))
+      storeIds.forEach(item => {
+        if (item.source === storeId) {
+          dispatch(storeSetActive(item))
+        }
+      })
     }
   }
 }

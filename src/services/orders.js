@@ -10,6 +10,7 @@ const orders = {
   find (params) {
     const { storeId, to, from, limit, skip } = params
     const query = {
+      $sort: { dateOrdered: -1 },
       source: storeId,
       dateCreated: {
         $lte: to,

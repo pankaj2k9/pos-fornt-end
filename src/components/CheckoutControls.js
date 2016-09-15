@@ -21,8 +21,16 @@ const CheckoutControls = (props) => {
     walkinCustomer,
     odboMinusTotal,
     odboBalance,
-    intl
+    intl,
+    onSubmit
   } = props
+
+  CheckoutControls.defaultProps = {
+    onSubmit: function (event) {
+      event.preventDefault()
+      document.getElementById('confirmCheckout').focus()
+    }
+  }
 
   return (
     <section className='modal-card-body'>
@@ -67,7 +75,7 @@ const CheckoutControls = (props) => {
           {currency === 'odbo' && odboBalance <= 0
             ? null
             : <div className='control is-expanded'>
-              <form autoComplete='off'>
+              <form autoComplete='off' onSubmit={onSubmit}>
                 <input
                   id='checkoutInput'
                   autoFocus

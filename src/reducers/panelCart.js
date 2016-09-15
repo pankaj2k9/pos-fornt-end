@@ -12,6 +12,7 @@ import {
   SET_CART_ITEM_QTY,
   SET_CUSTOM_DISCOUNT,
   REMOVE_CART_ITEM,
+  REMOVE_VOUCHER,
   PANEL_CART_RESET,
   RECALL_CART_ITEMS
 } from '../actions/panelCart'
@@ -173,6 +174,10 @@ function panelCart (state = {
         items: state.items,
         totalPrice: state.totalPrice,
         shouldUpdate: false
+      })
+    case REMOVE_VOUCHER:
+      return Object.assign({}, state, {
+        voucher: null
       })
     case PANEL_CART_RESET:
       return Object.assign({}, state, {

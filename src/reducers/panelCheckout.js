@@ -1,13 +1,17 @@
 import {
   SET_PAYMENT_MODE,
+  SET_DISCOUNT,
   SET_CASH_TENDERED,
   SET_TRANS_NUMBER,
   SET_CARD_TYPE,
   SET_CARD_PROVIDER,
   SET_PIN_CODE,
   SET_ORDER_NOTE,
+  REMOVE_NOTE,
+  PANEL_CHECKOUT_SHOULD_UPDATE,
   PANEL_CHECKOUT_RESET,
   CHECKOUT_FIELDS_RESET,
+  TOGGLE_BONUS_POINTS,
 
   VERIFY_VOUCHER_REQUEST,
   VERIFY_VOUCHER_SUCCESS,
@@ -21,21 +25,24 @@ function checkout (state = {
     type: 'credit',
     provider: 'master'
   },
-  voucher: {
-    verifying: false,
-    retry: false,
-    discount: null,
-    code: null
-  },
-  customDiscount: null,
+  bonusPoints: false,
+  customDiscount: undefined,
   transNumber: '',
   pincode: '',
-  orderNote: []
+  orderNote: [],
+  shouldUpdate: false,
+  error: null
 }, action) {
   switch (action.type) {
     case SET_PAYMENT_MODE:
       return Object.assign({}, state, {
         paymentMode: action.mode
+      })
+    case SET_DISCOUNT:
+      state.shouldUpdate = true
+      return Object.assign({}, state, {
+        customDiscount: action.discountValue,
+        shouldUpdate: false
       })
     case SET_CASH_TENDERED:
       const cash = (action.cash === '') ? 0 : action.cash
@@ -68,11 +75,28 @@ function checkout (state = {
       return Object.assign({}, state, {
         orderNote: action.note
       })
+    case REMOVE_NOTE:
+      state.orderNote.forEach(function (item, index, object) {
+        if (item.message === action.message) {
+          object.splice(index, 1)
+          state.shouldUpdate = true
+        }
+      })
+      return Object.assign({}, state, {
+        orderNote: state.orderNote,
+        shouldUpdate: false
+      })
+    case PANEL_CHECKOUT_SHOULD_UPDATE:
+      return Object.assign({}, state, {
+        orderNote: state.orderNote,
+        shouldUpdate: true
+      })
     case PANEL_CHECKOUT_RESET:
       return Object.assign({}, state, {
         isProcessing: false,
         paymentMode: 'cash',
         cashTendered: 0,
+        customDiscount: undefined,
         transNumber: '',
         pincode: '',
         orderNote: ''
@@ -85,31 +109,21 @@ function checkout (state = {
         pincode: '',
         card: {}
       })
+    case TOGGLE_BONUS_POINTS:
+      return Object.assign({}, state, {
+        bonusPoints: action.value
+      })
     case VERIFY_VOUCHER_REQUEST:
       return Object.assign({}, state, {
-        voucher: {
-          verifying: true,
-          retry: false,
-          discount: null
-        }
+        error: null
       })
     case VERIFY_VOUCHER_SUCCESS:
       return Object.assign({}, state, {
-        voucher: {
-          verifying: false,
-          retry: false,
-          discount: action.discount,
-          code: action.vc
-        }
+        error: null
       })
     case VERIFY_VOUCHER_FAILURE:
       return Object.assign({}, state, {
-        voucher: {
-          verifying: false,
-          retry: true,
-          discount: null,
-          code: null
-        }
+        error: action.error
       })
     default:
       return state

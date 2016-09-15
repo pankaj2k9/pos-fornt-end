@@ -10,11 +10,16 @@ import {
   setActiveModal
 } from '../actions/application'
 
-import {
-  setSettingsActiveTab
-} from '../actions/settings'
+import { setSettingsActiveTab } from '../actions/settings'
+
+import { fetchCustomers } from '../actions/customers'
 
 class Settings extends Component {
+
+  componentWillMount () {
+    const { dispatch } = this.props
+    dispatch(fetchCustomers())
+  }
 
   onClickTab (tabName) {
     const {dispatch} = this.props

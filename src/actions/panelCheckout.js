@@ -6,8 +6,11 @@ export const SET_ORDER_NOTE = 'SET_ORDER_NOTE'
 export const SET_PIN_CODE = 'SET_PIN_CODE'
 export const SET_CARD_TYPE = 'SET_CARD_TYPE'
 export const SET_CARD_PROVIDER = 'SET_CARD_PROVIDER'
+export const REMOVE_NOTE = 'REMOVE_NOTE'
+export const PANEL_CHECKOUT_SHOULD_UPDATE = ' PANEL_CHECKOUT_SHOULD_UPDATE'
 export const PANEL_CHECKOUT_RESET = 'PANEL_CHECKOUT_RESET'
 export const CHECKOUT_FIELDS_RESET = 'CHECKOUT_FIELDS_RESET'
+export const TOGGLE_BONUS_POINTS = 'TOGGLE_BONUS_POINTS'
 
 export const VERIFY_VOUCHER_REQUEST = 'VERIFY_VOUCHER_REQUEST'
 export const VERIFY_VOUCHER_SUCCESS = 'VERIFY_VOUCHER_SUCCESS'
@@ -21,6 +24,13 @@ export function setPaymentMode (mode) {
   return {
     type: SET_PAYMENT_MODE,
     mode
+  }
+}
+
+export function removeNote (message) {
+  return {
+    type: REMOVE_NOTE,
+    message
   }
 }
 
@@ -73,6 +83,12 @@ export function setPinCode (pincode) {
   }
 }
 
+export function panelCheckoutShouldUpdate () {
+  return {
+    type: PANEL_CHECKOUT_SHOULD_UPDATE
+  }
+}
+
 export function panelCheckoutReset () {
   return {
     type: PANEL_CHECKOUT_RESET
@@ -82,6 +98,13 @@ export function panelCheckoutReset () {
 export function checkoutFieldsReset () {
   return {
     type: CHECKOUT_FIELDS_RESET
+  }
+}
+
+export function toggleBonusPoints (value) {
+  return {
+    type: TOGGLE_BONUS_POINTS,
+    value
   }
 }
 
@@ -97,9 +120,10 @@ export function verifyVoucherSuccess () {
   }
 }
 
-export function verifyVoucherFailure () {
+export function verifyVoucherFailure (error) {
   return {
-    type: VERIFY_VOUCHER_FAILURE
+    type: VERIFY_VOUCHER_FAILURE,
+    error
   }
 }
 
@@ -109,8 +133,16 @@ export function verifyVoucherCode (query) {
     return voucherService.fetch(query)
 
     .then(voucher => {
-      dispatch(setVoucherDiscount(voucher.data[0]))
-      dispatch(setActiveModal(''))
+      if (voucher.total === '1') {
+        dispatch(setVoucherDiscount(voucher.data[0]))
+        dispatch(setActiveModal(''))
+      } else {
+        let x = query.query
+        dispatch(verifyVoucherFailure(`no voucher found with ${x.code}`))
+      }
+    })
+    .catch(error => {
+      dispatch(verifyVoucherFailure(error.message))
     })
   }
 }

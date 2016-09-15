@@ -61,6 +61,14 @@ export function storeSetId (storeId) {
   }
 }
 
+export const STORE_SET_ACTIVE = 'STORE_SET_ACTIVE'
+export function storeSetActive (store) {
+  return {
+    type: STORE_SET_ACTIVE,
+    store
+  }
+}
+
 export const SET_STAFF_LOGGED_IN = 'SET_STAFF_LOGGED_IN'
 
 export function setStaffLoggedIn (userData) {

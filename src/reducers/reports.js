@@ -7,7 +7,8 @@ import {
   STOREORDERS_SET_PAGE,
   STOREORDERS_FETCH_REQUEST,
   STOREORDERS_FETCH_SUCCESS,
-  STOREORDERS_FETCH_FAILURE
+  STOREORDERS_FETCH_FAILURE,
+  REPORTS_STATE_RESET
 } from '../actions/reports'
 
 function salesReport (state, action) {
@@ -113,6 +114,29 @@ function report (state = {
     case STOREORDERS_FETCH_FAILURE:
       return Object.assign({}, state, {
         storeOrders: storeOrders(state.storeOrders, action)
+      })
+    case REPORTS_STATE_RESET:
+      return Object.assign({}, state, {
+        storeOrders: {
+          isLoading: false,
+          orderItems: [],
+          byId: {},
+          orderFromGet: null,
+          error: false,
+          orderSearchKey: '',
+          activeOrderId: null,
+          activeModal: null,
+          page: 1,
+          limit: 10,
+          skip: 0,
+          total: 0
+        },
+        salesReport: {
+          isLoading: false,
+          productSales: [],
+          from: new Date(),
+          to: new Date()
+        }
       })
     default:
       return state

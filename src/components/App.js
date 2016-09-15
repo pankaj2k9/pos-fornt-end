@@ -11,6 +11,7 @@ import {
 } from '../actions/application'
 
 import { logout } from '../actions/login'
+import { onLogout } from '../actions/helpers'
 import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
@@ -22,6 +23,7 @@ class App extends React.Component {
   handleLogout () {
     const { dispatch } = this.props
     dispatch(logout(browserHistory))
+    dispatch(onLogout())
   }
 
   handleLogoutCashier () {
@@ -54,7 +56,7 @@ class App extends React.Component {
           isLoggingOut={isLoggingOut}
           openChooseUser={this.openChooseUserModal.bind(this)} />
         <section className='section' style={{padding: 10}}>
-          <div className='container'>
+          <div style={{paddingLeft: 15, paddingRight: 15}}>
             {this.props.children}
           </div>
         </section>

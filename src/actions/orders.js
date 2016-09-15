@@ -46,14 +46,27 @@ export function orderStateReset () {
   }
 }
 
-export function processOrder (orderInfo, receipt) {
+export function processOrder (orderInfo, receipt, staff) {
   return (dispatch) => {
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(orderSuccess())
-      dispatch(temporaryReceiptData(receipt))
-      print(receipt)
+      const newReceipt = {
+        items: receipt.items,
+        info: {
+          date: new Date(),
+          staff,
+          orderId: order.id
+        },
+        trans: receipt.trans,
+        headerText: receipt.headerText,
+        footerText: receipt.footerText
+      }
+      dispatch(temporaryReceiptData(newReceipt))
+      if (order.id) {
+        print(newReceipt)
+      }
       /**
        * reprintingReceipt sets reprinting state
        * when reprinting state is set to true value, it diplays a loading text

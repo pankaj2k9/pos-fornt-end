@@ -34,19 +34,19 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += `<div style="${RECEIPT_STYLE}">`
   // build header
   receiptHtmlString += buildHeader(receipt.headerText)
-  receiptHtmlString += RECEIPT_DIVIDER
+  receiptHtmlString += receipt.headerText ? RECEIPT_DIVIDER : ''
 
   // build extra info
   receiptHtmlString += buildExtraInfo(receipt.info)
-  receiptHtmlString += RECEIPT_DIVIDER
+  receiptHtmlString += receipt.info ? RECEIPT_DIVIDER : ''
 
   // build item list
   receiptHtmlString += buildItemList(receipt.items)
-  receiptHtmlString += RECEIPT_DIVIDER
+  receiptHtmlString += receipt.items ? RECEIPT_DIVIDER : ''
 
   // build price computation
   receiptHtmlString += buildComputation(receipt.trans)
-  receiptHtmlString += RECEIPT_DIVIDER
+  receiptHtmlString += receipt.trans ? RECEIPT_DIVIDER : ''
 
   // build footer
   receiptHtmlString += buildFooter(receipt.footerText)
@@ -60,18 +60,19 @@ export const buildReceipt = (receipt) => {
  */
 const buildItemList = (items) => {
   let itemList = ''
-  items.forEach((item, index) => {
-    if (index > 0) {
-      receiptHtmlString += '\n'
-    }
+  if (items) {
+    items.forEach((item, index) => {
+      if (index > 0) {
+        receiptHtmlString += '\n'
+      }
 
-    itemList += `<div style="${ITEM_LIST_STYLE}">`
-    itemList += stringifyItemQty(item.qty)
-    itemList += stringifyItemName(item.name)
-    itemList += stringifyItemSubtotal(item.subtotal)
-    itemList += '</div>'
-  })
-
+      itemList += `<div style="${ITEM_LIST_STYLE}">`
+      itemList += stringifyItemQty(item.qty)
+      itemList += stringifyItemName(item.name)
+      itemList += stringifyItemSubtotal(item.subtotal)
+      itemList += '</div>'
+    })
+  }
   return itemList
 }
 
@@ -108,16 +109,17 @@ const stringifyItemSubtotal = (subtotal) => {
  */
 export const buildHeader = (headerText) => {
   let header = ''
-
-  header += `<div style="${HEADER_STYLE}">`
-  if (typeof headerText === 'string') {
-    header += `<div>${headerText}</div>`
-  } else if (typeof headerText === 'object') {
-    headerText.forEach(hdr => {
-      header += `<div>${hdr}</div>`
-    })
+  if (headerText) {
+    header += `<div style="${HEADER_STYLE}">`
+    if (typeof headerText === 'string') {
+      header += `<div>${headerText}</div>`
+    } else if (typeof headerText === 'object') {
+      headerText.forEach(hdr => {
+        header += `<div>${hdr}</div>`
+      })
+    }
+    header += '</div>'
   }
-  header += '</div>'
   return header
 }
 
@@ -146,10 +148,13 @@ export const buildFooter = (footerText) => {
  */
 export const buildExtraInfo = (info) => {
   let extra = ''
-
+  let orderId = info.orderId
+    ? extra += `<div>Order ID : ${info.orderId}</div>`
+    : null
   extra += '<div>'
   extra += `<div>STAFF : ${info.staff}<div>`
   extra += `<div>${formatDate(info.date)}</div>`
+  orderId
   extra += '</div>'
 
   return extra
@@ -161,42 +166,68 @@ export const buildExtraInfo = (info) => {
  */
 export const buildComputation = (trans) => {
   let comp = ''
+  if (trans) {
+    let total = `<div>${formatCurrency(trans.total)}</div>`
+    let voucherDiscount = trans.voucherDiscount
+      ? `<div>${formatCurrency(trans.voucherDiscount)}</div>`
+      : `<div>${'no voucher'}</div>`
+    let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
+    let customer = trans.customer ? trans.customer : trans.walkIn
+    let minLabel
+    let minuend
+    let card
+    let cardType
+    let diffLabel
+    let difference
+    let showDiff = true
 
-  let total = `<div>${formatCurrency(trans.total)}</div>`
-  let minLabel
-  let minuend
-  let diffLabel
-  let difference
-  let showDiff = true
+    switch (trans.type) {
+      case 'cash':
+        minLabel = 'CASH'
+        minuend = `<div>${formatCurrency(trans.cash)}</div>`
+        diffLabel = 'CHANGE'
+        difference = `<div>${formatCurrency(trans.change)}</div>`
+        break
+      case 'odbo':
+        total = `<div>${trans.total}</div>`
+        minLabel = 'THE ODBO COINS'
+        minuend = `<div>${trans.odboCoins}</div>`
+        diffLabel = 'BALANCE'
+        difference = `<div>${trans.odboBalance}</div>`
+        break
+      case 'credit':
+        minLabel = 'Trans #'
+        minuend = `<div>${trans.transNo}</div>`
+        card = 'Card Type'
+        cardType = `<div>${trans.cardType} <br /> ${trans.provider}</div>`
+        showDiff = false
+    }
 
-  switch (trans.type) {
-    case 'cash':
-      minLabel = 'CASH'
-      minuend = `<div>${formatCurrency(trans.cash)}</div>`
-      diffLabel = 'CHANGE'
-      difference = `<div>${formatCurrency(trans.change)}</div>`
-      break
-    case 'odbo':
-      total = `<div>${trans.total}</div>`
-      minLabel = 'THE ODBO COINS'
-      minuend = `<div>${trans.odboCoins}</div>`
-      diffLabel = 'BALANCE'
-      difference = `<div>${trans.odboBalance}</div>`
-      break
-    case 'credit':
-      minLabel = 'CREDIT'
-      minuend = `<div>${trans.transNo}</div>`
-      showDiff = false
+    comp += '<div>'
+    if (trans.type === 'cash') {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
+      if (trans.customer) {
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COIN BALANCE</div></div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${trans.newOdbo}<br/></div>`
+      }
+      comp += RECEIPT_DIVIDER
+    }
+    comp += trans.type === 'cash'
+      ? `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div> -${voucherDiscount}</div>`
+      : ''
+    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL : </div>${total}</div>`
+    comp += trans.type === 'credit'
+      ? `<div style="${TOTAL_DIV_STYLE_2}"><div>${card} : </div>${cardType}</div>`
+      : ''
+    comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>${minLabel} : </div>${minuend}</div>`
+    if (showDiff) {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}">
+        <div>${diffLabel} : </div>${difference}</div>`
+    }
+    comp += '</div>'
   }
-
-  comp += '<div>'
-  comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL : </div>${total}</div>`
-  comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>${minLabel} : </div>${minuend}</div>`
-  if (showDiff) {
-    comp += `<div style="${TOTAL_DIV_STYLE_1}">
-      <div>${diffLabel} : </div>${difference}</div>`
-  }
-  comp += '</div>'
 
   return comp
 }
@@ -223,4 +254,3 @@ export const printReceiptFromString = () => {
   printWindow.focus()
   printWindow.close()
 }
-
