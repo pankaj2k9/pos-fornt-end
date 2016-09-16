@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router'
 import { FormattedMessage } from 'react-intl'
 import LanguageToggle from './LanguageToggle'
+import Truncate from '../components/Truncate'
 
 const NavLink = (props) => {
   return <Link {...props} className='nav-item' activeClassName='is-active' style={{fontSize: 16}} />
@@ -21,6 +22,16 @@ const NavBar = ({
   openChooseUser
 }) => {
   const toggleClass = isHamburgerOpen ? 'is-active' : null
+  let staffName = !activeCashier
+    ? null
+    : `${activeCashier.firstName} ${activeCashier.lastName}`
+
+  const userIconStyle = {
+    textAlign: 'center', borderWidth: 3, borderColor: 'white',
+    borderStyle: 'solid', borderRadius: 50, padding: 5, width: 45
+  }
+
+  const userNameStyle = {fontSize: 24, lineHeight: 0.7, textAlign: 'left'}
 
   return (
     <div className='hero is-black'>
@@ -31,31 +42,40 @@ const NavBar = ({
             <div className='nav-item' style={{padding: 5}}>
               <span style={{margin: 5}}>
                 <i className='fa fa-user fa-2x'
-                  style={{textAlign: 'center', borderWidth: 3,
-                          borderColor: 'white', borderStyle: 'solid',
-                          borderRadius: 50, padding: 5, width: 45}} />
+                  style={userIconStyle} />
               </span>
-              <div>
-                {adminToken === null
-                  ? <a className={`button is-light is-outlined ${isLoggingOut
-                    ? 'is-loading' : null}`} onClick={openChooseUser}>
-                    <span><FormattedMessage id='app.button.logCashier' /></span>
-                    <span className='icon'>
-                      <i className='fa fa-user' />
-                    </span>
-                  </a>
-                  : activeCashier === null
-                    ? null
-                    : <p style={{fontSize: 24, lineHeight: 0.7, textAlign: 'left'}}>
-                      {`${activeCashier.firstName} ${activeCashier.lastName}`}<br />
-                      <em style={{fontSize: 14}}>
-                        <a onClick={openChooseUser}>
-                          <FormattedMessage id='app.button.changeCashier' />
-                        </a>
-                      </em>
-                    </p>
-                }
-              </div>
+              {staff.role === 'master'
+                ? <div>
+                  {adminToken === null
+                    ? <a className={`button is-light is-outlined ${isLoggingOut
+                      ? 'is-loading' : null}`} onClick={openChooseUser}>
+                      <span><FormattedMessage id='app.button.logCashier' /></span>
+                      <span className='icon'>
+                        <i className='fa fa-user' />
+                      </span>
+                    </a>
+                    : activeCashier === null
+                      ? null
+                      : <p style={userNameStyle}>
+                        <Truncate text={staffName} maxLength={12} />
+                        <br />
+                        <em style={{fontSize: 14}}>
+                          <a onClick={openChooseUser}>
+                            <FormattedMessage id='app.button.changeCashier' />
+                          </a>
+                        </em>
+                      </p>
+                  }
+                </div>
+                : !staff
+                  ? null
+                  : <p style={userNameStyle}>
+                    {`${staff.firstName} ${staff.lastName}`}<br />
+                    <em style={{fontSize: 14}}>
+                      <FormattedMessage id='app.general.loggedStaff' />
+                    </em>
+                  </p>
+              }
             </div>
             <span className='nav-item' style={{ paddingRight: 10 }}>
               <a className={`button is-light is-outlined ${isLoggingOut
@@ -87,9 +107,12 @@ const NavBar = ({
           </span>
 
           <div className={`nav-right nav-menu ${toggleClass}`}>
-            <NavLink to='/store'>
-              <FormattedMessage id='app.navBar.store.title' />
-            </NavLink>
+            {staff.role === 'master'
+              ? <NavLink to='/store'>
+                <FormattedMessage id='app.navBar.store.title' />
+              </NavLink>
+              : null
+            }
             <NavLink to='/settings'>
               <FormattedMessage id='app.navBar.settings.title' />
             </NavLink>

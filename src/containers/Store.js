@@ -146,16 +146,29 @@ class Store extends Component {
   }
 
   renderDisabledStore () {
+    const { staff } = this.props
     return (
       <div className='hero is-large'>
         <div className='hero-body'>
           <div className='container has-text-centered'>
-            <h1 className='title'>
-              <FormattedMessage id='app.general.noCashier' />
-            </h1>
-            <h2 className='subtitle'>
-              <FormattedMessage id='app.general.loginFirst' />
-            </h2>
+            {staff.role === 'master'
+              ? <div>
+                <h1 className='title'>
+                  <FormattedMessage id='app.general.noCashier' />
+                </h1>
+                <h2 className='subtitle'>
+                  <FormattedMessage id='app.general.loginFirst' />
+                </h2>
+              </div>
+              : <div>
+                <h1 className='title'>
+                  <FormattedMessage id='app.general.forbidden' />
+                </h1>
+                <h2 className='subtitle'>
+                  <FormattedMessage id='app.general.onlyMaster' />
+                </h2>
+              </div>
+            }
           </div>
         </div>
       </div>

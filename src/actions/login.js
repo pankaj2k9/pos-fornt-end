@@ -42,7 +42,11 @@ export function login (details, browserHistory) {
       .then(response => {
         dispatch(loginSuccess(response))
         dispatch(setStaffLoggedIn(response))
-        browserHistory.push('store')
+        if (response.data.role === 'master') {
+          browserHistory.push('store')
+        } else {
+          browserHistory.push('settings')
+        }
       })
       .catch(error => {
         if (error) {
