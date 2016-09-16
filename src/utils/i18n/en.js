@@ -59,7 +59,7 @@ const en = {
   'app.general.enabled': ' Enabled',
   'app.general.disabled': ' Disabled',
   'app.general.updateOdbo': 'Update Odbo Balance',
-  'app.general.forbiden': 'Forbiden!',
+  'app.general.forbidden': 'Forbidden!',
   'app.general.onlyMaster': 'Only a "Master Account" could navigate through this page',
 
   'app.panel.products': 'Products',

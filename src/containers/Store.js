@@ -162,7 +162,7 @@ class Store extends Component {
               </div>
               : <div>
                 <h1 className='title'>
-                  <FormattedMessage id='app.general.forbiden' />
+                  <FormattedMessage id='app.general.forbidden' />
                 </h1>
                 <h2 className='subtitle'>
                   <FormattedMessage id='app.general.onlyMaster' />

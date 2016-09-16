@@ -25,6 +25,14 @@ const NavBar = ({
   let staffName = !activeCashier
     ? null
     : `${activeCashier.firstName} ${activeCashier.lastName}`
+
+  const userIconStyle = {
+    textAlign: 'center', borderWidth: 3, borderColor: 'white',
+    borderStyle: 'solid', borderRadius: 50, padding: 5, width: 45
+  }
+
+  const userNameStyle = {fontSize: 24, lineHeight: 0.7, textAlign: 'left'}
+
   return (
     <div className='hero is-black'>
       <div className='hero-head'>
@@ -34,9 +42,7 @@ const NavBar = ({
             <div className='nav-item' style={{padding: 5}}>
               <span style={{margin: 5}}>
                 <i className='fa fa-user fa-2x'
-                  style={{textAlign: 'center', borderWidth: 3,
-                          borderColor: 'white', borderStyle: 'solid',
-                          borderRadius: 50, padding: 5, width: 45}} />
+                  style={userIconStyle} />
               </span>
               {staff.role === 'master'
                 ? <div>
@@ -50,7 +56,7 @@ const NavBar = ({
                     </a>
                     : activeCashier === null
                       ? null
-                      : <p style={{fontSize: 24, lineHeight: 0.7, textAlign: 'left'}}>
+                      : <p style={userNameStyle}>
                         <Truncate text={staffName} maxLength={12} />
                         <br />
                         <em style={{fontSize: 14}}>
@@ -63,7 +69,7 @@ const NavBar = ({
                 </div>
                 : !staff
                   ? null
-                  : <p style={{fontSize: 24, lineHeight: 0.7, textAlign: 'left'}}>
+                  : <p style={userNameStyle}>
                     {`${staff.firstName} ${staff.lastName}`}<br />
                     <em style={{fontSize: 14}}>
                       <FormattedMessage id='app.general.loggedStaff' />

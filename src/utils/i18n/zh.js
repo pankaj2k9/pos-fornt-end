@@ -59,7 +59,7 @@ const zh = {
   'app.general.enabled': ' 启用 ',
   'app.general.disabled': ' 禁用 ',
   'app.general.updateOdbo': '更新 Odbo 平衡',
-  'app.general.forbiden': '被禁止!',
+  'app.general.forbidden': '被禁止!',
   'app.general.onlyMaster': '只有主人可以打开这个页面...',
 
   'app.panel.products': '制品',
