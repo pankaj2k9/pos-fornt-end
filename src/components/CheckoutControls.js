@@ -37,7 +37,7 @@ const CheckoutControls = (props) => {
       {
         isProcessing
         ? <div className='container has-text-centered'>
-          <i className='fa fa-spinner fa-pulse fa-5x fa-fw'></i>
+          <i className='fa fa-spinner fa-pulse fa-5x fa-fw' />
           <h1>Processing Orders...</h1>
         </div>
         : <div>

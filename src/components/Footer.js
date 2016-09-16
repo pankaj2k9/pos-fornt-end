@@ -10,8 +10,7 @@ export default class LanguageToggle extends React.Component {
               <img src='../assets/logo-horizontal/png' />
             </a>
           </div>
-          <div className='level-right'>
-          </div>
+          <div className='level-right' />
         </nav>
       </div>
     )

@@ -83,7 +83,7 @@ class LoginForm extends Component {
                         placeholder='Username'
                         onChange={this.handleUserChange.bind(this)}
                         />
-                      <i className='fa fa-user'></i>
+                      <i className='fa fa-user' />
                     </p>
                     <p className='control has-icon'>
                       <input className='input'
@@ -91,11 +91,11 @@ class LoginForm extends Component {
                         placeholder='Password'
                         onChange={this.handlePasswordChange.bind(this)}
                         />
-                      <i className='fa fa-lock'></i>
+                      <i className='fa fa-lock' />
                     </p>
                     <div className='control'>
                       {isLoggingIn || isFetchingStoreIds
-                        ? <p className='has-text-centered'><i className='fa fa-spinner fa-pulse fa-2x fa-fw'></i></p>
+                        ? <p className='has-text-centered'><i className='fa fa-spinner fa-pulse fa-2x fa-fw' /></p>
                         : <button className='button is-success is-fullwidth' type='submit'>
                           <FormattedMessage id='app.button.login' />
                         </button>

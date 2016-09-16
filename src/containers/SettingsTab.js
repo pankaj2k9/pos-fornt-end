@@ -270,7 +270,7 @@ class SettingsTab extends Component {
                 size='is-medium'
                 value={customerSearchKey}
                 placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search'></i>}
+                confirmButton={<i className='fa fa-search' />}
                 onChange={this.setCustomerFilter.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
@@ -286,7 +286,7 @@ class SettingsTab extends Component {
                 value={customerSearchKey}
                 placeholder={'app.ph.keyword'}
                 onChange={this.setCustomerSearchKey.bind(this)}
-                confirmButton={<i className='fa fa-search'></i>}
+                confirmButton={<i className='fa fa-search' />}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
                 confirmEvent={this.onSubmit.bind(this)}
@@ -300,7 +300,7 @@ class SettingsTab extends Component {
                 size='is-medium'
                 value={customerSearchKey}
                 placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search'></i>}
+                confirmButton={<i className='fa fa-search' />}
                 onChange={this.setCustomerSearchKey.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
@@ -435,7 +435,7 @@ class SettingsTab extends Component {
                       </div>
                       : <div className='column is-fullwidth'>
                         <p className='has-text-centered'>
-                          <i className='fa fa-spinner fa-pulse fa-fw'></i>
+                          <i className='fa fa-spinner fa-pulse fa-fw' />
                         </p>
                       </div>
                     }
@@ -471,9 +471,7 @@ class SettingsTab extends Component {
         details={orderDetails}
         orderSearchKey={orderSearchKey}
         modalStatus={{refund: refundSuccess}}
-        search={{ id: 'searchOrder', value: orderSearchKey,
-                  placeholder: 'Search Order Id',
-                  onChange: storeOrdersSetSearchKey }}
+        search={{ id: 'searchOrder', value: orderSearchKey, placeholder: 'Search Order Id', onChange: storeOrdersSetSearchKey }}
         closeButton={{name: 'Close', event: closeAndResetUtilitytModal}} />
     )
   }
@@ -495,7 +493,7 @@ class SettingsTab extends Component {
     const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
     return (
       <div id='verifyStorePin' className={`modal ${active}`}>
-        <div className='modal-background'></div>
+        <div className='modal-background' />
         <div className='modal-card'>
           <header className='modal-card-head'>
             <div className='modal-card-title is-marginless has-text-centered'>
@@ -526,7 +524,7 @@ class SettingsTab extends Component {
                     </a>
                     : <a className='button is-large is-fullwidth is-success is-disabled'>
                       <p className='has-text-centered'>
-                        <i className='fa fa-spinner fa-pulse fa-fw'></i>
+                        <i className='fa fa-spinner fa-pulse fa-fw' />
                       </p>
                     </a>
                   }

@@ -44,7 +44,7 @@ const BoxItem = (props) => {
                 <a className='button'
                   onClick={button.onClick}>
                   <span className='icon'>
-                    <i className='fa fa-eye'></i>
+                    <i className='fa fa-eye' />
                   </span>
                   <span><FormattedMessage id={button.name} /></span>
                 </a>

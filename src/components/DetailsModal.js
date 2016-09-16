@@ -24,13 +24,13 @@ const DetailsModal = (props) => {
 
   return (
     <div className={`modal ${active}`}>
-      <div className='modal-background'></div>
+      <div className='modal-background' />
       <div className='modal-card'>
         <header className='modal-card-head'>
           <p className='modal-card-title'>
             <FormattedMessage id={title} />
           </p>
-          <button className='delete' onClick={close}></button>
+          <button className='delete' onClick={close} />
         </header>
         <section className='modal-card-body'>
           {!hideDetails

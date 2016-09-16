@@ -87,8 +87,11 @@ class PanelCart extends Component {
       totalPrice, totalOdboPrice
     } = this.props
     let orderData = {
-      activeCustomer, walkinCustomer, cartItemsArray,
-      totalPrice, totalOdboPrice
+      activeCustomer,
+      walkinCustomer,
+      cartItemsArray,
+      totalPrice,
+      totalOdboPrice
     }
     dispatch(holdOrderAndReset(orderData))
   }
@@ -220,8 +223,10 @@ class PanelCart extends Component {
         title='Orders On Hold'
         active={activeModalId}
         items={filteredOrders}
-        search={{id: 'searchEvent', value: ordersSearchKey,
-          placeholder: 'app.ph.searchCust2', onChange: setOrderSearchKey}}
+        search={{id: 'searchEvent',
+          value: ordersSearchKey,
+          placeholder: 'app.ph.searchCust2',
+          onChange: setOrderSearchKey}}
         closeButton={{name: <FormattedMessage id='app.button.cancel' />,
           event: closeAndResetRecallModal}}
         listButton={{name: <FormattedMessage id='app.button.recallOrder' />,
@@ -248,13 +253,16 @@ class PanelCart extends Component {
     const buttonOne = empty
       ? undefined
       : {
-        name: 'app.button.holdOrder', class: '', type: 'button',
+        name: 'app.button.holdOrder',
+        class: '',
+        type: 'button',
         onClick: this.onClickHoldOrder.bind(this)
       }
     const buttonTwo = emptyOrdersOnHold
     ? undefined
     : {
-      name: 'app.button.recallOrder', class: 'is-dark',
+      name: 'app.button.recallOrder',
+      class: 'is-dark',
       onClick: this.recallModal.bind(this)
     }
     return (
@@ -275,8 +283,8 @@ class PanelCart extends Component {
                   ? 'app.ph.searchCust' : 'app.ph.searchCustErr'
                 : 'app.ph.placeCustName'
               }
-              confirmButton={<i className='fa fa-plus'></i>}
-              cancelButton={<i className='fa fa-times'></i>}
+              confirmButton={<i className='fa fa-plus' />}
+              cancelButton={<i className='fa fa-times' />}
               confirmEvent={this.buttonConfirm.bind(this)}
               cancelEvent={this.buttonCancel.bind(this)}
               onChange={this.keyInput.bind(this)}
@@ -345,7 +353,7 @@ class PanelCart extends Component {
                     : null
                   }
                   <th><FormattedMessage id='app.general.subtotal' /></th>
-                  <th></th>
+                  <th />
                 </tr>
               </thead>
               <tbody>

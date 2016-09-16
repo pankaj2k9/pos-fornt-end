@@ -83,7 +83,7 @@ class PanelCheckout extends Component {
           // else value is zero
           : sumOfDiscounts
         /* if custom discount then is creater than zero then computed the custom
-         discount together with the price of the product*/
+         discount together with the price of the product */
         : currency === 'sgd'
           ? (x[i].qty * (Number(x[i].customDiscount) / 100) * x[i].price) + sumOfDiscounts
           : (x[i].qty * (Number(x[i].customDiscount) / 100) * x[i].odboPrice) + sumOfDiscounts
@@ -189,7 +189,7 @@ class PanelCheckout extends Component {
     const active = activeModalId === 'voucherModal' ? 'is-active' : ''
     return (
       <div id='voucherModal' className={`modal ${active}`}>
-        <div className='modal-background'></div>
+        <div className='modal-background' />
         <div className='modal-card'>
           <header className='modal-card-head'>
             <p className='modal-card-title is-marginless has-text-centered'>
@@ -229,7 +229,7 @@ class PanelCheckout extends Component {
     const active = activeModalId === 'notesModal' ? 'is-active' : ''
     return (
       <div id='notesModal' className={`modal ${active}`}>
-        <div className='modal-background'></div>
+        <div className='modal-background' />
         <div className='modal-content'>
           <div className='box'>
             <div className='content'>
@@ -247,7 +247,7 @@ class PanelCheckout extends Component {
                           {`${item.message} `}
                           <span className='tag is-danger' style={{marginLeft: 10}}>
                             <FormattedMessage id='app.button.removeNote' />
-                            <button className='delete' onClick={remove}></button>
+                            <button className='delete' onClick={remove} />
                           </span>
                         </li>
                       )
@@ -301,11 +301,8 @@ class PanelCheckout extends Component {
           ? null
           : <Panel
             panelName={<FormattedMessage id='app.panel.checkout' />}
-            buttonOne={!empty ? {name: 'app.button.addVoucher', class: 'is-info',
-                        onClick: this.onClickAddVoucher.bind(this),
-                        icon: 'fa fa-money'} : null}
-            buttonTwo={!empty ? {name: 'app.button.cancelOrder', class: 'is-danger',
-                        onClick: this.onClickCancelOrder.bind(this)} : null}>
+            buttonOne={!empty ? {name: 'app.button.addVoucher', class: 'is-info', onClick: this.onClickAddVoucher.bind(this), icon: 'fa fa-money'} : null}
+            buttonTwo={!empty ? {name: 'app.button.cancelOrder', class: 'is-danger', onClick: this.onClickCancelOrder.bind(this)} : null}>
             <div className='panel-block control is-grouped'>
               {/*
                   @operator: !orderNoteCount
@@ -326,7 +323,7 @@ class PanelCheckout extends Component {
               <p className='control has-icon is-expanded'>
                 <input id='noteInput' className='input'
                   placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
-                <i className='fa fa-plus'></i>
+                <i className='fa fa-plus' />
               </p>
               <p className='control'>
                 <a className='button' onClick={this.onClickAddNote.bind(this)}>

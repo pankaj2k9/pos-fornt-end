@@ -66,7 +66,7 @@ class Store extends Component {
     const active = activeModalId === 'verifyStaff' ? 'is-active' : ''
     return (
       <div id='verifyStaff' className={`modal ${active}`}>
-        <div className='modal-background'></div>
+        <div className='modal-background' />
         <div className='modal-content'>
           <div className='box'>
             {shouldUpdate
@@ -78,7 +78,7 @@ class Store extends Component {
                   <FormattedMessage id='app.general.verifyingStaff' />
                 </h1>
                 <p className='has-text-centered'>
-                  <i className='fa fa-spinner fa-pulse fa-2x fa-fw'></i>
+                  <i className='fa fa-spinner fa-pulse fa-2x fa-fw' />
                 </p>
                 <div />
               </div>
