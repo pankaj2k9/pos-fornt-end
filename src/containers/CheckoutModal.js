@@ -134,15 +134,31 @@ class CheckoutModal extends Component {
 
     let receiptTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
-        ? { type: 'cash', total: total, cash: cashTendered,
-            walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
-            customer: customer, previousOdbo: prevOdbo,
-            points: earnedPoints, newOdbo: earnedPlusPrevious,
-            change: data.change, voucherDiscount: voucherAmount }
-        : { type: 'credit', total: total, transNo: transNumber,
-            cardType: card.type, provider: card.provider}
-      : { type: 'odbo', total: total,
-          odboCoins: data.odboCoins, odboBalance: data.odboBalance }
+      ? {
+        type: 'cash',
+        total: total,
+        cash: cashTendered,
+        walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+        customer: customer,
+        previousOdbo: prevOdbo,
+        points: earnedPoints,
+        newOdbo: earnedPlusPrevious,
+        change: data.change,
+        voucherDiscount: voucherAmount
+      }
+      : {
+        type: 'credit',
+        total: total,
+        transNo: transNumber,
+        cardType: card.type,
+        provider: card.provider
+      }
+      : {
+        type: 'odbo',
+        total: total,
+        odboCoins: data.odboCoins,
+        odboBalance: data.odboBalance
+      }
 
     let remarks = orderNote.length === 0
       ? [{type: 'others', message: 'no notes'}]
@@ -163,13 +179,30 @@ class CheckoutModal extends Component {
       ? 0
       : cashTendered
 
-    let posTrans = (currency === 'sgd')
-      ? (paymentMode === 'cash')
-        ? { type: 'cash', payment: Number(payment), bonusPoints: bonus }
-        : { type: 'credit', transNumber: transNumber,
-            cardType: card.type, provider: card.provider,
-            bonusPoints: bonus }
-      : {type: 'odbo', odboId: activeCustomer.odboId, pinCode: pincode}
+    let posTrans
+    if (currency === 'sgd') {
+      if (paymentMode === 'cash') {
+        posTrans = {
+          type: 'cash',
+          payment: Number(payment),
+          bonusPoints: bonus
+        }
+      } else if (paymentMode === 'credit') {
+        posTrans = {
+          type: 'credit',
+          transNumber,
+          cardType: card.type,
+          provider: card.provider,
+          bonusPoints: bonus
+        }
+      }
+    } else if (currency === 'odbo') {
+      posTrans = {
+        type: 'odbo',
+        odboId: activeCustomer.odboId,
+        pinCode: pincode
+      }
+    }
 
     const orderInfo = {
       products,
@@ -259,7 +292,7 @@ class CheckoutModal extends Component {
 
     return (
       <div id={id} className={'modal ' + (activeModalId === id ? 'is-active' : '')}>
-        <div className='modal-background'></div>
+        <div className='modal-background' />
         <div className='modal-card'>
           <header className='modal-card-head has-text-centered'>
             <p className='modal-card-title'>

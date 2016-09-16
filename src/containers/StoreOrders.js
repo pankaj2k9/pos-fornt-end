@@ -159,7 +159,7 @@ class StoreOrders extends React.Component {
           )}
         </ul>
       </nav>
-		)
+    )
   }
 
   render () {

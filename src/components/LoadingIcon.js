@@ -5,7 +5,7 @@ const LoadingIcon = ({ iconSize }) => {
 
   return (
     <span className={iconClass}>
-      <i className='fa fa-cog fa-spin'></i>
+      <i className='fa fa-cog fa-spin' />
     </span>
   )
 }

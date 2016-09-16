@@ -35,7 +35,7 @@ class AccountChangePw extends Component {
             onChange={onOldPwChange}
             value={oldPw}
           />
-          <i className='fa fa-lock'></i>
+          <i className='fa fa-lock' />
         </p>
 
         <label className='label'>
@@ -50,7 +50,7 @@ class AccountChangePw extends Component {
             onChange={onNewPwChange}
             value={newPw}
           />
-          <i className='fa fa-lock'></i>
+          <i className='fa fa-lock' />
         </p>
 
         <p className='control has-icon'>
@@ -61,7 +61,7 @@ class AccountChangePw extends Component {
             onChange={onConfirmPwChange}
             value={confirmPw}
           />
-          <i className='fa fa-lock'></i>
+          <i className='fa fa-lock' />
         </p>
 
         <div className='control is-grouped'>

@@ -24,19 +24,19 @@ class Table extends React.Component {
               icon = <i
                 onClick={action.onClick.bind(this, row.id)}
                 className='fa fa-eye fa-2'
-                key={`icon-${iconKey}-view`}></i>
+                key={`icon-${iconKey}-view`} />
               break
             case 'edit':
               icon = <i
                 onClick={action.onClick.bind(this, row.id)}
                 className='fa fa-pencil-square-o fa-2'
-                key={`icon-${iconKey}-edit`}></i>
+                key={`icon-${iconKey}-edit`} />
               break
             case 'remove':
               icon = <i
                 onClick={action.onClick.bind(this, row.id)}
                 className='fa fa-trash-o fa-2'
-                key={`icon-${iconKey}-remove`}></i>
+                key={`icon-${iconKey}-remove`} />
               break
           }
           return (

@@ -29,7 +29,7 @@ const intFrameHeight = window.innerHeight
 const intFrameWidth = window.innerWidth
 
 class PanelProducts extends Component {
-  /* Panel Events*/
+  /* Panel Events */
   onClickFilterButton (filter) {
     const {dispatch} = this.props
     document.getElementById('productsSearch').focus()

@@ -27,8 +27,13 @@ const NavBar = ({
     : `${activeCashier.firstName} ${activeCashier.lastName}`
 
   const userIconStyle = {
-    textAlign: 'center', borderWidth: 3, borderColor: 'white',
-    borderStyle: 'solid', borderRadius: 50, padding: 5, width: 45
+    textAlign: 'center',
+    borderWidth: 3,
+    borderColor: 'white',
+    borderStyle: 'solid',
+    borderRadius: 50,
+    padding: 5,
+    width: 45
   }
 
   const userNameStyle = {fontSize: 24, lineHeight: 0.7, textAlign: 'left'}
@@ -101,9 +106,9 @@ const NavBar = ({
           </div>
 
           <span className={`nav-toggle ${toggleClass}`} onClick={onHamburgerToggle}>
-            <span></span>
-            <span></span>
-            <span></span>
+            <span />
+            <span />
+            <span />
           </span>
 
           <div className={`nav-right nav-menu ${toggleClass}`}>

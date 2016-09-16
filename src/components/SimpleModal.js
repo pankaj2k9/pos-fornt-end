@@ -39,12 +39,11 @@ const SimpleModal = ({
 }) => {
   return (
     <div className={modalClass}>
-      <div className='modal-background'></div>
+      <div className='modal-background' />
       <div className='modal-card'>
         <header className='modal-card-head'>
           <p className='modal-card-title'>{modalTitle}</p>
-          <button className={modalBtnCloseClass} onClick={modalCloseBtnOnClick}>
-          </button>
+          <button className={modalBtnCloseClass} onClick={modalCloseBtnOnClick} />
         </header>
         <section className='modal-card-body'>
           {modalBodyComponent}

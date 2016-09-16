@@ -175,8 +175,8 @@ class SearchModal extends Component {
                   value={search.value}
                   placeholder={'app.ph.searchOrder'}
                   onChange={this.orderSearchKeyInput.bind(this)}
-                  confirmButton={<i className='fa fa-check'></i>}
-                  cancelButton={<i className='fa fa-undo'></i>}
+                  confirmButton={<i className='fa fa-check' />}
+                  cancelButton={<i className='fa fa-undo' />}
                   confirmEvent={this.buttonConfirm.bind(this)}
                   cancelEvent={this.buttonCancel.bind(this)}
                   onKeyDown={this.onSubmitKey.bind(this)}
