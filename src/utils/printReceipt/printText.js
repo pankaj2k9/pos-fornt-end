@@ -204,7 +204,7 @@ export const buildComputation = (trans) => {
     }
 
     comp += '<div>'
-    if (trans.type === 'cash') {
+    if (trans.type === 'cash' || trans.type === 'credit') {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
       if (trans.customer) {
         comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COIN BALANCE</div></div>`

@@ -93,6 +93,7 @@ function checkout (state = {
       })
     case PANEL_CHECKOUT_RESET:
       return Object.assign({}, state, {
+        bonusPoints: false,
         isProcessing: false,
         paymentMode: 'cash',
         cashTendered: 0,

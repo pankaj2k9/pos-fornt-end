@@ -121,8 +121,10 @@ class CheckoutModal extends Component {
       : 0
 
     let earnedPlusPrevious = activeCustomer
-      ? Number(earnedPoints).toFixed(0) + Number(activeCustomer.odboCoins)
+      ? Number(earnedPoints) + Number(activeCustomer.odboCoins)
       : 0
+
+    console.log('earnedPlusPrevious: ', earnedPlusPrevious)
 
     let customer = activeCustomer
       ? `${activeCustomer.lastName}, ${activeCustomer.firstName}`
@@ -134,25 +136,30 @@ class CheckoutModal extends Component {
 
     let receiptTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
-      ? {
-        type: 'cash',
-        total: total,
-        cash: cashTendered,
-        walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
-        customer: customer,
-        previousOdbo: prevOdbo,
-        points: earnedPoints,
-        newOdbo: earnedPlusPrevious,
-        change: data.change,
-        voucherDiscount: voucherAmount
-      }
-      : {
-        type: 'credit',
-        total: total,
-        transNo: transNumber,
-        cardType: card.type,
-        provider: card.provider
-      }
+        ? {
+          type: 'cash',
+          total: total,
+          cash: cashTendered,
+          walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+          customer: customer,
+          previousOdbo: prevOdbo,
+          points: earnedPoints,
+          newOdbo: earnedPlusPrevious,
+          change: data.change,
+          voucherDiscount: voucherAmount
+        }
+        : {
+          type: 'credit',
+          total: total,
+          transNo: transNumber,
+          walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+          customer: customer,
+          previousOdbo: prevOdbo,
+          points: earnedPoints,
+          newOdbo: earnedPlusPrevious,
+          cardType: card.type,
+          provider: card.provider
+        }
       : {
         type: 'odbo',
         total: total,
@@ -179,13 +186,16 @@ class CheckoutModal extends Component {
       ? 0
       : cashTendered
 
+    let odboId = !activeCustomer.odboId ? undefined : activeCustomer.odboId
+
     let posTrans
     if (currency === 'sgd') {
       if (paymentMode === 'cash') {
         posTrans = {
           type: 'cash',
           payment: Number(payment),
-          bonusPoints: bonus
+          bonusPoints: bonus,
+          odboId: odboId
         }
       } else if (paymentMode === 'credit') {
         posTrans = {
@@ -193,13 +203,14 @@ class CheckoutModal extends Component {
           transNumber,
           cardType: card.type,
           provider: card.provider,
-          bonusPoints: bonus
+          bonusPoints: bonus,
+          odboId: odboId
         }
       }
     } else if (currency === 'odbo') {
       posTrans = {
         type: 'odbo',
-        odboId: activeCustomer.odboId,
+        odboId: odboId,
         pinCode: pincode
       }
     }
@@ -217,8 +228,8 @@ class CheckoutModal extends Component {
   }
 
   onClickCancel () {
-    const {dispatch, orderError, orderSuccess, locale} = this.props
-    orderError === '' && orderSuccess
+    const {dispatch, orderSuccess, locale} = this.props
+    orderSuccess
     ? dispatch(resetStore(locale)) && document.getElementById('productsSearch').focus()
     : dispatch(closeActiveModal()) && document.getElementById('productsSearch').focus()
   }
