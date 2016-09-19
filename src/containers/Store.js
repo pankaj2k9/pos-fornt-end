@@ -43,7 +43,8 @@ class Store extends Component {
     dispatch(setActiveModal(''))
   }
 
-  verifyStaff () {
+  verifyStaff (event) {
+    event.preventDefault()
     const {dispatch, activeCashier} = this.props
     let staffData = {
       username: activeCashier.username,
@@ -120,9 +121,11 @@ class Store extends Component {
                     ? null
                     : <div className='container'>
                       <p className='control is-fullwidth'>
-                        <input id='staffPassword'
-                          className='input is-large' type='password'
-                          placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
+                        <form autoComplete={false} onSubmit={this.verifyStaff.bind(this)}>
+                          <input id='staffPassword'
+                            className='input is-large' type='password'
+                            placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
+                        </form>
                       </p>
                       <hr />
                     </div>

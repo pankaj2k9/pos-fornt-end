@@ -94,7 +94,8 @@ class PanelCheckout extends Component {
     return updatedDiscount
   }
 
-  onClickAddNote () {
+  onClickAddNote (event) {
+    event.preventDefault()
     const { dispatch, orderNote } = this.props
     var noteToAdd = [{
       type: 'others',
@@ -115,7 +116,8 @@ class PanelCheckout extends Component {
     dispatch(setActiveModal('voucherModal'))
   }
 
-  onClickVerifyVoucher () {
+  onClickVerifyVoucher (event) {
+    event.preventDefault()
     const { dispatch } = this.props
     let query = { query: {
       code: document.getElementById('vcInput').value
@@ -206,8 +208,10 @@ class PanelCheckout extends Component {
                 </p>
               }
               <p className='control is-expanded'>
-                <input id='vcInput' className='input is-large'
-                  placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
+                <form autoComplete={false} onSubmit={this.onClickVerifyVoucher.bind(this)}>
+                  <input id='vcInput' className='input is-large'
+                    placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
+                </form>
               </p>
               <div className='columns'>
                 <p className='column is-6 is-offset-3'>
@@ -236,8 +240,9 @@ class PanelCheckout extends Component {
               <h1 className='title'><FormattedMessage id='app.general.notes' /></h1>
               {!cpShouldUpdate
                 ? <ul>
-                  {
-                    orderNote.map(function (item, key) {
+                  { !orderNote
+                    ? null
+                    : orderNote.map(function (item, key) {
                       function remove () {
                         dispatch(panelCheckoutShouldUpdate())
                         dispatch(removeNote(item.message))
@@ -320,11 +325,15 @@ class PanelCheckout extends Component {
                   </a>
                 </p>
               }
-              <p className='control has-icon is-expanded'>
-                <input id='noteInput' className='input'
-                  placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
-                <i className='fa fa-plus' />
-              </p>
+              <div className='control is-expanded'>
+                <form autoComplete={false} onSubmit={this.onClickAddNote.bind(this)}>
+                  <p className='control has-icon is-expanded'>
+                    <input id='noteInput' className='input'
+                      placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
+                    <i className='fa fa-plus' />
+                  </p>
+                </form>
+              </div>
               <p className='control'>
                 <a className='button' onClick={this.onClickAddNote.bind(this)}>
                   <strong><FormattedMessage id='app.button.addNote' /></strong>
@@ -479,13 +488,8 @@ class PanelCheckout extends Component {
                 </div>
                 : null
               }
-              {
-                orderNote.length === 0
-                ? null
-                : this.renderNoteModal()
-              }
-
               <div>
+                {this.renderNoteModal()}
                 {this.renderVoucherModal()}
                 {this.renderModal()}
               </div>

@@ -27,7 +27,9 @@ class CheckoutModal extends Component {
     }
   }
 
-  onClickSubmit (data) {
+  onClickSubmit (data, event) {
+    event.preventDefault()
+    console.log('data: ', data)
     const { dispatch, orderItems, customDiscount,
             currency, paymentMode, activeCashier,
             activeCustomer, pincode, adminToken,
@@ -186,7 +188,7 @@ class CheckoutModal extends Component {
       ? 0
       : cashTendered
 
-    let odboId = !activeCustomer.odboId ? undefined : activeCustomer.odboId
+    let odboId = !activeCustomer ? undefined : activeCustomer.odboId
 
     let posTrans
     if (currency === 'sgd') {
@@ -301,6 +303,10 @@ class CheckoutModal extends Component {
       : Number(cashMinusTotal)
     const newOdboBalance = odboMinusTotal < 0 || isNaN(odboMinusTotal) ? Number(0).toFixed(2) : odboMinusTotal
 
+    let data = currency !== 'sgd'
+      ? {odboCoins: odboCoins, odboBalance: odboMinusTotal}
+      : {change: cashChange}
+
     return (
       <div id={id} className={'modal ' + (activeModalId === id ? 'is-active' : '')}>
         <div className='modal-background' />
@@ -320,6 +326,7 @@ class CheckoutModal extends Component {
               isProcessing={isProcessing}
               currency={currency}
               paymentMode={paymentMode}
+              odboCoins={odboCoins}
               odboBalance={odboBalance}
               onChange={this.onChange.bind(this)}
               card={card}
@@ -329,6 +336,7 @@ class CheckoutModal extends Component {
               cashTendered={cashTendered}
               cashChange={cashChange}
               odboMinusTotal={newOdboBalance}
+              onSubmit={this.onClickSubmit.bind(this, data)}
             />
             : <CheckoutProcessing
               isProcessing={isProcessing}

@@ -35,6 +35,10 @@ import {
 } from '../actions/helpers'
 
 import {
+  fetchCustomerByOdboId
+} from '../actions/customers'
+
+import {
   closeActiveModal,
   setActiveModal
 } from '../actions/application'
@@ -58,10 +62,11 @@ class PanelCart extends Component {
     : dispatch(setWalkinCustomer(inputValue))
   }
 
-  buttonConfirm () {
-    const {dispatch, searchKey, customersArray, inputAction} = this.props
+  buttonConfirm (event) {
+    event.preventDefault()
+    const {dispatch, searchKey, inputAction} = this.props
     inputAction === 'search'
-    ? dispatch(validateCustomerOdboId(customersArray, searchKey))
+    ? dispatch(fetchCustomerByOdboId(searchKey))
     : dispatch(setCustomerInputDisabled()) && document.getElementById('productsSearch').focus()
   }
 
@@ -252,7 +257,8 @@ class PanelCart extends Component {
       searchKey,
       customerSearchError,
       ordersOnHold,
-      overallDiscount
+      overallDiscount,
+      shouldUpdate
     } = this.props
     const emptyOrdersOnHold = (ordersOnHold.length === 0) || (ordersOnHold === null || undefined)
     const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
@@ -279,23 +285,28 @@ class PanelCart extends Component {
       >
         <div className='panel-block'>
           {inputActive
-            ? <SearchBar
-              id='customerInput'
-              autoFocus={inputActive}
-              value={inputAction === 'search' ? searchKey : walkinCustomer}
-              placeholder={
-                inputAction === 'search'
-                ? customerSearchError === null
-                  ? 'app.ph.searchCust' : 'app.ph.searchCustErr'
-                : 'app.ph.placeCustName'
-              }
-              confirmButton={<i className='fa fa-plus' />}
-              cancelButton={<i className='fa fa-times' />}
-              confirmEvent={this.buttonConfirm.bind(this)}
-              cancelEvent={this.buttonCancel.bind(this)}
-              onChange={this.keyInput.bind(this)}
-              onKeyDown={this.onSubmitKey.bind(this)}
-              icon={inputAction === 'search' ? 'fa fa-search' : 'fa fa-user'} />
+            ? !shouldUpdate
+              ? <SearchBar
+                id='customerInput'
+                autoFocus={inputActive}
+                value={inputAction === 'search' ? searchKey : walkinCustomer}
+                placeholder={
+                  inputAction === 'search'
+                  ? customerSearchError === null
+                    ? 'app.ph.searchCust' : 'app.ph.searchCustErr'
+                  : 'app.ph.placeCustName'
+                }
+                confirmButton={<i className='fa fa-plus' />}
+                cancelButton={<i className='fa fa-times' />}
+                confirmEvent={this.buttonConfirm.bind(this)}
+                cancelEvent={this.buttonCancel.bind(this)}
+                onChange={this.keyInput.bind(this)}
+                onSubmit={this.buttonConfirm.bind(this)}
+                onKeyDown={this.onSubmitKey.bind(this)}
+                icon={inputAction === 'search' ? 'fa fa-search' : 'fa fa-user'} />
+              : <div className='has-text-centered'>
+                <i className='fa fa-spinner fa-pulse fa-fw' />
+              </div>
             : <Level
               left={
                 <div>

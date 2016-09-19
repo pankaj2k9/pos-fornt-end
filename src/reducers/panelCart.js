@@ -37,7 +37,6 @@ function panelCart (state = {
   switch (action.type) {
     case PANEL_CART_SHOULD_UPDATE:
       return Object.assign({}, state, {
-        customerSearchKey: ' ',
         shouldUpdate: true
       })
     case SET_CUSTOMER_INPUT_ACTIVE:
@@ -64,7 +63,8 @@ function panelCart (state = {
         activeCustomer: action.customer,
         customerSearchKey: '',
         customerSearchError: null,
-        searchActive: false
+        searchActive: false,
+        shouldUpdate: false
       })
     case SET_ACTIVE_CUSTOMER_ERROR:
       return Object.assign({}, state, {
