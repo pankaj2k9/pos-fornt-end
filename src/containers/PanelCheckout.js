@@ -207,12 +207,12 @@ class PanelCheckout extends Component {
                   {error}
                 </p>
               }
-              <p className='control is-expanded'>
+              <div className='control is-expanded'>
                 <form autoComplete={false} onSubmit={this.onClickVerifyVoucher.bind(this)}>
                   <input id='vcInput' className='input is-large'
                     placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
                 </form>
-              </p>
+              </div>
               <div className='columns'>
                 <p className='column is-6 is-offset-3'>
                   <a className='button is-large is-fullwidth is-success'
@@ -234,10 +234,15 @@ class PanelCheckout extends Component {
     return (
       <div id='notesModal' className={`modal ${active}`}>
         <div className='modal-background' />
-        <div className='modal-content'>
-          <div className='box'>
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              <FormattedMessage id='app.general.notes' />
+            </p>
+            <button className='delete' onClick={this.closeNotes.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
             <div className='content'>
-              <h1 className='title'><FormattedMessage id='app.general.notes' /></h1>
               {!cpShouldUpdate
                 ? <ul>
                   { !orderNote
@@ -264,7 +269,6 @@ class PanelCheckout extends Component {
             </div>
           </div>
         </div>
-        <button className='modal-close' onClick={this.closeNotes.bind(this)} />
       </div>
     )
   }
