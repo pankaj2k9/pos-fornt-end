@@ -20,6 +20,7 @@ import {
   setCartItemQty,
   setCustomDiscount,
   removeCartItem,
+  removeCustomer,
   panelCartShouldUpdate
 } from '../actions/panelCart'
 
@@ -43,6 +44,11 @@ class PanelCart extends Component {
     const {dispatch} = this.props
     dispatch(setCustomerInputActive(inputAction))
     document.getElementById('customerInput').focus()
+  }
+
+  onClickRemoveCustomer () {
+    const {dispatch} = this.props
+    dispatch(removeCustomer())
   }
 
   keyInput (inputValue) {
@@ -293,28 +299,39 @@ class PanelCart extends Component {
             : <Level
               left={
                 <div>
-                  {walkinCustomer !== ''
-                    ? <FormattedMessage id='app.general.cust' /> : null}
                   {activeCustomer !== null || undefined
-                  ? <h4 className='is-marginless'>
-                    {activeCustomer.firstName}
-                  </h4>
+                  ? <div>
+                    <p className='is-marginless'>
+                      <FormattedMessage id='app.general.cust' />:
+                      <strong>{` ${activeCustomer.firstName}`}</strong>
+                    </p>
+                    <a style={{color: 'orange'}}
+                      onClick={this.onClickRemoveCustomer.bind(this)}>
+                      <i className='fa fa-times' />
+                      <FormattedMessage id='app.button.remove' />
+                    </a>
+                  </div>
                   : <div>
                     {walkinCustomer === ''
                       ? <h4 className='is-marginless'>
                         <FormattedMessage id='app.general.walkinCust' />
                         <a style={{marginLeft: 12}}
                           onClick={this.onClickPanelHeaderBtns.bind(this, 'add')}>
-                          <FormattedMessage id='app.button.add' />+
+                          <FormattedMessage id='app.button.add' />{' '}
+                          <i className='fa fa-plus' />
                         </a>
                       </h4>
-                      : <h4 className='is-marginless'>
-                        {walkinCustomer}
-                        <a style={{marginLeft: 12}}
-                          onClick={this.onClickPanelHeaderBtns.bind(this, 'add')}>
-                          +<FormattedMessage id='app.button.edit' />
+                      : <div>
+                        <p className='is-marginless'>
+                          <FormattedMessage id='app.general.cust' />:
+                          <strong>{` ${walkinCustomer}`}</strong>
+                        </p>
+                        <a style={{color: 'orange'}}
+                          onClick={this.onClickRemoveCustomer.bind(this)}>
+                          <i className='fa fa-times' />
+                          <FormattedMessage id='app.button.remove' />
                         </a>
-                      </h4>
+                      </div>
                     }
                   </div>
                   }
@@ -332,7 +349,7 @@ class PanelCart extends Component {
               }
               action={this.onClickPanelHeaderBtns.bind(this, 'search')}
               button={activeCustomer !== null || undefined
-                ? <FormattedMessage id='app.button.edit' />
+                ? <FormattedMessage id='app.button.change' />
                 : <FormattedMessage id='app.button.searchCust' />}
               buttonIcon={
                 activeCustomer !== null || undefined
