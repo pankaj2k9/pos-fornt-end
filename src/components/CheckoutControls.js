@@ -14,6 +14,10 @@ const ModalInput = (props) => {
     inputPh
   } = props
 
+  var inputCash = 6
+  var inputCredit = 20
+  var inputPin = 4
+
   return (
     <div className='control is-expanded'>
       <form autoComplete='off' onSubmit={onSubmit}>
@@ -34,8 +38,8 @@ const ModalInput = (props) => {
             : inputPh.odbo}
           maxLength={
             currency === 'sgd'
-              ? paymentMode === 'cash' ? 6 : 20
-              : 4
+              ? paymentMode === 'cash' ? inputCash : inputCredit
+              : inputPin
           }
           onChange={e => onChange(e.target.value)} />
       </form>
@@ -63,6 +67,14 @@ const CheckoutControls = (props) => {
     onSubmit,
     intl
   } = props
+
+  // style for logo of card Association
+  var unselected = {opacity: 0.2}
+  var selected = {opacity: 1}
+
+  // fixed width for displaying trans details
+  var cashDetails = 250
+  var cardDetails = 280
 
   CheckoutControls.defaultProps = {
     onSubmit: function (event) {
@@ -153,22 +165,22 @@ const CheckoutControls = (props) => {
                   <div className='columns'>
                     <div className='column is-4'>
                       <img style={card.provider === 'visa'
-                        ? {opacity: 1}
-                        : {opacity: 0.2}}
+                        ? selected
+                        : unselected}
                         onClick={onClickCardProvToggle.bind(this, 'visa')}
                         src={require('../assets/card-visa.gif')} />
                     </div>
                     <div className='column is-4'>
                       <img style={card.provider === 'master'
-                        ? {opacity: 1}
-                        : {opacity: 0.2}}
+                        ? selected
+                        : unselected}
                         onClick={onClickCardProvToggle.bind(this, 'master')}
                         src={require('../assets/card-mc.gif')} />
                     </div>
                     <div className='column is-4'>
                       <img style={card.provider === 'amex'
-                        ? {opacity: 1}
-                        : {opacity: 0.2}}
+                        ? selected
+                        : unselected}
                         onClick={onClickCardProvToggle.bind(this, 'amex')}
                         src={require('../assets/card-amex.gif')} />
                     </div>
@@ -180,7 +192,7 @@ const CheckoutControls = (props) => {
           {currency === 'sgd'
             ? <div>
               <center>
-                <div style={{width: 250}}>
+                <div style={{width: cashDetails}}>
                 {paymentMode === 'cash'
                   ? <div>
                     <table>
@@ -222,7 +234,7 @@ const CheckoutControls = (props) => {
             </div>
             : <div className='container has-text-centered'>
               <center>
-                <div style={{width: 280}}>
+                <div style={{width: cardDetails}}>
                   <table>
                     <tbody>
                       <tr>

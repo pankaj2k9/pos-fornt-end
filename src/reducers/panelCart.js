@@ -37,7 +37,7 @@ function panelCart (state = {
   switch (action.type) {
     case PANEL_CART_SHOULD_UPDATE:
       return Object.assign({}, state, {
-        shouldUpdate: true
+        shouldUpdate: action.value
       })
     case SET_CUSTOMER_INPUT_ACTIVE:
       return Object.assign({}, state, {

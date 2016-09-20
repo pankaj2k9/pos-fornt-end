@@ -16,9 +16,10 @@ export const SET_CUSTOM_DISCOUNT = 'SET_CUSTOM_DISCOUNT'
 export const PANEL_CART_RESET = 'PANEL_CART_RESET'
 export const RECALL_CART_ITEMS = 'RECALL_CART_ITEMS'
 
-export function panelCartShouldUpdate () {
+export function panelCartShouldUpdate (value) {
   return {
-    type: PANEL_CART_SHOULD_UPDATE
+    type: PANEL_CART_SHOULD_UPDATE,
+    value
   }
 }
 
@@ -132,25 +133,5 @@ export function recallCartItems (cartItems, totalPrice, totalOdboPrice) {
     cartItems,
     totalPrice,
     totalOdboPrice
-  }
-}
-
-export function validateCustomerOdboId (customersArray, searchKey) {
-  return (dispatch) => {
-    let result = []
-    customersArray.forEach(customer => {
-      if (customer.odboId === searchKey) {
-        dispatch(setActiveCustomer(customer))
-        result[customer.id] = customer
-        dispatch(setCustomerInputDisabled())
-        document.getElementById('productsSearch').focus()
-      }
-    })
-    if (result.length === 0) {
-      dispatch(setActiveCustomerError('customer_search_error'))
-      dispatch(setInputOdboID(''))
-      document.getElementById('customerInput').value = ''
-      document.getElementById('customerInput').focus()
-    }
   }
 }

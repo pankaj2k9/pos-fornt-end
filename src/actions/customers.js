@@ -35,7 +35,7 @@ export function customersFetchFailure (error) {
 
 export function customerFetchRequest () {
   return {
-    type: CUSTOMERS_FETCH_REQUEST
+    type: CUSTOMER_FETCH_REQUEST
   }
 }
 
@@ -47,7 +47,7 @@ export function customerFetchSuccess (customer) {
 
 export function customerFetchFailure (error) {
   return {
-    type: CUSTOMERS_FETCH_FAILURE,
+    type: CUSTOMER_FETCH_FAILURE,
     error
   }
 }
@@ -68,14 +68,17 @@ export function fetchCustomers (query) {
 
 export function fetchCustomerByOdboId (searchKey) {
   return (dispatch) => {
-    dispatch(panelCartShouldUpdate())
+    dispatch(panelCartShouldUpdate(true))
     dispatch(customerFetchRequest())
     const query = {query: { odboId: searchKey }}
     return customerService.fetch(query)
     .then(customer => {
-      customer.length !== 0
-      ? dispatch(customerFetchSuccess(customer.data[0]))
-      : dispatch(customerFetchFailure())
+      customer
+        ? customer.length !== 0
+          ? dispatch(customerFetchSuccess(customer.data[0]))
+          : dispatch(customerFetchFailure('No Results'))
+        : dispatch(customerFetchFailure('No Results')) &&
+          dispatch(panelCartShouldUpdate(false))
       dispatch(setCustomerInputDisabled())
     })
     .catch(error => {

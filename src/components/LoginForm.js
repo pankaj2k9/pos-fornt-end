@@ -45,10 +45,6 @@ class LoginForm extends Component {
     onGetStoreIds()
   }
 
-  componentDidMount () {
-    // document.getElementById('loginForm').style.overflowY = 'hidden'
-  }
-
   render () {
     const { errorMessage, isLoggingIn, isFetchingStoreIds, storeIds } = this.props
     const formIsDisabled = isFetchingStoreIds || isLoggingIn ? 'is-disabled' : ''

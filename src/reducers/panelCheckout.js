@@ -22,7 +22,7 @@ function checkout (state = {
   paymentMode: 'cash',
   cashTendered: 0,
   card: {
-    type: null,
+    type: 'credit',
     provider: null
   },
   bonusPoints: false,

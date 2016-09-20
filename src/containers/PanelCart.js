@@ -15,7 +15,6 @@ import {
   setCustomerInputDisabled,
   setWalkinCustomer,
   setInputOdboID,
-  validateCustomerOdboId,
   setCurrencyType,
   setCartItemQty,
   setCustomDiscount,
@@ -74,14 +73,6 @@ class PanelCart extends Component {
     const {dispatch} = this.props
     dispatch(setCustomerInputDisabled())
     document.getElementById('productsSearch').focus()
-  }
-
-  onSubmitKey (event) {
-    event.preventDefault()
-    const {dispatch, searchKey, customersArray, inputAction} = this.props
-    inputAction === 'search'
-    ? dispatch(validateCustomerOdboId(customersArray, searchKey))
-    : dispatch(setCustomerInputDisabled())
   }
 
   onClickCurrencyToggle () {
@@ -302,7 +293,6 @@ class PanelCart extends Component {
                 cancelEvent={this.buttonCancel.bind(this)}
                 onChange={this.keyInput.bind(this)}
                 onSubmit={this.buttonConfirm.bind(this)}
-                onKeyDown={this.onSubmitKey.bind(this)}
                 icon={inputAction === 'search' ? 'fa fa-search' : 'fa fa-user'} />
               : <div className='has-text-centered'>
                 <i className='fa fa-spinner fa-pulse fa-fw' />

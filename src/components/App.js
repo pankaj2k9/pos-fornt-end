@@ -16,10 +16,6 @@ import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
 
-  componentDidMount () {
-    document.getElementById('appSection').style.overflowY = 'hidden'
-  }
-
   handleHamburgerToggle () {
     const { dispatch } = this.props
     dispatch(hamburgerToggle())
