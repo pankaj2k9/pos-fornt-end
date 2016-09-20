@@ -22,8 +22,8 @@ function checkout (state = {
   paymentMode: 'cash',
   cashTendered: 0,
   card: {
-    type: 'credit',
-    provider: 'master'
+    type: null,
+    provider: null
   },
   bonusPoints: false,
   customDiscount: undefined,

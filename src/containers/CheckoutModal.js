@@ -1,6 +1,6 @@
 import React, {Component, PropTypes} from 'react'
 import { connect } from 'react-redux'
-import { FormattedMessage } from 'react-intl'
+import { injectIntl, FormattedMessage } from 'react-intl'
 
 import CheckoutControls from '../components/CheckoutControls'
 import CheckoutProcessing from '../components/CheckoutProcessing'
@@ -29,14 +29,14 @@ class CheckoutModal extends Component {
 
   onClickSubmit (data, event) {
     event.preventDefault()
-    console.log('data: ', data)
     const { dispatch, orderItems, customDiscount,
             currency, paymentMode, activeCashier,
             activeCustomer, pincode, adminToken,
             cashTendered, locale, card,
             transNumber, storeId, voucher,
             orderNote, isDiscounted, overAllTotal,
-            bonusPoints, walkinCustomer, store
+            bonusPoints, walkinCustomer, store,
+            sumOfCartItems, intl
           } = this.props
 
     let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
@@ -92,7 +92,9 @@ class CheckoutModal extends Component {
         : Number(item.odboPrice) - discount
       items.push({
         id: item.id,
-        name: `${item.nameEn} ${showDiscount}`,
+        name: `${item.nameEn.substring(0, 18) + '...'}
+          ${intl.formatMessage({ id: 'app.general.barcode' }) + item.barcodeInfo}
+          ${showDiscount}`,
         qty: item.qty,
         subtotal: currency === 'sgd'
           ? Number(Number(item.qty) * computedDiscount).toFixed(2)
@@ -126,8 +128,6 @@ class CheckoutModal extends Component {
       ? Number(earnedPoints) + Number(activeCustomer.odboCoins)
       : 0
 
-    console.log('earnedPlusPrevious: ', earnedPlusPrevious)
-
     let customer = activeCustomer
       ? `${activeCustomer.lastName}, ${activeCustomer.firstName}`
       : undefined
@@ -148,7 +148,8 @@ class CheckoutModal extends Component {
           points: earnedPoints,
           newOdbo: earnedPlusPrevious,
           change: data.change,
-          voucherDiscount: voucherAmount
+          voucherDiscount: voucherAmount,
+          sumOfCartItems: sumOfCartItems
         }
         : {
           type: 'credit',
@@ -159,8 +160,10 @@ class CheckoutModal extends Component {
           previousOdbo: prevOdbo,
           points: earnedPoints,
           newOdbo: earnedPlusPrevious,
-          cardType: card.type,
-          provider: card.provider
+          cardType: card.type === 'debit' ? 'Nets' : 'Credit',
+          provider: card.provider,
+          voucherDiscount: voucherAmount,
+          sumOfCartItems: sumOfCartItems
         }
       : {
         type: 'odbo',
@@ -404,6 +407,7 @@ CheckoutModal.PropTypes = {
   walkinCustomer: PropTypes.string,
   voucherDiscount: PropTypes.number,
   orderNote: PropTypes.array,
+  sumOfCartItems: PropTypes.number,
   overAllTotal: PropTypes.number,
   card: PropTypes.object,
   voucher: PropTypes.object
@@ -430,8 +434,9 @@ function mapStateToProps (state) {
     pincode: state.panelCheckout.pincode,
     customDiscount: state.panelCheckout.customDiscount,
     receiptData: state.orders.receipt,
-    reprinting: state.orders.reprinting
+    reprinting: state.orders.reprinting,
+    intl: state.intl
   }
 }
 
-export default connect(mapStateToProps)(CheckoutModal)
+export default connect(mapStateToProps)(injectIntl(CheckoutModal))

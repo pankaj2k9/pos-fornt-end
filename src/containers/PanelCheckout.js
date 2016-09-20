@@ -139,7 +139,7 @@ class PanelCheckout extends Component {
   renderModal () {
     const { cartItemsArray, locale, currency, card,
             paymentMode, walkinCustomer, voucher, orderNote } = this.props
-
+    const subtotal = Number(this.sumOfCartItems()) - Number(this.sumOfCartDiscounts())
     return (
       <Modal id='afterCheckoutModal'
         locale={locale}
@@ -148,6 +148,7 @@ class PanelCheckout extends Component {
         paymentMode={paymentMode}
         walkinCustomer={walkinCustomer}
         voucher={voucher}
+        sumOfCartItems={subtotal}
         overAllTotal={this.overAllTotal()}
         orderNote={orderNote}
         card={card} />
@@ -312,7 +313,7 @@ class PanelCheckout extends Component {
             panelName={<FormattedMessage id='app.panel.checkout' />}
             buttonOne={!empty ? {name: 'app.button.addVoucher', class: 'is-info', onClick: this.onClickAddVoucher.bind(this), icon: 'fa fa-money'} : null}
             buttonTwo={!empty ? {name: 'app.button.cancelOrder', class: 'is-danger', onClick: this.onClickCancelOrder.bind(this)} : null}>
-            <div className='panel-block control is-grouped'>
+            <div className='panel-block control is-grouped is-marginless'>
               {/*
                   @operator: !orderNoteCount
                       - validates the variable 'orderNoteCount' is zero,
@@ -344,7 +345,7 @@ class PanelCheckout extends Component {
                 </a>
               </p>
             </div>
-            <div className='panel-block'>
+            <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
               <Level
                 left={<FormattedMessage id='app.general.subtotal' />}
                 right={

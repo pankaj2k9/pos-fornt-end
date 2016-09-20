@@ -168,9 +168,6 @@ export const buildComputation = (trans) => {
   let comp = ''
   if (trans) {
     let total = `<div>${formatCurrency(trans.total)}</div>`
-    let voucherDiscount = trans.voucherDiscount
-      ? `<div>${formatCurrency(trans.voucherDiscount)}</div>`
-      : `<div>${'no voucher'}</div>`
     let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
     let customer = trans.customer ? trans.customer : trans.walkIn
     let minLabel
@@ -205,18 +202,12 @@ export const buildComputation = (trans) => {
 
     comp += '<div>'
     if (trans.type === 'cash' || trans.type === 'credit') {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
-      if (trans.customer) {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COIN BALANCE</div></div>`
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
-        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${trans.newOdbo}<br/></div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL : </div>${trans.sumOfCartItems}</div>`
+      if (trans.voucherDiscount) {
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div>${trans.voucherDiscount}</div>`
       }
       comp += RECEIPT_DIVIDER
     }
-    comp += trans.type === 'cash'
-      ? `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div> -${voucherDiscount}</div>`
-      : ''
     comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL : </div>${total}</div>`
     comp += trans.type === 'credit'
       ? `<div style="${TOTAL_DIV_STYLE_2}"><div>${card} : </div>${cardType}</div>`
@@ -225,6 +216,18 @@ export const buildComputation = (trans) => {
     if (showDiff) {
       comp += `<div style="${TOTAL_DIV_STYLE_1}">
         <div>${diffLabel} : </div>${difference}</div>`
+    }
+    if (trans.type === 'cash' || trans.type === 'credit') {
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
+      if (trans.customer) {
+        if (trans.points !== 0) {
+          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>--------------ODBO COIN BALANCE--------------</div></div>`
+          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
+          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
+          comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${trans.newOdbo}<br/></div>`
+        }
+      }
     }
     comp += '</div>'
   }

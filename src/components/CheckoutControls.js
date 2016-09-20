@@ -5,12 +5,50 @@ import { injectIntl, FormattedMessage } from 'react-intl'
 import Level from './Level'
 import Toggle from './Toggle'
 
+const ModalInput = (props) => {
+  const {
+    currency,
+    paymentMode,
+    onChange,
+    onSubmit,
+    inputPh
+  } = props
+
+  return (
+    <div className='control is-expanded'>
+      <form autoComplete='off' onSubmit={onSubmit}>
+        <input
+          id='checkoutInput'
+          autoFocus
+          className='input is-large'
+          type={
+            currency === 'sgd'
+            ? paymentMode === 'cash' ? 'number' : 'text'
+            : 'password'
+          }
+          placeholder={
+            currency === 'sgd'
+            ? paymentMode === 'cash'
+              ? inputPh.cash
+              : inputPh.card
+            : inputPh.odbo}
+          maxLength={
+            currency === 'sgd'
+              ? paymentMode === 'cash' ? 6 : 20
+              : 4
+          }
+          onChange={e => onChange(e.target.value)} />
+      </form>
+      <hr />
+    </div>
+  )
+}
+
 const CheckoutControls = (props) => {
   const {
     isProcessing,
     currency,
     paymentMode,
-    onChange,
     onClickCardToggle,
     onClickCardProvToggle,
     total,
@@ -21,8 +59,9 @@ const CheckoutControls = (props) => {
     walkinCustomer,
     odboMinusTotal,
     odboBalance,
-    intl,
-    onSubmit
+    onChange,
+    onSubmit,
+    intl
   } = props
 
   CheckoutControls.defaultProps = {
@@ -74,32 +113,21 @@ const CheckoutControls = (props) => {
 
           {currency === 'odbo' && odboBalance <= 0
             ? null
-            : <div className='control is-expanded'>
-              <form autoComplete='off' onSubmit={onSubmit}>
-                <input
-                  id='checkoutInput'
-                  autoFocus
-                  className='input is-large'
-                  type={
-                    currency === 'sgd'
-                    ? paymentMode === 'cash' ? 'number' : 'text'
-                    : 'password'
-                  }
-                  placeholder={
-                    currency === 'sgd'
-                    ? paymentMode === 'cash'
-                      ? intl.formatMessage({ id: 'app.ph.enterAmount' })
-                      : intl.formatMessage({ id: 'app.ph.enterTransId' })
-                    : intl.formatMessage({ id: 'app.ph.enterPin' })}
-                  maxLength={
-                    currency === 'sgd'
-                      ? paymentMode === 'cash' ? 6 : 20
-                      : 4
-                  }
-                  onChange={e => onChange(e.target.value)} />
-              </form>
-              <hr />
-            </div>
+            : paymentMode === 'credit'
+              ? !card.provider
+                ? null
+                : <ModalInput paymentMode={paymentMode} onChange={onChange}
+                  currency={currency} onSubmit={onSubmit} inputPh={{
+                    cash: intl.formatMessage({ id: 'app.ph.enterAmount' }),
+                    card: intl.formatMessage({ id: 'app.ph.enterTransId' }),
+                    odbo: intl.formatMessage({ id: 'app.ph.enterPin' })
+                  }} />
+              : <ModalInput paymentMode={paymentMode} onChange={onChange}
+                currency={currency} onSubmit={onSubmit} inputPh={{
+                  cash: intl.formatMessage({ id: 'app.ph.enterAmount' }),
+                  card: intl.formatMessage({ id: 'app.ph.enterTransId' }),
+                  odbo: intl.formatMessage({ id: 'app.ph.enterPin' })
+                }} />
           }
 
           {currency === 'odbo'
@@ -108,37 +136,41 @@ const CheckoutControls = (props) => {
               ? null
               : <div className='columns container'>
                 <div className='column is-6 has-text-centered'>
-                  <p className='title'>Card Type</p>
+                  <p className='title'>
+                    <FormattedMessage id='app.general.cardType' />
+                  </p>
                   <Toggle
                     switchAction={onClickCardToggle}
                     active={card.type}
-                    toggleTwo={{name: 'Debit', value: 'debit'}}
-                    toggleOne={{name: 'Credit', value: 'credit'}}
+                    toggleTwo={{name: intl.formatMessage({ id: 'app.button.debit' }), value: 'debit'}}
+                    toggleOne={{name: intl.formatMessage({ id: 'app.button.credit' }), value: 'credit'}}
                     size='is-large' />
                 </div>
                 <div className='column is-6 has-text-centered'>
-                  <p className='title'>Card Association</p>
+                  <p className='title'>
+                    <FormattedMessage id='app.general.cardAssoc' />
+                  </p>
                   <div className='columns'>
                     <div className='column is-4'>
                       <img style={card.provider === 'visa'
                         ? {opacity: 1}
                         : {opacity: 0.2}}
                         onClick={onClickCardProvToggle.bind(this, 'visa')}
-                        src='http://www.credit-card-logos.com/images/visa_credit-card-logos/visa_logo_7.gif' />
+                        src={require('../assets/card-visa.gif')} />
                     </div>
                     <div className='column is-4'>
                       <img style={card.provider === 'master'
                         ? {opacity: 1}
                         : {opacity: 0.2}}
                         onClick={onClickCardProvToggle.bind(this, 'master')}
-                        src='http://www.credit-card-logos.com/images/mastercard_credit-card-logos/mastercard_logo_8.gif' />
+                        src={require('../assets/card-mc.gif')} />
                     </div>
                     <div className='column is-4'>
                       <img style={card.provider === 'amex'
                         ? {opacity: 1}
                         : {opacity: 0.2}}
                         onClick={onClickCardProvToggle.bind(this, 'amex')}
-                        src='http://www.credit-card-logos.com/images/american_express_credit-card-logos/american_express_logo_8.gif' />
+                        src={require('../assets/card-amex.gif')} />
                     </div>
                   </div>
                 </div>
