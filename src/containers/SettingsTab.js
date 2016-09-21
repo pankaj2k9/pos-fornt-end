@@ -476,7 +476,8 @@ class SettingsTab extends Component {
     )
   }
 
-  onClickVerifyPin () {
+  onClickVerifyPin (event) {
+    event.preventDefault()
     const {dispatch, storeId, activeCashier, staff} = this.props
     let query = {
       query: {
@@ -510,7 +511,7 @@ class SettingsTab extends Component {
                 </p>
               }
               <div className='control is-expanded'>
-                <form autoComplete={false}>
+                <form autoComplete={false} onSubmit={this.onClickVerifyPin.bind(this)}>
                   <input id='storePinCode' className='input is-large' type='password'
                     placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
                 </form>

@@ -10,14 +10,16 @@ export const SET_VOUCHER_DISCOUNT = 'SET_VOUCHER_DISCOUNT'
 export const ADD_CART_ITEM = 'ADD_CART_ITEM'
 export const REMOVE_CART_ITEM = 'REMOVE_CART_ITEM'
 export const REMOVE_VOUCHER = 'REMOVE_VOUCHER'
+export const REMOVE_CUSTOMER = 'REMOVE_CUSTOMER'
 export const SET_CART_ITEM_QTY = 'SET_CART_ITEM_QTY'
 export const SET_CUSTOM_DISCOUNT = 'SET_CUSTOM_DISCOUNT'
 export const PANEL_CART_RESET = 'PANEL_CART_RESET'
 export const RECALL_CART_ITEMS = 'RECALL_CART_ITEMS'
 
-export function panelCartShouldUpdate () {
+export function panelCartShouldUpdate (value) {
   return {
-    type: PANEL_CART_SHOULD_UPDATE
+    type: PANEL_CART_SHOULD_UPDATE,
+    value
   }
 }
 
@@ -97,6 +99,12 @@ export function removeVoucher () {
   }
 }
 
+export function removeCustomer () {
+  return {
+    type: REMOVE_CUSTOMER
+  }
+}
+
 export function setCartItemQty (cartItemId, opperand) {
   return {
     type: SET_CART_ITEM_QTY,
@@ -125,25 +133,5 @@ export function recallCartItems (cartItems, totalPrice, totalOdboPrice) {
     cartItems,
     totalPrice,
     totalOdboPrice
-  }
-}
-
-export function validateCustomerOdboId (customersArray, searchKey) {
-  return (dispatch) => {
-    let result = []
-    customersArray.forEach(customer => {
-      if (customer.odboId === searchKey) {
-        dispatch(setActiveCustomer(customer))
-        result[customer.id] = customer
-        dispatch(setCustomerInputDisabled())
-        document.getElementById('productsSearch').focus()
-      }
-    })
-    if (result.length === 0) {
-      dispatch(setActiveCustomerError('customer_search_error'))
-      dispatch(setInputOdboID(''))
-      document.getElementById('customerInput').value = ''
-      document.getElementById('customerInput').focus()
-    }
   }
 }

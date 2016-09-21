@@ -15,6 +15,7 @@ import { onLogout } from '../actions/helpers'
 import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
+
   handleHamburgerToggle () {
     const { dispatch } = this.props
     dispatch(hamburgerToggle())
@@ -55,7 +56,7 @@ class App extends React.Component {
           adminToken={adminToken}
           isLoggingOut={isLoggingOut}
           openChooseUser={this.openChooseUserModal.bind(this)} />
-        <section className='section' style={{padding: 10}}>
+        <section id='appSection' className='section' style={{padding: 10}}>
           <div style={{paddingLeft: 15, paddingRight: 15}}>
             {this.props.children}
           </div>

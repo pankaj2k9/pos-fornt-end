@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {connect} from 'react-redux'
 
-import { FormattedMessage } from 'react-intl'
+import { FormattedMessage, FormattedDate, FormattedTime } from 'react-intl'
 
 import SearchBar from '../components/SearchBar'
 import Level from '../components/Level'
@@ -80,7 +80,13 @@ const Details = (props) => {
                   }
                   right={
                     <h1 className='title is-marginless'>
-                      {details.dateOrdered}
+                      <FormattedDate value={details.dateOrdered} format='short' />
+                    </h1>
+                  } />
+                <Level
+                  right={
+                    <h1 className='title is-marginless'>
+                      <FormattedTime value={details.dateOrdered} format='hhmm' />
                     </h1>
                   } />
                 {!processing
@@ -93,22 +99,7 @@ const Details = (props) => {
               : <div className='section has-text-centered'>
                 <h1 className='title'>Refund Success</h1>
               </div>
-            : !status.reprint
-              ? <div>
-                <Level
-                  left={
-                    <h1 className='title is-marginless'>
-                      <FormattedMessage id='app.modal.dateOrdered' />
-                    :</h1>
-                  }
-                  right={
-                    <h1 className='title is-marginless'>{details.dateOrdered}</h1>
-                  } />
-                {status.reprint === null ? null : <h1>Reprint Failed</h1>}
-              </div>
-              : <div className='section'>
-                <h1 className='title'>Reprint Success</h1>
-              </div>
+            : null
           }
         </div>
       }
@@ -122,7 +113,8 @@ class SearchModal extends Component {
     dispatch(search.onChange(value))
   }
 
-  buttonConfirm () {
+  buttonConfirm (event) {
+    event.preventDefault()
     const {dispatch, orderSearchKey} = this.props
     dispatch(storeOrderFetch(orderSearchKey))
   }
@@ -179,7 +171,7 @@ class SearchModal extends Component {
                   cancelButton={<i className='fa fa-undo' />}
                   confirmEvent={this.buttonConfirm.bind(this)}
                   cancelEvent={this.buttonCancel.bind(this)}
-                  onKeyDown={this.onSubmitKey.bind(this)}
+                  onSubmit={this.onSubmitKey.bind(this)}
                 />
                 : <SearchBar
                   id='orderSearch'

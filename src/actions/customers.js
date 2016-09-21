@@ -7,7 +7,11 @@ export const CUSTOMER_FETCH_SUCCESS = 'CUSTOMER_FETCH_SUCCESS'
 export const CUSTOMER_FETCH_FAILURE = 'CUSTOMER_FETCH_FAILURE'
 
 import customerService from '../services/customers'
-import { setActiveCustomer } from '../actions/panelCart'
+import {
+  panelCartShouldUpdate,
+  setActiveCustomer,
+  setCustomerInputDisabled
+} from '../actions/panelCart'
 
 export function customersFetchRequest () {
   return {
@@ -31,7 +35,7 @@ export function customersFetchFailure (error) {
 
 export function customerFetchRequest () {
   return {
-    type: CUSTOMERS_FETCH_REQUEST
+    type: CUSTOMER_FETCH_REQUEST
   }
 }
 
@@ -43,7 +47,7 @@ export function customerFetchSuccess (customer) {
 
 export function customerFetchFailure (error) {
   return {
-    type: CUSTOMERS_FETCH_FAILURE,
+    type: CUSTOMER_FETCH_FAILURE,
     error
   }
 }
@@ -59,31 +63,31 @@ export function fetchCustomers (query) {
       dispatch(customersFetchFailure())
       return error.response.json()
     })
-    .then((error) => {
-      console.log(error)
-    })
-    .catch(() => {})
   }
 }
 
-// export function fetchCustomerByOdboId (searchKey) {
-//   return (dispatch) => {
-//     dispatch(customerFetchRequest())
-//     const query = {query: { odboId: searchKey }}
-//     return customerService.fetch(query)
-//     .then(customer => {
-//       customer.length !== 0
-//       ? dispatch(customerFetchSuccess(customer.data[0]))
-//       : dispatch(customerFetchFailure())
-//     })
-//     .catch(error => {
-//       dispatch(customerFetchFailure())
-//       return error.response.json()
-//     })
-//     .then((error) => {
-//       document.getElementById('productsSearch').focus()
-//       console.log(error)
-//     })
-//     .catch(() => {})
-//   }
-// }
+export function fetchCustomerByOdboId (searchKey) {
+  return (dispatch) => {
+    dispatch(panelCartShouldUpdate(true))
+    dispatch(customerFetchRequest())
+    const query = {query: { odboId: searchKey }}
+    return customerService.fetch(query)
+    .then(response => {
+      if (response) {
+        if (!response.data[0]) {
+          dispatch(customerFetchFailure('No Results'))
+          dispatch(panelCartShouldUpdate(false))
+        } else {
+          dispatch(customerFetchSuccess(response.data[0]))
+        }
+      } else {
+        dispatch(customerFetchFailure('No Results'))
+        dispatch(panelCartShouldUpdate(false))
+      }
+      dispatch(setCustomerInputDisabled())
+    })
+    .catch(error => {
+      dispatch(customerFetchFailure(error.message))
+    })
+  }
+}

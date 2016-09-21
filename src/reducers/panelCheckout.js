@@ -23,7 +23,7 @@ function checkout (state = {
   cashTendered: 0,
   card: {
     type: 'credit',
-    provider: 'master'
+    provider: null
   },
   bonusPoints: false,
   customDiscount: undefined,
@@ -93,13 +93,14 @@ function checkout (state = {
       })
     case PANEL_CHECKOUT_RESET:
       return Object.assign({}, state, {
+        bonusPoints: false,
         isProcessing: false,
         paymentMode: 'cash',
         cashTendered: 0,
         customDiscount: undefined,
         transNumber: '',
         pincode: '',
-        orderNote: ''
+        orderNote: []
       })
     case CHECKOUT_FIELDS_RESET:
       return Object.assign({}, state, {
@@ -107,7 +108,8 @@ function checkout (state = {
         cashTendered: 0,
         transNumber: '',
         pincode: '',
-        card: {}
+        card: {},
+        orderNote: []
       })
     case TOGGLE_BONUS_POINTS:
       return Object.assign({}, state, {

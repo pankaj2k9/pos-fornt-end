@@ -12,6 +12,7 @@ import {
   SET_CART_ITEM_QTY,
   SET_CUSTOM_DISCOUNT,
   REMOVE_CART_ITEM,
+  REMOVE_CUSTOMER,
   REMOVE_VOUCHER,
   PANEL_CART_RESET,
   RECALL_CART_ITEMS
@@ -36,8 +37,7 @@ function panelCart (state = {
   switch (action.type) {
     case PANEL_CART_SHOULD_UPDATE:
       return Object.assign({}, state, {
-        customerSearchKey: ' ',
-        shouldUpdate: true
+        shouldUpdate: action.value
       })
     case SET_CUSTOMER_INPUT_ACTIVE:
       return Object.assign({}, state, {
@@ -63,7 +63,8 @@ function panelCart (state = {
         activeCustomer: action.customer,
         customerSearchKey: '',
         customerSearchError: null,
-        searchActive: false
+        searchActive: false,
+        shouldUpdate: false
       })
     case SET_ACTIVE_CUSTOMER_ERROR:
       return Object.assign({}, state, {
@@ -76,6 +77,11 @@ function panelCart (state = {
     case SET_VOUCHER_DISCOUNT:
       return Object.assign({}, state, {
         voucher: action.data
+      })
+    case REMOVE_CUSTOMER:
+      return Object.assign({}, state, {
+        activeCustomer: null,
+        walkinCustomer: ''
       })
     case ADD_CART_ITEM:
       state.customerSearchKey = ' '

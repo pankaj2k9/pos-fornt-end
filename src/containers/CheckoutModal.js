@@ -1,6 +1,6 @@
 import React, {Component, PropTypes} from 'react'
 import { connect } from 'react-redux'
-import { FormattedMessage } from 'react-intl'
+import { injectIntl, FormattedMessage } from 'react-intl'
 
 import CheckoutControls from '../components/CheckoutControls'
 import CheckoutProcessing from '../components/CheckoutProcessing'
@@ -27,14 +27,16 @@ class CheckoutModal extends Component {
     }
   }
 
-  onClickSubmit (data) {
+  onClickSubmit (data, event) {
+    event.preventDefault()
     const { dispatch, orderItems, customDiscount,
             currency, paymentMode, activeCashier,
             activeCustomer, pincode, adminToken,
             cashTendered, locale, card,
             transNumber, storeId, voucher,
             orderNote, isDiscounted, overAllTotal,
-            bonusPoints, walkinCustomer, store
+            bonusPoints, walkinCustomer, store,
+            sumOfCartItems, intl
           } = this.props
 
     let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
@@ -90,7 +92,9 @@ class CheckoutModal extends Component {
         : Number(item.odboPrice) - discount
       items.push({
         id: item.id,
-        name: `${item.nameEn} ${showDiscount}`,
+        name: `${item.nameEn.substring(0, 18) + '...'}
+          ${intl.formatMessage({ id: 'app.general.barcode' }) + item.barcodeInfo}
+          ${showDiscount}`,
         qty: item.qty,
         subtotal: currency === 'sgd'
           ? Number(Number(item.qty) * computedDiscount).toFixed(2)
@@ -121,7 +125,7 @@ class CheckoutModal extends Component {
       : 0
 
     let earnedPlusPrevious = activeCustomer
-      ? Number(earnedPoints).toFixed(0) + Number(activeCustomer.odboCoins)
+      ? Number(earnedPoints) + Number(activeCustomer.odboCoins)
       : 0
 
     let customer = activeCustomer
@@ -134,25 +138,33 @@ class CheckoutModal extends Component {
 
     let receiptTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
-      ? {
-        type: 'cash',
-        total: total,
-        cash: cashTendered,
-        walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
-        customer: customer,
-        previousOdbo: prevOdbo,
-        points: earnedPoints,
-        newOdbo: earnedPlusPrevious,
-        change: data.change,
-        voucherDiscount: voucherAmount
-      }
-      : {
-        type: 'credit',
-        total: total,
-        transNo: transNumber,
-        cardType: card.type,
-        provider: card.provider
-      }
+        ? {
+          type: 'cash',
+          total: total,
+          cash: cashTendered,
+          walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+          customer: customer,
+          previousOdbo: prevOdbo,
+          points: earnedPoints,
+          newOdbo: earnedPlusPrevious,
+          change: data.change,
+          voucherDiscount: voucherAmount,
+          sumOfCartItems: sumOfCartItems
+        }
+        : {
+          type: 'credit',
+          total: total,
+          transNo: transNumber,
+          walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+          customer: customer,
+          previousOdbo: prevOdbo,
+          points: earnedPoints,
+          newOdbo: earnedPlusPrevious,
+          cardType: card.type === 'debit' ? 'Nets' : 'Credit',
+          provider: card.provider,
+          voucherDiscount: voucherAmount,
+          sumOfCartItems: sumOfCartItems
+        }
       : {
         type: 'odbo',
         total: total,
@@ -179,13 +191,16 @@ class CheckoutModal extends Component {
       ? 0
       : cashTendered
 
+    let odboId = !activeCustomer ? undefined : activeCustomer.odboId
+
     let posTrans
     if (currency === 'sgd') {
       if (paymentMode === 'cash') {
         posTrans = {
           type: 'cash',
           payment: Number(payment),
-          bonusPoints: bonus
+          bonusPoints: bonus,
+          odboId: odboId
         }
       } else if (paymentMode === 'credit') {
         posTrans = {
@@ -193,13 +208,14 @@ class CheckoutModal extends Component {
           transNumber,
           cardType: card.type,
           provider: card.provider,
-          bonusPoints: bonus
+          bonusPoints: bonus,
+          odboId: odboId
         }
       }
     } else if (currency === 'odbo') {
       posTrans = {
         type: 'odbo',
-        odboId: activeCustomer.odboId,
+        odboId: odboId,
         pinCode: pincode
       }
     }
@@ -217,8 +233,8 @@ class CheckoutModal extends Component {
   }
 
   onClickCancel () {
-    const {dispatch, orderError, orderSuccess, locale} = this.props
-    orderError === '' && orderSuccess
+    const {dispatch, orderSuccess, locale} = this.props
+    orderSuccess
     ? dispatch(resetStore(locale)) && document.getElementById('productsSearch').focus()
     : dispatch(closeActiveModal()) && document.getElementById('productsSearch').focus()
   }
@@ -290,6 +306,10 @@ class CheckoutModal extends Component {
       : Number(cashMinusTotal)
     const newOdboBalance = odboMinusTotal < 0 || isNaN(odboMinusTotal) ? Number(0).toFixed(2) : odboMinusTotal
 
+    let data = currency !== 'sgd'
+      ? {odboCoins: odboCoins, odboBalance: odboMinusTotal}
+      : {change: cashChange}
+
     return (
       <div id={id} className={'modal ' + (activeModalId === id ? 'is-active' : '')}>
         <div className='modal-background' />
@@ -309,6 +329,7 @@ class CheckoutModal extends Component {
               isProcessing={isProcessing}
               currency={currency}
               paymentMode={paymentMode}
+              odboCoins={odboCoins}
               odboBalance={odboBalance}
               onChange={this.onChange.bind(this)}
               card={card}
@@ -318,6 +339,7 @@ class CheckoutModal extends Component {
               cashTendered={cashTendered}
               cashChange={cashChange}
               odboMinusTotal={newOdboBalance}
+              onSubmit={this.onClickSubmit.bind(this, data)}
             />
             : <CheckoutProcessing
               isProcessing={isProcessing}
@@ -385,6 +407,7 @@ CheckoutModal.PropTypes = {
   walkinCustomer: PropTypes.string,
   voucherDiscount: PropTypes.number,
   orderNote: PropTypes.array,
+  sumOfCartItems: PropTypes.number,
   overAllTotal: PropTypes.number,
   card: PropTypes.object,
   voucher: PropTypes.object
@@ -411,8 +434,9 @@ function mapStateToProps (state) {
     pincode: state.panelCheckout.pincode,
     customDiscount: state.panelCheckout.customDiscount,
     receiptData: state.orders.receipt,
-    reprinting: state.orders.reprinting
+    reprinting: state.orders.reprinting,
+    intl: state.intl
   }
 }
 
-export default connect(mapStateToProps)(CheckoutModal)
+export default connect(mapStateToProps)(injectIntl(CheckoutModal))
