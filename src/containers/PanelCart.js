@@ -113,24 +113,24 @@ class PanelCart extends Component {
     // const add = this.addProductQty
     return cartItemsArray.map(function (item, key) {
       function plus () {
-        dispatch(panelCartShouldUpdate())
+        dispatch(panelCartShouldUpdate(true))
         dispatch(setCartItemQty(item.id, 'plus'))
         document.getElementById('productsSearch').focus()
       }
       function minus () {
-        dispatch(panelCartShouldUpdate())
+        dispatch(panelCartShouldUpdate(true))
         dispatch(setCartItemQty(item.id, 'minus'))
         document.getElementById('productsSearch').focus()
       }
       function remove () {
-        dispatch(panelCartShouldUpdate())
+        dispatch(panelCartShouldUpdate(true))
         dispatch(removeCartItem(item.id))
         document.getElementById('orderSearch').value = 0
         document.getElementById('productsSearch').focus()
       }
       function setDiscount (value) {
         let discount = Number(value) > 100 ? 100 : value
-        dispatch(panelCartShouldUpdate())
+        dispatch(panelCartShouldUpdate(true))
         dispatch(setCustomDiscount(discount, item.id))
       }
       let productName = locale === 'en' ? item.nameEn : item.nameZh

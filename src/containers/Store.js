@@ -30,12 +30,13 @@ class Store extends Component {
 
   onChange (staffId) {
     const {dispatch, staff} = this.props
-    let x = staff.staffs
-    for (var i = 0; i < x.length; i++) {
-      if (x[i].id === staffId) {
-        dispatch(setCashierLoggedIn(x[i]))
+    let staffs = staff.staffs
+    for (var i = 0; i < staffs.length; i++) {
+      if (staffs[i].id === staffId) {
+        dispatch(setCashierLoggedIn(staffs[i]))
       }
     }
+    document.getElementById('staffPassword').focus()
   }
 
   close () {
@@ -68,13 +69,16 @@ class Store extends Component {
     return (
       <div id='verifyStaff' className={`modal ${active}`}>
         <div className='modal-background' />
-        <div className='modal-content'>
-          <div className='box'>
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <div className='modal-card-title is-marginless has-text-centered'>
+              <h1 className='title'><FormattedMessage id='app.button.logCashier' /></h1>
+            </div>
+            <button className='delete' onClick={this.close.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
             {shouldUpdate
               ? <div className='content has-text-centered'>
-                <h1 className='title'>
-                  <FormattedMessage id='app.general.chooseUser' />
-                </h1>
                 <h1 className='subtitle'>
                   <FormattedMessage id='app.general.verifyingStaff' />
                 </h1>
@@ -85,9 +89,6 @@ class Store extends Component {
               </div>
               : <div>
                 <div className='content has-text-centered'>
-                  <h1 className='title'>
-                    <FormattedMessage id='app.general.chooseUser' />
-                  </h1>
                   {!error
                     ? null
                     : <p className='subtitle'>
@@ -95,9 +96,6 @@ class Store extends Component {
                     </p>
                   }
                   <div className='control is-horizontal'>
-                    <div className='control-label' style={{padding: 0, fontSize: 18}}>
-                      <FormattedMessage id='app.general.chooseUser' />
-                    </div>
                     <div className='control'>
                       <span className='select is-large is-fullwidth'>
                         <select
@@ -119,31 +117,32 @@ class Store extends Component {
                   </div>
                   {activeCashier === null
                     ? null
-                    : <div className='container'>
-                      <p className='control is-fullwidth'>
-                        <form autoComplete={false} onSubmit={this.verifyStaff.bind(this)}>
-                          <input id='staffPassword'
-                            className='input is-large' type='password'
-                            placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
-                        </form>
-                      </p>
-                      <hr />
+                    : <div>
+                      <div className='container'>
+                        <p className='control is-fullwidth'>
+                          <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
+                            <input id='staffPassword' autoComplete='off'
+                              className='input is-large' type='password'
+                              placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
+                          </form>
+                        </p>
+                        <hr />
+                      </div>
+                      <div className='columns'>
+                        <p className='column is-6 is-offset-3'>
+                          <a className='button is-large is-fullwidth is-success'
+                            onClick={this.verifyStaff.bind(this)} >
+                            <FormattedMessage id='app.button.verify' />
+                          </a>
+                        </p>
+                      </div>
                     </div>
                   }
-                  <div className='columns'>
-                    <p className='column is-6 is-offset-3'>
-                      <a className='button is-large is-fullwidth is-success'
-                        onClick={this.verifyStaff.bind(this)} >
-                        <FormattedMessage id='app.button.verify' />
-                      </a>
-                    </p>
-                  </div>
                 </div>
               </div>
             }
           </div>
         </div>
-        <button className='modal-close' onClick={this.close.bind(this)} />
       </div>
     )
   }

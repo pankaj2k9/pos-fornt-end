@@ -72,13 +72,18 @@ export function fetchCustomerByOdboId (searchKey) {
     dispatch(customerFetchRequest())
     const query = {query: { odboId: searchKey }}
     return customerService.fetch(query)
-    .then(customer => {
-      customer
-        ? customer.length !== 0
-          ? dispatch(customerFetchSuccess(customer.data[0]))
-          : dispatch(customerFetchFailure('No Results'))
-        : dispatch(customerFetchFailure('No Results')) &&
+    .then(response => {
+      if (response) {
+        if (!response.data[0]) {
+          dispatch(customerFetchFailure('No Results'))
           dispatch(panelCartShouldUpdate(false))
+        } else {
+          dispatch(customerFetchSuccess(response.data[0]))
+        }
+      } else {
+        dispatch(customerFetchFailure('No Results'))
+        dispatch(panelCartShouldUpdate(false))
+      }
       dispatch(setCustomerInputDisabled())
     })
     .catch(error => {

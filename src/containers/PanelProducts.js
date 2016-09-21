@@ -44,7 +44,7 @@ class PanelProducts extends Component {
   onClickProduct (productId) {
     const {dispatch, productsById, currency} = this.props
     const product = productsById[productId]
-    dispatch(panelCartShouldUpdate())
+    dispatch(panelCartShouldUpdate(true))
     dispatch(addItemToCart(product, currency))
     document.getElementById('productsSearch').focus()
   }
@@ -57,7 +57,7 @@ class PanelProducts extends Component {
       productsArray,
       productsSearchKey, currency
     } = this.props
-    dispatch(panelCartShouldUpdate())
+    dispatch(panelCartShouldUpdate(true))
     const barcodeItem = productsArray.filter(function (product) {
       return product.barcodeInfo === (productsSearchKey)
     })

@@ -51,7 +51,7 @@ export function resetProductsPanel () {
 export function addItemToCart (product, currency) {
   return (dispatch) => {
     dispatch(panelProductsShouldUpdate())
-    dispatch(panelCartShouldUpdate())
+    dispatch(panelCartShouldUpdate(true))
     dispatch(addCartItem(product, currency))
     dispatch(setPaymentMode('cash'))
     dispatch(resetProductsPanel())
