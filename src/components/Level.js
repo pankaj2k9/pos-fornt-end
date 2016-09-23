@@ -26,7 +26,7 @@ const Level = (props) => {
         : null
       }
       {right !== null || undefined
-        ? <div className='level-right'>
+        ? <div className='level-right' style={{maxHeight: 27}}>
           {button
             ? <button onClick={action} className='button is-link'>
               <span className='icon'><i className={buttonIcon} /></span>

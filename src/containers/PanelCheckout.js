@@ -53,24 +53,27 @@ class PanelCheckout extends Component {
 
   sumOfCartItems () {
     const {cartItemsArray, currency} = this.props
+
     let x = cartItemsArray
     let sumOfItemsSgd = 0.00
-    let sumOfItemsOdbo = 0.00
+    let sumOfItemsOdbo = 0
 
     for (var i = 0; i < x.length; i++) {
       sumOfItemsSgd = sumOfItemsSgd + Number(x[i].subTotalPrice)
       sumOfItemsOdbo = sumOfItemsOdbo + Number(x[i].subTotalOdboPrice)
     }
+
     let sumOfItems = currency === 'sgd'
-      ? sumOfItemsSgd
-      : sumOfItemsOdbo
+      ? Number(sumOfItemsSgd).toFixed(2)
+      : Number(sumOfItemsOdbo).toFixed(0)
+
     return sumOfItems
   }
 
   sumOfCartDiscounts () {
     const {cartItemsArray, currency, shouldUpdate} = this.props
     let x = cartItemsArray
-    let sumOfDiscounts = 0.00
+    let sumOfDiscounts = 0
     for (var i = 0; i < x.length; i++) {
       // validate if there is no custom discount
       sumOfDiscounts = x[i].customDiscount === 0
@@ -90,7 +93,9 @@ class PanelCheckout extends Component {
     }
     let updatedDiscount = shouldUpdate // detects changes in discount
       ? null
-      : sumOfDiscounts
+      : currency === 'sgd'
+        ? Math.round(sumOfDiscounts)
+        : Math.round(sumOfDiscounts)
     return updatedDiscount
   }
 
@@ -139,7 +144,7 @@ class PanelCheckout extends Component {
   renderModal () {
     const { cartItemsArray, locale, currency, card,
             paymentMode, walkinCustomer, voucher, orderNote } = this.props
-    const subtotal = Number(this.sumOfCartItems()) - Number(this.sumOfCartDiscounts())
+    const subtotal = this.sumOfCartItems() - this.sumOfCartDiscounts()
     return (
       <Modal id='afterCheckoutModal'
         locale={locale}
@@ -156,25 +161,29 @@ class PanelCheckout extends Component {
   }
 
   overAllDeduct () {
-    const {customDiscount} = this.props
+    const {customDiscount, currency} = this.props
     let discount = !customDiscount || customDiscount === '' || customDiscount === 0
-      ? 0 : customDiscount
-    let overAllDeduct = (Number(discount) / 100) * this.sumOfCartItems()
-    return Number(overAllDeduct).toFixed(2)
+      ? 0 : Number(customDiscount)
+    let overAllDeduct = currency === 'sgd'
+      ? Math.round((discount / 100) * this.sumOfCartItems()).toFixed(2)
+      : Math.round((discount / 100) * this.sumOfCartItems()).toFixed(0)
+    return overAllDeduct
   }
 
   overAllTotal () {
     const { voucher, currency, customDiscount } = this.props
-    var voucherDiscount = !voucher ? 0.00 : voucher.amount
+    var voucherDiscount = !voucher
+      ? 0.00
+      : Number(voucher.amount).toFixed(2)
     let subtotal = !customDiscount || customDiscount === 0
       ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
       : this.sumOfCartItems() - this.overAllDeduct()
-    let sgdMinusVc = Number(subtotal).toFixed(2) - Number(voucherDiscount) < 0
+    let sgdMinusVc = Number(subtotal).toFixed(2) - voucherDiscount < 0
       ? 0.00
-      : Number(subtotal).toFixed(2) - Number(voucherDiscount).toFixed(2)
+      : Number(subtotal).toFixed(2) - voucherDiscount
     let overAllTotal = currency === 'sgd'
-      ? sgdMinusVc
-      : subtotal
+      ? sgdMinusVc.toFixed(2)
+      : Number(subtotal).toFixed(0)
     return overAllTotal
   }
 
@@ -295,8 +304,8 @@ class PanelCheckout extends Component {
       : Number(customDiscount) > 100 ? 100 : customDiscount
     // @subtotal: display apropriate computation of discounts
     let subtotal = !customDiscount || customDiscount === 0
-      ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
-      : Number(this.sumOfCartItems()).toFixed(2)
+      ? (this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
+      : this.sumOfCartItems()
     var voucherDiscount = !voucher ? 0.00 : voucher.amount
     const orderNoteCount = orderNote.length === 0 ? 0 : orderNote.length
     const empty = cartItemsArray.length === 0
@@ -389,23 +398,26 @@ class PanelCheckout extends Component {
                 </div>
                 : null
               }
-              <Level left={<FormattedMessage id='app.general.voucherDiscount' />}
-                right={
-                  <strong>
-                  {/*
-                      @operator: !voucher
-                          - validates if the prop object 'voucher' is null,
-                            it will display nothing else display the remove
-                            voucher button
-                    */
-                    !voucher
-                    ? null
-                    : <a onClick={this.onClickRemoveVoucher.bind(this)}
-                      style={{marginRight: 50}}>
-                      <FormattedMessage id='app.button.removeVoucher' /> </a>
-                  }
-                  {Number(voucherDiscount).toFixed(2)}</strong>
-                } />
+              {currency === 'sgd'
+                ? <Level left={<FormattedMessage id='app.general.voucherDiscount' />}
+                  right={
+                    <strong>
+                    {/*
+                        @operator: !voucher
+                            - validates if the prop object 'voucher' is null,
+                              it will display nothing else display the remove
+                              voucher button
+                      */
+                      !voucher
+                      ? null
+                      : <a onClick={this.onClickRemoveVoucher.bind(this)}
+                        style={{marginRight: 50}}>
+                        <FormattedMessage id='app.button.removeVoucher' /> </a>
+                    }
+                    {Number(voucherDiscount).toFixed(2)}</strong>
+                  } />
+                : null
+              }
               {/*
                   @operator: !activeCustomer
                       - validates if the prop object 'activeCustomer' is null,

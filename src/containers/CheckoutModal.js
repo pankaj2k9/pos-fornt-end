@@ -40,9 +40,7 @@ class CheckoutModal extends Component {
           } = this.props
 
     let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
-    let total = currency === 'sgd'
-      ? Number(overAllTotal).toFixed(2)
-      : Number(overAllTotal)
+    let total = overAllTotal
 
     let products = orderItems.map(item => {
       return {
@@ -62,6 +60,8 @@ class CheckoutModal extends Component {
 
     let items = []
     orderItems.forEach(item => {
+      let itemCD = Number(item.customDiscount)
+      let itemQty = Number(item.qty)
       let discountPercent = item.customDiscount === 0
         ? item.isDiscounted
           ? currency === 'sgd'
@@ -85,20 +85,20 @@ class CheckoutModal extends Component {
             : (parseInt(item.odboPriceDiscount) / 100) * item.odboPrice
           : 0.00
         : currency === 'sgd'
-          ? (Number(item.customDiscount) / 100) * item.price
-          : (Number(item.customDiscount) / 100) * item.odboPrice
+          ? (itemCD / 100) * item.price
+          : (itemCD / 100) * item.odboPrice
       let computedDiscount = currency === 'sgd'
         ? Number(item.price) - discount
-        : Number(item.odboPrice) - discount
+        : Number(item.odboPrice) - Math.round(discount)
       items.push({
         id: item.id,
         name: `${item.nameEn.substring(0, 18) + '...'}
           ${intl.formatMessage({ id: 'app.general.barcode' }) + item.barcodeInfo}
           ${showDiscount}`,
-        qty: item.qty,
+        qty: itemQty,
         subtotal: currency === 'sgd'
-          ? Number(Number(item.qty) * computedDiscount).toFixed(2)
-          : parseInt(item.qty) * Number(computedDiscount)
+          ? Number(itemQty * computedDiscount).toFixed(2)
+          : itemQty * computedDiscount
       })
     })
 
@@ -134,7 +134,7 @@ class CheckoutModal extends Component {
 
     let prevOdbo = activeCustomer
       ? activeCustomer.odboCoins
-      : 0.00
+      : 0
 
     let receiptTrans = (currency === 'sgd')
       ? (paymentMode === 'cash')
@@ -142,20 +142,22 @@ class CheckoutModal extends Component {
           type: 'cash',
           total: total,
           cash: cashTendered,
-          walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+          walkIn: walkinCustomer,
           customer: customer,
           previousOdbo: prevOdbo,
           points: earnedPoints,
           newOdbo: earnedPlusPrevious,
           change: data.change,
           voucherDiscount: voucherAmount,
-          sumOfCartItems: sumOfCartItems
+          sumOfCartItems: sumOfCartItems,
+          customDiscount: customDiscount,
+          orderNote
         }
         : {
           type: 'credit',
           total: total,
           transNo: transNumber,
-          walkIn: !walkinCustomer ? 'N/A' : walkinCustomer,
+          walkIn: walkinCustomer,
           customer: customer,
           previousOdbo: prevOdbo,
           points: earnedPoints,
@@ -163,13 +165,16 @@ class CheckoutModal extends Component {
           cardType: card.type === 'debit' ? 'Nets' : 'Credit',
           provider: card.provider,
           voucherDiscount: voucherAmount,
-          sumOfCartItems: sumOfCartItems
+          sumOfCartItems: sumOfCartItems,
+          customDiscount: customDiscount,
+          orderNote
         }
       : {
         type: 'odbo',
         total: total,
         odboCoins: data.odboCoins,
-        odboBalance: data.odboBalance
+        odboBalance: data.odboBalance,
+        orderNote
       }
 
     let remarks = orderNote.length === 0
@@ -291,20 +296,22 @@ class CheckoutModal extends Component {
 
     let odboCoins = (activeCustomer !== null || undefined)
     ? isNaN(Number(activeCustomer.odboCoins))
-      ? Number(0).toFixed(2)
+      ? 0
       : Number(activeCustomer.odboCoins)
-    : Number(0).toFixed(2)
+    : 0
 
     const odboBalance = (odboCoins <= 0 || isNaN(odboCoins))
-      ? Number(0).toFixed(2)
+      ? 0
       : odboCoins
-    const total = Number(overAllTotal).toFixed(2)
-    const odboMinusTotal = Number(odboBalance) - Number(overAllTotal)
-    const cashMinusTotal = Number(cashTendered) - Number(overAllTotal)
+    const total = overAllTotal
+    const odboMinusTotal = odboBalance - overAllTotal
+    const cashMinusTotal = Number(cashTendered) - overAllTotal
     const cashChange = (cashMinusTotal < 0 || isNaN(cashMinusTotal))
-      ? Number(0).toFixed(2)
-      : Number(cashMinusTotal)
-    const newOdboBalance = odboMinusTotal < 0 || isNaN(odboMinusTotal) ? Number(0).toFixed(2) : odboMinusTotal
+      ? 0
+      : Number(cashMinusTotal).toFixed(2)
+    const newOdboBalance = odboMinusTotal < 0 || isNaN(odboMinusTotal)
+      ? 0
+      : odboMinusTotal
 
     let data = currency !== 'sgd'
       ? {odboCoins: odboCoins, odboBalance: odboMinusTotal}
@@ -336,7 +343,7 @@ class CheckoutModal extends Component {
               onClickCardToggle={this.onClickCardToggle.bind(this)}
               onClickCardProvToggle={this.onClickCardProvToggle.bind(this)}
               total={total}
-              cashTendered={cashTendered}
+              cashTendered={Number(cashTendered).toFixed(2)}
               cashChange={cashChange}
               odboMinusTotal={newOdboBalance}
               onSubmit={this.onClickSubmit.bind(this, data)}
@@ -373,7 +380,7 @@ class CheckoutModal extends Component {
                 </p>
                 {
                   (currency === 'sgd') && !orderSuccess && orderError === ''
-                  ? (cashMinusTotal >= Number(0).toFixed(2)) || paymentMode === 'credit' && transNumber !== ''
+                  ? (cashMinusTotal >= 0) || paymentMode === 'credit' && transNumber !== ''
                     ? <p className='column control is-marginless'>
                       <a id='confirmCheckout' className='button is-large is-success is-fullwidth'
                         onClick={this.onClickSubmit.bind(this, {change: cashChange})}>
@@ -381,7 +388,7 @@ class CheckoutModal extends Component {
                       </a>
                     </p>
                     : null
-                  : (odboMinusTotal >= Number(0).toFixed(2)) && !orderSuccess && orderError === ''
+                  : (odboMinusTotal >= 0) && !orderSuccess && orderError === ''
                     ? <p className='column control is-marginless'>
                       <a id='confirmCheckout' className='button is-large is-success is-fullwidth'
                         onClick={this.onClickSubmit.bind(this, {odboCoins: odboCoins, odboBalance: odboMinusTotal})}>

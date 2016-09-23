@@ -117,47 +117,65 @@ class PanelCart extends Component {
         dispatch(setCartItemQty(item.id, 'plus'))
         document.getElementById('productsSearch').focus()
       }
+
       function minus () {
         dispatch(panelCartShouldUpdate(true))
         dispatch(setCartItemQty(item.id, 'minus'))
         document.getElementById('productsSearch').focus()
       }
+
       function remove () {
         dispatch(panelCartShouldUpdate(true))
         dispatch(removeCartItem(item.id))
         document.getElementById('orderSearch').value = 0
         document.getElementById('productsSearch').focus()
       }
+
       function setDiscount (value) {
         let discount = Number(value) > 100 ? 100 : value
         dispatch(panelCartShouldUpdate(true))
         dispatch(setCustomDiscount(discount, item.id))
       }
+
       let productName = locale === 'en' ? item.nameEn : item.nameZh
-      // placeholder value: displays default discount
+      let itemDiscount = Number(item.priceDiscount)
+      let odboDiscount = Number(item.odboPriceDiscount)
+      let customDiscount = Number(item.customDiscount)
+      let price = Number(item.price)
+      let odboPrice = Number(item.odboPrice)
+
+      // validate customDiscount is equal to 0
       let discountPH = item.customDiscount === 0
         ? item.isDiscounted
           ? currency === 'sgd'
-            ? Number(item.priceDiscount)
-            : Number(item.odboPriceDiscount)
+            ? itemDiscount
+            : odboDiscount
           : 0.00
-        : Number(item.customDiscount)
+        : customDiscount
+
       // input value: 100 is max value
-      let discountVal = item.customDiscount === 0
+      let discountVal = odboDiscount === 0
         ? ''
-        : Number(item.customDiscount)
-      let discount = item.customDiscount === 0
+        : customDiscount
+
+      // validate customDiscount is equal to 0
+      let discount = customDiscount === 0
+        // if true then validate if item discount is enabled
         ? item.isDiscounted
           ? currency === 'sgd'
-            ? (Number(item.priceDiscount) / 100) * item.price
-            : (parseInt(item.odboPriceDiscount) / 100) * item.odboPrice
+            ? Math.round((itemDiscount / 100) * price)
+            : Math.round((odboDiscount / 100) * odboPrice)
+          // else if item discount not enabled, discount is zero
           : 0.00
+        // else if customDiscount is not zero, compute overall discount of sale
         : currency === 'sgd'
-          ? (Number(item.customDiscount) / 100) * item.price
-          : (Number(item.customDiscount) / 100) * item.odboPrice
+          ? Math.round((customDiscount / 100) * price)
+          : Math.round((customDiscount / 100) * odboPrice)
+
       let computedDiscount = currency === 'sgd'
-        ? Number(item.price) - discount
-        : Number(item.odboPrice) - discount
+        ? price - discount
+        : odboPrice - Math.round(discount)
+
       return (
         notEmpty
         ? <tr key={key}>

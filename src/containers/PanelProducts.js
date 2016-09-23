@@ -200,7 +200,7 @@ class PanelProducts extends Component {
               value={productsSearchKey}
               placeholder='app.ph.searchOrBarcode'
               onChange={this.searchKeyInput.bind(this)}
-              onKeyDown={this.barcodeInput.bind(this)} />
+              onSubmit={this.barcodeInput.bind(this)} />
           </div>
           <div className='panel-heading'>
             <Tabs
@@ -213,7 +213,7 @@ class PanelProducts extends Component {
           <div className='panel-block'>
           {!isFetching
             ? <div className='columns is-multiline is-mobile'
-              style={{height: intFrameHeight - 250, overflowY: 'scroll'}}>
+              style={{height: intFrameHeight - 280, overflowY: 'scroll'}}>
               {this.renderChildren()}
             </div>
             : <div style={{height: intFrameHeight - 300, justifyContent: 'center'}}>
