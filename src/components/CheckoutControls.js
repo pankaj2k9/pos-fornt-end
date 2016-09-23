@@ -74,7 +74,7 @@ const CheckoutControls = (props) => {
 
   // fixed width for displaying trans details
   var cashDetails = 250
-  var cardDetails = 280
+  var odboDetails = 280
 
   CheckoutControls.defaultProps = {
     onSubmit: function (event) {
@@ -82,7 +82,6 @@ const CheckoutControls = (props) => {
       document.getElementById('confirmCheckout').focus()
     }
   }
-
   return (
     <section className='modal-card-body'>
       {
@@ -203,7 +202,7 @@ const CheckoutControls = (props) => {
                         </tr>
                         <tr>
                           <td><h3><FormattedMessage id='app.general.cashTendered' />:</h3></td>
-                          <td style={{textAlign: 'right'}}><h3>{parseInt(cashTendered).toFixed(2)}</h3></td>
+                          <td style={{textAlign: 'right'}}><h3>{cashTendered}</h3></td>
                         </tr>
                       </tbody>
                     </table>
@@ -222,8 +221,8 @@ const CheckoutControls = (props) => {
                         </td>
                         <td style={{textAlign: 'right'}}>
                         {paymentMode === 'cash'
-                          ? <h1>{parseInt(cashChange).toFixed(2)}</h1>
-                          : <h1>{parseInt(total).toFixed(2)}</h1>
+                          ? <h1>{cashChange}</h1>
+                          : <h1>{total}</h1>
                         }
                         </td>
                       </tr>
@@ -234,28 +233,30 @@ const CheckoutControls = (props) => {
             </div>
             : <div className='container has-text-centered'>
               <center>
-                <div style={{width: cardDetails}}>
+                <div style={{width: odboDetails}}>
                   <table>
                     <tbody>
                       <tr>
-                        <td><h3><FormattedMessage id='app.general.ob' />:</h3></td>
-                        <td style={{textAlign: 'right'}}><h3>{parseInt(odboBalance).toFixed(2)}</h3></td>
+                        <td>
+                          <h3><FormattedMessage id='app.general.ob' />:</h3>
+                        </td>
+                        <td style={{textAlign: 'right'}}><h3>{odboBalance}</h3></td>
                       </tr>
                       <tr>
                         <td><h3><FormattedMessage id='app.general.top' />:</h3></td>
-                        <td style={{textAlign: 'right'}}><h3>{parseInt(total).toFixed(2)}</h3></td>
+                        <td style={{textAlign: 'right'}}><h3>{total}</h3></td>
                       </tr>
                     </tbody>
                   </table>
                   <hr />
                   <table>
-                  {parseInt(odboBalance).toFixed(2) > 0 && odboMinusTotal >= 0
+                  {odboBalance > 0 && odboMinusTotal >= 0
                     ? <tr className='is-bordered'>
                       <td>
                         <h3><FormattedMessage id='app.general.rob' />:</h3>
                       </td>
                       <td style={{textAlign: 'right'}}>
-                        <h1>{parseInt(odboMinusTotal).toFixed(2)}</h1>
+                        <h1>{odboMinusTotal}</h1>
                       </td>
                     </tr>
                     : <tr>

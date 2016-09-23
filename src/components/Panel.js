@@ -16,9 +16,18 @@ const Panel = (props) => {
     buttonTwo: undefined
   }
 
+  const containerStyle = {
+    margin: 10,
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 5,
+    paddingRight: 5
+  }
+
   return (
     <div className={'content'}>
-      <div className='container'style={{paddingTop: 5, paddingBottom: 10, paddingLeft: 5, paddingRight: 5}}>
+      <div className='container'
+        style={containerStyle}>
         <Level
           left={<h2 className='is-marginless'>{panelName}</h2>}
           right={
