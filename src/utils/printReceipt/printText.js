@@ -147,13 +147,16 @@ export const buildFooter = (footerText) => {
  * @param {Object} info of receipt
  */
 export const buildExtraInfo = (info) => {
+  let date = new Date(info.date)
   let extra = ''
   let orderId = info.orderId
     ? extra += `<div>Order ID : ${info.orderId}</div>`
     : null
   extra += '<div>'
-  extra += `<div>STAFF : ${info.staff}<div>`
-  extra += `<div>${formatDate(info.date)}</div>`
+  if (info.staff) {
+    extra += `<div>STAFF : ${info.staff}<div>`
+  }
+  extra += `<div>${formatDate(date)}</div>`
   orderId
   extra += '</div>'
 
@@ -232,12 +235,14 @@ export const buildComputation = (trans) => {
         }
       }
     }
-    if (trans.orderNote.length !== 0) {
-      comp += RECEIPT_DIVIDER
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>Remarks: </div></div>`
-      trans.orderNote.map(note => {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}">${note.message}</div>`
-      })
+    if (trans.orderNote) {
+      if (trans.orderNote.length !== 0) {
+        comp += RECEIPT_DIVIDER
+        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>Remarks: </div></div>`
+        trans.orderNote.map(note => {
+          comp += `<div style="${TOTAL_DIV_STYLE_2}">${note.message}</div>`
+        })
+      }
     }
     comp += '</div>'
   }

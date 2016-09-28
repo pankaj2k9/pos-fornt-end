@@ -8,6 +8,11 @@ import { fetchCustomers } from './customers'
 
 import print from '../utils/printReceipt/print'
 
+export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
+export function reprintingReceipt (value) {
+  return { type: REPRINTING_RECEIPT, value }
+}
+
 export const RESET_SETTINGS_STATE = 'RESET_SETTINGS_STATE'
 export function resetSettingsState () {
   return { type: RESET_SETTINGS_STATE }
@@ -71,9 +76,16 @@ export function storeOrderFetch (orderId) {
 
     return ordersService.get(orderId)
       .then(response => {
-        response.id !== undefined
-        ? dispatch(storeOrderFetchSuccess(response))
-        : dispatch(storeOrderFetchFailure())
+        console.log('response: ', response)
+        if (response) {
+          if (!response.data[0]) {
+            dispatch(storeOrderFetchFailure())
+          } else {
+            dispatch(storeOrderFetchSuccess(response.data[0]))
+          }
+        } else {
+          dispatch(storeOrderFetchFailure())
+        }
       })
       .catch(error => {
         dispatch(storeOrderFetchFailure(error))

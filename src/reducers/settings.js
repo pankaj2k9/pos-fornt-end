@@ -12,6 +12,7 @@ import {
   VERIFY_STORE_PIN_SUCCESS,
   VERIFY_STORE_PIN_FAILURE,
   SETTINGS_ERROR,
+  REPRINTING_RECEIPT,
 
   UPDATE_CUSTOMER_SHOW,
   UPDATE_CUSTOMER_REQUEST,
@@ -159,9 +160,14 @@ function settings (state = {
         activeCustomerId: action.odboId
       })
     }
+    case REPRINTING_RECEIPT:
+      return Object.assign({}, state, {
+        reprintSuccess: action.value,
+        isProcessing: false
+      })
     case REFUND_REQUEST:
       return Object.assign({}, state, {
-        refundSuccess: null,
+        refundSuccess: false,
         isProcessing: true
       })
     case REFUND_SUCCESS:

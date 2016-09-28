@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { FormattedMessage, FormattedDate } from 'react-intl'
 
 import SalesReport from './SalesReport'
+import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
 
 import { reportsSetTab } from '../actions/reports'
@@ -10,6 +11,20 @@ import { reportsSetTab } from '../actions/reports'
 class Reports extends React.Component {
   _onPressTab (tab) {
     this.props.dispatch(reportsSetTab(tab))
+  }
+
+  renderTab () {
+    const { activeTab } = this.props
+    switch (activeTab) {
+      case 'sales':
+        return <SalesReport />
+      case 'completeSales':
+        return <SalesReportComplete />
+      case 'orders':
+        return <StoreOrders />
+      default:
+        return <SalesReportComplete />
+    }
   }
 
   render () {
@@ -30,6 +45,10 @@ class Reports extends React.Component {
 
           <div className='tabs is-centered'>
             <ul>
+              <li className={activeTab === 'completeSales' ? 'is-active' : ''}
+                onClick={this._onPressTab.bind(this, 'completeSales')}>
+                <a><FormattedMessage id='app.general.completeSales' /></a>
+              </li>
               <li className={activeTab === 'sales' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'sales')}>
                 <a><FormattedMessage id='app.page.reports.salesReport' /></a>
@@ -40,10 +59,8 @@ class Reports extends React.Component {
               </li>
             </ul>
           </div>
-
-          {activeTab === 'sales'
-            ? <SalesReport />
-            : <StoreOrders />
+          {
+            this.renderTab()
           }
         </div>
       </section>

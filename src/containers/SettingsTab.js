@@ -214,6 +214,28 @@ class SettingsTab extends Component {
             </center>
           </div>
         </div>
+        <div className='columns'>
+          <div className='column'><h1 className='title'>
+            <FormattedMessage id={'app.general.reprint'} /></h1>
+          </div>
+        </div>
+        <div className='columns'>
+          <div className='column is-two-thirds'>
+            <p className='subtitle'>
+              <span>
+                <FormattedMessage id={'app.page.settings.refundDesc'} />
+              </span>
+            </p>
+          </div>
+          <div className='column'>
+            <center>
+              <a className='button is-large'
+                onClick={this.onClickReprint.bind(this)}>
+                <FormattedMessage id={'app.general.reprint'} />
+              </a>
+            </center>
+          </div>
+        </div>
       </div>
     )
   }
@@ -455,8 +477,8 @@ class SettingsTab extends Component {
 
   renderOrderSearchModal () {
     const {activeModalId, orderSearchKey,
-           orderDetails, refundSuccess,
-           isProcessing} = this.props
+           orderDetails, refundSuccess, locale,
+           isProcessing, storeDetails, reprintSuccess} = this.props
     const modalId = activeModalId === 'refundModal'
                     ? 'refundModal' : 'reprintModal'
     const type = activeModalId
@@ -464,13 +486,15 @@ class SettingsTab extends Component {
       <SearchModal
         id={modalId}
         type={type}
+        locale={locale}
+        storeDetails={storeDetails}
         title='Enter Order ID'
         active={activeModalId}
         processing={isProcessing}
         displayData='details'
         details={orderDetails}
         orderSearchKey={orderSearchKey}
-        modalStatus={{refund: refundSuccess}}
+        modalStatus={{refund: refundSuccess, reprintSuccess}}
         search={{ id: 'searchOrder', value: orderSearchKey, placeholder: 'Search Order Id', onChange: storeOrdersSetSearchKey }}
         closeButton={{name: 'Close', event: closeAndResetUtilitytModal}} />
     )
@@ -571,6 +595,7 @@ function mapStateToProps (state) {
     activeModalId: state.application.activeModalId,
     staff: state.application.staff.data,
     activeCashier: state.application.activeCashier,
+    storeDetails: state.application.store,
     storeId: state.application.storeId,
     customers: state.data.customers.customersArray,
     isFetching: state.data.customers.isFetching,

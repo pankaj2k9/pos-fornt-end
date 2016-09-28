@@ -37,7 +37,7 @@ class LoginForm extends Component {
     const { onLogin } = this.props
     const { username, password } = this.state
 
-    onLogin(username, password)
+    onLogin(username.toLowerCase(), password)
   }
 
   componentWillMount () {
