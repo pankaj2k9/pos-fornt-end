@@ -28,27 +28,18 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
  * @param {Object} receipt contain info needed to print the receipt
  */
 export const buildReceipt = (data) => {
-  const sampleHeader = [
-    'adr1',
-    'adr2',
-    'adr3'
-  ]
-  const cashier = 'jennye'
-  const machineId = 'BUGIS?'
-  const openCashDrawerCount = 34
-  const refundCount = 5
-  const cashInDrawer = 1000
-
+  const { cashier, machineId, openCashDrawerCount, refundCount, cashInDrawer } = data.info
   let netSales = 0
 
+  // remove ODBO transactions
   data.summary = data.summary.filter(item => {
     return item.type !== 'odbo'
   })
-
   data.orders = data.orders.filter(item => {
     if (item.posTrans.type === 'odbo') { data.orders = Number(data.orders) - 1 }
     return item.posTrans.type !== 'odbo'
   })
+  // end remove ODBO transactions
 
   data.orders.forEach(order => {
     netSales += Number(order.total)
@@ -59,8 +50,8 @@ export const buildReceipt = (data) => {
 
   receiptHtmlString += `<div style="${RECEIPT_STYLE}">`
   // build header
-  receiptHtmlString += buildHeader(sampleHeader)
-  receiptHtmlString += sampleHeader ? RECEIPT_DIVIDER : ''
+  receiptHtmlString += buildHeader(data.headerText)
+  receiptHtmlString += data.headerText ? RECEIPT_DIVIDER : ''
 
   // build info section 1
   receiptHtmlString += buildInfo1()

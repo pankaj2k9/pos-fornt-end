@@ -5,6 +5,8 @@ import { FormattedMessage } from 'react-intl'
 import LoadingPane from '../components/LoadingPane'
 import { completeSalesFetch } from '../actions/reports'
 
+import printEODS from '../utils/printEODS/print'
+
 class SalesReportComplete extends React.Component {
   componentDidMount () {
     const { dispatch, storeId } = this.props
@@ -15,16 +17,42 @@ class SalesReportComplete extends React.Component {
     dispatch(completeSalesFetch(storeId, today))
   }
 
+  printEndOfDaySales () {
+    let { completeSales } = this.props
+
+    // put real store address here
+    completeSales.headerText = [
+      'The ODBO',
+      '200 Victoria Street',
+      'Bugis Junction #02-22',
+      'SINGAPORE',
+      'Telephone : 6238 1337'
+    ]
+
+    // put real sales info here
+    completeSales.info = {
+      cashier: 'jennye',
+      machineId: 'BUGIS?',
+      openCashDrawerCount: 33,
+      refundCount: 5,
+      cashInDrawer: 1000
+    }
+
+    printEODS(completeSales)
+  }
+
   render () {
     const { isLoading } = this.props
+
     return (
       isLoading
         ? <LoadingPane
           headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
         : <div>
-          Hello world
+          <button onClick={this.printEndOfDaySales.bind(this)}>
+            Print End of Day Sales
+          </button>
         </div>
-
     )
   }
 }
