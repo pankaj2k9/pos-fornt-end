@@ -28,7 +28,8 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
  * @param {Object} receipt contain info needed to print the receipt
  */
 export const buildReceipt = (data) => {
-  const { cashier, machineId, openCashDrawerCount, refundCount, cashInDrawer } = data.info
+  const { cashier, storeId, openCashDrawerCount, cashInDrawer } = data.info
+  const refundCount = data.refundCount
   let netSales = 0
 
   // remove ODBO transactions
@@ -72,15 +73,15 @@ export const buildReceipt = (data) => {
   receiptHtmlString += RECEIPT_DIVIDER
 
   // build footer
-  receiptHtmlString += buildFooter(cashier, machineId)
+  receiptHtmlString += buildFooter(cashier, storeId)
 }
 
 /**
  * Add receipt footer
  * @param {string} cashier
- * @param {string} machineId
+ * @param {string} storeId
  */
-export const buildFooter = (cashier, machineId) => {
+export const buildFooter = (cashier, storeId) => {
   let footerString = ''
 
   footerString += `<div style="${ITEM_LIST_STYLE}">`
@@ -88,7 +89,7 @@ export const buildFooter = (cashier, machineId) => {
   footerString += '</div>'
 
   footerString += `<div style="${ITEM_LIST_STYLE}">`
-  footerString += `Machine Id : ${machineId}`
+  footerString += `Store Id : ${storeId}`
   footerString += '</div>'
 
   footerString += `<div style="${ITEM_LIST_STYLE}">`
