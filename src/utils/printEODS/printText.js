@@ -1,10 +1,10 @@
 import { formatCurrency, formatDate } from '../string'
 
 const RECEIPT_WIDTH = 240
+const RECEIPT_MARGIN = 6
 const RECEIPT_FONT = 'sans-serif'
 const RECEIPT_FONT_SIZE = 12
 const RECEIPT_LINE_HEIGHT = 18
-const RECEIPT_MARGIN = 6
 const RECEIPT_DIVIDER = '------------------------------------------------------------'
 const RECEIPT_NEWLINE = '<br /><br />'
 
@@ -18,12 +18,10 @@ const ITEM_NAME_STYLE = 'width: 135px; display: inline-block;'
 const ITEM_NAME_STYLE_FULL = 'width: 190px; display: inline-block;'
 const ITEM_SUBTOTAL_STYLE = 'width: 70px; display: inline-block; text-align: right;'
 const HEADER_STYLE = `display: flex; flex-direction: column; align-items: center; margin-bottom: ${RECEIPT_MARGIN}px;`
-const TOTAL_DIV_STYLE_1 = `display: flex; justify-content: space-between; flex-direction: row; font-size: ${RECEIPT_FONT_SIZE * 1.2}px; font-weight: bold;`
-const TOTAL_DIV_STYLE_2 = 'display: flex; justify-content: space-between; flex-direction: row;'
+let receiptHtmlString = ''
 const BODY_STYLE = `font-family: ${RECEIPT_FONT};
   font-size: ${RECEIPT_FONT_SIZE}px;
   line-height: ${RECEIPT_LINE_HEIGHT}px;`
-let receiptHtmlString = ''
 
 /**
  * Build the receipt as html string
@@ -35,6 +33,9 @@ export const buildReceipt = (data) => {
     'adr2',
     'adr3'
   ]
+  const cashier = 'jennye'
+  const machineId = 'BUGIS?'
+
   receiptHtmlString = ''
   // receiptHtmlString += '<div style="width: 240px; border-bottom: 2px solid black; />'
 
@@ -52,17 +53,34 @@ export const buildReceipt = (data) => {
   receiptHtmlString += data.summary ? RECEIPT_DIVIDER : ''
 
   // build order list
-  // receiptHtmlString += buildItemList(receipt.items)
-  // receiptHtmlString += receipt.items ? RECEIPT_DIVIDER : ''
-
-  // build price computation
-  // receiptHtmlString += buildComputation(receipt.trans)
-  // receiptHtmlString += receipt.trans ? RECEIPT_DIVIDER : ''
+  receiptHtmlString += buildPaymentDetails(data.orders)
+  receiptHtmlString += RECEIPT_DIVIDER
 
   // build footer
-  // receiptHtmlString += buildFooter(receipt.footerText)
+  receiptHtmlString += buildFooter(cashier, machineId)
+}
 
-  receiptHtmlString += '</div>'
+/**
+ * Add receipt footer
+ * @param {string} cashier
+ * @param {string} machineId
+ */
+export const buildFooter = (cashier, machineId) => {
+  let footerString = ''
+
+  footerString += `<div style="${ITEM_LIST_STYLE}">`
+  footerString += `Cashier : ${cashier.toUpperCase()}`
+  footerString += '</div>'
+
+  footerString += `<div style="${ITEM_LIST_STYLE}">`
+  footerString += `Machine Id : ${machineId}`
+  footerString += '</div>'
+
+  footerString += `<div style="${ITEM_LIST_STYLE}">`
+  footerString += `Date Printed : ${formatDate(new Date())}`
+  footerString += '</div>'
+
+  return footerString
 }
 
 /**
@@ -96,25 +114,6 @@ const buildInfo1 = () => {
   info1 += '<div>** END OF DAY SALES REPORT **</div>'
 
   return info1
-}
-
-/**
- * Add the receipt footer/s
- * @param {string|string[]} footerText
- */
-export const buildFooter = (footerText) => {
-  let footer = ''
-
-  footer += `<div style="${HEADER_STYLE}">`
-  if (typeof footerText === 'string') {
-    footer += `<div>${footerText}</div>`
-  } else if (typeof footerText === 'object') {
-    footerText.forEach(ftr => {
-      footer += `<div>${ftr}</div>`
-    })
-  }
-  footer += '</div>'
-  return footer
 }
 
 /**
@@ -190,136 +189,105 @@ export const buildSummary = (summary) => {
  * Print sales orders list
  * @param {Object} orders for the day
  */
-export const buildOrders = (orders) => {
-  let summaryText = ''
-  let odbo
-  let totalCollected = 0
+export const buildPaymentDetails = (orders) => {
+  let ordersText = ''
+  let paymentDetailsTotal = 0
 
-  if (summary) {
-    summary.forEach((item, index) => {
-      if (item.provider) {
-        summaryText += `<div style="${ITEM_LIST_STYLE}">`
-        summaryText += stringifyItemName(item.provider.toUpperCase())
-        summaryText += stringifyItemQty('x' + item.count)
-        summaryText += stringifyItemSubtotal(item.subtotal)
-        summaryText += '</div>'
+  ordersText += '<div>Payment Details Information</div>'
+  ordersText += RECEIPT_DIVIDER
 
-        totalCollected += Number(item.subtotal)
-      } else if (item.type === 'cash') {
-        summaryText += `<div style="${ITEM_LIST_STYLE}">`
-        summaryText += stringifyItemName(item.type.toUpperCase())
-        summaryText += stringifyItemQty('x' + item.count)
-        summaryText += stringifyItemSubtotal(item.subtotal)
-        summaryText += '</div>'
+  // paymentDetails = {
+  //   'MASTER': {
+  //     subtotal: 0,
+  //     trans: [
+  //       {
+  //         id: 1.
+  //         total: 1
+  //       },
+  //       ...
+  //     ]
+  //   },
+  //   ...
+  // }
+  const paymentDetails = {}
+  orders.forEach(order => {
+    const orderType = order.posTrans.type
+    const orderTotal = order.total
+    const orderID = order.id
+    paymentDetailsTotal += Number(orderTotal)
 
-        totalCollected += Number(item.subtotal)
-      } else if (item.type === 'odbo') {
-        odbo = item
+    // Add order to existing type
+    if (paymentDetails && Object.keys(paymentDetails).find(type => type === orderType)) {
+      paymentDetails[orderType] = {
+        subtotal: paymentDetails[orderType].subtotal + Number(orderTotal),
+        trans: [...paymentDetails[orderType].trans,
+          { id: orderID, total: Number(orderTotal) }
+        ]
       }
+    } else { // Create new type in paymentDetails
+      paymentDetails[orderType] = {}
+      paymentDetails[orderType] = {
+        subtotal: Number(orderTotal),
+        trans: [{ id: orderID, total: Number(orderTotal) }]
+      }
+    }
+  })
+
+  // Add all transactions for each type
+  Object.keys(paymentDetails).forEach(type => {
+    const paymentDetail = paymentDetails[type]
+
+    // Add section header
+    ordersText += RECEIPT_NEWLINE
+    ordersText += `<div style="${ITEM_LIST_STYLE}">`
+    ordersText += `Payment Details : ${type.toUpperCase()}`
+    ordersText += '</div>'
+
+    // Add all orders for current type
+    paymentDetail.trans.forEach(trans => {
+      ordersText += `<div style="${ITEM_LIST_STYLE}">`
+      ordersText += stringifyItemNameFull(trans.id)
+      ordersText += stringifyItemSubtotal(trans.total)
+      ordersText += '</div>'
     })
-  }
 
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemNameFull('TOTAL COLLECTED')
-  summaryText += stringifyItemSubtotal(totalCollected)
-  summaryText += '</div>'
+    // Add type subtotal
+    ordersText += RECEIPT_DIVIDER
+    ordersText += `<div style="${ITEM_LIST_STYLE}">`
+    ordersText += stringifyItemNameFull('** SUBTOTAL **')
+    ordersText += stringifyItemSubtotal(paymentDetail.subtotal)
+    ordersText += '</div>'
+    ordersText += RECEIPT_DIVIDER
+  })
 
-  summaryText += RECEIPT_DIVIDER
+  // Add total
+  ordersText += `<div style="${ITEM_LIST_STYLE}">`
+  ordersText += stringifyItemNameFull('** TOTAL **')
+  ordersText += stringifyItemSubtotal(paymentDetailsTotal)
+  ordersText += '</div>'
 
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemName(odbo.type.toUpperCase())
-  summaryText += stringifyItemQty('x' + odbo.count)
-  summaryText += stringifyItemSubtotal(odbo.subtotal)
-  summaryText += '</div>'
+  // bill info
+  ordersText += RECEIPT_DIVIDER
+  ordersText += RECEIPT_NEWLINE
 
-  return summaryText
-}
+  // Total No.Bill
+  ordersText += `<div style="${ITEM_LIST_STYLE}">`
+  ordersText += stringifyItemNameFull('Total No.Bill: ')
+  ordersText += `<div style="${ITEM_SUBTOTAL_STYLE}">${orders.length}</div>`
+  ordersText += '</div>'
 
-/**
- * Add purchase computation
- * @param {Object} info of receipt
- */
-export const buildComputation = (trans) => {
-  let comp = ''
-  if (trans) {
-    let total = `<div>${formatCurrency(trans.total)}</div>`
-    let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
-    let customer = trans.customer ? trans.customer : trans.walkIn
-    let minLabel
-    let minuend
-    let card
-    let cardType
-    let diffLabel
-    let difference
-    let showDiff = true
-    switch (trans.type) {
-      case 'cash':
-        minLabel = 'CASH'
-        minuend = `<div>${formatCurrency(trans.cash)}</div>`
-        diffLabel = 'CHANGE'
-        difference = `<div>${formatCurrency(trans.change)}</div>`
-        break
-      case 'odbo':
-        total = `<div>${trans.total}</div>`
-        minLabel = 'THE ODBO COINS'
-        minuend = `<div>${trans.odboCoins}</div>`
-        diffLabel = 'BALANCE'
-        difference = `<div>${trans.odboBalance}</div>`
-        break
-      case 'credit':
-        minLabel = 'Trans #'
-        minuend = `<div>${trans.transNo}</div>`
-        card = 'Card Type'
-        cardType = `<div>${trans.cardType} <br /> ${trans.provider}</div>`
-        showDiff = false
-    }
+  ordersText += `<div style="${ITEM_LIST_STYLE}">`
+  ordersText += stringifyItemNameFull('First Bill No: ')
+  ordersText += orders[0].id
+  ordersText += '</div>'
 
-    comp += '<div>'
-    if (trans.type === 'cash' || trans.type === 'credit') {
-      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL : </div>${trans.sumOfCartItems}</div>`
-      if (trans.voucherDiscount) {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div>${trans.voucherDiscount}</div>`
-      } else if (trans.customDiscount) {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>OVERALL DISCOUNT : </div>${trans.customDiscount}</div>`
-      }
-      comp += RECEIPT_DIVIDER
-    }
-    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL : </div>${total}</div>`
-    comp += trans.type === 'credit'
-      ? `<div style="${TOTAL_DIV_STYLE_2}"><div>${card} : </div>${cardType}</div>`
-      : ''
-    comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>${minLabel} : </div>${minuend}</div>`
-    if (showDiff) {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}">
-        <div>${diffLabel} : </div>${difference}</div>`
-    }
-    if (trans.type === 'cash' || trans.type === 'credit') {
-      if (customer) {
-        comp += RECEIPT_DIVIDER
-        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
-      }
-      if (trans.customer) {
-        if (trans.points !== 0) {
-          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>--------------ODBO COIN BALANCE--------------</div></div>`
-          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
-          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
-          comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${trans.newOdbo}<br/></div>`
-        }
-      }
-    }
-    if (trans.orderNote) {
-      if (trans.orderNote.length !== 0) {
-        comp += RECEIPT_DIVIDER
-        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>Remarks: </div></div>`
-        trans.orderNote.map(note => {
-          comp += `<div style="${TOTAL_DIV_STYLE_2}">${note.message}</div>`
-        })
-      }
-    }
-    comp += '</div>'
-  }
+  ordersText += `<div style="${ITEM_LIST_STYLE}">`
+  ordersText += stringifyItemNameFull('Second Bill No: ')
+  ordersText += orders[orders.length - 1].id
+  ordersText += '</div>'
+  ordersText += RECEIPT_NEWLINE
 
-  return comp
+  return ordersText
 }
 
 const stringifyItemQty = (qty) => {
