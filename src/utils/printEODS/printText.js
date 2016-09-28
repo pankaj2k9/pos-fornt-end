@@ -35,6 +35,24 @@ export const buildReceipt = (data) => {
   ]
   const cashier = 'jennye'
   const machineId = 'BUGIS?'
+  const openCashDrawerCount = 34
+  const refundCount = 5
+  const cashInDrawer = 1000
+
+  let netSales = 0
+
+  data.summary = data.summary.filter(item => {
+    return item.type !== 'odbo'
+  })
+
+  data.orders = data.orders.filter(item => {
+    if (item.posTrans.type === 'odbo') { data.orders = Number(data.orders) - 1 }
+    return item.posTrans.type !== 'odbo'
+  })
+
+  data.orders.forEach(order => {
+    netSales += Number(order.total)
+  })
 
   receiptHtmlString = ''
   // receiptHtmlString += '<div style="width: 240px; border-bottom: 2px solid black; />'
@@ -49,7 +67,13 @@ export const buildReceipt = (data) => {
   receiptHtmlString += RECEIPT_DIVIDER
 
   // build summary
-  receiptHtmlString += buildSummary(data.summary)
+  receiptHtmlString += buildSummary(
+    data.summary,
+    netSales,
+    openCashDrawerCount,
+    refundCount,
+    cashInDrawer
+  )
   receiptHtmlString += data.summary ? RECEIPT_DIVIDER : ''
 
   // build order list
@@ -118,37 +142,71 @@ const buildInfo1 = () => {
 
 /**
  * Print sales summary
- * @param {Object} summary of receipt
+ * @param {Object[]} summary of receipt
+ * @param {Number} netSales total sales today
+ * @param {Number} refundsCount
+ * @param {Number} openCashDrawerCount
+ * @param {Number} cashInDrawer
  */
-export const buildSummary = (summary) => {
+export const buildSummary = (
+  summary,
+  netSales,
+  openCashDrawerCount,
+  refundCount,
+  cashInDrawer
+) => {
   let summaryText = ''
-  let odbo
   let totalCollected = 0
 
+  const processedSummary = {}
+  summary.forEach(item => {
+    const newItem = {
+      count: Number(item.count),
+      subtotal: Number(item.subtotal)
+    }
+
+    if (item.provider && item.cardType === 'debit') {
+      newItem.type = 'NETS'
+    } else if (item.provider && item.cardType === 'credit') {
+      newItem.type = item.provider
+    } else {
+      newItem.type = item.type
+    }
+
+    if (processedSummary[newItem.type]) {
+      processedSummary[newItem.type].type = newItem.type
+      processedSummary[newItem.type].count += newItem.count
+      processedSummary[newItem.type].subtotal += newItem.subtotal
+    } else {
+      processedSummary[newItem.type] = {}
+      processedSummary[newItem.type].type = newItem.type
+      processedSummary[newItem.type].count = newItem.count
+      processedSummary[newItem.type].subtotal = newItem.subtotal
+    }
+  })
+
+  // Add net sales
+  summaryText += `<div style="${ITEM_LIST_STYLE}">`
+  summaryText += stringifyItemNameFull('NET SALES :')
+  summaryText += stringifyItemSubtotal(netSales)
+  summaryText += '</div>'
+
+  summaryText += RECEIPT_NEWLINE
+
+  // Add summary
   if (summary) {
-    summary.forEach((item, index) => {
-      if (item.provider) {
-        summaryText += `<div style="${ITEM_LIST_STYLE}">`
-        summaryText += stringifyItemName(item.provider.toUpperCase())
-        summaryText += stringifyItemQty('x' + item.count)
-        summaryText += stringifyItemSubtotal(item.subtotal)
-        summaryText += '</div>'
+    Object.keys(processedSummary).forEach(item => {
+      summaryText += `<div style="${ITEM_LIST_STYLE}">`
+      summaryText += stringifyItemName(processedSummary[item].type.toUpperCase())
+      summaryText += stringifyItemQty('x' + processedSummary[item].count)
+      summaryText += stringifyItemSubtotal(processedSummary[item].subtotal)
+      summaryText += '</div>'
 
-        totalCollected += Number(item.subtotal)
-      } else if (item.type === 'cash') {
-        summaryText += `<div style="${ITEM_LIST_STYLE}">`
-        summaryText += stringifyItemName(item.type.toUpperCase())
-        summaryText += stringifyItemQty('x' + item.count)
-        summaryText += stringifyItemSubtotal(item.subtotal)
-        summaryText += '</div>'
-
-        totalCollected += Number(item.subtotal)
-      } else if (item.type === 'odbo') {
-        odbo = item
-      }
+      totalCollected += Number(processedSummary[item].subtotal)
     })
   }
 
+  // Add Odbo summary
   summaryText += `<div style="${ITEM_LIST_STYLE}">`
   summaryText += stringifyItemNameFull('TOTAL COLLECTED')
   summaryText += stringifyItemSubtotal(totalCollected)
@@ -156,18 +214,20 @@ export const buildSummary = (summary) => {
 
   summaryText += RECEIPT_DIVIDER
 
-  // add odbo summary
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemName(odbo.type.toUpperCase())
-  summaryText += stringifyItemQty('x' + odbo.count)
-  summaryText += stringifyItemSubtotal(odbo.subtotal)
-  summaryText += '</div>'
-
   // add open cashdrawer
   summaryText += RECEIPT_NEWLINE
+
+  // add refund count
+  summaryText += `<div style="${ITEM_LIST_STYLE}">`
+  summaryText += stringifyItemName('REFUND')
+  summaryText += stringifyItemQty('x' + refundCount)
+  summaryText += stringifyItemSubtotal(0)
+  summaryText += '</div>'
+
+  // add open cash drawer count
   summaryText += `<div style="${ITEM_LIST_STYLE}">`
   summaryText += stringifyItemName('OPEN CASHDRAWER')
-  summaryText += stringifyItemQty('x123')
+  summaryText += stringifyItemQty('x' + openCashDrawerCount)
   summaryText += stringifyItemSubtotal(0)
   summaryText += '</div>'
 
@@ -176,7 +236,7 @@ export const buildSummary = (summary) => {
   // cash in drawer
   summaryText += `<div style="${ITEM_LIST_STYLE}">`
   summaryText += stringifyItemNameFull('CASH IN DRAWER')
-  summaryText += stringifyItemSubtotal(118)
+  summaryText += stringifyItemSubtotal(cashInDrawer)
   summaryText += '</div>'
 
   summaryText += RECEIPT_DIVIDER
@@ -211,7 +271,16 @@ export const buildPaymentDetails = (orders) => {
   // }
   const paymentDetails = {}
   orders.forEach(order => {
-    const orderType = order.posTrans.type
+    const posTrans = order.posTrans
+    let orderType
+    if (posTrans.provider && posTrans.cardType === 'debit') {
+      orderType = 'NETS'
+    } else if (posTrans.provider && posTrans.cardType === 'credit') {
+      orderType = posTrans.provider
+    } else {
+      orderType = posTrans.type
+    }
+
     const orderTotal = order.total
     const orderID = order.id
     paymentDetailsTotal += Number(orderTotal)
@@ -324,8 +393,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  // printWindow.document.close()
-  // printWindow.focus()
-  // printWindow.close()
-  // console.log(receiptHtmlString)
+  printWindow.document.close()
+  printWindow.focus()
+  printWindow.close()
 }
