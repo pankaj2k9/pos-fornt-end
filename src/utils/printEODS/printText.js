@@ -17,6 +17,8 @@ const ITEM_QTY_STYLE = 'width: 65px; display: inline-block'
 const ITEM_NAME_STYLE = 'width: 135px; display: inline-block;'
 const ITEM_NAME_STYLE_FULL = 'width: 190px; display: inline-block;'
 const ITEM_SUBTOTAL_STYLE = 'width: 70px; display: inline-block; text-align: right;'
+const ITEM_COL1 = 'width: 80px; display: inline-block'
+const ITEM_COL2 = 'width: 55px; display: inline-block; text-align: right;'
 const HEADER_STYLE = `display: flex; flex-direction: column; align-items: center; margin-bottom: ${RECEIPT_MARGIN}px;`
 let receiptHtmlString = ''
 const BODY_STYLE = `font-family: ${RECEIPT_FONT};
@@ -29,7 +31,7 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
  */
 export const buildReceipt = (data) => {
   const { cashier, storeId, openCashDrawerCount, cashInDrawer } = data.info
-  const refundCount = data.refundCount
+  const refundCount = Number(data.refundCount.count)
   let netSales = 0
 
   // remove ODBO transactions
@@ -70,6 +72,10 @@ export const buildReceipt = (data) => {
 
   // build order list
   receiptHtmlString += buildPaymentDetails(data.orders)
+  receiptHtmlString += RECEIPT_DIVIDER
+
+  // build staffs list
+  receiptHtmlString += buildStaffs(data.staffs)
   receiptHtmlString += RECEIPT_DIVIDER
 
   // build footer
@@ -238,6 +244,33 @@ export const buildSummary = (
 }
 
 /**
+ * Build sales person section
+ * @param {Object[]} staffs
+ */
+export const buildStaffs = (staffs) => {
+  let staffsText = ''
+
+  staffsText += `<div style="${ITEM_LIST_STYLE}">`
+  staffsText += `<div style="${ITEM_COL1}">Sales-Person</div>`
+  staffsText += `<div style="${ITEM_COL2}">Products</div>`
+  staffsText += `<div style="${ITEM_COL2}">Service</div>`
+  staffsText += `<div style="${ITEM_COL2}">Rounding</div>`
+  staffsText += '</div>'
+
+  staffs.forEach(staff => {
+    console.log('STAFF', staff)
+    staffsText += `<div style="${ITEM_LIST_STYLE}">`
+    staffsText += `<div style="${ITEM_COL1}">${staff.firstName}</div>`
+    staffsText += `<div style="${ITEM_COL2}">${staff.total}</div>`
+    staffsText += `<div style="${ITEM_COL2}">${formatCurrency(0)}</div>`
+    staffsText += `<div style="${ITEM_COL2}">${formatCurrency(0)}</div>`
+    staffsText += '</div>'
+  })
+
+  return staffsText
+}
+
+/**
  * Print sales orders list
  * @param {Object} orders for the day
  */
@@ -385,7 +418,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  printWindow.document.close()
-  printWindow.focus()
-  printWindow.close()
+  // printWindow.document.close()
+  // printWindow.focus()
+  // printWindow.close()
 }
