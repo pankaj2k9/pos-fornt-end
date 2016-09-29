@@ -16,8 +16,7 @@ class SalesReportComplete extends React.Component {
   }
 
   render () {
-    const { isLoading, completeSales } = this.props
-    console.log(completeSales)
+    const { isLoading } = this.props
     return (
       isLoading
         ? <LoadingPane

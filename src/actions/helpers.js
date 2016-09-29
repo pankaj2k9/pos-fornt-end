@@ -24,11 +24,19 @@ import {
   fetchAllProducts
 } from './products'
 
-import {closeActiveModal} from './application'
+import {
+  closeActiveModal
+} from './application'
 
-import {reprintingReceipt, orderStateReset} from './orders'
+import {
+  reprintingReceipt,
+  orderStateReset,
+  addCashdrawerOpenCount
+} from './orders'
 
-import {resetSettingsState} from './settings'
+import {
+  resetSettingsState
+} from './settings'
 
 import print from '../utils/printReceipt/print'
 
@@ -41,6 +49,7 @@ export function reprintReceipt (receiptData) {
      * print() function does not detect the printing state so setTimeout is used
      * setTimeout() is used to emulate the change in reprinting state
      */
+    dispatch(addCashdrawerOpenCount())
     dispatch(reprintingReceipt(true))
     print(receiptData)
     setTimeout(function () {

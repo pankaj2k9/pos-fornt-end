@@ -29,7 +29,6 @@ export function productSalesFetch (source, from, to) {
 
     return reportsService.findProductSales(source, from, to)
       .then(response => {
-        console.log(response)
         dispatch(productSalesFetchSuccess(response))
       })
       .catch(error => {
@@ -56,7 +55,6 @@ export function completeSalesFetch (source, date) {
 
     return reportsService.findCompleteSales(source, date)
       .then(response => {
-        console.log(response)
         dispatch(completeSalesFetchSuccess(response))
       })
       .catch(error => {

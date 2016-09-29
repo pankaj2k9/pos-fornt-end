@@ -3,7 +3,10 @@ import usersService from '../services/users'
 import noSalesService from '../services/noSales'
 import customers from '../services/customers'
 
-import { setActiveModal } from './application'
+import {
+  setActiveModal,
+  addCashdrawerOpenCount
+ } from './application'
 import { fetchCustomers } from './customers'
 
 import print from '../utils/printReceipt/print'
@@ -76,7 +79,6 @@ export function storeOrderFetch (orderId) {
 
     return ordersService.get(orderId)
       .then(response => {
-        console.log('response: ', response)
         if (response) {
           if (!response.data[0]) {
             dispatch(storeOrderFetchFailure())
@@ -122,6 +124,7 @@ export function verifyStorePin (query, staff) {
         }
         print(receipt)
         dispatch(setActiveModal(''))
+        dispatch(addCashdrawerOpenCount())
         dispatch(resetSettingsState())
         document.getElementById('storePinCode').value = ''
       })

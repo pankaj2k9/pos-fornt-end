@@ -69,6 +69,11 @@ const zh = {
   'app.generel.reprintSuccess': '检查打印机对于收据',
   'app.generel.completeSales': '齐全销售报告',
 
+  'app.general.cashDrawerEmpty': '钱箱空物',
+  'app.general.initCashDrawer': '初始确认金额',
+  'app.general.updateCashDrawer': '更新钱箱量',
+  'app.general.setCashAmount': '更新钱箱量',
+
   'app.panel.products': '制品',
   'app.panel.sales': '销售',
   'app.panel.checkout': '查看',

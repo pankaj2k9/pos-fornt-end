@@ -147,7 +147,6 @@ class SearchModal extends Component {
   onClickOption () {
     const {dispatch, orderSearchKey, type,
            details, storeDetails, locale} = this.props
-    console.log(storeDetails)
     let items = []
     details.items.forEach(item => {
       let itemQty = Number(item.quantity)
@@ -159,46 +158,6 @@ class SearchModal extends Component {
       })
     })
 
-    // let trans = (currency === 'sgd')
-    //   ? (paymentMode === 'cash')
-    //     ? {
-    //       type: 'cash',
-    //       total: total,
-    //       cash: cashTendered,
-    //       walkIn: walkinCustomer,
-    //       customer: customer,
-    //       previousOdbo: prevOdbo,
-    //       points: earnedPoints,
-    //       newOdbo: earnedPlusPrevious,
-    //       change: data.change,
-    //       voucherDiscount: details.voucherDiscount,
-    //       sumOfCartItems: details.subtotal,
-    //       customDiscount: customDiscount,
-    //       orderNote
-    //     }
-    //     : {
-    //       type: 'credit',
-    //       total: total,
-    //       transNo: transNumber,
-    //       walkIn: walkinCustomer,
-    //       customer: customer,
-    //       previousOdbo: prevOdbo,
-    //       points: earnedPoints,
-    //       newOdbo: earnedPlusPrevious,
-    //       cardType: card.type === 'debit' ? 'Nets' : 'Credit',
-    //       provider: card.provider,
-    //       voucherDiscount: voucherAmount,
-    //       sumOfCartItems: sumOfCartItems,
-    //       customDiscount: customDiscount,
-    //       orderNote
-    //     }
-    //   : {
-    //     type: 'odbo',
-    //     total: total,
-    //     odboCoins: data.odboCoins,
-    //     odboBalance: data.odboBalance,
-    //     orderNote
-    //   }
     let receipt = {
       items,
       info: {
@@ -208,7 +167,6 @@ class SearchModal extends Component {
       headerText: [storeDetails.name, storeDetails.storeAddress],
       footerText: 'Reprinted Reciept'
     }
-    console.log('storeDetails', receipt)
     type === 'refundModal'
     ? dispatch(refund(orderSearchKey))
     : dispatch(print(receipt)) && dispatch(reprintingReceipt(true))

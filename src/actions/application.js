@@ -1,5 +1,8 @@
 import storesService from '../services/stores'
 import authStaffService from '../services/authStaff'
+import noSalesService from '../services/noSales'
+
+import print from '../utils/printReceipt/print'
 
 export const HAMBURGER_TOGGLE = 'HAMBURGER_TOGGLE'
 export function hamburgerToggle () {
@@ -70,7 +73,6 @@ export function storeSetActive (store) {
 }
 
 export const SET_STAFF_LOGGED_IN = 'SET_STAFF_LOGGED_IN'
-
 export function setStaffLoggedIn (userData) {
   return {
     type: SET_STAFF_LOGGED_IN,
@@ -79,7 +81,6 @@ export function setStaffLoggedIn (userData) {
 }
 
 export const SET_CASHIER_LOGGED_IN = 'SET_CASHIER_LOGGED_IN'
-
 export function setCashierLoggedIn (cashier) {
   return {
     type: SET_CASHIER_LOGGED_IN,
@@ -88,10 +89,87 @@ export function setCashierLoggedIn (cashier) {
 }
 
 export const RESET_STAFF_STATE = 'RESET_STAFF_STATE'
-
 export function resetStaffState () {
   return {
     type: RESET_STAFF_STATE
+  }
+}
+
+export const RESET_ERROR_STATE = 'RESET_ERROR_STATE'
+export function resetErrorState () {
+  return {
+    type: RESET_ERROR_STATE
+  }
+}
+
+export const ADD_CASHDRAWER_DATA = 'ADD_CASHDRAWER_DATA'
+export function addCashdrawerData (cashdrawer) {
+  return {
+    type: ADD_CASHDRAWER_DATA,
+    cashdrawer
+  }
+}
+
+export const ADD_CASHDRAWER_OPENCOUNT = 'ADD_CASHDRAWER_OPENCOUNT'
+export function addCashdrawerOpenCount () {
+  return {
+    type: ADD_CASHDRAWER_OPENCOUNT
+  }
+}
+
+export const SET_CASHDRAWER_REQUEST = 'SET_CASHDRAWER_REQUEST'
+export function setCashdrawerRequest () {
+  return {
+    type: SET_CASHDRAWER_REQUEST
+  }
+}
+
+export const SET_CASHDRAWER_SUCCESS = 'SET_CASHDRAWER_SUCCESS'
+export function setCashdrawerSuccess (data) {
+  return {
+    type: SET_CASHDRAWER_SUCCESS,
+    data
+  }
+}
+
+export const SET_CASHDRAWER_FAILURE = 'SET_CASHDRAWER_FAILURE'
+export function setCashdrawerFailure (error) {
+  return {
+    type: SET_CASHDRAWER_FAILURE,
+    error
+  }
+}
+
+export const SET_ACTIVE_CASHDRAWER = 'SET_ACTIVE_CASHDRAWER'
+export function setActiveCashdrawer (cashdrawer) {
+  return {
+    type: SET_ACTIVE_CASHDRAWER,
+    cashdrawer
+  }
+}
+
+export function validateAndUpdateCashdrawer (query, staff, data) {
+  return (dispatch) => {
+    dispatch(setCashdrawerRequest(data))
+    return noSalesService.find(query)
+      .then(response => {
+        const receipt = {
+          info: {
+            date: new Date(),
+            staff: `${staff.lastName}, ${staff.firstName}`
+          },
+          footerText: ['No sales']
+        }
+        print(receipt)
+        dispatch(setActiveModal(''))
+        dispatch(setCashdrawerSuccess(data))
+        document.getElementById('storePinCode2').value = ''
+        document.getElementById('cashdrawerAmount').value = ''
+      })
+      .catch(error => {
+        document.getElementById('storePinCode2').value = ''
+        dispatch(setCashdrawerFailure(error.message))
+      })
   }
 }
 

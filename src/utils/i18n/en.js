@@ -69,6 +69,11 @@ const en = {
   'app.general.reprintSuccess': 'Check Printer for the Receipt',
   'app.general.completeSales': 'Complete Sales Report',
 
+  'app.general.cashDrawerEmpty': 'Cash Drawer Empty',
+  'app.general.initCashDrawer': 'Initial Amount of Cash drawer',
+  'app.general.updateCashDrawer': 'Update Amount of CashDrawer',
+  'app.general.setCashAmount': 'Set Cash Drawer Amount',
+
   'app.panel.products': 'Products',
   'app.panel.sales': 'Sales',
   'app.panel.checkout': 'Checkout',
