@@ -7,18 +7,17 @@ const RECEIPT_FONT_SIZE = 12
 const RECEIPT_LINE_HEIGHT = 18
 const RECEIPT_DIVIDER = '------------------------------------------------------------'
 const RECEIPT_NEWLINE = '<br /><br />'
+const RECEIPT_STYLES = '' +
+  '.row { display: flex; justify-content: space-between; }\n' +
+  '.row.col3 .col:nth-child(1) { width: 150px; }\n' +
+  '.row.col3 .col:nth-child(2) { width: 30px; text-align: right; }\n' +
+  '.row.col3 .col:nth-child(3) { width: 60px; text-align: right; }\n' +
+  '.row.col4 > div { width: 55px; text-align: right; }\n' + '.row.col4 .col:nth-child(1) { width: 80px; text-align: left; }\n'
 
 // const LI_NAME_MAX = 24
 
 // styles
 const RECEIPT_STYLE = `width: ${RECEIPT_WIDTH}px; margin: ${RECEIPT_MARGIN}px`
-const ITEM_LIST_STYLE = 'display: flex; align-items: start; justify-content: start;'
-const ITEM_QTY_STYLE = 'width: 65px; display: inline-block'
-const ITEM_NAME_STYLE = 'width: 135px; display: inline-block;'
-const ITEM_NAME_STYLE_FULL = 'width: 190px; display: inline-block;'
-const ITEM_SUBTOTAL_STYLE = 'width: 70px; display: inline-block; text-align: right;'
-const ITEM_COL1 = 'width: 80px; display: inline-block'
-const ITEM_COL2 = 'width: 55px; display: inline-block; text-align: right;'
 const HEADER_STYLE = `display: flex; flex-direction: column; align-items: center; margin-bottom: ${RECEIPT_MARGIN}px;`
 let receiptHtmlString = ''
 const BODY_STYLE = `font-family: ${RECEIPT_FONT};
@@ -30,9 +29,23 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
  * @param {Object} receipt contain info needed to print the receipt
  */
 export const buildReceipt = (data) => {
-  const { cashier, storeId, openCashDrawerCount, cashInDrawer } = data.info
-  const refundCount = Number(data.refundCount.count)
   let netSales = 0
+  data.orders.forEach(order => {
+    netSales += Number(order.total)
+  })
+  data.info.cashInfo.value = netSales
+
+  const {
+    cashier,
+    storeId,
+    openCashDrawerCount,
+    cashInDrawer,
+    cashInfo,
+    floatInfo,
+    PO,
+    RA
+  } = data.info
+  const refundCount = Number(data.refundCount.count)
 
   // remove ODBO transactions
   data.summary = data.summary.filter(item => {
@@ -43,10 +56,6 @@ export const buildReceipt = (data) => {
     return item.posTrans.type !== 'odbo'
   })
   // end remove ODBO transactions
-
-  data.orders.forEach(order => {
-    netSales += Number(order.total)
-  })
 
   receiptHtmlString = ''
   // receiptHtmlString += '<div style="width: 240px; border-bottom: 2px solid black; />'
@@ -66,6 +75,10 @@ export const buildReceipt = (data) => {
     netSales,
     openCashDrawerCount,
     refundCount,
+    cashInfo,
+    floatInfo,
+    PO,
+    RA,
     cashInDrawer
   )
   receiptHtmlString += data.summary ? RECEIPT_DIVIDER : ''
@@ -88,21 +101,13 @@ export const buildReceipt = (data) => {
  * @param {string} storeId
  */
 export const buildFooter = (cashier, storeId) => {
-  let footerString = ''
+  let footerText = ''
 
-  footerString += `<div style="${ITEM_LIST_STYLE}">`
-  footerString += `Cashier : ${cashier.toUpperCase()}`
-  footerString += '</div>'
+  footerText += buildRow([`Cashier : ${cashier.toUpperCase()}`])
+  footerText += buildRow([`Store Id : ${storeId}`])
+  footerText += buildRow([`Date Printed : ${formatDate(new Date())}`])
 
-  footerString += `<div style="${ITEM_LIST_STYLE}">`
-  footerString += `Store Id : ${storeId}`
-  footerString += '</div>'
-
-  footerString += `<div style="${ITEM_LIST_STYLE}">`
-  footerString += `Date Printed : ${formatDate(new Date())}`
-  footerString += '</div>'
-
-  return footerString
+  return footerText
 }
 
 /**
@@ -132,10 +137,21 @@ const buildInfo1 = () => {
   const date = new Date()
   const dateOptions = { day: 'numeric', month: 'numeric', year: 'numeric' }
   let info1 = ''
-  info1 += `<div>${formatDate(date, dateOptions)}</div>`
-  info1 += '<div>** END OF DAY SALES REPORT **</div>'
+  info1 += buildRow([formatDate(date, dateOptions)])
+  info1 += buildRow(['<div>** END OF DAY SALES REPORT **</div>'])
 
   return info1
+}
+
+const buildRow = (cols) => {
+  let rowText = ''
+  const colLength = cols.length
+
+  rowText += `<div class="row col${colLength}">`
+  cols.forEach(col => { rowText += `<div class="col">${col}</div>` })
+  rowText += '</div>'
+
+  return rowText
 }
 
 /**
@@ -151,6 +167,10 @@ export const buildSummary = (
   netSales,
   openCashDrawerCount,
   refundCount,
+  cashInfo,
+  floatInfo,
+  PO,
+  RA,
   cashInDrawer
 ) => {
   let summaryText = ''
@@ -184,58 +204,65 @@ export const buildSummary = (
   })
 
   // Add net sales
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemNameFull('NET SALES :')
-  summaryText += stringifyItemSubtotal(netSales)
-  summaryText += '</div>'
-
+  summaryText += buildRow([ 'NET SALES :', formatCurrency(netSales) ])
   summaryText += RECEIPT_NEWLINE
 
   // Add summary
   if (summary) {
     Object.keys(processedSummary).forEach(item => {
-      summaryText += `<div style="${ITEM_LIST_STYLE}">`
-      summaryText += stringifyItemName(processedSummary[item].type.toUpperCase())
-      summaryText += stringifyItemQty('x' + processedSummary[item].count)
-      summaryText += stringifyItemSubtotal(processedSummary[item].subtotal)
-      summaryText += '</div>'
+      const summType = processedSummary[item].type.toUpperCase()
+      const summCount = 'x' + processedSummary[item].count
+      const summSubtotal = formatCurrency(processedSummary[item].subtotal)
+
+      summaryText += buildRow([ summType, summCount, summSubtotal ])
 
       totalCollected += Number(processedSummary[item].subtotal)
     })
   }
 
   // Add Odbo summary
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemNameFull('TOTAL COLLECTED')
-  summaryText += stringifyItemSubtotal(totalCollected)
-  summaryText += '</div>'
-
+  summaryText += buildRow(['TOTAL COLLECTED', formatCurrency(totalCollected)])
   summaryText += RECEIPT_DIVIDER
 
-  // add open cashdrawer
+  // add open cash drawer count
+  summaryText += RECEIPT_NEWLINE
+  summaryText += buildRow(['OPEN CASHDRAWER', 'x' + openCashDrawerCount, formatCurrency(0)])
   summaryText += RECEIPT_NEWLINE
 
   // add refund count
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemName('REFUND')
-  summaryText += stringifyItemQty('x' + refundCount)
-  summaryText += stringifyItemSubtotal(0)
-  summaryText += '</div>'
+  summaryText += buildRow(['REFUND (CASH)', 'x' + refundCount])
 
-  // add open cash drawer count
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemName('OPEN CASHDRAWER')
-  summaryText += stringifyItemQty('x' + openCashDrawerCount)
-  summaryText += stringifyItemSubtotal(0)
-  summaryText += '</div>'
+  // add cash and float info
+  if (cashInfo) {
+    const count = 'x' + cashInfo.count
+    const value = formatCurrency(cashInfo.value)
+
+    summaryText += buildRow(['CASH', count, value])
+  }
+  if (floatInfo) {
+    const count = 'x' + floatInfo.count
+    const value = formatCurrency(floatInfo.value)
+
+    summaryText += buildRow(['FLOAT', count, value])
+  }
+  // P/O and R/A
+  if (PO) {
+    const count = 'x' + PO.count
+    const value = formatCurrency(PO.value)
+
+    summaryText += buildRow(['P/O', count, value])
+  }
+  if (RA) {
+    const count = 'x' + RA.count
+    const value = formatCurrency(RA.value)
+
+    summaryText += buildRow(['R/A', count, value])
+  }
 
   summaryText += RECEIPT_DIVIDER
 
   // cash in drawer
-  summaryText += `<div style="${ITEM_LIST_STYLE}">`
-  summaryText += stringifyItemNameFull('CASH IN DRAWER')
-  summaryText += stringifyItemSubtotal(cashInDrawer)
-  summaryText += '</div>'
+  summaryText += buildRow(['CASH IN DRAWER', formatCurrency(cashInfo.value + floatInfo.value)])
 
   summaryText += RECEIPT_DIVIDER
   summaryText += RECEIPT_NEWLINE
@@ -250,21 +277,10 @@ export const buildSummary = (
 export const buildStaffs = (staffs) => {
   let staffsText = ''
 
-  staffsText += `<div style="${ITEM_LIST_STYLE}">`
-  staffsText += `<div style="${ITEM_COL1}">Sales-Person</div>`
-  staffsText += `<div style="${ITEM_COL2}">Products</div>`
-  staffsText += `<div style="${ITEM_COL2}">Service</div>`
-  staffsText += `<div style="${ITEM_COL2}">Rounding</div>`
-  staffsText += '</div>'
+  staffsText += buildRow(['Sales-Person', 'Products', 'Service', 'Rounding'])
 
   staffs.forEach(staff => {
-    console.log('STAFF', staff)
-    staffsText += `<div style="${ITEM_LIST_STYLE}">`
-    staffsText += `<div style="${ITEM_COL1}">${staff.firstName}</div>`
-    staffsText += `<div style="${ITEM_COL2}">${staff.total}</div>`
-    staffsText += `<div style="${ITEM_COL2}">${formatCurrency(0)}</div>`
-    staffsText += `<div style="${ITEM_COL2}">${formatCurrency(0)}</div>`
-    staffsText += '</div>'
+    staffsText += buildRow([staff.firstName, staff.total, '0.00', '0.00'])
   })
 
   return staffsText
@@ -333,71 +349,34 @@ export const buildPaymentDetails = (orders) => {
 
     // Add section header
     ordersText += RECEIPT_NEWLINE
-    ordersText += `<div style="${ITEM_LIST_STYLE}">`
-    ordersText += `Payment Details : ${type.toUpperCase()}`
-    ordersText += '</div>'
+    ordersText += buildRow([type.toUpperCase()])
 
     // Add all orders for current type
     paymentDetail.trans.forEach(trans => {
-      ordersText += `<div style="${ITEM_LIST_STYLE}">`
-      ordersText += stringifyItemNameFull(trans.id)
-      ordersText += stringifyItemSubtotal(trans.total)
-      ordersText += '</div>'
+      ordersText += buildRow([trans.id, formatCurrency(trans.total)])
     })
 
     // Add type subtotal
     ordersText += RECEIPT_DIVIDER
-    ordersText += `<div style="${ITEM_LIST_STYLE}">`
-    ordersText += stringifyItemNameFull('** SUBTOTAL **')
-    ordersText += stringifyItemSubtotal(paymentDetail.subtotal)
-    ordersText += '</div>'
+    ordersText += buildRow(['** SUBTOTAL **', formatCurrency(paymentDetail.subtotal)])
     ordersText += RECEIPT_DIVIDER
   })
 
   // Add total
-  ordersText += `<div style="${ITEM_LIST_STYLE}">`
-  ordersText += stringifyItemNameFull('** TOTAL **')
-  ordersText += stringifyItemSubtotal(paymentDetailsTotal)
-  ordersText += '</div>'
+  ordersText += buildRow(['** TOTAL **', formatCurrency(paymentDetailsTotal)])
 
   // bill info
   ordersText += RECEIPT_DIVIDER
   ordersText += RECEIPT_NEWLINE
 
   // Total No.Bill
-  ordersText += `<div style="${ITEM_LIST_STYLE}">`
-  ordersText += stringifyItemNameFull('Total No.Bill: ')
-  ordersText += `<div style="${ITEM_SUBTOTAL_STYLE}">${orders.length}</div>`
-  ordersText += '</div>'
+  ordersText += buildRow(['Total No.Bill: ', orders.length])
+  ordersText += buildRow(['First Bill No: ', orders[0] && orders[0].id] || 'N/A')
+  ordersText += buildRow(['Last  Bill No: ', orders[orders.length - 1] && orders[orders.length - 1].id] || 'N/A')
 
-  ordersText += `<div style="${ITEM_LIST_STYLE}">`
-  ordersText += stringifyItemNameFull('First Bill No: ')
-  ordersText += orders[0].id
-  ordersText += '</div>'
-
-  ordersText += `<div style="${ITEM_LIST_STYLE}">`
-  ordersText += stringifyItemNameFull('Second Bill No: ')
-  ordersText += orders[orders.length - 1].id
-  ordersText += '</div>'
   ordersText += RECEIPT_NEWLINE
 
   return ordersText
-}
-
-const stringifyItemQty = (qty) => {
-  return `<div style="${ITEM_QTY_STYLE}">${qty}</div>`
-}
-
-const stringifyItemName = (name) => {
-  return `<div style="${ITEM_NAME_STYLE}">${name}</div>`
-}
-
-const stringifyItemNameFull = (name) => {
-  return `<div style="${ITEM_NAME_STYLE_FULL}">${name}</div>`
-}
-
-const stringifyItemSubtotal = (subtotal) => {
-  return `<div style="${ITEM_SUBTOTAL_STYLE}">${formatCurrency(subtotal)}</div>`
 }
 
 /**
@@ -409,7 +388,10 @@ export const printReceiptFromString = () => {
 
   const content = '<!DOCTYPE html>' +
                   '<html>' +
-                  '<head><title>Print Receipt</title></head>' +
+                  '<head>' +
+                  '<title>Print Receipt</title>' +
+                  '<style>' + RECEIPT_STYLES + '</style>' +
+                  '</head>' +
                   '<body style="' + BODY_STYLE + '"onload="window.focus(); window.print(); window.close();">' +
                   receiptHtmlString +
                   '</body>' +
@@ -418,7 +400,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  // printWindow.document.close()
-  // printWindow.focus()
-  // printWindow.close()
+  printWindow.document.close()
+  printWindow.focus()
+  printWindow.close()
 }

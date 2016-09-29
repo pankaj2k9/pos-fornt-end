@@ -34,7 +34,11 @@ class SalesReportComplete extends React.Component {
       cashier: cashier,
       storeId: storeId,
       openCashDrawerCount: openCount,
-      cashInDrawer: cashInDrawer
+      cashInDrawer: cashInDrawer,
+      cashInfo: { count: openCount, value: 0 },
+      floatInfo: { count: 1, value: cashInDrawer },
+      PO: { count: 0, value: 0 },
+      RA: { count: 0, value: 0 }
     }
 
     printEODS(completeSales)
@@ -62,7 +66,9 @@ function mapStateToProps (state) {
     isLoading: state.reports.completeSales.isLoading,
     completeSales: state.reports.completeSales.completeSales,
     storeId: state.application.storeId,
-    cashier: state.application.activeCashier.firstName,
+    cashier: state.application.activeCashier &&
+      state.application.activeCashier.firstName ||
+      state.application.staff.data.username,
     from: state.reports.completeSales.date,
     openCount: state.application.activeCashdrawer.openCount,
     cashInDrawer: state.application.activeCashdrawer.initialAmount
