@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl'
 
 import Table from '../components/Table'
 import LoadingPane from '../components/LoadingPane'
-import { salesReportFetch } from '../actions/reports'
+import { productSalesFetch } from '../actions/reports'
 
 class SalesReport extends React.Component {
   componentDidMount () {
@@ -13,7 +13,7 @@ class SalesReport extends React.Component {
     // get sales today
     const today = new Date()
 
-    dispatch(salesReportFetch(storeId, today, today))
+    dispatch(productSalesFetch(storeId, today, today))
   }
 
   _constructSalesItems () {
@@ -67,11 +67,11 @@ class SalesReport extends React.Component {
 function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
-    isLoading: state.reports.salesReport.isLoading,
-    productSales: state.reports.salesReport.productSales,
+    isLoading: state.reports.productSales.isLoading,
+    productSales: state.reports.productSales.productSales,
     storeId: state.application.storeId,
-    from: state.reports.salesReport.from,
-    to: state.reports.salesReport.to
+    from: state.reports.productSales.from,
+    to: state.reports.productSales.to
   }
 }
 

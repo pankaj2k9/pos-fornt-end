@@ -122,7 +122,7 @@ class CheckoutModal extends Component {
 
     let earnedPoints = bonusPoints
       ? Number(total).toFixed(0) * 2
-      : 0
+      : Number(total).toFixed(0)
 
     let earnedPlusPrevious = activeCustomer
       ? Number(earnedPoints) + Number(activeCustomer.odboCoins)

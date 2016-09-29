@@ -11,28 +11,54 @@ export function reportsStateReset () {
   return { type: REPORTS_STATE_RESET }
 }
 
-export const SALESREPORT_FETCH_REQUEST = 'SALESREPORT_FETCH_REQUEST'
-export const SALESREPORT_FETCH_SUCCESS = 'SALESREPORT_FETCH_SUCCESS'
-export const SALESREPORT_FETCH_FAILURE = 'SALESREPORT_FETCH_FAILURE'
-export function salesReportFetchRequest () {
-  return { type: SALESREPORT_FETCH_REQUEST }
+export const PRODUCTSALES_FETCH_REQUEST = 'PRODUCTSALES_FETCH_REQUEST'
+export const PRODUCTSALES_FETCH_SUCCESS = 'PRODUCTSALES_FETCH_SUCCESS'
+export const PRODUCTSALES_FETCH_FAILURE = 'PRODUCTSALES_FETCH_FAILURE'
+export function productSalesFetchRequest () {
+  return { type: PRODUCTSALES_FETCH_REQUEST }
 }
-export function salesReportFetchSuccess (productSales) {
-  return { type: SALESREPORT_FETCH_SUCCESS, productSales }
+export function productSalesFetchSuccess (productSales) {
+  return { type: PRODUCTSALES_FETCH_SUCCESS, productSales }
 }
-export function salesReportFetchFailure (error) {
-  return { type: SALESREPORT_FETCH_REQUEST, error }
+export function productSalesFetchFailure (error) {
+  return { type: PRODUCTSALES_FETCH_REQUEST, error }
 }
-export function salesReportFetch (source, from, to) {
+export function productSalesFetch (source, from, to) {
   return (dispatch) => {
-    dispatch(salesReportFetchRequest())
+    dispatch(productSalesFetchRequest())
 
-    return reportsService.find(source, from, to)
+    return reportsService.findProductSales(source, from, to)
       .then(response => {
-        dispatch(salesReportFetchSuccess(response))
+        dispatch(productSalesFetchSuccess(response))
       })
       .catch(error => {
-        dispatch(salesReportFetchFailure(error))
+        dispatch(productSalesFetchFailure(error))
+      })
+  }
+}
+
+export const COMPLETESALES_FETCH_REQUEST = 'COMPLETESALES_FETCH_REQUEST'
+export const COMPLETESALES_FETCH_SUCCESS = 'COMPLETESALES_FETCH_SUCCESS'
+export const COMPLETESALES_FETCH_FAILURE = 'COMPLETESALES_FETCH_FAILURE'
+export function completeSalesFetchRequest () {
+  return { type: COMPLETESALES_FETCH_REQUEST }
+}
+export function completeSalesFetchSuccess (completeSales) {
+  return { type: COMPLETESALES_FETCH_SUCCESS, completeSales }
+}
+export function completeSalesFetchFailure (error) {
+  return { type: COMPLETESALES_FETCH_REQUEST, error }
+}
+export function completeSalesFetch (source, date) {
+  return (dispatch) => {
+    dispatch(completeSalesFetchRequest())
+
+    return reportsService.findCompleteSales(source, date)
+      .then(response => {
+        dispatch(completeSalesFetchSuccess(response))
+      })
+      .catch(error => {
+        dispatch(completeSalesFetchFailure(error))
       })
   }
 }

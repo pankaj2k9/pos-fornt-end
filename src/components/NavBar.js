@@ -24,7 +24,7 @@ const NavBar = ({
   const toggleClass = isHamburgerOpen ? 'is-active' : null
   let staffName = !activeCashier
     ? null
-    : `${activeCashier.firstName} ${activeCashier.lastName}`
+    : `${activeCashier.firstName} ${!activeCashier.lastName ? '' : activeCashier.lastName}`
 
   const userIconStyle = {
     textAlign: 'center',
@@ -75,7 +75,7 @@ const NavBar = ({
                 : !staff
                   ? null
                   : <p style={userNameStyle}>
-                    {`${staff.firstName} ${staff.lastName}`}<br />
+                    {`${staff.firstName} ${!staff.lastName ? '' : staff.lastName}`}<br />
                     <em style={{fontSize: 14}}>
                       <FormattedMessage id='app.general.loggedStaff' />
                     </em>

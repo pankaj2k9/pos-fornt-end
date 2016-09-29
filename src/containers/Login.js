@@ -17,9 +17,10 @@ const Login = (props) => {
     isLoggingIn,
     isFetchingStoreIds,
     storeIds,
+    storeId,
+    cashdrawer,
     handleSetStoreId
   } = props
-
   return (
     <LoginForm
       onLogin={handleLogin}
@@ -29,6 +30,8 @@ const Login = (props) => {
       storeIds={storeIds}
       errorMessage={errorMessage}
       isLoggingIn={isLoggingIn}
+      storeId={storeId}
+      cashdrawer={cashdrawer}
     />
   )
 }
@@ -42,19 +45,20 @@ const mapStateToProps = (state) => {
     errorMessage: state.login.errorMessage,
     isLoggingIn: state.login.isLoggingIn,
     isFetchingStoreIds: state.application.isFetchingStoreIds,
+    storeId: state.application.storeId,
+    cashdrawer: state.application.cashdrawer,
     storeIds
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    handleLogin: (username, password) => {
+    handleLogin: (username, password, storeId, cashdrawer) => {
       const loginDetails = {
         username,
         password
       }
-
-      dispatch(login(loginDetails, browserHistory))
+      dispatch(login(loginDetails, browserHistory, storeId, cashdrawer))
     },
 
     handleGetStoreIds: () => {

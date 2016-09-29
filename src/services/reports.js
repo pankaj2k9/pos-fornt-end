@@ -9,8 +9,12 @@ const reports = {
    * @param {Date} to query date
    * @return {Promise}
    */
-  find (source, from, to) {
+  findProductSales (source, from, to) {
     return reportsService.find({ query: {source, from, to} })
+  },
+
+  findCompleteSales (source, date) {
+    return reportsService.find({ query: {type: 'order.sales.endOfDay', date, source} })
   }
 }
 

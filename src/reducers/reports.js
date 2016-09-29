@@ -1,8 +1,11 @@
 import {
   REPORTS_SET_TAB,
-  SALESREPORT_FETCH_REQUEST,
-  SALESREPORT_FETCH_SUCCESS,
-  SALESREPORT_FETCH_FAILURE,
+  PRODUCTSALES_FETCH_REQUEST,
+  PRODUCTSALES_FETCH_SUCCESS,
+  PRODUCTSALES_FETCH_FAILURE,
+  COMPLETESALES_FETCH_REQUEST,
+  COMPLETESALES_FETCH_SUCCESS,
+  COMPLETESALES_FETCH_FAILURE,
   STOREORDERS_SET_ACTIVE_ID,
   STOREORDERS_SET_PAGE,
   STOREORDERS_FETCH_REQUEST,
@@ -11,18 +14,39 @@ import {
   REPORTS_STATE_RESET
 } from '../actions/reports'
 
-function salesReport (state, action) {
+function productSales (state, action) {
   switch (action.type) {
-    case SALESREPORT_FETCH_REQUEST:
+    case PRODUCTSALES_FETCH_REQUEST:
       return Object.assign({}, state, {
         isLoading: true
       })
-    case SALESREPORT_FETCH_SUCCESS:
+    case PRODUCTSALES_FETCH_SUCCESS:
       return Object.assign({}, state, {
         isLoading: false,
         productSales: action.productSales
       })
-    case SALESREPORT_FETCH_FAILURE:
+    case PRODUCTSALES_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        isLoading: false,
+        error: action.error
+      })
+    default:
+      return state
+  }
+}
+
+function completeSales (state, action) {
+  switch (action.type) {
+    case COMPLETESALES_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        isLoading: true
+      })
+    case COMPLETESALES_FETCH_SUCCESS:
+      return Object.assign({}, state, {
+        isLoading: false,
+        completeSales: action.completeSales
+      })
+    case COMPLETESALES_FETCH_FAILURE:
       return Object.assign({}, state, {
         isLoading: false,
         error: action.error
@@ -74,12 +98,17 @@ function storeOrders (state, action) {
 }
 
 function report (state = {
-  activeTab: 'sales',
-  salesReport: {
+  activeTab: 'completeSales',
+  productSales: {
     isLoading: false,
     productSales: [],
     from: new Date(),
     to: new Date()
+  },
+  completeSales: {
+    isLoading: false,
+    completeSales: null,
+    date: new Date()
   },
   storeOrders: {
     isLoading: false,
@@ -101,11 +130,17 @@ function report (state = {
       return Object.assign({}, state, {
         activeTab: action.tab
       })
-    case SALESREPORT_FETCH_REQUEST:
-    case SALESREPORT_FETCH_SUCCESS:
-    case SALESREPORT_FETCH_FAILURE:
+    case PRODUCTSALES_FETCH_REQUEST:
+    case PRODUCTSALES_FETCH_SUCCESS:
+    case PRODUCTSALES_FETCH_FAILURE:
       return Object.assign({}, state, {
-        salesReport: salesReport(state.salesReport, action)
+        productSales: productSales(state.productSales, action)
+      })
+    case COMPLETESALES_FETCH_REQUEST:
+    case COMPLETESALES_FETCH_SUCCESS:
+    case COMPLETESALES_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        completeSales: completeSales(state.completeSales, action)
       })
     case STOREORDERS_SET_ACTIVE_ID:
     case STOREORDERS_SET_PAGE:
@@ -131,7 +166,7 @@ function report (state = {
           skip: 0,
           total: 0
         },
-        salesReport: {
+        productSales: {
           isLoading: false,
           productSales: [],
           from: new Date(),

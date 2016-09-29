@@ -11,6 +11,7 @@ const orders = {
     const { storeId, to, from, limit, skip } = params
     const query = {
       $sort: { dateOrdered: -1 },
+      $eager: '[items, items.product]',
       source: storeId,
       dateCreated: {
         $lte: to,
@@ -23,7 +24,11 @@ const orders = {
     return ordersService.find({ query })
   },
   get (orderId) {
-    return ordersService.get(orderId)
+    const query = {
+      id: orderId,
+      $eager: '[items, items.product]'
+    }
+    return ordersService.find({ query })
   }
 }
 

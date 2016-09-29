@@ -5,15 +5,19 @@ import { FormattedMessage, FormattedDate, FormattedTime } from 'react-intl'
 
 import SearchBar from '../components/SearchBar'
 import Level from '../components/Level'
+import Truncate from '../components/Truncate'
 
 import {
   storeOrderFetch,
-  storeOrdersSetSearchKey
+  storeOrdersSetSearchKey,
+  reprintingReceipt
 } from '../actions/settings'
 
 import {
   refund
 } from '../actions/refund'
+
+import print from '../utils/printReceipt/print'
 
 const List = (props) => {
   const {dispatch, items, listButton} = props
@@ -49,7 +53,7 @@ const List = (props) => {
 }
 
 const Details = (props) => {
-  const {type, details, status, processing} = props
+  const {details, status, processing} = props
   return (
     <div className='content'>
       <Level
@@ -69,38 +73,46 @@ const Details = (props) => {
       {!details
         ? null
         : <div>
-          {type === 'refundModal'
-            ? !status.refund
-              ? <div>
-                <Level
-                  left={
-                    <h1 className='title is-marginless'>
-                      <FormattedMessage id='app.modal.dateOrdered' />:
-                    </h1>
-                  }
-                  right={
-                    <h1 className='title is-marginless'>
-                      <FormattedDate value={details.dateOrdered} format='short' />
-                    </h1>
-                  } />
-                <Level
-                  right={
-                    <h1 className='title is-marginless'>
-                      <FormattedTime value={details.dateOrdered} format='hhmm' />
-                    </h1>
-                  } />
-                {!processing
-                  ? null
-                  : <p className='section has-text-centered'>
-                    <i className='fa fa-spinner fa-pulse fa-2x fa-fw' />
-                  </p>
+          <div>
+            <ul style={{display: 'flex', listStyleType: 'none', fontSize: 16}}>
+              <li style={{margin: 0, padding: 10}}>
+                <strong><FormattedMessage id='app.modal.dateOrdered' />:</strong>
+                <br />- <FormattedDate value={details.dateOrdered} />
+                <br />- <FormattedTime value={details.dateOrdered} />
+              </li>
+              <li style={{margin: 0, padding: 10}}>
+                <strong><FormattedMessage id='app.general.transDetails' />:</strong>
+                <br />- <FormattedMessage id='app.modal.type' />: {details.posTrans.type}
+                <br />- <FormattedMessage id='app.general.total' />: {details.total}
+              </li>
+              <li style={{margin: 0, padding: 10}}>
+                <strong><FormattedMessage id='app.panel.products' />:</strong>
+                {details.items.map((item, key) => {
+                  return (
+                    <div key={key}>
+                      {` x(${item.quantity}) - `}
+                      <Truncate text={item.product.nameEn} maxLength={12} />
+                    </div>
+                  )
                 }
-              </div>
-              : <div className='section has-text-centered'>
-                <h1 className='title'>Refund Success</h1>
-              </div>
-            : null
-          }
+                )}
+              </li>
+            </ul>
+            {!processing
+              ? null
+              : <p className='section has-text-centered'>
+                <i className='fa fa-spinner fa-pulse fa-2x fa-fw' />
+              </p>
+            }
+          </div>
+          <h1 className='title'>
+            {status.refund
+              ? <FormattedMessage id='app.general.refundSuccess' />
+              : status.reprint
+                ? <FormattedMessage id='app.general.reprintSuccess' />
+                : null
+            }
+          </h1>
         </div>
       }
     </div>
@@ -133,10 +145,31 @@ class SearchModal extends Component {
   }
 
   onClickOption () {
-    const {dispatch, orderSearchKey, type} = this.props
+    const {dispatch, orderSearchKey, type,
+           details, storeDetails, locale} = this.props
+    let items = []
+    details.items.forEach(item => {
+      let itemQty = Number(item.quantity)
+      let prodName = locale === 'en' ? item.product.nameEn : item.product.nameZh
+      items.push({
+        name: `${prodName.substring(0, 18) + '...'}`,
+        qty: itemQty,
+        subtotal: item.totalCost
+      })
+    })
+
+    let receipt = {
+      items,
+      info: {
+        date: details.dateCreated,
+        orderId: details.id
+      },
+      headerText: [storeDetails.name, storeDetails.storeAddress],
+      footerText: 'Reprinted Reciept'
+    }
     type === 'refundModal'
     ? dispatch(refund(orderSearchKey))
-    : null
+    : dispatch(print(receipt)) && dispatch(reprintingReceipt(true))
   }
 
   render () {
@@ -192,12 +225,15 @@ class SearchModal extends Component {
             <div className='columns' style={{flex: 1}}>
               <div className='column'>
               {displayData === 'details'
-                ? !modalStatus.refund && !processing
+                ? !processing
                   ? !details
                     ? null
                     : <p className='control'>
-                      <a className='button is-large is-fullwidth is-info' onClick={this.onClickOption.bind(this)}>
-                        <FormattedMessage id={'app.page.settings.refundButton'} />
+                      <a className='button is-large is-fullwidth is-info'
+                        onClick={this.onClickOption.bind(this)}>
+                        <FormattedMessage id={id === 'refundModal'
+                          ? 'app.page.settings.refundButton'
+                          : 'app.general.reprint'} />
                       </a>
                     </p>
                   : null
@@ -220,13 +256,15 @@ class SearchModal extends Component {
 SearchModal.PropTypes = {
   id: PropTypes.string,
   type: PropTypes.string,
+  locale: PropTypes.string,
   activeCustomer: PropTypes.string,
   items: PropTypes.array,
   cancelButton: PropTypes.object,
   listButton: PropTypes.object,
   ordersSearchKey: PropTypes.string,
   modalStatus: PropTypes.object,
-  processing: PropTypes.bool
+  processing: PropTypes.bool,
+  storeDetails: PropTypes.object
 }
 
 export default connect()(SearchModal)
