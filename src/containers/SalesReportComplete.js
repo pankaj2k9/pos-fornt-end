@@ -18,7 +18,7 @@ class SalesReportComplete extends React.Component {
   }
 
   printEndOfDaySales () {
-    let { completeSales, storeId, cashier } = this.props
+    let { completeSales, storeId, cashier, openCount, cashInDrawer } = this.props
 
     // put real store address here
     completeSales.headerText = [
@@ -33,8 +33,8 @@ class SalesReportComplete extends React.Component {
     completeSales.info = {
       cashier: cashier,
       storeId: storeId,
-      openCashDrawerCount: 33,
-      cashInDrawer: 1000
+      openCashDrawerCount: openCount,
+      cashInDrawer: cashInDrawer
     }
 
     printEODS(completeSales)
@@ -63,7 +63,9 @@ function mapStateToProps (state) {
     completeSales: state.reports.completeSales.completeSales,
     storeId: state.application.storeId,
     cashier: state.application.activeCashier.firstName,
-    from: state.reports.completeSales.date
+    from: state.reports.completeSales.date,
+    openCount: state.application.activeCashdrawer.openCount,
+    cashInDrawer: state.application.activeCashdrawer.initialAmount
   }
 }
 
