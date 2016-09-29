@@ -35,8 +35,8 @@ class SalesReportComplete extends React.Component {
       storeId: storeId,
       openCashDrawerCount: openCount,
       cashInDrawer: cashInDrawer,
-      cashInfo: { count: 3, value: 120 },
-      floatInfo: { count: 2, value: 60 },
+      cashInfo: { count: openCount, value: 0 },
+      floatInfo: { count: 1, value: cashInDrawer },
       PO: { count: 0, value: 0 },
       RA: { count: 0, value: 0 }
     }

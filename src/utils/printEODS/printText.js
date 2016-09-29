@@ -29,6 +29,12 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
  * @param {Object} receipt contain info needed to print the receipt
  */
 export const buildReceipt = (data) => {
+  let netSales = 0
+  data.orders.forEach(order => {
+    netSales += Number(order.total)
+  })
+  data.info.cashInfo.value = netSales
+
   const {
     cashier,
     storeId,
@@ -40,7 +46,6 @@ export const buildReceipt = (data) => {
     RA
   } = data.info
   const refundCount = Number(data.refundCount.count)
-  let netSales = 0
 
   // remove ODBO transactions
   data.summary = data.summary.filter(item => {
@@ -51,10 +56,6 @@ export const buildReceipt = (data) => {
     return item.posTrans.type !== 'odbo'
   })
   // end remove ODBO transactions
-
-  data.orders.forEach(order => {
-    netSales += Number(order.total)
-  })
 
   receiptHtmlString = ''
   // receiptHtmlString += '<div style="width: 240px; border-bottom: 2px solid black; />'
@@ -229,7 +230,7 @@ export const buildSummary = (
   summaryText += RECEIPT_NEWLINE
 
   // add refund count
-  summaryText += buildRow(['REFUND', 'x' + refundCount, formatCurrency(0)])
+  summaryText += buildRow(['REFUND (CASH)', 'x' + refundCount])
 
   // add cash and float info
   if (cashInfo) {
@@ -261,7 +262,7 @@ export const buildSummary = (
   summaryText += RECEIPT_DIVIDER
 
   // cash in drawer
-  summaryText += buildRow(['CASH IN DRAWER', formatCurrency(cashInDrawer)])
+  summaryText += buildRow(['CASH IN DRAWER', formatCurrency(cashInfo.value + floatInfo.value)])
 
   summaryText += RECEIPT_DIVIDER
   summaryText += RECEIPT_NEWLINE
@@ -370,8 +371,8 @@ export const buildPaymentDetails = (orders) => {
 
   // Total No.Bill
   ordersText += buildRow(['Total No.Bill: ', orders.length])
-  ordersText += buildRow(['First Bill No: ', orders[0].id])
-  ordersText += buildRow(['Last  Bill No: ', orders[orders.length - 1].id])
+  ordersText += buildRow(['First Bill No: ', orders[0] && orders[0].id] || 'N/A')
+  ordersText += buildRow(['Last  Bill No: ', orders[orders.length - 1] && orders[orders.length - 1].id] || 'N/A')
 
   ordersText += RECEIPT_NEWLINE
 
@@ -399,7 +400,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  // printWindow.document.close()
-  // printWindow.focus()
-  // printWindow.close()
+  printWindow.document.close()
+  printWindow.focus()
+  printWindow.close()
 }
