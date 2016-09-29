@@ -29,7 +29,16 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
  * @param {Object} receipt contain info needed to print the receipt
  */
 export const buildReceipt = (data) => {
-  const { cashier, storeId, openCashDrawerCount, cashInDrawer } = data.info
+  const {
+    cashier,
+    storeId,
+    openCashDrawerCount,
+    cashInDrawer,
+    cashInfo,
+    floatInfo,
+    PO,
+    RA
+  } = data.info
   const refundCount = Number(data.refundCount.count)
   let netSales = 0
 
@@ -65,6 +74,10 @@ export const buildReceipt = (data) => {
     netSales,
     openCashDrawerCount,
     refundCount,
+    cashInfo,
+    floatInfo,
+    PO,
+    RA,
     cashInDrawer
   )
   receiptHtmlString += data.summary ? RECEIPT_DIVIDER : ''
@@ -153,6 +166,10 @@ export const buildSummary = (
   netSales,
   openCashDrawerCount,
   refundCount,
+  cashInfo,
+  floatInfo,
+  PO,
+  RA,
   cashInDrawer
 ) => {
   let summaryText = ''
@@ -206,14 +223,41 @@ export const buildSummary = (
   summaryText += buildRow(['TOTAL COLLECTED', formatCurrency(totalCollected)])
   summaryText += RECEIPT_DIVIDER
 
-  // add open cashdrawer
+  // add open cash drawer count
+  summaryText += RECEIPT_NEWLINE
+  summaryText += buildRow(['OPEN CASHDRAWER', 'x' + openCashDrawerCount, formatCurrency(0)])
   summaryText += RECEIPT_NEWLINE
 
   // add refund count
   summaryText += buildRow(['REFUND', 'x' + refundCount, formatCurrency(0)])
 
-  // add open cash drawer count
-  summaryText += buildRow(['OPEN CASHDRAWER', 'x' + openCashDrawerCount, formatCurrency(0)])
+  // add cash and float info
+  if (cashInfo) {
+    const count = 'x' + cashInfo.count
+    const value = formatCurrency(cashInfo.value)
+
+    summaryText += buildRow(['CASH', count, value])
+  }
+  if (floatInfo) {
+    const count = 'x' + floatInfo.count
+    const value = formatCurrency(floatInfo.value)
+
+    summaryText += buildRow(['FLOAT', count, value])
+  }
+  // P/O and R/A
+  if (PO) {
+    const count = 'x' + PO.count
+    const value = formatCurrency(PO.value)
+
+    summaryText += buildRow(['P/O', count, value])
+  }
+  if (RA) {
+    const count = 'x' + RA.count
+    const value = formatCurrency(RA.value)
+
+    summaryText += buildRow(['R/A', count, value])
+  }
+
   summaryText += RECEIPT_DIVIDER
 
   // cash in drawer
