@@ -255,7 +255,7 @@ class PanelCheckout extends Component {
             <div className='content'>
               {!cpShouldUpdate
                 ? <ul>
-                  { !orderNote
+                  {!orderNote
                     ? null
                     : orderNote.map(function (item, key) {
                       function remove () {
