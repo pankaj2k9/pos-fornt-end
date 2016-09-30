@@ -39,7 +39,7 @@ class CheckoutModal extends Component {
             sumOfCartItems, intl
           } = this.props
 
-    let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
+    let staff = `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
     let total = overAllTotal
 
     let products = orderItems.map(item => {
