@@ -182,7 +182,13 @@ class CheckoutModal extends Component {
       : orderNote
 
     let storeAddress = !store.storeAddress
-      ? ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268']
+      ? [
+        'The ODBO',
+        '200 Victoria Street',
+        'Bugis Junction #02-22',
+        'SINGAPORE',
+        'Telephone : 6238 1337'
+      ]
       : [store.name, store.storeAddress]
 
     const receipt = {
