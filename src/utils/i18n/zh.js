@@ -202,8 +202,8 @@ const zh = {
   'app.page.settings.customersDesc2': '首先名字，姓氏，或搜索客户 ODBO ID',
   'app.page.settings.account': '帐户',
   'app.page.settings.accountDesc': '查看或编辑您的帐户设置',
-  'app.page.settings.noSales': '无销售',
-  'app.page.settings.noSalesDesc': '点击并验证店PIN码打开钱箱',
+  'app.page.settings.openCashDrawer': '打开钱箱',
+  'app.page.settings.openCashDrawerDesc': '点击并验证店PIN码打开钱箱',
 
   'app.page.settings.usernameAndPw': '用户名和密码',
   'app.page.settings.changePw': '更改密码',

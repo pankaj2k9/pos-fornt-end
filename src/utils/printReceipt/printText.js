@@ -204,7 +204,8 @@ export const buildComputation = (trans) => {
 
     comp += '<div>'
     if (trans.type === 'cash' || trans.type === 'credit') {
-      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL : </div>${trans.sumOfCartItems}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL : </div>${formatCurrency(trans.sumOfCartItems)}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST : </div>${formatCurrency(0)}</div>`
       if (trans.voucherDiscount) {
         comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div>${trans.voucherDiscount}</div>`
       } else if (trans.customDiscount) {

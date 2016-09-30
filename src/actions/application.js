@@ -156,7 +156,7 @@ export function validateAndUpdateCashdrawer (query, staff, data) {
         const receipt = {
           info: {
             date: new Date(),
-            staff: `${staff.lastName}, ${staff.firstName}`
+            staff: `${staff.lastName || ''}, ${staff.firstName || ''}`
           },
           footerText: ['No sales']
         }

@@ -36,10 +36,10 @@ class CheckoutModal extends Component {
             transNumber, storeId, voucher,
             orderNote, isDiscounted, overAllTotal,
             bonusPoints, walkinCustomer, store,
-            sumOfCartItems, intl
+            sumOfCartItems
           } = this.props
 
-    let staff = `${activeCashier.firstName} ${activeCashier.lastName}`
+    let staff = `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
     let total = overAllTotal
 
     let products = orderItems.map(item => {
@@ -92,8 +92,8 @@ class CheckoutModal extends Component {
         : Number(item.odboPrice) - Math.round(discount)
       items.push({
         id: item.id,
-        name: `${item.nameEn.substring(0, 18) + '...'}
-          ${intl.formatMessage({ id: 'app.general.barcode' }) + item.barcodeInfo}
+        name: `${item.nameEn.substring(0, 18)}...\n
+          #${item.barcodeInfo || ''}\n
           ${showDiscount}`,
         qty: itemQty,
         subtotal: currency === 'sgd'
@@ -182,7 +182,13 @@ class CheckoutModal extends Component {
       : orderNote
 
     let storeAddress = !store.storeAddress
-      ? ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268']
+      ? [
+        'The ODBO',
+        '200 Victoria Street',
+        'Bugis Junction #02-22',
+        'SINGAPORE',
+        'Telephone : 6238 1337'
+      ]
       : [store.name, store.storeAddress]
 
     const receipt = {

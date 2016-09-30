@@ -202,8 +202,8 @@ const en = {
   'app.page.settings.customersDesc2': 'Search customers via first name, last name or ID',
   'app.page.settings.account': 'Account',
   'app.page.settings.accountDesc': 'View or Edit your account settings',
-  'app.page.settings.noSales': 'No Sales',
-  'app.page.settings.noSalesDesc': 'Verify store pin code to open cash drawer',
+  'app.page.settings.openCashDrawer': 'Open Cash Drawer',
+  'app.page.settings.openCashDrawerDesc': 'Verify store pin code to open cash drawer',
 
   'app.page.settings.usernameAndPw': 'Username & Password',
   'app.page.settings.changePw': 'Change Password',

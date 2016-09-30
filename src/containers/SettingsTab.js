@@ -117,14 +117,14 @@ class SettingsTab extends Component {
                 <i className='fa fa-caret-square-o-down fa-4x' />
               </span>
               <p className='title'>
-                <FormattedMessage id={'app.page.settings.noSales'} />
+                <FormattedMessage id={'app.page.settings.openCashDrawer'} />
               </p>
               <p className='subtitle'>
-                <FormattedMessage id={'app.page.settings.noSalesDesc'} />
+                <FormattedMessage id={'app.page.settings.openCashDrawerDesc'} />
               </p>
               <a className='button is-info'
                 onClick={this.onClickNoSales.bind(this, 'verifyStorePin')}>
-                <FormattedMessage id={'app.page.settings.noSales'} />
+                <FormattedMessage id={'app.page.settings.openCashDrawer'} />
               </a>
             </div>
           </div>
