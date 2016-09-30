@@ -36,7 +36,7 @@ class CheckoutModal extends Component {
             transNumber, storeId, voucher,
             orderNote, isDiscounted, overAllTotal,
             bonusPoints, walkinCustomer, store,
-            sumOfCartItems, intl
+            sumOfCartItems
           } = this.props
 
     let staff = `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
@@ -92,8 +92,8 @@ class CheckoutModal extends Component {
         : Number(item.odboPrice) - Math.round(discount)
       items.push({
         id: item.id,
-        name: `${item.nameEn.substring(0, 18) + '...'}
-          ${intl.formatMessage({ id: 'app.general.barcode' }) + item.barcodeInfo}
+        name: `${item.nameEn.substring(0, 18)}...\n
+          #${item.barcodeInfo || ''}\n
           ${showDiscount}`,
         qty: itemQty,
         subtotal: currency === 'sgd'
