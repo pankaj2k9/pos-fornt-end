@@ -28,7 +28,7 @@ class Reports extends React.Component {
   }
 
   render () {
-    const { activeTab, storeId } = this.props
+    const { activeTab, store } = this.props
     const today = new Date()
 
     return (
@@ -36,7 +36,7 @@ class Reports extends React.Component {
         <div className='container'>
           <div className='container'>
             <FormattedMessage id='app.page.reports.storeId' />
-            <strong>{`: ${storeId}`}</strong>
+            <strong>{`: ${store.name}`}</strong>
           </div>
           <div className='container'>
             <FormattedMessage id='app.page.reports.date' />{': '}
@@ -71,7 +71,7 @@ class Reports extends React.Component {
 function mapStateToProps (state) {
   return {
     activeTab: state.reports.activeTab,
-    storeId: state.application.storeId
+    store: state.application.store
   }
 }
 

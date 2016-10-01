@@ -102,6 +102,13 @@ export function resetErrorState () {
   }
 }
 
+export const RESET_APP_STATE = 'RESET_APP_STATE'
+export function resetAppState () {
+  return {
+    type: RESET_APP_STATE
+  }
+}
+
 export const ADD_CASHDRAWER_DATA = 'ADD_CASHDRAWER_DATA'
 export function addCashdrawerData (cashdrawer) {
   return {
@@ -163,8 +170,6 @@ export function validateAndUpdateCashdrawer (query, staff, data) {
         print(receipt)
         dispatch(setActiveModal(''))
         dispatch(setCashdrawerSuccess(data))
-        document.getElementById('storePinCode2').value = ''
-        document.getElementById('cashdrawerAmount').value = ''
       })
       .catch(error => {
         document.getElementById('storePinCode2').value = ''

@@ -30,6 +30,14 @@ import {
 import { resetStore } from '../actions/helpers'
 
 class PanelCheckout extends Component {
+
+  componentDidUpdate () {
+    const { activeModalId } = this.props
+    if (activeModalId === 'voucherModal') {
+      document.getElementById('vcInput').focus()
+    }
+  }
+
   onClickCheckout (paymentMode) {
     const { dispatch } = this.props
     dispatch(setActiveModal('afterCheckoutModal'))
@@ -109,6 +117,7 @@ class PanelCheckout extends Component {
     var newNote = orderNote.concat(noteToAdd)
     dispatch(setOrderNote(newNote))
     document.getElementById('noteInput').value = ''
+    document.getElementById('productsSearch').focus()
   }
 
   onClickViewNotes () {
@@ -139,6 +148,7 @@ class PanelCheckout extends Component {
     const { dispatch, bonusPoints } = this.props
     let boolVal = !bonusPoints
     dispatch(toggleBonusPoints(boolVal))
+    document.getElementById('productsSearch').focus()
   }
 
   renderModal () {
@@ -284,8 +294,10 @@ class PanelCheckout extends Component {
   }
 
   render () {
-    const { cartItemsArray, currency, intl, shouldUpdate, activeCustomer,
-            orderNote, voucher, customDiscount, bonusPoints } = this.props
+    const { cartItemsArray, currency, intl,
+            shouldUpdate, activeCustomer,
+            orderNote, voucher, customDiscount,
+            bonusPoints, activeModalId } = this.props
     /** VAIDATION OF VALUES **/
     /** @customDiscount: prop to be validated
         @operator: customDiscount === '' || !customDiscount
@@ -340,7 +352,7 @@ class PanelCheckout extends Component {
                 </p>
               }
               <div className='control is-expanded'>
-                <form autoComplete={false} onSubmit={this.onClickAddNote.bind(this)}>
+                <form autoComplete='off' onSubmit={this.onClickAddNote.bind(this)}>
                   <p className='control has-icon is-expanded'>
                     <input id='noteInput' className='input'
                       placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
@@ -376,12 +388,17 @@ class PanelCheckout extends Component {
                     ? <Level left={<FormattedMessage id='app.general.overallDiscount' />}
                       center={
                         <div>
-                          <p className='control has-addons' style={{width: 50, marginLeft: 100}}>
-                            <input id='itemDiscount' className='input is-small' type='Number'
-                              placeholder={discountPH} value={discount}
-                              onChange={e => this.setOverallDiscount(e.target.value)} />
-                            <a className='button is-small'>%</a>
-                          </p>
+                          <form onSubmit={e => {
+                            e.preventDefault()
+                            document.getElementById('productsSearch').focus()
+                          }}>
+                            <p className='control has-addons' style={{width: 50, marginLeft: 100}}>
+                              <input id='itemDiscount' className='input is-small' type='Number'
+                                placeholder={discountPH} value={discount}
+                                onChange={e => this.setOverallDiscount(e.target.value)} />
+                              <a className='button is-small'>%</a>
+                            </p>
+                          </form>
                         </div>
                       }
                       right={
@@ -508,7 +525,10 @@ class PanelCheckout extends Component {
               <div>
                 {this.renderNoteModal()}
                 {this.renderVoucherModal()}
-                {this.renderModal()}
+                {activeModalId === 'afterCheckoutModal'
+                  ? this.renderModal()
+                  : null
+                }
               </div>
 
             </div>

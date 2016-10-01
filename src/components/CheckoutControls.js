@@ -22,7 +22,7 @@ const ModalInput = (props) => {
     <div className='control is-expanded'>
       <form autoComplete='off' onSubmit={onSubmit}>
         <input
-          id='checkoutInput'
+          id={'modalInput'}
           autoFocus
           className='input is-large'
           type={
@@ -124,21 +124,12 @@ const CheckoutControls = (props) => {
 
           {currency === 'odbo' && odboBalance <= 0
             ? null
-            : paymentMode === 'credit'
-              ? !card.provider
-                ? null
-                : <ModalInput paymentMode={paymentMode} onChange={onChange}
-                  currency={currency} onSubmit={onSubmit} inputPh={{
-                    cash: intl.formatMessage({ id: 'app.ph.enterAmount' }),
-                    card: intl.formatMessage({ id: 'app.ph.enterTransId' }),
-                    odbo: intl.formatMessage({ id: 'app.ph.enterPin' })
-                  }} />
-              : <ModalInput paymentMode={paymentMode} onChange={onChange}
-                currency={currency} onSubmit={onSubmit} inputPh={{
-                  cash: intl.formatMessage({ id: 'app.ph.enterAmount' }),
-                  card: intl.formatMessage({ id: 'app.ph.enterTransId' }),
-                  odbo: intl.formatMessage({ id: 'app.ph.enterPin' })
-                }} />
+            : <ModalInput paymentMode={paymentMode} onChange={onChange}
+              currency={currency} onSubmit={onSubmit} inputPh={{
+                cash: intl.formatMessage({ id: 'app.ph.enterAmount' }),
+                card: intl.formatMessage({ id: 'app.ph.enterTransId' }),
+                odbo: intl.formatMessage({ id: 'app.ph.enterPin' })
+              }} provider={card.provider} />
           }
 
           {currency === 'odbo'
@@ -146,7 +137,7 @@ const CheckoutControls = (props) => {
             : paymentMode === 'cash'
               ? null
               : <div className='columns container'>
-                <div className='column is-6 has-text-centered'>
+                <div className={`column has-text-centered ${card.type === 'debit' ? 'is-12' : 'is-6'}`}>
                   <p className='title'>
                     <FormattedMessage id='app.general.cardType' />
                   </p>
@@ -157,34 +148,38 @@ const CheckoutControls = (props) => {
                     toggleOne={{name: intl.formatMessage({ id: 'app.button.credit' }), value: 'credit'}}
                     size='is-large' />
                 </div>
-                <div className='column is-6 has-text-centered'>
-                  <p className='title'>
-                    <FormattedMessage id='app.general.cardAssoc' />
-                  </p>
-                  <div className='columns'>
-                    <div className='column is-4'>
-                      <img style={card.provider === 'visa'
-                        ? selected
-                        : unselected}
-                        onClick={onClickCardProvToggle.bind(this, 'visa')}
-                        src={require('../assets/card-visa.gif')} />
+                {
+                  card.type === 'debit'
+                    ? null
+                    : <div className='column is-6 has-text-centered'>
+                      <p className='title'>
+                        <FormattedMessage id='app.general.cardAssoc' />
+                      </p>
+                      <div className='columns'>
+                        <div className='column is-4'>
+                          <img style={card.provider === 'visa'
+                            ? selected
+                            : unselected}
+                            onClick={onClickCardProvToggle.bind(this, 'visa')}
+                            src={require('../assets/card-visa.gif')} />
+                        </div>
+                        <div className='column is-4'>
+                          <img style={card.provider === 'master'
+                            ? selected
+                            : unselected}
+                            onClick={onClickCardProvToggle.bind(this, 'master')}
+                            src={require('../assets/card-mc.gif')} />
+                        </div>
+                        <div className='column is-4'>
+                          <img style={card.provider === 'amex'
+                            ? selected
+                            : unselected}
+                            onClick={onClickCardProvToggle.bind(this, 'amex')}
+                            src={require('../assets/card-amex.gif')} />
+                        </div>
+                      </div>
                     </div>
-                    <div className='column is-4'>
-                      <img style={card.provider === 'master'
-                        ? selected
-                        : unselected}
-                        onClick={onClickCardProvToggle.bind(this, 'master')}
-                        src={require('../assets/card-mc.gif')} />
-                    </div>
-                    <div className='column is-4'>
-                      <img style={card.provider === 'amex'
-                        ? selected
-                        : unselected}
-                        onClick={onClickCardProvToggle.bind(this, 'amex')}
-                        src={require('../assets/card-amex.gif')} />
-                    </div>
-                  </div>
-                </div>
+                }
               </div>
           }
 

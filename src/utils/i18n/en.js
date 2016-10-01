@@ -127,6 +127,7 @@ const en = {
   'app.ph.youChoose': 'You Choosed: ',
   'app.ph.storePin': 'enter PIN',
   'app.ph.enterNewVal': 'enter new value',
+  'app.ph.enterRefundRemarks': 'What is the reason of refund',
 
   'app.error.update.stock': 'Update stocks on admin app',
   'app.error.noCustResults': 'No search results for customer ',
@@ -193,7 +194,8 @@ const en = {
   'app.page.settings.subtitle': 'POS Settings and Utilities...',
   'app.page.settings.refund': 'Order Refund',
   'app.page.settings.refundDesc': 'Refund of payment is functionality which allows recovering funds for payment already made to the customer.',
-  'app.page.settings.refundDesc2': 'We only do full refund of single purchase',
+  'app.page.settings.ordersDesc': 'Refund an order or Reprint a previous transaction',
+  'app.page.settings.reprintDesc': 'Reprint Receipt is a functionality which allows reprinting a receipt from a previous transaction',
   'app.page.settings.orderDetails': 'Order Details',
   'app.page.settings.refundButton': 'Order Refund',
   'app.page.settings.customers': 'Customers',

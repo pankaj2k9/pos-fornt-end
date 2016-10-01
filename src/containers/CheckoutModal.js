@@ -7,6 +7,7 @@ import CheckoutProcessing from '../components/CheckoutProcessing'
 import {closeActiveModal} from '../actions/application'
 
 import {
+  checkoutFieldsReset,
   setCashTendered,
   setTransNumber,
   setPinCode,
@@ -25,6 +26,24 @@ class CheckoutModal extends Component {
       submitText: PropTypes.string,
       submitAction: PropTypes.function
     }
+  }
+
+  componentDidUpdate () {
+    const {orderSuccess} = this.props
+    if (!orderSuccess) {
+      document.getElementById('modalInput').focus()
+    }
+  }
+
+  componentDidMount () {
+    const {orderSuccess} = this.props
+    if (!orderSuccess) {
+      document.getElementById('modalInput').focus()
+    }
+  }
+
+  componentWillUnmount () {
+    document.getElementById('productsSearch').focus()
   }
 
   onClickSubmit (data, event) {
@@ -120,14 +139,6 @@ class CheckoutModal extends Component {
         : 0
       : 0
 
-    let earnedPoints = bonusPoints
-      ? Number(total).toFixed(0) * 2
-      : Number(total).toFixed(0)
-
-    let earnedPlusPrevious = activeCustomer
-      ? Number(earnedPoints) + Number(activeCustomer.odboCoins)
-      : 0
-
     let customer = activeCustomer
       ? `${activeCustomer.lastName}, ${activeCustomer.firstName}`
       : undefined
@@ -145,8 +156,6 @@ class CheckoutModal extends Component {
           walkIn: walkinCustomer,
           customer: customer,
           previousOdbo: prevOdbo,
-          points: earnedPoints,
-          newOdbo: earnedPlusPrevious,
           change: data.change,
           voucherDiscount: voucherAmount,
           sumOfCartItems: sumOfCartItems,
@@ -160,10 +169,8 @@ class CheckoutModal extends Component {
           walkIn: walkinCustomer,
           customer: customer,
           previousOdbo: prevOdbo,
-          points: earnedPoints,
-          newOdbo: earnedPlusPrevious,
           cardType: card.type === 'debit' ? 'Nets' : 'Credit',
-          provider: card.provider,
+          provider: !card.provider ? undefined : card.provider,
           voucherDiscount: voucherAmount,
           sumOfCartItems: sumOfCartItems,
           customDiscount: customDiscount,
@@ -218,7 +225,7 @@ class CheckoutModal extends Component {
           type: 'credit',
           transNumber,
           cardType: card.type,
-          provider: card.provider,
+          provider: !card.provider ? undefined : card.provider,
           bonusPoints: bonus,
           odboId: odboId
         }
@@ -241,13 +248,15 @@ class CheckoutModal extends Component {
       remarks
     }
     dispatch(processOrder(orderInfo, receipt, staff))
+    document.getElementById('productsSearch').focus()
   }
 
   onClickCancel () {
     const {dispatch, orderSuccess, locale} = this.props
     orderSuccess
     ? dispatch(resetStore(locale)) && document.getElementById('productsSearch').focus()
-    : dispatch(closeActiveModal()) && document.getElementById('productsSearch').focus()
+    : dispatch(closeActiveModal()) && dispatch(checkoutFieldsReset()) &&
+      document.getElementById('productsSearch').focus()
   }
 
   onClickReset () {
@@ -352,6 +361,7 @@ class CheckoutModal extends Component {
               cashTendered={Number(cashTendered).toFixed(2)}
               cashChange={cashChange}
               odboMinusTotal={newOdboBalance}
+              transNumber={transNumber}
               onSubmit={this.onClickSubmit.bind(this, data)}
             />
             : <CheckoutProcessing
@@ -386,7 +396,7 @@ class CheckoutModal extends Component {
                 </p>
                 {
                   (currency === 'sgd') && !orderSuccess && orderError === ''
-                  ? (cashMinusTotal >= 0) || paymentMode === 'credit' && transNumber !== ''
+                  ? (cashMinusTotal >= 0) || paymentMode === 'credit'
                     ? <p className='column control is-marginless'>
                       <a id='confirmCheckout' className='button is-large is-success is-fullwidth'
                         onClick={this.onClickSubmit.bind(this, {change: cashChange})}>

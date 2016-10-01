@@ -15,6 +15,21 @@ import {
 } from '../actions/application'
 
 class Store extends Component {
+
+  componentDidUpdate () {
+    const { activeCashier, activeCashdrawer, activeModalId } = this.props
+    if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
+      if (activeModalId === 'verifyStaff' && activeCashier) {
+        document.getElementById('staffPassword').focus()
+      }
+      if (activeModalId === '' || !activeModalId) {
+        if (activeCashier) {
+          document.getElementById('productsSearch').focus()
+        }
+      }
+    }
+  }
+
   componentWillMount () {
     const {
       dispatch,
@@ -119,13 +134,13 @@ class Store extends Component {
                     ? null
                     : <div>
                       <div className='container'>
-                        <p className='control is-fullwidth'>
-                          <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
+                        <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
+                          <p className='control is-fullwidth'>
                             <input id='staffPassword' autoComplete='off'
                               className='input is-large' type='password'
                               placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
-                          </form>
-                        </p>
+                          </p>
+                        </form>
                         <hr />
                       </div>
                       <div className='columns'>

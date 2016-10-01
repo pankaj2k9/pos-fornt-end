@@ -131,6 +131,7 @@ const zh = {
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noCustResults': '没有客户的搜索结果 ',
   'app.error.noCartItems': '有没有产品... ',
+  'app.ph.enterRefundRemarks': '什么是退款的原因',
 
   'app.modal.order': '订购',
   'app.modal.orderId': '订购 ID',
@@ -193,7 +194,8 @@ const zh = {
   'app.page.settings.subtitle': 'POS设置和工具集...',
   'app.page.settings.refund': '退',
   'app.page.settings.refundDesc': '付款方式退款功能，这使得支付资金的收回客户有',
-  'app.page.settings.refundDesc2': '我们只做单一购买全额退款',
+  'app.page.settings.ordersDesc': '订单退款要么重印收据从以前的事务',
+  'app.page.settings.reprintDesc': '重印功能，你可以从以前的交易重新打印收据',
   'app.page.settings.orderDetails': '订单详细信息',
   'app.page.settings.refundButton': '订单退款',
   'app.page.settings.customers': '顾客',

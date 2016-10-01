@@ -8,7 +8,7 @@ import { completeSalesFetch } from '../actions/reports'
 import printEODS from '../utils/printEODS/print'
 
 class SalesReportComplete extends React.Component {
-  componentDidMount () {
+  componentWillMount () {
     const { dispatch, storeId } = this.props
 
     // get sales today
@@ -46,15 +46,29 @@ class SalesReportComplete extends React.Component {
 
   render () {
     const { isLoading } = this.props
-
     return (
       isLoading
         ? <LoadingPane
           headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
         : <div>
-          <button onClick={this.printEndOfDaySales.bind(this)}>
-            Print End of Day Sales
-          </button>
+          <div className='tile is-ancestor box'>
+            <div className='tile is-vertical is-8'>
+              <article className='tile is-child'>
+                <p className='title'>POS SALES</p>
+                <p className='subtitle'>print the summary of sales this day</p>
+              </article>
+            </div>
+            <div className='tile is-vertical is-4 has-text-centered'>
+              <article className='tile is-child'>
+                <div className='content'>
+                  <button className='button is-success is-large'
+                    onClick={this.printEndOfDaySales.bind(this)}>
+                    Print Summary
+                  </button>
+                </div>
+              </article>
+            </div>
+          </div>
         </div>
     )
   }

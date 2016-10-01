@@ -43,6 +43,14 @@ import {
 } from '../actions/application'
 
 class PanelCart extends Component {
+
+  componentDidUpdate () {
+    const {activeModalId} = this.props
+    if (activeModalId === 'recallOrder') {
+      document.getElementById('orderSearch').focus()
+    }
+  }
+
   onClickPanelHeaderBtns (inputAction) {
     const {dispatch} = this.props
     dispatch(setCustomerInputActive(inputAction))
@@ -80,6 +88,7 @@ class PanelCart extends Component {
     currency === 'sgd'
     ? dispatch(setCurrencyType('odbo'))
     : dispatch(setCurrencyType('sgd'))
+    document.getElementById('productsSearch').focus()
   }
 
   onClickHoldOrder () {
@@ -190,12 +199,17 @@ class PanelCart extends Component {
           {
             !overallDiscount || overallDiscount === 0
               ? <td>
-                <p className='control has-addons' style={{width: 50}}>
-                  <input id='itemDiscount' className='input is-small' type='Number'
-                    placeholder={discountPH} value={discountVal}
-                    onChange={e => setDiscount(e.target.value)} />
-                  <a className='button is-small'>%</a>
-                </p>
+                <form onSubmit={e => {
+                  e.preventDefault()
+                  document.getElementById('productsSearch').focus()
+                }}>
+                  <p className='control has-addons' style={{width: 50}}>
+                    <input id='itemDiscount' className='input is-small' type='Number'
+                      placeholder={discountPH} value={discountVal}
+                      onChange={e => setDiscount(e.target.value)} />
+                    <a className='button is-small'>%</a>
+                  </p>
+                </form>
               </td>
               : null
           }
