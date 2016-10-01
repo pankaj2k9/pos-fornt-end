@@ -102,6 +102,13 @@ export function resetErrorState () {
   }
 }
 
+export const RESET_APP_STATE = 'RESET_APP_STATE'
+export function resetAppState () {
+  return {
+    type: RESET_APP_STATE
+  }
+}
+
 export const ADD_CASHDRAWER_DATA = 'ADD_CASHDRAWER_DATA'
 export function addCashdrawerData (cashdrawer) {
   return {

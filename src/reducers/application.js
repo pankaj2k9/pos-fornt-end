@@ -20,7 +20,8 @@ import {
   AUTH_STAFF_REQUEST,
   AUTH_STAFF_FAILURE,
   RESET_STAFF_STATE,
-  RESET_ERROR_STATE
+  RESET_ERROR_STATE,
+  RESET_APP_STATE
 } from '../actions/application'
 
 function application (state = {
@@ -29,6 +30,7 @@ function application (state = {
   activeModalId: null,
   isHamburgerOpen: false,
   isFetchingStoreIds: false,
+  store: null,
   storeIds: [],
   storeIdsError: null,
   storeId: null,
@@ -177,6 +179,21 @@ function application (state = {
       return Object.assign({}, state, {
         shouldUpdate: false,
         error: null
+      })
+    case RESET_APP_STATE:
+      return Object.assign({}, state, {
+        activeCashdrawer: null,
+        activeModalId: null,
+        isHamburgerOpen: false,
+        isFetchingStoreIds: false,
+        storeIds: [],
+        storeIdsError: null,
+        storeId: null,
+        activeCashier: null,
+        adminToken: null,
+        shouldUpdate: false,
+        error: null,
+        store: null
       })
     default:
       return state

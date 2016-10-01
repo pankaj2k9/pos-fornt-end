@@ -108,7 +108,7 @@ function checkout (state = {
         cashTendered: 0,
         transNumber: '',
         pincode: '',
-        card: {},
+        card: { type: 'credit', provider: null },
         orderNote: []
       })
     case TOGGLE_BONUS_POINTS:

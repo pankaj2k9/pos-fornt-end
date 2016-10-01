@@ -25,13 +25,14 @@ import {
 } from './products'
 
 import {
-  closeActiveModal
+  closeActiveModal,
+  addCashdrawerOpenCount,
+  resetAppState
 } from './application'
 
 import {
   reprintingReceipt,
-  orderStateReset,
-  addCashdrawerOpenCount
+  orderStateReset
 } from './orders'
 
 import {
@@ -113,6 +114,7 @@ export function onLogout () {
     dispatch(panelCheckoutReset())
     dispatch(reportsStateReset())
     dispatch(orderStateReset())
+    dispatch(resetAppState())
   }
 }
 

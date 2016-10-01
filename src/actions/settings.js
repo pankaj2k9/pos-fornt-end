@@ -73,8 +73,9 @@ export function storeOrderFetchSuccess (response) {
 export function storeOrderFetchFailure (error) {
   return { type: STOREORDER_FETCH_FAILURE, error }
 }
-export function storeOrderFetch (orderId) {
+export function storeOrderFetch (searchKey) {
   return (dispatch) => {
+    let orderId = searchKey // Number(orderSearchKey)
     dispatch(storeOrderFetchRequest())
 
     return ordersService.get(orderId)
