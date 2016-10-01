@@ -15,6 +15,21 @@ import {
 } from '../actions/application'
 
 class Store extends Component {
+
+  componentDidUpdate () {
+    const { activeCashier, activeCashdrawer, activeModalId } = this.props
+    if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
+      if (activeModalId === 'verifyStaff' && activeCashier) {
+        document.getElementById('staffPassword').focus()
+      }
+      if (activeModalId === '' || !activeModalId) {
+        if (activeCashier) {
+          document.getElementById('productsSearch').focus()
+        }
+      }
+    }
+  }
+
   componentWillMount () {
     const {
       dispatch,
@@ -25,18 +40,6 @@ class Store extends Component {
     if (!productsById) {
       dispatch(fetchAllProducts(locale, productsFilter))
       dispatch(fetchCustomers())
-    }
-  }
-
-  componentDidUpdate () {
-    const { activeCashier, activeModalId } = this.props
-    if (activeModalId === 'verifyStaff' && activeCashier) {
-      document.getElementById('staffPassword').focus()
-    }
-    if (activeModalId === '' || !activeModalId) {
-      if (activeCashier) {
-        document.getElementById('productsSearch').focus()
-      }
     }
   }
 

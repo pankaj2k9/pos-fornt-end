@@ -36,7 +36,10 @@ class CheckoutModal extends Component {
   }
 
   componentDidMount () {
-    document.getElementById('modalInput').focus()
+    const {orderSuccess} = this.props
+    if (!orderSuccess) {
+      document.getElementById('modalInput').focus()
+    }
   }
 
   componentWillUnmount () {

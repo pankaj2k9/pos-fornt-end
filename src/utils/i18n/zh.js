@@ -131,6 +131,7 @@ const zh = {
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noCustResults': '没有客户的搜索结果 ',
   'app.error.noCartItems': '有没有产品... ',
+  'app.ph.enterRefundRemarks': '什么是退款的原因',
 
   'app.modal.order': '订购',
   'app.modal.orderId': '订购 ID',

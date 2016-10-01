@@ -143,7 +143,7 @@ class SettingsTab extends Component {
                 <i className='fa fa-list-alt fa-4x' />
               </span>
               <p className='title'>
-                <FormattedMessage id={'app.page.settings.tabOrders'} />
+                <FormattedMessage id={'app.page.settings.refund'} />
               </p>
               <p className='subtitle'>
                 <FormattedMessage id={'app.page.settings.ordersDesc'} />
@@ -480,7 +480,7 @@ class SettingsTab extends Component {
   }
 
   renderOrderSearchModal () {
-    const {activeModalId, orderSearchKey,
+    const {activeModalId, orderSearchKey, intl,
            orderDetails, refundSuccess, locale,
            isProcessing, storeDetails, reprintSuccess} = this.props
     const modalId = activeModalId === 'refundModal'
@@ -548,6 +548,7 @@ class SettingsTab extends Component {
     return (
       <SearchModal
         id={modalId}
+        inputPh={intl.formatMessage({ id: 'app.ph.enterRefundRemarks' })}
         type={type}
         locale={locale}
         storeDetails={storeDetails}

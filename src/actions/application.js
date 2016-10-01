@@ -170,8 +170,6 @@ export function validateAndUpdateCashdrawer (query, staff, data) {
         print(receipt)
         dispatch(setActiveModal(''))
         dispatch(setCashdrawerSuccess(data))
-        document.getElementById('storePinCode2').value = ''
-        document.getElementById('cashdrawerAmount').value = ''
       })
       .catch(error => {
         document.getElementById('storePinCode2').value = ''

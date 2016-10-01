@@ -53,7 +53,7 @@ const List = (props) => {
 }
 
 const Details = (props) => {
-  const {details, status, processing} = props
+  const {details, status, processing, type, inputPh, onClickOption} = props
   return (
     <div className='content'>
       <Level
@@ -98,6 +98,17 @@ const Details = (props) => {
                 )}
               </li>
             </ul>
+            {type === 'refundModal'
+              ? <form autoComplete='off' onSubmit={onClickOption}>
+                <p className='control is-fullwidth'>
+                  <label className='label'>Reason of Refund</label>
+                  <input id='refundRemarks' autoComplete='off'
+                    className='input is-large' type='text'
+                    placeholder={inputPh} />
+                </p>
+              </form>
+              : null
+            }
             {!processing
               ? null
               : <p className='section has-text-centered'>
@@ -144,10 +155,12 @@ class SearchModal extends Component {
     dispatch(storeOrderFetch(orderSearchKey))
   }
 
-  onClickOption () {
+  onClickOption (event) {
+    event.preventDefault()
     const {dispatch, orderSearchKey, type, details} = this.props
+    var refundRemarks = document.getElementById('refundRemarks').value
     if (type === 'refundModal') {
-      dispatch(refund(orderSearchKey))
+      dispatch(refund(orderSearchKey, refundRemarks))
     } else if (type === 'reprintModal') {
       print(details)
       dispatch(reprintingReceipt(true))
@@ -199,7 +212,8 @@ class SearchModal extends Component {
           </header>
           <section className='modal-card-body' style={{padding: 15}}>
             {displayData === 'details'
-              ? <Details type={type} details={details} status={modalStatus} processing={processing} />
+              ? <Details type={type} details={details} status={modalStatus}
+                processing={processing} onClickOption={this.onClickOption.bind(this)} />
               : <List items={items} dispatch={dispatch} listButton={listButton} />
             }
           </section>
@@ -253,7 +267,8 @@ SearchModal.PropTypes = {
   ordersSearchKey: PropTypes.string,
   modalStatus: PropTypes.object,
   processing: PropTypes.bool,
-  storeDetails: PropTypes.object
+  storeDetails: PropTypes.object,
+  inputPh: PropTypes.string
 }
 
 export default connect()(SearchModal)

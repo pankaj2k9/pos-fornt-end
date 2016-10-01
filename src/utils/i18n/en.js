@@ -127,6 +127,7 @@ const en = {
   'app.ph.youChoose': 'You Choosed: ',
   'app.ph.storePin': 'enter PIN',
   'app.ph.enterNewVal': 'enter new value',
+  'app.ph.enterRefundRemarks': 'What is the reason of refund',
 
   'app.error.update.stock': 'Update stocks on admin app',
   'app.error.noCustResults': 'No search results for customer ',
