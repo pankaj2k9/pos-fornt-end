@@ -28,6 +28,18 @@ class Store extends Component {
     }
   }
 
+  componentDidUpdate () {
+    const { activeCashier, activeModalId } = this.props
+    if (activeModalId === 'verifyStaff' && activeCashier) {
+      document.getElementById('staffPassword').focus()
+    }
+    if (activeModalId === '' || !activeModalId) {
+      if (activeCashier) {
+        document.getElementById('productsSearch').focus()
+      }
+    }
+  }
+
   onChange (staffId) {
     const {dispatch, staff} = this.props
     let staffs = staff.staffs
@@ -119,13 +131,13 @@ class Store extends Component {
                     ? null
                     : <div>
                       <div className='container'>
-                        <p className='control is-fullwidth'>
-                          <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
+                        <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
+                          <p className='control is-fullwidth'>
                             <input id='staffPassword' autoComplete='off'
                               className='input is-large' type='password'
                               placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
-                          </form>
-                        </p>
+                          </p>
+                        </form>
                         <hr />
                       </div>
                       <div className='columns'>

@@ -28,8 +28,8 @@ class StoreOrders extends React.Component {
   }
 
   _fetchOrdersToday (query) {
-    const { dispatch, storeId, limit } = this.props
-
+    const { dispatch, store, limit } = this.props
+    let storeId = store.source
     // get sales today
     const from = new Date()
     from.setHours(0, 0, 0, 0)
@@ -215,7 +215,7 @@ function mapStateToProps (state) {
 
   return {
     locale: state.intl.locale,
-    storeId: state.application.storeId,
+    store: state.application.store,
     isLoading: state.reports.storeOrders.isLoading,
     orderItems: state.reports.storeOrders.orderItems,
     page: state.reports.storeOrders.page,

@@ -34,6 +34,15 @@ import {
 
 class SettingsTab extends Component {
 
+  componentDidUpdate () {
+    const {activeModalId} = this.props
+    if (activeModalId === 'verifyStorePin') {
+      document.getElementById('storePinCode').focus()
+    } else if (activeModalId === 'refundModal' || 'reprintModal') {
+      document.getElementById('orderSearch').focus()
+    }
+  }
+
   onClickRefund () {
     const {dispatch} = this.props
     dispatch(setActiveModal('refundModal'))
@@ -134,10 +143,10 @@ class SettingsTab extends Component {
                 <i className='fa fa-list-alt fa-4x' />
               </span>
               <p className='title'>
-                <FormattedMessage id={'app.page.settings.refund'} />
+                <FormattedMessage id={'app.page.settings.tabOrders'} />
               </p>
               <p className='subtitle'>
-                <FormattedMessage id={'app.page.settings.refundDesc2'} />
+                <FormattedMessage id={'app.page.settings.ordersDesc'} />
               </p>
               <a className='button is-info'
                 onClick={this.onClickOption.bind(this, 'orders')}>
@@ -199,11 +208,6 @@ class SettingsTab extends Component {
                 <FormattedMessage id={'app.page.settings.refundDesc'} />
               </span>
             </p>
-            <p className='subtitle'>
-              <span>
-                <FormattedMessage id={'app.page.settings.refundDesc2'} />
-              </span>
-            </p>
           </div>
           <div className='column'>
             <center>
@@ -223,7 +227,7 @@ class SettingsTab extends Component {
           <div className='column is-two-thirds'>
             <p className='subtitle'>
               <span>
-                <FormattedMessage id={'app.page.settings.refundDesc'} />
+                <FormattedMessage id={'app.page.settings.reprintDesc'} />
               </span>
             </p>
           </div>
@@ -482,6 +486,65 @@ class SettingsTab extends Component {
     const modalId = activeModalId === 'refundModal'
                     ? 'refundModal' : 'reprintModal'
     const type = activeModalId
+    let items = []
+    let trans
+    let info
+    let headerText
+    if (orderDetails) {
+      orderDetails.items.forEach(item => {
+        let itemQty = Number(item.quantity)
+        let prodName = locale === 'en' ? item.product.nameEn : item.product.nameZh
+        items.push({
+          name: `${prodName.substring(0, 18) + '...'}`,
+          qty: itemQty,
+          subtotal: item.totalCost
+        })
+      })
+      let userTrans = orderDetails.users
+        ? {
+          customer: `${orderDetails.users.firstName} ${orderDetails.users.lastName}`,
+          previousOdbo: orderDetails.users.odboCoins,
+          points: orderDetails.redemptionPoints,
+          newOdbo: Number(orderDetails.users.odboCoins) + Number(orderDetails.redemptionPoints)
+        }
+        : {}
+      let initialTrans = {
+        total: orderDetails.total,
+        voucherDiscount: orderDetails.voucherDeduction,
+        sumOfCartItems: orderDetails.subtotal,
+        orderNote: orderDetails.remarks
+      }
+      trans = (orderDetails.currency === 'sgd')
+        ? (orderDetails.posTrans.type === 'cash')
+          ? Object.assign(initialTrans, userTrans, {
+            type: 'cash',
+            cash: orderDetails.posTrans.payment,
+            change: orderDetails.posTrans.change
+          })
+          : Object.assign(initialTrans, userTrans, {
+            type: 'credit',
+            cardType: orderDetails.posTrans.cardType,
+            provider: orderDetails.posTrans.provider,
+            transNo: orderDetails.posTrans.transNumber
+          })
+        : Object.assign(initialTrans, userTrans, {
+          type: 'odbo'
+        })
+      info = {
+        date: orderDetails.dateOrdered,
+        orderId: orderDetails.id
+      }
+      headerText = !storeDetails.storeAddress
+        ? ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268']
+        : [storeDetails.name, storeDetails.storeAddress]
+    }
+    var details = {
+      items,
+      info,
+      trans,
+      headerText,
+      footerText: ['Thank you', 'Have a nice day!']
+    }
     return (
       <SearchModal
         id={modalId}
@@ -492,7 +555,7 @@ class SettingsTab extends Component {
         active={activeModalId}
         processing={isProcessing}
         displayData='details'
-        details={orderDetails}
+        details={!orderDetails ? undefined : details}
         orderSearchKey={orderSearchKey}
         modalStatus={{refund: refundSuccess, reprintSuccess}}
         search={{ id: 'searchOrder', value: orderSearchKey, placeholder: 'Search Order Id', onChange: storeOrdersSetSearchKey }}

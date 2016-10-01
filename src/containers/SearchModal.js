@@ -66,7 +66,7 @@ const Details = (props) => {
         }
         right={
           <h1 className='title is-marginless'>
-            {!details ? 'No Results' : 'ID: ' + details.id}
+            {!details ? 'No Results' : 'ID: ' + details.info.orderId}
           </h1>
         } />
 
@@ -77,21 +77,21 @@ const Details = (props) => {
             <ul style={{display: 'flex', listStyleType: 'none', fontSize: 16}}>
               <li style={{margin: 0, padding: 10}}>
                 <strong><FormattedMessage id='app.modal.dateOrdered' />:</strong>
-                <br />- <FormattedDate value={details.dateOrdered} />
-                <br />- <FormattedTime value={details.dateOrdered} />
+                <br />- <FormattedDate value={details.info.date} />
+                <br />- <FormattedTime value={details.info.date} />
               </li>
               <li style={{margin: 0, padding: 10}}>
                 <strong><FormattedMessage id='app.general.transDetails' />:</strong>
-                <br />- <FormattedMessage id='app.modal.type' />: {details.posTrans.type}
-                <br />- <FormattedMessage id='app.general.total' />: {details.total}
+                <br />- <FormattedMessage id='app.modal.type' />: {details.trans.type}
+                <br />- <FormattedMessage id='app.general.total' />: {details.trans.total}
               </li>
               <li style={{margin: 0, padding: 10}}>
                 <strong><FormattedMessage id='app.panel.products' />:</strong>
                 {details.items.map((item, key) => {
                   return (
                     <div key={key}>
-                      {` x(${item.quantity}) - `}
-                      <Truncate text={item.product.nameEn} maxLength={12} />
+                      {` x(${item.qty}) - `}
+                      <Truncate text={item.name} maxLength={12} />
                     </div>
                   )
                 }
@@ -105,7 +105,7 @@ const Details = (props) => {
               </p>
             }
           </div>
-          <h1 className='title'>
+          <h1 className='title has-text-centered'>
             {status.refund
               ? <FormattedMessage id='app.general.refundSuccess' />
               : status.reprint
@@ -145,31 +145,13 @@ class SearchModal extends Component {
   }
 
   onClickOption () {
-    const {dispatch, orderSearchKey, type,
-           details, storeDetails, locale} = this.props
-    let items = []
-    details.items.forEach(item => {
-      let itemQty = Number(item.quantity)
-      let prodName = locale === 'en' ? item.product.nameEn : item.product.nameZh
-      items.push({
-        name: `${prodName.substring(0, 18) + '...'}`,
-        qty: itemQty,
-        subtotal: item.totalCost
-      })
-    })
-
-    let receipt = {
-      items,
-      info: {
-        date: details.dateCreated,
-        orderId: details.id
-      },
-      headerText: [storeDetails.name, storeDetails.storeAddress],
-      footerText: 'Reprinted Reciept'
+    const {dispatch, orderSearchKey, type, details} = this.props
+    if (type === 'refundModal') {
+      dispatch(refund(orderSearchKey))
+    } else if (type === 'reprintModal') {
+      print(details)
+      dispatch(reprintingReceipt(true))
     }
-    type === 'refundModal'
-    ? dispatch(refund(orderSearchKey))
-    : dispatch(print(receipt)) && dispatch(reprintingReceipt(true))
   }
 
   render () {
@@ -228,14 +210,21 @@ class SearchModal extends Component {
                 ? !processing
                   ? !details
                     ? null
-                    : <p className='control'>
-                      <a className='button is-large is-fullwidth is-info'
-                        onClick={this.onClickOption.bind(this)}>
-                        <FormattedMessage id={id === 'refundModal'
-                          ? 'app.page.settings.refundButton'
-                          : 'app.general.reprint'} />
-                      </a>
-                    </p>
+                    : type === 'refundModal' && !modalStatus.refund
+                      ? <p className='control'>
+                        <a className='button is-large is-fullwidth is-info'
+                          onClick={this.onClickOption.bind(this)}>
+                          <FormattedMessage id={'app.page.settings.refundButton'} />
+                        </a>
+                      </p>
+                      : type === 'reprintModal' && !modalStatus.reprint
+                        ? <p className='control'>
+                          <a className='button is-large is-fullwidth is-info'
+                            onClick={this.onClickOption.bind(this)}>
+                            <FormattedMessage id={'app.general.reprint'} />
+                          </a>
+                        </p>
+                        : null
                   : null
                 : null
               }
