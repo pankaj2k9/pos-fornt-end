@@ -198,7 +198,7 @@ export const buildComputation = (trans) => {
         minLabel = 'Trans #'
         minuend = `<div>${trans.transNo}</div>`
         card = 'Card Type'
-        cardType = `<div>${trans.cardType} <br /> ${trans.provider}</div>`
+        cardType = `<div>${trans.cardType} <br /> ${!trans.provider ? '' : trans.provider}</div>`
         showDiff = false
     }
 
