@@ -7,8 +7,7 @@ if (!global.fetch) {
 
 const api = (function () {
   let instance
-  // const host = process.env.API_URL
-  const host = 'https://uat-pos.theodbocare.com/api/'
+  const host = process.env.API_URL
   // setup feathers client
   function setupClient () {
     const app = feathers()
