@@ -136,14 +136,6 @@ class CheckoutModal extends Component {
         : 0
       : 0
 
-    let earnedPoints = bonusPoints
-      ? Number(total).toFixed(0) * 2
-      : Number(total).toFixed(0)
-
-    let earnedPlusPrevious = activeCustomer
-      ? Number(earnedPoints) + Number(activeCustomer.odboCoins)
-      : 0
-
     let customer = activeCustomer
       ? `${activeCustomer.lastName}, ${activeCustomer.firstName}`
       : undefined
@@ -161,8 +153,6 @@ class CheckoutModal extends Component {
           walkIn: walkinCustomer,
           customer: customer,
           previousOdbo: prevOdbo,
-          points: earnedPoints,
-          newOdbo: earnedPlusPrevious,
           change: data.change,
           voucherDiscount: voucherAmount,
           sumOfCartItems: sumOfCartItems,
@@ -176,8 +166,6 @@ class CheckoutModal extends Component {
           walkIn: walkinCustomer,
           customer: customer,
           previousOdbo: prevOdbo,
-          points: earnedPoints,
-          newOdbo: earnedPlusPrevious,
           cardType: card.type === 'debit' ? 'Nets' : 'Credit',
           provider: !card.provider ? undefined : card.provider,
           voucherDiscount: voucherAmount,

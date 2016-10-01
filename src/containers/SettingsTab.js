@@ -503,9 +503,9 @@ class SettingsTab extends Component {
       let userTrans = orderDetails.users
         ? {
           customer: `${orderDetails.users.firstName} ${orderDetails.users.lastName}`,
-          previousOdbo: orderDetails.users.odboCoins,
+          previousOdbo: Number(orderDetails.users.odboCoins) - Number(orderDetails.redemptionPoints),
           points: orderDetails.redemptionPoints,
-          newOdbo: Number(orderDetails.users.odboCoins) + Number(orderDetails.redemptionPoints)
+          newOdbo: Number(orderDetails.users.odboCoins)
         }
         : {}
       let initialTrans = {
@@ -543,7 +543,7 @@ class SettingsTab extends Component {
       info,
       trans,
       headerText,
-      footerText: ['Thank you', 'Have a nice day!']
+      footerText: ['This is a reprinted receipt']
     }
     return (
       <SearchModal

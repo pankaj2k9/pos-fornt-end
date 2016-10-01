@@ -54,6 +54,10 @@ export function processOrder (orderInfo, receipt, staff) {
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(orderSuccess())
+      let newPoints = {
+        points: order.redemptionPoints,
+        newOdbo: Number(receipt.trans.previousOdbo) + Number(order.redemptionPoints)
+      }
       const newReceipt = {
         items: receipt.items,
         info: {
@@ -61,7 +65,7 @@ export function processOrder (orderInfo, receipt, staff) {
           staff,
           orderId: order.id
         },
-        trans: receipt.trans,
+        trans: Object.assign(receipt.trans, newPoints),
         headerText: receipt.headerText,
         footerText: receipt.footerText
       }
