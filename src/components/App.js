@@ -11,7 +11,9 @@ import {
   setActiveModal,
   resetStaffState,
   validateAndUpdateCashdrawer,
-  setCashdrawerFailure
+  setCashdrawerFailure,
+  setCashierLoggedIn,
+  authCashierStaff
 } from '../actions/application'
 
 import { logout } from '../actions/login'
@@ -19,6 +21,15 @@ import { onLogout } from '../actions/helpers'
 import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
+
+  componentDidUpdate () {
+    const { activeCashier, activeCashdrawer, activeModalId, shouldUpdate } = this.props
+    if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
+      if (activeModalId === 'verifyStaff' && activeCashier && !shouldUpdate) {
+        document.getElementById('staffPassword').focus()
+      }
+    }
+  }
 
   handleHamburgerToggle () {
     const { dispatch } = this.props
@@ -34,6 +45,39 @@ class App extends React.Component {
   handleLogoutCashier () {
     const { dispatch } = this.props
     dispatch(resetStaffState())
+  }
+
+  close () {
+    const {dispatch} = this.props
+    dispatch(setActiveModal(''))
+  }
+
+  onChange (staffId) {
+    const {dispatch, staff} = this.props
+    let staffs = staff.data.staffs
+    for (var i = 0; i < staffs.length; i++) {
+      if (staffs[i].id === staffId) {
+        dispatch(setCashierLoggedIn(staffs[i]))
+      }
+    }
+  }
+
+  activeCashier () {
+    const { intl, activeCashier } = this.props
+    let active = activeCashier === null
+      ? intl.formatMessage({id: 'app.general.chooseUser'})
+      : intl.formatMessage({id: 'app.ph.youChoose'}) + activeCashier.username
+    return active
+  }
+
+  verifyStaff (event) {
+    event.preventDefault()
+    const {dispatch, activeCashier} = this.props
+    let staffData = {
+      username: activeCashier.username,
+      password: document.getElementById('staffPassword').value
+    }
+    dispatch(authCashierStaff(staffData))
   }
 
   openChooseUserModal () {
@@ -125,9 +169,94 @@ class App extends React.Component {
     )
   }
 
+  chooseUserModal () {
+    const {intl, activeModalId, staff,
+           activeCashier, shouldUpdate, error} = this.props
+    const active = activeModalId === 'verifyStaff' ? 'is-active' : ''
+    return (
+      <div id='verifyStaff' className={`modal ${active}`}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <div className='modal-card-title is-marginless has-text-centered'>
+              <h1 className='title'><FormattedMessage id='app.button.logCashier' /></h1>
+            </div>
+            <button className='delete' onClick={this.close.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
+            {shouldUpdate
+              ? <div className='content has-text-centered'>
+                <h1 className='subtitle'>
+                  <FormattedMessage id='app.general.verifyingStaff' />
+                </h1>
+                <p className='has-text-centered'>
+                  <i className='fa fa-spinner fa-pulse fa-2x fa-fw' />
+                </p>
+                <div />
+              </div>
+              : <div>
+                <div className='content has-text-centered'>
+                  {!error
+                    ? null
+                    : <p className='subtitle'>
+                      {error}
+                    </p>
+                  }
+                  <div className='control is-horizontal'>
+                    <div className='control'>
+                      <span className='select is-large is-fullwidth'>
+                        <select
+                          onChange={e => this.onChange(e.target.value)}
+                          value={this.activeCashier()}
+                          style={{backgroundColor: 'rgba(255,255,255,0.0)'}}>
+                          <option>{this.activeCashier()}</option>
+                          {staff.data.staffs.map(function (cashier, key) {
+                            return (
+                              <option key={key} value={cashier.id}>
+                                {cashier.username}
+                              </option>
+                            )
+                          }, this)
+                          }
+                        </select>
+                      </span>
+                    </div>
+                  </div>
+                  {!activeCashier
+                    ? null
+                    : <div>
+                      <div className='container'>
+                        <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
+                          <p className='control is-fullwidth'>
+                            <input id='staffPassword' autoComplete='off'
+                              className='input is-large' type='password'
+                              placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
+                          </p>
+                        </form>
+                        <hr />
+                      </div>
+                      <div className='columns'>
+                        <p className='column is-6 is-offset-3'>
+                          <a className='button is-large is-fullwidth is-success'
+                            onClick={this.verifyStaff.bind(this)} >
+                            <FormattedMessage id='app.button.verify' />
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   render () {
     const { isHamburgerOpen, location, isLoggingOut,
-            staff, activeCashier, adminToken } = this.props
+            staff, activeCashier, adminToken, activeModalId } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.data
 
@@ -148,8 +277,11 @@ class App extends React.Component {
             {this.props.children}
           </div>
         </section>
+        {this.renderCashDrawerModal()}
         {
-          this.renderCashDrawerModal()
+          staff && activeModalId === 'verifyStaff'
+          ? this.chooseUserModal()
+          : null
         }
       </div>
     )

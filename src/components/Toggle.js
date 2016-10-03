@@ -30,7 +30,7 @@ const Toggle = (props) => {
         style={{width: buttonWidth}}
         onClick={switchAction}
         >
-      {toggleTwo.name}
+        {toggleTwo.name}
       </a>
     </p>
   )

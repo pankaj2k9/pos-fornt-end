@@ -211,19 +211,19 @@ class PanelProducts extends Component {
             />
           </div>
           <div className='panel-block'>
-          {!isFetching
-            ? <div className='columns is-multiline is-mobile'
-              style={{height: intFrameHeight - 280, overflowY: 'scroll'}}>
-              {this.renderChildren()}
-            </div>
-            : <div style={{height: intFrameHeight - 300, justifyContent: 'center'}}>
-              <LoadingPane
-                headerMessage={
-                  <FormattedMessage id='app.page.products.loadingProd' />
-                }
-                paneSize='is-medium' />
-            </div>
-          }
+            {!isFetching
+              ? <div className='columns is-multiline is-mobile'
+                style={{height: intFrameHeight - 280, overflowY: 'scroll'}}>
+                {this.renderChildren()}
+              </div>
+              : <div style={{height: intFrameHeight - 300, justifyContent: 'center'}}>
+                <LoadingPane
+                  headerMessage={
+                    <FormattedMessage id='app.page.products.loadingProd' />
+                  }
+                  paneSize='is-medium' />
+              </div>
+            }
           </div>
         </Panel>
       </div>

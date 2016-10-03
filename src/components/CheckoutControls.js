@@ -187,7 +187,7 @@ const CheckoutControls = (props) => {
             ? <div>
               <center>
                 <div style={{width: cashDetails}}>
-                {paymentMode === 'cash'
+                  {paymentMode === 'cash'
                   ? <div>
                     <table>
                       <tbody>
@@ -209,13 +209,13 @@ const CheckoutControls = (props) => {
                     <tbody>
                       <tr className='is-bordered'>
                         <td>
-                        {paymentMode === 'cash'
+                          {paymentMode === 'cash'
                           ? <h1><FormattedMessage id='app.general.change' />:</h1>
                           : <h1><FormattedMessage id='app.general.totalPrice' />:</h1>
                         }
                         </td>
                         <td style={{textAlign: 'right'}}>
-                        {paymentMode === 'cash'
+                          {paymentMode === 'cash'
                           ? <h1>{cashChange}</h1>
                           : <h1>{total}</h1>
                         }
@@ -245,7 +245,7 @@ const CheckoutControls = (props) => {
                   </table>
                   <hr />
                   <table>
-                  {odboBalance > 0 && odboMinusTotal >= 0
+                    {odboBalance > 0 && odboMinusTotal >= 0
                     ? <tr className='is-bordered'>
                       <td>
                         <h3><FormattedMessage id='app.general.rob' />:</h3>
