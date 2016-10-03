@@ -158,8 +158,8 @@ class SearchModal extends Component {
   onClickOption (event) {
     event.preventDefault()
     const {dispatch, orderSearchKey, type, details} = this.props
-    var refundRemarks = document.getElementById('refundRemarks').value
     if (type === 'refundModal') {
+      var refundRemarks = document.getElementById('refundRemarks').value
       dispatch(refund(orderSearchKey, refundRemarks))
     } else if (type === 'reprintModal') {
       print(details)
@@ -220,28 +220,28 @@ class SearchModal extends Component {
           <footer className='modal-card-foot'>
             <div className='columns' style={{flex: 1}}>
               <div className='column'>
-              {displayData === 'details'
-                ? !processing
-                  ? !details
-                    ? null
-                    : type === 'refundModal' && !modalStatus.refund
-                      ? <p className='control'>
-                        <a className='button is-large is-fullwidth is-info'
-                          onClick={this.onClickOption.bind(this)}>
-                          <FormattedMessage id={'app.page.settings.refundButton'} />
-                        </a>
-                      </p>
-                      : type === 'reprintModal' && !modalStatus.reprint
+                {displayData === 'details'
+                  ? !processing
+                    ? !details
+                      ? null
+                      : type === 'refundModal' && !modalStatus.refund
                         ? <p className='control'>
                           <a className='button is-large is-fullwidth is-info'
                             onClick={this.onClickOption.bind(this)}>
-                            <FormattedMessage id={'app.general.reprint'} />
+                            <FormattedMessage id={'app.page.settings.refundButton'} />
                           </a>
                         </p>
-                        : null
+                        : type === 'reprintModal' && !modalStatus.reprint
+                          ? <p className='control'>
+                            <a className='button is-large is-fullwidth is-info'
+                              onClick={this.onClickOption.bind(this)}>
+                              <FormattedMessage id={'app.general.reprint'} />
+                            </a>
+                          </p>
+                          : null
+                    : null
                   : null
-                : null
-              }
+                }
                 <p className='control'>
                   <a className='button is-large is-fullwidth' onClick={closeButton.event(dispatch)}>
                     {closeButton.name}

@@ -1,3 +1,5 @@
+import { browserHistory } from 'react-router'
+
 import storesService from '../services/stores'
 import authStaffService from '../services/authStaff'
 import noSalesService from '../services/noSales'
@@ -219,6 +221,7 @@ export function authCashierStaff (details) {
       .then(response => {
         dispatch(authStaffSuccess(response.token))
         dispatch(setActiveModal(''))
+        browserHistory.push('store')
       })
       .catch(error => {
         if (error) {
