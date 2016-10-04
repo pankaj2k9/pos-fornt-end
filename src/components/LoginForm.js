@@ -81,7 +81,7 @@ class LoginForm extends Component {
                                   let storeName = !store.name ? 'The ODBO Pte. Ltd' : store.name
                                   return (
                                     <option key={`store-id-${store.source}`} value={store.source}>
-                                    {storeName}
+                                      {storeName}
                                     </option>
                                   )
                                 }

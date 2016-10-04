@@ -392,31 +392,31 @@ class PanelCart extends Component {
         <div className='panel-block' style={{padding: 0}}>
           <div className='content'
             style={{height: intFrameHeight / 3.5, overflowY: 'scroll'}}>
-          {!empty
-            ? <table className='table'>
-              <thead>
-                <tr>
-                  <th><FormattedMessage id='app.general.qty' /></th>
-                  <th><FormattedMessage id='app.general.product' /></th>
-                  {!overallDiscount || overallDiscount === 0
-                    ? <th><FormattedMessage id='app.general.discount' /></th>
-                    : null
-                  }
-                  <th><FormattedMessage id='app.general.subtotal' /></th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {this.renderChildren()}
-              </tbody>
-            </table>
-            : <div className='section has-text-centered is-fullheight'
-              style={{height: intFrameHeight / 4, overflowY: 'scroll'}}>
-              <p>
-                <strong><FormattedMessage id='app.error.noCartItems' /></strong>
-              </p>
-            </div>
-          }
+            {!empty
+              ? <table className='table'>
+                <thead>
+                  <tr>
+                    <th><FormattedMessage id='app.general.qty' /></th>
+                    <th><FormattedMessage id='app.general.product' /></th>
+                    {!overallDiscount || overallDiscount === 0
+                      ? <th><FormattedMessage id='app.general.discount' /></th>
+                      : null
+                    }
+                    <th><FormattedMessage id='app.general.subtotal' /></th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.renderChildren()}
+                </tbody>
+              </table>
+              : <div className='section has-text-centered is-fullheight'
+                style={{height: intFrameHeight / 4, overflowY: 'scroll'}}>
+                <p>
+                  <strong><FormattedMessage id='app.error.noCartItems' /></strong>
+                </p>
+              </div>
+            }
           </div>
         </div>
         {

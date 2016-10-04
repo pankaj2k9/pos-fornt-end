@@ -27,7 +27,8 @@ const SearchBar = (props) => {
     cancelButton: undefined,
     cancelEvent: undefined,
     icon: 'fa fa-search',
-    onSubmit: function (event) { event.preventDefault() }
+    onSubmit: function (event) { event.preventDefault() },
+    onFocus: function () { document.getElementById(id).value = '' }
   }
 
   return (

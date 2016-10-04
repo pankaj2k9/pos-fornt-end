@@ -341,70 +341,70 @@ class SettingsTab extends Component {
           style={{
             height: intFrameHeight / 2, overflowY: 'scroll', padding: 5
           }}>
-            {!isFetching
-              ? customers.length !== 0
-                ? customers.map(function (customer, key) {
-                  function view () {
-                    dispatch(setActiveModal('customerDetails'))
-                    dispatch(customersSetActiveId(customer.odboId))
-                  }
-                  let zeroes = ''
-                  var i
-                  for (i = customer.odboId.length; i < 7; i++) {
-                    zeroes += 0
-                  }
-                  let stat = customer.status === 'active'
-                    ? <FormattedMessage id={'app.general.active'} />
-                    : <FormattedMessage id={'app.general.notActive'} />
-                  return (
-                    <div key={key} className='column is-half'>
-                      <BoxItem
-                        title={{
-                          main: `${customer.firstName} ${customer.lastName}`,
-                          alt: stat
-                        }}
-                        image={{icon: 'fa fa-user fa-4x'}}
-                        button={{name: 'app.button.view', onClick: view}}>
-                        <ul className='is-marginless'>
-                          <li>
-                            <strong>ODBO ID: </strong>
-                            {`${zeroes}${customer.odboId}`}
-                          </li>
-                          <li>
-                            <strong><FormattedMessage id={'app.general.membership'} />: </strong>
-                            {customer.membership}
-                          </li>
-                          <li>
-                            <strong><FormattedMessage id={'app.general.ob'} />: </strong>
-                            {customer.odboCoins}
-                          </li>
-                        </ul>
-                      </BoxItem>
-                    </div>
-                  )
-                })
-              : <div>
-                <LoadingPane
-                  headerMessage={
-                    <span>
-                      <FormattedMessage id='app.error.noCustResults' />
-                      <strong>
+          {!isFetching
+            ? customers.length !== 0
+              ? customers.map(function (customer, key) {
+                function view () {
+                  dispatch(setActiveModal('customerDetails'))
+                  dispatch(customersSetActiveId(customer.odboId))
+                }
+                let zeroes = ''
+                var i
+                for (i = customer.odboId.length; i < 7; i++) {
+                  zeroes += 0
+                }
+                let stat = customer.status === 'active'
+                  ? <FormattedMessage id={'app.general.active'} />
+                  : <FormattedMessage id={'app.general.notActive'} />
+                return (
+                  <div key={key} className='column is-half'>
+                    <BoxItem
+                      title={{
+                        main: `${customer.firstName} ${customer.lastName}`,
+                        alt: stat
+                      }}
+                      image={{icon: 'fa fa-user fa-4x'}}
+                      button={{name: 'app.button.view', onClick: view}}>
+                      <ul className='is-marginless'>
+                        <li>
+                          <strong>ODBO ID: </strong>
+                          {`${zeroes}${customer.odboId}`}
+                        </li>
+                        <li>
+                          <strong><FormattedMessage id={'app.general.membership'} />: </strong>
+                          {customer.membership}
+                        </li>
+                        <li>
+                          <strong><FormattedMessage id={'app.general.ob'} />: </strong>
+                          {customer.odboCoins}
+                        </li>
+                      </ul>
+                    </BoxItem>
+                  </div>
+                )
+              })
+            : <div>
+              <LoadingPane
+                headerMessage={
+                  <span>
+                    <FormattedMessage id='app.error.noCustResults' />
+                    <strong>
                       {customerFilter === ''
                         ? ` ${customerSearchKey}`
                         : `" ${customerFilter} ${customerSearchKey} "`
                       }
-                      </strong>
-                    </span>
-                  }
-                  isFetching={isFetching}
-                  paneSize='is-medium' />
-              </div>
-            : <LoadingPane
-              headerMessage={
-                <FormattedMessage id='app.page.products.loadingProd' />
-              }
-              paneSize='is-medium' />
+                    </strong>
+                  </span>
+                }
+                isFetching={isFetching}
+                paneSize='is-medium' />
+            </div>
+          : <LoadingPane
+            headerMessage={
+              <FormattedMessage id='app.page.products.loadingProd' />
             }
+            paneSize='is-medium' />
+          }
         </div>
         {!x
           ? null
@@ -431,12 +431,12 @@ class SettingsTab extends Component {
               {!showControl
                 ? null
                 : <div>
-                {!ucError
-                  ? null
-                  : <p className='subtitle has-text-centered'>
-                    {ucError}
-                  </p>
-                }
+                  {!ucError
+                    ? null
+                    : <p className='subtitle has-text-centered'>
+                      {ucError}
+                    </p>
+                  }
                   <div className='control is-expanded'>
                     <form autoComplete={false}>
                       <input id='newOdbo' className='input is-large' type='number'

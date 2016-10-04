@@ -41,7 +41,7 @@ const NavBar = ({
   return (
     <div className='hero is-black'>
       <div className='hero-head'>
-      {shouldShowControls
+        {shouldShowControls
         ? <nav className='nav dark'>
           <div className='nav-left'>
             <div className='nav-item' style={{padding: 5}}>
@@ -87,10 +87,10 @@ const NavBar = ({
                 ? 'is-loading' : null}`}
                 onClick={adminToken === null ? onLogout : onLogoutCashier}>
                 <span>
-                {adminToken === null
-                ? <FormattedMessage id='app.button.logout' />
-                : <FormattedMessage id='app.button.logoutCashier' />
-                }
+                  {adminToken === null
+                  ? <FormattedMessage id='app.button.logout' />
+                  : <FormattedMessage id='app.button.logoutCashier' />
+                  }
                 </span>
                 <span className='icon'>
                   <i className='fa fa-sign-out' />

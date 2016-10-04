@@ -46,41 +46,41 @@ export function login (details, browserHistory, store, cashdrawer) {
       .then(response => {
         dispatch(loginSuccess(response))
         dispatch(setStaffLoggedIn(response))
-        if (response.data.role === 'master') {
-          let date = new Date()
-          let initial = {
-            source: store,
-            date: String(`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`),
-            openCount: 0,
-            initialAmount: 0
-          }
-          browserHistory.push('store')
-          if (cashdrawer.length === 0) {
+        let date = new Date()
+        let initial = {
+          source: store,
+          date: String(`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`),
+          openCount: 0,
+          initialAmount: 0
+        }
+        if (cashdrawer.length === 0) {
+          dispatch(addCashdrawerData(initial))
+          dispatch(setActiveCashdrawer(initial))
+          dispatch(setActiveModal('updateCashDrawer'))
+        } else if (cashdrawer.length !== 0) {
+          let matchCount
+          cashdrawer.find(function (drawer) {
+            let date = new Date()
+            let date1 = drawer.date
+            let date2 = String(`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`)
+            if (date1 === date2) {
+              dispatch(setActiveCashdrawer(drawer))
+              matchCount = 1
+              if (drawer.initialAmount === 0) {
+                dispatch(setActiveModal('updateCashDrawer'))
+              }
+            }
+          })
+          if (!matchCount) {
             dispatch(addCashdrawerData(initial))
             dispatch(setActiveCashdrawer(initial))
             dispatch(setActiveModal('updateCashDrawer'))
-          } else if (cashdrawer.length !== 0) {
-            let matchCount
-            cashdrawer.find(function (drawer) {
-              let date = new Date()
-              let date1 = drawer.date
-              let date2 = String(`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`)
-              if (date1 === date2) {
-                dispatch(setActiveCashdrawer(drawer))
-                matchCount = 1
-                if (drawer.initialAmount === 0) {
-                  dispatch(setActiveModal('updateCashDrawer'))
-                }
-              }
-            })
-            if (!matchCount) {
-              dispatch(addCashdrawerData(initial))
-              dispatch(setActiveCashdrawer(initial))
-              dispatch(setActiveModal('updateCashDrawer'))
-            }
           }
-        } else {
+        }
+        if (response.data.role !== 'master') {
           browserHistory.push('settings')
+        } else {
+          browserHistory.push('store')
         }
       })
       .catch(error => {

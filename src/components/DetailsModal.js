@@ -41,19 +41,19 @@ const DetailsModal = (props) => {
                 </a>
               </div>
               <ul style={{fontSize: 16}}>
-              {
-                items.map(function (item, key) {
-                  let listName = item.name === undefined
-                    ? null
-                    : <strong><FormattedMessage id={item.name} />: </strong>
-                  return (
-                    <li key={key}>
-                      {listName}
-                      {item.desc}
-                    </li>
-                  )
-                }, this)
-              }
+                {
+                  items.map(function (item, key) {
+                    let listName = item.name === undefined
+                      ? null
+                      : <strong><FormattedMessage id={item.name} />: </strong>
+                    return (
+                      <li key={key}>
+                        {listName}
+                        {item.desc}
+                      </li>
+                    )
+                  }, this)
+                }
               </ul>
             </section>
             : <section>

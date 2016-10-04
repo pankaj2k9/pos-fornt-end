@@ -6,6 +6,7 @@ import ViewOrder from '../components/ViewOrder'
 import SimpleModal from '../components/SimpleModal'
 import Table from '../components/Table'
 import LoadingPane from '../components/LoadingPane'
+
 import {
   storeOrdersFetch,
   storeOrdersSetPage,
@@ -81,16 +82,18 @@ class StoreOrders extends React.Component {
     const to = new Date()
     to.setHours(23, 59, 59, 999)
 
-    let sortedOrders = orderItems.sort(function (a, b) {
-      // Turn your strings into dates, and then subtract them
-      // to get a value that is either negative, positive, or zero.
-      return new Date(b.dateCreated) - new Date(a.dateCreated)
-    })
+    // let sortedOrders = orderItems.sort(function (a, b) {
+    //   // Turn your strings into dates, and then subtract them
+    //   // to get a value that is either negative, positive, or zero.
+    //   return new Date(b.dateCreated) - new Date(a.dateCreated)
+    // })
 
-    const productOrderItems = sortedOrders.map((order, index) => {
+    const productOrderItems = orderItems.map((order, index) => {
+      var remarkLength = 15
+      var refundRemark = order.refundRemarks
       const currency = order.currency === 'sgd' ? 'SGD' : 'The Odbo coins'
       let isRefunded = order.isRefunded
-        ? intl.formatMessage({ id: 'app.general.refundedOrder' })
+        ? `${intl.formatMessage({id: 'app.general.refundedOrder'})} "${refundRemark.substring(0, remarkLength) + '...'}"`
         : ''
       return {
         id: `${order.id} ${isRefunded}`,
@@ -103,7 +106,7 @@ class StoreOrders extends React.Component {
           type: 'string'
         },
         subtotal: {
-          value: `${order.subtotal} ${currency}`,
+          value: `${order.isRefunded ? '-' : ''}${order.subtotal} ${currency}`,
           type: 'string'
         }
       }

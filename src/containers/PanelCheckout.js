@@ -371,9 +371,7 @@ class PanelCheckout extends Component {
                 left={<FormattedMessage id='app.general.subtotal' />}
                 right={
                   <p className='control'>
-                    <strong>
-                    {subtotal}
-                    </strong>
+                    <strong>{subtotal}</strong>
                   </p>
               } />
               { /*
@@ -419,20 +417,20 @@ class PanelCheckout extends Component {
                 ? <Level left={<FormattedMessage id='app.general.voucherDiscount' />}
                   right={
                     <strong>
-                    {/*
-                        @operator: !voucher
-                            - validates if the prop object 'voucher' is null,
-                              it will display nothing else display the remove
-                              voucher button
-                      */
-                      !voucher
-                      ? null
-                      : <a onClick={this.onClickRemoveVoucher.bind(this)}
-                        style={{marginRight: 50}}>
-                        <FormattedMessage id='app.button.removeVoucher' /> </a>
-                    }
-                    {Number(voucherDiscount).toFixed(2)}</strong>
-                  } />
+                      {/*
+                          @operator: !voucher
+                              - validates if the prop object 'voucher' is null,
+                                it will display nothing else display the remove
+                                voucher button
+                        */
+                        !voucher
+                        ? null
+                        : <a onClick={this.onClickRemoveVoucher.bind(this)}
+                          style={{marginRight: 50}}>
+                          <FormattedMessage id='app.button.removeVoucher' /> </a>
+                      }
+                      {Number(voucherDiscount).toFixed(2)}</strong>
+                    } />
                 : null
               }
               {/*
