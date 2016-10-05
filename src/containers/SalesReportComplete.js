@@ -9,22 +9,22 @@ import printEODS from '../utils/printEODS/print'
 
 class SalesReportComplete extends React.Component {
   componentWillMount () {
-    const { dispatch, storeId } = this.props
+    const { dispatch, store } = this.props
 
     // get sales today
     const today = new Date()
 
-    dispatch(completeSalesFetch(storeId, today))
+    dispatch(completeSalesFetch(store.source, today))
   }
 
   printEndOfDaySales () {
-    let { completeSales, storeId, cashier, openCount, cashInDrawer } = this.props
+    let { completeSales, store, cashier, openCount, cashInDrawer } = this.props
 
     // put real store address here
     completeSales.headerText = [
       'The ODBO',
-      '200 Victoria Street',
-      'Bugis Junction #02-22',
+      store.name,
+      store.address || '200 Victoria Street',
       'SINGAPORE',
       'Telephone : 6238 1337'
     ]
@@ -32,10 +32,10 @@ class SalesReportComplete extends React.Component {
     // put real sales info here
     completeSales.info = {
       cashier: cashier,
-      storeId: storeId,
+      storeId: store.source,
       openCashDrawerCount: openCount,
       cashInDrawer: cashInDrawer,
-      cashInfo: { count: openCount, value: 0 },
+      cashInfo: { count: 0, value: 0 },
       floatInfo: { count: 1, value: cashInDrawer },
       PO: { count: 0, value: 0 },
       RA: { count: 0, value: 0 }
@@ -79,7 +79,7 @@ function mapStateToProps (state) {
     locale: state.intl.locale,
     isLoading: state.reports.completeSales.isLoading,
     completeSales: state.reports.completeSales.completeSales,
-    storeId: state.application.storeId,
+    store: state.application.store,
     cashier: state.application.activeCashier &&
       state.application.activeCashier.firstName ||
       state.application.staff.data.username,
