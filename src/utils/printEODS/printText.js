@@ -55,7 +55,36 @@ export const buildReceipt = (data) => {
     if (item.posTrans.type === 'odbo') { data.orders = Number(data.orders) - 1 }
     return item.posTrans.type !== 'odbo'
   })
+
   // end remove ODBO transactions
+
+  // get subtotal adn count of cash orders
+  let cashOrderAmount
+  let cashOrderCount
+  if (data.summary.length > 0) {
+    data.summary.forEach(function (item) {
+      if (item.type === 'cash') {
+        cashOrderCount = Number(item.count)
+        cashOrderAmount = Number(item.subtotal)
+      }
+    })
+  } else {
+    cashOrderAmount = 0
+  }
+  // end of get subtotal of cash orders
+
+  // get amount of refunded items of type 'cash'
+  var refundedAmount
+  if (data.refundSummary.length > 0) {
+    data.refundSummary.forEach(item => {
+      if (item.type === 'cash') {
+        refundedAmount = Number(item.subtotal)
+      }
+    })
+  } else {
+    refundedAmount = 0
+  }
+  // end of get amount of refunded items
 
   receiptHtmlString = ''
   // receiptHtmlString += '<div style="width: 240px; border-bottom: 2px solid black; />'
@@ -71,10 +100,14 @@ export const buildReceipt = (data) => {
 
   // build summary
   receiptHtmlString += buildSummary(
+    data.refundSummary,
     data.summary,
     netSales,
     openCashDrawerCount,
     refundCount,
+    cashOrderCount,
+    cashOrderAmount,
+    refundedAmount,
     cashInfo,
     floatInfo,
     PO,
@@ -163,10 +196,14 @@ const buildRow = (cols) => {
  * @param {Number} cashInDrawer
  */
 export const buildSummary = (
+  refundSummary,
   summary,
   netSales,
   openCashDrawerCount,
   refundCount,
+  cashOrderCount,
+  cashOrderAmount,
+  refundedAmount,
   cashInfo,
   floatInfo,
   PO,
@@ -174,7 +211,35 @@ export const buildSummary = (
   cashInDrawer
 ) => {
   let summaryText = ''
+  let totalRefund = 0
   let totalCollected = 0
+
+  const processedRefundSummary = {}
+  refundSummary.forEach(item => {
+    const newItem = {
+      count: Number(item.count),
+      subtotal: Number(item.subtotal)
+    }
+
+    if (item.provider && item.cardType === 'debit') {
+      newItem.type = 'NETS'
+    } else if (item.provider && item.cardType === 'credit') {
+      newItem.type = item.provider
+    } else {
+      newItem.type = item.type
+    }
+
+    if (processedRefundSummary[newItem.type]) {
+      processedRefundSummary[newItem.type].type = newItem.type
+      processedRefundSummary[newItem.type].count += newItem.count
+      processedRefundSummary[newItem.type].subtotal += newItem.subtotal
+    } else {
+      processedRefundSummary[newItem.type] = {}
+      processedRefundSummary[newItem.type].type = newItem.type
+      processedRefundSummary[newItem.type].count = newItem.count
+      processedRefundSummary[newItem.type].subtotal = newItem.subtotal
+    }
+  })
 
   const processedSummary = {}
   summary.forEach(item => {
@@ -210,18 +275,31 @@ export const buildSummary = (
   // Add summary
   if (summary) {
     Object.keys(processedSummary).forEach(item => {
-      const summType = processedSummary[item].type.toUpperCase()
-      const summCount = 'x' + processedSummary[item].count
-      const summSubtotal = formatCurrency(processedSummary[item].subtotal)
+      const sumType = processedSummary[item].type.toUpperCase()
+      const sumCount = 'x' + processedSummary[item].count
+      const sumSubtotal = formatCurrency(processedSummary[item].subtotal)
 
-      summaryText += buildRow([ summType, summCount, summSubtotal ])
+      summaryText += buildRow([ sumType, sumCount, sumSubtotal ])
 
       totalCollected += Number(processedSummary[item].subtotal)
     })
   }
 
+  // Add refundSummary
+  if (refundSummary) {
+    Object.keys(processedRefundSummary).forEach(item => {
+      const sumType = `${processedRefundSummary[item].type.toUpperCase()} [REFUND]`
+      const sumCount = 'x' + processedRefundSummary[item].count
+      const sumSubtotal = '- ' + formatCurrency(processedRefundSummary[item].subtotal)
+
+      summaryText += buildRow([ sumType, sumCount, sumSubtotal ])
+
+      totalRefund += Number(processedRefundSummary[item].subtotal)
+    })
+  }
+
   // Add Odbo summary
-  summaryText += buildRow(['TOTAL COLLECTED', formatCurrency(totalCollected)])
+  summaryText += buildRow(['TOTAL COLLECTED', formatCurrency(totalCollected - totalRefund)])
   summaryText += RECEIPT_DIVIDER
 
   // add open cash drawer count
@@ -229,16 +307,18 @@ export const buildSummary = (
   summaryText += buildRow(['OPEN CASHDRAWER', 'x' + openCashDrawerCount, formatCurrency(0)])
   summaryText += RECEIPT_NEWLINE
 
-  // add refund count
-  summaryText += buildRow(['REFUND (CASH)', 'x' + refundCount])
-
-  // add cash and float info
+  // add cash
   if (cashInfo) {
-    const count = 'x' + cashInfo.count
-    const value = formatCurrency(cashInfo.value)
+    const count = 'x' + cashOrderCount
+    const value = formatCurrency(cashOrderAmount)
 
     summaryText += buildRow(['CASH', count, value])
   }
+
+  // add refund info
+  summaryText += buildRow(['REFUND (CASH)', 'x' + refundCount, '-' + formatCurrency(refundedAmount)])
+
+  // add float info
   if (floatInfo) {
     const count = 'x' + floatInfo.count
     const value = formatCurrency(floatInfo.value)
@@ -262,7 +342,7 @@ export const buildSummary = (
   summaryText += RECEIPT_DIVIDER
 
   // cash in drawer
-  summaryText += buildRow(['CASH IN DRAWER', formatCurrency(cashInfo.value + floatInfo.value)])
+  summaryText += buildRow(['CASH IN DRAWER', formatCurrency((cashOrderAmount - refundedAmount) + floatInfo.value)])
 
   summaryText += RECEIPT_DIVIDER
   summaryText += RECEIPT_NEWLINE

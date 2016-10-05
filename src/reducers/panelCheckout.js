@@ -97,6 +97,7 @@ function checkout (state = {
         isProcessing: false,
         paymentMode: 'cash',
         cashTendered: 0,
+        card: { type: 'credit', provider: null },
         customDiscount: undefined,
         transNumber: '',
         pincode: '',
