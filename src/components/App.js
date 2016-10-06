@@ -22,6 +22,15 @@ import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
 
+  componentWillMount () {
+    const { dispatch, location } = this.props
+    var currentLocation = location.pathname
+    if (currentLocation === '/') {
+      dispatch(logout(browserHistory))
+      dispatch(onLogout())
+    }
+  }
+
   componentDidUpdate () {
     const { activeCashier, activeCashdrawer, activeModalId, shouldUpdate } = this.props
     if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
@@ -135,16 +144,18 @@ class App extends React.Component {
                 </p>
               }
               <div>
-                <form autoComplete={false} onSubmit={this.updateCashdrawer.bind(this)}>
-                  <div className='control is-expanded'>
+                <div className='control is-expanded'>
+                  <form autoComplete='off'>
                     <input id='cashdrawerAmount' className='input is-large' type='number'
                       placeholder={intl.formatMessage({ id: 'app.general.setCashAmount' })} />
-                  </div>
-                  <div className='control'>
+                  </form>
+                </div>
+                <div className='control'>
+                  <form autoComplete='off' onSubmit={this.updateCashdrawer.bind(this)}>
                     <input id='storePinCode2' className='input is-large' type='password'
                       placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
               <div className='columns' style={{margin: 20}}>
                 <div className='column is-6 is-offset-3'>
