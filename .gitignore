@@ -44,3 +44,6 @@ dist
 # Vim
 *.swp
 *.swo
+
+# Eslint
+.eslintcache
