@@ -110,8 +110,6 @@ export function searchCustomer (query) {
 
 export function onLogout () {
   return (dispatch) => {
-    dispatch(panelCartReset())
-    dispatch(panelCheckoutReset())
     dispatch(reportsStateReset())
     dispatch(orderStateReset())
     dispatch(resetAppState())

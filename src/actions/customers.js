@@ -68,9 +68,10 @@ export function fetchCustomers (query) {
 
 export function fetchCustomerByOdboId (searchKey) {
   return (dispatch) => {
+    let odboId = Number(searchKey)
     dispatch(panelCartShouldUpdate(true))
     dispatch(customerFetchRequest())
-    const query = {query: { odboId: searchKey }}
+    const query = {query: { odboId: odboId }}
     return customerService.fetch(query)
     .then(response => {
       if (response) {

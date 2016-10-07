@@ -91,13 +91,13 @@ class SettingsTab extends Component {
           query: { firstName: customerFilter, lastName: customerSearchKey }
         }
       } else {
-        query = { query: { odboId: customerSearchKey } }
+        query = { query: { odboId: Number(customerSearchKey) } }
       }
     } else if (customerFilter === '' && customerSearchKey !== '') {
       if (isNaN(parseInt(customerSearchKey))) {
         query = { query: { lastName: customerSearchKey } }
       } else {
-        query = { query: { odboId: customerSearchKey } }
+        query = { query: { odboId: Number(customerSearchKey) } }
       }
     }
     dispatch(searchCustomer(query))

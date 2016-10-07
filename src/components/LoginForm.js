@@ -39,7 +39,7 @@ class LoginForm extends Component {
     onLogin(username.toLowerCase(), password, storeId, cashdrawer)
   }
 
-  componentWillMount () {
+  componentDidMount () {
     const { onGetStoreIds } = this.props
     onGetStoreIds()
   }
