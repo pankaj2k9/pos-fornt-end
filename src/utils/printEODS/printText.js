@@ -248,7 +248,7 @@ export const buildSummary = (
       subtotal: Number(item.subtotal)
     }
 
-    if (item.provider && item.cardType === 'debit') {
+    if (item.cardType === 'debit') {
       newItem.type = 'NETS'
     } else if (item.provider && item.cardType === 'credit') {
       newItem.type = item.provider
@@ -309,7 +309,7 @@ export const buildSummary = (
 
   // add cash
   if (cashInfo) {
-    const count = 'x' + cashOrderCount
+    const count = `x${!cashOrderCount ? 0 : cashOrderCount}`
     const value = formatCurrency(cashOrderAmount)
 
     summaryText += buildRow(['CASH', count, value])
