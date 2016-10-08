@@ -3,17 +3,12 @@
 # Exit when fail
 set -e
 
-if [ -z "$1" ]; then
-  echo "Please specify app version"
-  exit 1
-fi
-
 npm install
 
 npm run build
 
-docker build -t pos-app:"$1" .
+docker build -t odbo-pos:latest .
 
-docker tag pos-app:"$1" 350254269313.dkr.ecr.us-east-1.amazonaws.com/pos-app:"$1"
+docker tag odbo-pos:latest 350254269313.dkr.ecr.ap-southeast-1.amazonaws.com/odbo-pos:latest
 
-docker push 350254269313.dkr.ecr.us-east-1.amazonaws.com/pos-app:"$1"
+docker push 350254269313.dkr.ecr.ap-southeast-1.amazonaws.com/odbo-pos:latest
