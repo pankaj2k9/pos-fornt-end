@@ -43,8 +43,8 @@ export const COMPLETESALES_FETCH_FAILURE = 'COMPLETESALES_FETCH_FAILURE'
 export function completeSalesFetchRequest () {
   return { type: COMPLETESALES_FETCH_REQUEST }
 }
-export function completeSalesFetchSuccess (completeSales) {
-  return { type: COMPLETESALES_FETCH_SUCCESS, completeSales }
+export function completeSalesFetchSuccess (completeSales, date) {
+  return { type: COMPLETESALES_FETCH_SUCCESS, completeSales, date }
 }
 export function completeSalesFetchFailure (error) {
   return { type: COMPLETESALES_FETCH_REQUEST, error }
@@ -52,10 +52,9 @@ export function completeSalesFetchFailure (error) {
 export function completeSalesFetch (source, date) {
   return (dispatch) => {
     dispatch(completeSalesFetchRequest())
-
     return reportsService.findCompleteSales(source, date)
       .then(response => {
-        dispatch(completeSalesFetchSuccess(response))
+        dispatch(completeSalesFetchSuccess(response, date))
       })
       .catch(error => {
         dispatch(completeSalesFetchFailure(error))

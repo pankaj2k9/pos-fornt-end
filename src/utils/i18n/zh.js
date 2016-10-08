@@ -184,6 +184,7 @@ const zh = {
   'app.page.reports.storeId': '店铺ID',
   'app.page.reports.date': '日期',
   'app.page.reports.currency': '货币',
+  'app.page.reports.noData': '没有记录的数据上选定的日期',
 
   'app.page.settings.tabMain': '主要',
   'app.page.settings.tabOrders': '命令',

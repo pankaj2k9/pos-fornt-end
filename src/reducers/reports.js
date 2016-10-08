@@ -44,7 +44,8 @@ function completeSales (state, action) {
     case COMPLETESALES_FETCH_SUCCESS:
       return Object.assign({}, state, {
         isLoading: false,
-        completeSales: action.completeSales
+        completeSales: action.completeSales,
+        date: action.date || new Date()
       })
     case COMPLETESALES_FETCH_FAILURE:
       return Object.assign({}, state, {
