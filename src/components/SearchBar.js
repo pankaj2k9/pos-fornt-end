@@ -55,14 +55,14 @@ const SearchBar = (props) => {
             <i className={icon} />
           </p>
           {confirmButton !== undefined
-            ? <a className='button control is-success' onClick={confirmEvent}>
+            ? <a className='button control is-medium is-success' onClick={confirmEvent}>
               {confirmButton}
             </a>
             : null
           }
 
           {cancelButton !== undefined
-            ? <a className='button control is-danger' onClick={cancelEvent}>
+            ? <a className='button control is-medium is-danger' onClick={cancelEvent}>
               {cancelButton}
             </a>
             : null

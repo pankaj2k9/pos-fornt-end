@@ -41,6 +41,11 @@ export function customersSetFilter (filter) {
   return { type: CUSTOMERS_SET_FILTER, filter }
 }
 
+export const CUSTOMERS_SET_CONTACT_FILTER = 'CUSTOMERS_SET_CONTACT_FILTER'
+export function customersSetContactFilter (contactFilter) {
+  return { type: CUSTOMERS_SET_CONTACT_FILTER, contactFilter }
+}
+
 export const CUSTOMERS_SET_ACTIVE_ID = 'CUSTOMERS_SET_ACTIVE_ID'
 export function customersSetActiveId (odboId) {
   return {
