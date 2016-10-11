@@ -3,6 +3,7 @@ import {
   CUSTOMERS_SET_SEARCH_KEY,
   CUSTOMERS_SET_FILTER,
   CUSTOMERS_SET_ACTIVE_ID,
+  CUSTOMERS_SET_CONTACT_FILTER,
   STOREORDER_SET_SEARCH_KEY,
   STOREORDER_FETCH_REQUEST,
   STOREORDER_FETCH_SUCCESS,
@@ -123,6 +124,7 @@ function settings (state = {
   orderSearchKey: '',
   customerSearchKey: '',
   customerFilter: '',
+  customerContactFilter: '',
   refundSuccess: false,
   reprintSuccess: null,
   isProcessing: false,
@@ -154,6 +156,10 @@ function settings (state = {
     case CUSTOMERS_SET_FILTER:
       return Object.assign({}, state, {
         customerFilter: action.filter
+      })
+    case CUSTOMERS_SET_CONTACT_FILTER:
+      return Object.assign({}, state, {
+        customerContactFilter: action.contactFilter
       })
     case CUSTOMERS_SET_ACTIVE_ID: {
       return Object.assign({}, state, {

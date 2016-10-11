@@ -5,7 +5,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('development'),
   __DEV__: true,
-  'process.env.API_URL': JSON.stringify('http://localhost:3030')
+  'process.env.API_URL': JSON.stringify(process.env.API_URL)
 }
 
 export default {

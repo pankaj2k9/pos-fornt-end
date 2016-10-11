@@ -117,6 +117,7 @@ const zh = {
   'app.ph.placeCustName': '将客户名称',
   'app.ph.searchFn': '搜索与名字',
   'app.ph.searchLn': '搜索与姓氏',
+  'app.ph.searchPhone': '电话号码查询',
   'app.ph.keyword': '搜索关键字',
   'app.ph.searchOrder': '搜索顺序 ID',
   'app.ph.enterAmount': '输入 量',

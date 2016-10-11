@@ -117,6 +117,7 @@ const en = {
   'app.ph.placeCustName': 'Place walk-in customer name',
   'app.ph.searchFn': 'Search with first name',
   'app.ph.searchLn': 'Search with last name',
+  'app.ph.searchPhone': 'Search with phone number',
   'app.ph.keyword': 'Enter Keyword',
   'app.ph.searchOrder': 'Search Order ID',
   'app.ph.enterAmount': 'Enter Amount',
