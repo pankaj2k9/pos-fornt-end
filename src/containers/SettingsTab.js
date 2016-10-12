@@ -91,21 +91,21 @@ class SettingsTab extends Component {
     let query
     if (customerContactFilter) {
       // query for phoneNumber if customer contact filter has value
-      query = { query: { phoneNumber: customerContactFilter } }
+      query = { query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }
     } else {
       if (customerFilter !== '' && customerSearchKey === '') {
-        query = { query: { firstName: customerFilter } }
+        query = { query: { firstName: { $like: `%${customerFilter}%` } } }
       } else if (customerFilter !== '' && customerSearchKey !== '') {
         if (isNaN(parseInt(customerSearchKey))) {
           query = {
-            query: { firstName: customerFilter, lastName: customerSearchKey }
+            query: { firstName: { $like: `%${customerFilter}%` }, lastName: { $like: `%${customerSearchKey}%` } }
           }
         } else {
           query = { query: { odboId: Number(customerSearchKey) } }
         }
       } else if (customerFilter === '' && customerSearchKey !== '') {
         if (isNaN(parseInt(customerSearchKey))) {
-          query = { query: { lastName: customerSearchKey } }
+          query = { query: { lastName: { $like: `%${customerSearchKey}%` } } }
         } else {
           query = { query: { odboId: Number(customerSearchKey) } }
         }
@@ -154,14 +154,14 @@ class SettingsTab extends Component {
                 <i className='fa fa-list-alt fa-4x' />
               </span>
               <p className='title'>
-                <FormattedMessage id={'app.page.settings.refund'} />
+                <FormattedMessage id={'app.page.settings.tabOrders'} />
               </p>
               <p className='subtitle'>
                 <FormattedMessage id={'app.page.settings.ordersDesc'} />
               </p>
               <a className='button is-info'
                 onClick={this.onClickOption.bind(this, 'orders')}>
-                <FormattedMessage id={'app.page.settings.refund'} />
+                <FormattedMessage id={'app.page.settings.tabOrders'} />
               </a>
             </div>
           </div>
@@ -284,22 +284,8 @@ class SettingsTab extends Component {
     let hideDetails = showControl
     var intFrameHeight = window.innerHeight
     return (
-      <div className='is-fullheight'>
+      <div>
         <div className='columns'>
-          <div className='column'><h1 className='title'>
-            <FormattedMessage id={'app.page.settings.customers'} /></h1>
-          </div>
-        </div>
-        <div className='columns is-multiline'>
-          <div className='column is-12'
-            style={{justifyContent: 'center'}}>
-            <p className='subtitle'>
-              <br />
-              <span>
-                <FormattedMessage id={'app.page.settings.customersDesc2'} />
-              </span>
-            </p>
-          </div>
           <div className='column is-3'>
             <LabeledControl label='app.ph.searchFn'>
               <SearchBar
@@ -331,21 +317,6 @@ class SettingsTab extends Component {
             </LabeledControl>
           </div>
           <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCust'>
-              <SearchBar
-                id='odboIdSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKey.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
             <LabeledControl label='app.ph.searchPhone'>
               <SearchBar
                 id='phoneNumberSearch'
@@ -360,12 +331,27 @@ class SettingsTab extends Component {
                 />
             </LabeledControl>
           </div>
+          <div className='column is-3'>
+            <LabeledControl label='app.ph.searchCust'>
+              <SearchBar
+                id='odboIdSearch'
+                size='is-medium'
+                value={customerSearchKey}
+                placeholder={'app.ph.keyword'}
+                confirmButton={<i className='fa fa-search' />}
+                onChange={this.setCustomerSearchKey.bind(this)}
+                onSubmit={this.onSubmit.bind(this)}
+                onFocus={this.onFocus.bind(this)}
+                confirmEvent={this.onSubmit.bind(this)}
+                />
+            </LabeledControl>
+          </div>
         </div>
-        <hr />
+        <hr style={{margin: 20}} />
         <div
           className='columns is-mobile is-multiline'
           style={{
-            height: intFrameHeight / 2, overflowY: 'scroll', padding: 5
+            height: intFrameHeight - 350, overflowY: 'scroll', padding: 5
           }}>
           {!isFetching
             ? customers.length !== 0
@@ -386,7 +372,7 @@ class SettingsTab extends Component {
                   <div key={key} className='column is-half'>
                     <BoxItem
                       title={{
-                        main: `${customer.firstName} ${customer.lastName}`,
+                        main: `${customer.firstName} ${customer.lastName || ''}`,
                         alt: stat
                       }}
                       image={{icon: 'fa fa-user fa-4x'}}
@@ -395,6 +381,10 @@ class SettingsTab extends Component {
                         <li>
                           <strong>ODBO ID: </strong>
                           {`${zeroes}${customer.odboId}`}
+                        </li>
+                        <li>
+                          <strong><FormattedMessage id={'app.general.contactNo'} />: </strong>
+                          {customer.phoneNumber}
                         </li>
                         <li>
                           <strong><FormattedMessage id={'app.general.membership'} />: </strong>
@@ -603,6 +593,11 @@ class SettingsTab extends Component {
     dispatch(verifyStorePin(query, staffName))
   }
 
+  openCashdrawerModal () {
+    const {dispatch} = this.props
+    dispatch(setActiveModal('updateCashDrawer'))
+  }
+
   renderVerifyStorePinCode () {
     const {intl, activeModalId, error, errorMessage, isProcessing} = this.props
     const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
@@ -624,6 +619,12 @@ class SettingsTab extends Component {
                   {errorMessage}
                 </p>
               }
+              <p className='subtitle'>
+                <FormattedMessage id='app.general.updateCD' />
+                <a onClick={this.openCashdrawerModal.bind(this)}>
+                  <FormattedMessage id='app.button.clickHere' />
+                </a>
+              </p>
               <div className='control is-expanded'>
                 <form autoComplete={false} onSubmit={this.onClickVerifyPin.bind(this)}>
                   <input id='storePinCode' className='input is-large' type='password'
@@ -670,7 +671,7 @@ class SettingsTab extends Component {
     }
 
     return (
-      <div className=''>
+      <div className='is-fullheight'>
         {visibleContent}
         {this.renderOrderSearchModal()}
         {this.renderVerifyStorePinCode()}

@@ -8,10 +8,10 @@ import { productSalesFetch } from '../actions/reports'
 
 class SalesReport extends React.Component {
   componentDidMount () {
-    const { dispatch, storeId } = this.props
+    const { dispatch, storeId, date } = this.props
 
     // get sales today
-    const today = new Date()
+    const today = date || new Date()
 
     dispatch(productSalesFetch(storeId, today, today))
   }
@@ -67,6 +67,7 @@ class SalesReport extends React.Component {
 function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
+    date: state.reports.date,
     isLoading: state.reports.productSales.isLoading,
     productSales: state.reports.productSales.productSales,
     storeId: state.application.storeId,

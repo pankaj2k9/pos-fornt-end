@@ -12,6 +12,20 @@ const BoxItem = (props) => {
 
   return (
     <div className='box' style={{padding: 10}}>
+      <nav className='level is-pulled-right'>
+        <div className='level-left' />
+        <div className='level-right'>
+          <div className='level-item'>
+            <a className='button'
+              onClick={button.onClick}>
+              <span className='icon'>
+                <i className='fa fa-eye' />
+              </span>
+              <span><FormattedMessage id={button.name} /></span>
+            </a>
+          </div>
+        </div>
+      </nav>
       <article className='media'>
         <div className='media-left'>
           <figure className='image is-64x64'>
@@ -37,20 +51,6 @@ const BoxItem = (props) => {
               {props.children}
             </div>
           </div>
-          <nav className='level'>
-            <div className='level-left' />
-            <div className='level-right'>
-              <div className='level-item'>
-                <a className='button'
-                  onClick={button.onClick}>
-                  <span className='icon'>
-                    <i className='fa fa-eye' />
-                  </span>
-                  <span><FormattedMessage id={button.name} /></span>
-                </a>
-              </div>
-            </div>
-          </nav>
         </div>
       </article>
     </div>

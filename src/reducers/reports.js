@@ -1,5 +1,6 @@
 import {
   REPORTS_SET_TAB,
+  REPORTS_SET_DATE,
   PRODUCTSALES_FETCH_REQUEST,
   PRODUCTSALES_FETCH_SUCCESS,
   PRODUCTSALES_FETCH_FAILURE,
@@ -100,6 +101,7 @@ function storeOrders (state, action) {
 
 function report (state = {
   activeTab: 'completeSales',
+  date: null,
   productSales: {
     isLoading: false,
     productSales: [],
@@ -131,6 +133,10 @@ function report (state = {
       return Object.assign({}, state, {
         activeTab: action.tab
       })
+    case REPORTS_SET_DATE:
+      return Object.assign({}, state, {
+        date: action.date
+      })
     case PRODUCTSALES_FETCH_REQUEST:
     case PRODUCTSALES_FETCH_SUCCESS:
     case PRODUCTSALES_FETCH_FAILURE:
@@ -153,6 +159,7 @@ function report (state = {
       })
     case REPORTS_STATE_RESET:
       return Object.assign({}, state, {
+        date: null,
         storeOrders: {
           isLoading: false,
           orderItems: [],

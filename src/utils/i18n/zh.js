@@ -13,6 +13,7 @@ const zh = {
   'app.general.memberPoints': '会员积分',
   'app.general.dateJoined': '注册日期',
 
+  'app.general.contactNo': '电话',
   'app.general.barcode': '条码: ',
   'app.general.product': '产品',
   'app.general.qty': '数量',
@@ -68,6 +69,7 @@ const zh = {
   'app.generel.refundSuccess': '退成功!',
   'app.generel.reprintSuccess': '检查打印机对于收据',
   'app.generel.completeSales': '齐全销售报告',
+  'app.general.updateCD': '更新钱箱？',
 
   'app.general.cashDrawerEmpty': '钱箱空物',
   'app.general.initCashDrawer': '初始确认金额',
@@ -108,6 +110,7 @@ const zh = {
   'app.button.logCashier': '登录收银员',
   'app.button.logoutCashier': '登录收银员',
   'app.button.changeCashier': '收银员变化',
+  'app.button.clickHere': '点击这里',
 
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
   'app.ph.searchCust': '搜索 Odbo ID',

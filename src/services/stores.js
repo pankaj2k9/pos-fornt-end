@@ -4,7 +4,8 @@ const storesService = api.service('/stores')
 
 const stores = {
   find () {
-    return storesService.find()
+    const query = {$sort: { source: 1 }, source: {$ne: 'ecomm'}}
+    return storesService.find({query})
   },
 
   get (storeId) {

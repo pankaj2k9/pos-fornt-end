@@ -6,6 +6,11 @@ export function reportsSetTab (tab) {
   return { type: REPORTS_SET_TAB, tab }
 }
 
+export const REPORTS_SET_DATE = 'REPORTS_SET_DATE'
+export function reportsSetDate (date) {
+  return { type: REPORTS_SET_DATE, date }
+}
+
 export const REPORTS_STATE_RESET = 'REPORTS_STATE_RESET'
 export function reportsStateReset () {
   return { type: REPORTS_STATE_RESET }

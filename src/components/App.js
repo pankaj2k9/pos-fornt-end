@@ -119,6 +119,7 @@ class App extends React.Component {
   renderCashDrawerModal () {
     const { activeModalId, intl, error, shouldUpdate } = this.props
     let active = activeModalId === 'updateCashDrawer' ? 'is-active' : ''
+    var currentLocation = this.props.location.pathname
     return (
       active === 'is-active'
       ? <div id='updateCashDrawer' className={`modal ${active}`}>
@@ -128,12 +129,19 @@ class App extends React.Component {
             <div className='modal-card-title is-marginless has-text-centered'>
               <h1 className='title'>Cash Drawer</h1>
             </div>
+            {currentLocation === '/settings'
+              ? <button className='delete' onClick={this.close.bind(this)} />
+              : null
+            }
           </header>
           <div className='modal-card-body'>
             <div className='content has-text-centered'>
-              <h1 className='title' style={{color: 'red'}}>
-                <FormattedMessage id='app.general.cashDrawerEmpty' />
-              </h1>
+              {currentLocation === '/settings'
+                ? null
+                : <h1 className='title' style={{color: 'red'}}>
+                  <FormattedMessage id='app.general.cashDrawerEmpty' />
+                </h1>
+              }
               <p className='subtitle'>
                 <FormattedMessage id='app.general.updateCashDrawer' />
               </p>

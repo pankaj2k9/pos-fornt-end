@@ -1,8 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
-import moment from 'moment'
-import { DatePicker } from 'react-input-enhancements'
 
 import LoadingPane from '../components/LoadingPane'
 import { completeSalesFetch } from '../actions/reports'
@@ -11,10 +9,10 @@ import printEODS from '../utils/printEODS/print'
 
 class SalesReportComplete extends React.Component {
   componentWillMount () {
-    const { dispatch, store } = this.props
+    const { dispatch, date, store } = this.props
 
     // get sales today
-    const today = new Date()
+    const today = date || new Date()
 
     dispatch(completeSalesFetch(store.source, today))
   }
@@ -46,14 +44,6 @@ class SalesReportComplete extends React.Component {
     printEODS(completeSales)
   }
 
-  onChangeDate (event) {
-    event.preventDefault
-    var selectedDate = event.toDate()
-    const { dispatch, store } = this.props
-
-    dispatch(completeSalesFetch(store.source, selectedDate))
-  }
-
   cashdrawerData () {
     const { cashdrawers, csDate } = this.props
     var drawerData
@@ -69,42 +59,13 @@ class SalesReportComplete extends React.Component {
   }
 
   render () {
-    const { isLoading, csDate } = this.props
+    const { isLoading } = this.props
     var drawerData = this.cashdrawerData()
     return (
       isLoading
         ? <LoadingPane
           headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
         : <div>
-          <div className='content is-clearfix'>
-            <div className='control is-pulled-right' style={{marginRight: 100}}>
-              <label className='label'>Select Date</label>
-              <DatePicker
-                value={moment(csDate).format('ddd DD/MMM/YYYY')}
-                onChange={this.onChangeDate.bind(this)}
-                // this callback will parse inserted timestamp
-                onValuePreUpdate={v => parseInt(v, 10) > 1e8
-                  ? moment(parseInt(v, 10)).format('ddd DD/MMM/YYYY') : v
-                }
-              >
-                {(inputProps, { registerInput }) =>
-                  <p className='control'>
-                    <input
-                      {...inputProps}
-                      className='input is-medium'
-                      style={{ fontFamily: 'monospace' }}
-                      id='selectedDate'
-                      type='text'
-                    />
-                  </p>
-                }
-              </DatePicker>
-            </div>
-            <div className='title is-marginless'>
-              <strong>Currently Viewing:</strong>
-              <p>{moment(csDate).format('ddd DD/MMM/YYYY')}</p>
-            </div>
-          </div>
           {drawerData
             ? <div className='tile is-ancestor box'>
               <div className='tile is-vertical is-8'>
@@ -138,6 +99,7 @@ function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
     isLoading: state.reports.completeSales.isLoading,
+    date: state.reports.date,
     csDate: state.reports.completeSales.date,
     completeSales: state.reports.completeSales.completeSales,
     store: state.application.store,
