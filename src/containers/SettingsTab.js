@@ -154,14 +154,14 @@ class SettingsTab extends Component {
                 <i className='fa fa-list-alt fa-4x' />
               </span>
               <p className='title'>
-                <FormattedMessage id={'app.page.settings.refund'} />
+                <FormattedMessage id={'app.page.settings.tabOrders'} />
               </p>
               <p className='subtitle'>
                 <FormattedMessage id={'app.page.settings.ordersDesc'} />
               </p>
               <a className='button is-info'
                 onClick={this.onClickOption.bind(this, 'orders')}>
-                <FormattedMessage id={'app.page.settings.refund'} />
+                <FormattedMessage id={'app.page.settings.tabOrders'} />
               </a>
             </div>
           </div>
@@ -284,14 +284,9 @@ class SettingsTab extends Component {
     let hideDetails = showControl
     var intFrameHeight = window.innerHeight
     return (
-      <div className='is-fullheight'>
+      <div>
         <div className='columns'>
-          <div className='column'><h1 className='title'>
-            <FormattedMessage id={'app.page.settings.customers'} /></h1>
-          </div>
-        </div>
-        <div className='columns is-multiline'>
-          <div className='column is-12'
+          <div className='column is-3'
             style={{justifyContent: 'center'}}>
             <p className='subtitle'>
               <br />
@@ -361,11 +356,11 @@ class SettingsTab extends Component {
             </LabeledControl>
           </div>
         </div>
-        <hr />
+        <hr style={{margin: 20}} />
         <div
           className='columns is-mobile is-multiline'
           style={{
-            height: intFrameHeight / 2, overflowY: 'scroll', padding: 5
+            height: intFrameHeight - 350, overflowY: 'scroll', padding: 5
           }}>
           {!isFetching
             ? customers.length !== 0
@@ -386,7 +381,7 @@ class SettingsTab extends Component {
                   <div key={key} className='column is-half'>
                     <BoxItem
                       title={{
-                        main: `${customer.firstName} ${customer.lastName}`,
+                        main: `${customer.firstName} ${customer.lastName || ''}`,
                         alt: stat
                       }}
                       image={{icon: 'fa fa-user fa-4x'}}
@@ -670,7 +665,7 @@ class SettingsTab extends Component {
     }
 
     return (
-      <div className=''>
+      <div className='is-fullheight'>
         {visibleContent}
         {this.renderOrderSearchModal()}
         {this.renderVerifyStorePinCode()}
