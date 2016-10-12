@@ -68,6 +68,7 @@ const en = {
   'app.general.refundSuccess': 'Refund Success!',
   'app.general.reprintSuccess': 'Check Printer for the Receipt',
   'app.general.completeSales': 'Complete Sales Report',
+  'app.general.updateCD': 'Update Cash Drawer？',
 
   'app.general.cashDrawerEmpty': 'Cash Drawer Empty',
   'app.general.initCashDrawer': 'Initial Amount of Cash drawer',
@@ -108,6 +109,7 @@ const en = {
   'app.button.logCashier': 'Cashier Login',
   'app.button.logoutCashier': 'Cashier Logout',
   'app.button.changeCashier': 'Change Cashier',
+  'app.button.clickHere': 'Click Here',
 
   'app.ph.searchOrBarcode': 'Search Product or Scan Barcode',
   'app.ph.searchCust': 'Search Odbo ID',

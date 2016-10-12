@@ -598,6 +598,11 @@ class SettingsTab extends Component {
     dispatch(verifyStorePin(query, staffName))
   }
 
+  openCashdrawerModal () {
+    const {dispatch} = this.props
+    dispatch(setActiveModal('updateCashDrawer'))
+  }
+
   renderVerifyStorePinCode () {
     const {intl, activeModalId, error, errorMessage, isProcessing} = this.props
     const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
@@ -619,6 +624,12 @@ class SettingsTab extends Component {
                   {errorMessage}
                 </p>
               }
+              <p className='subtitle'>
+                <FormattedMessage id='app.general.updateCD' />
+                <a onClick={this.openCashdrawerModal.bind(this)}>
+                  <FormattedMessage id='app.button.clickHere' />
+                </a>
+              </p>
               <div className='control is-expanded'>
                 <form autoComplete={false} onSubmit={this.onClickVerifyPin.bind(this)}>
                   <input id='storePinCode' className='input is-large' type='password'
