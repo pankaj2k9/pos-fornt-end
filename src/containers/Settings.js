@@ -48,7 +48,6 @@ class Settings extends Component {
         <div className='section' style={{padding: 10}}>
           <center style={{marginBottom: 20}}>
             <h1 className='title is-3'><FormattedMessage id={'app.page.settings.title'} /></h1>
-            <h2 className='subtitle is-5'><FormattedMessage id={'app.page.settings.subtitle'} /></h2>
           </center>
           <Tabs
             activeLink={activeTab}
