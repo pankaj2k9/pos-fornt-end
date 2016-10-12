@@ -13,6 +13,7 @@ const zh = {
   'app.general.memberPoints': '会员积分',
   'app.general.dateJoined': '注册日期',
 
+  'app.general.contactNo': '电话',
   'app.general.barcode': '条码: ',
   'app.general.product': '产品',
   'app.general.qty': '数量',

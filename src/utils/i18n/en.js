@@ -13,6 +13,7 @@ const en = {
   'app.general.memberPoints': 'Member Points',
   'app.general.dateJoined': 'Date Joined',
 
+  'app.general.contactNo': 'Phone',
   'app.general.barcode': 'BC# ',
   'app.general.product': 'Product',
   'app.general.qty': 'Qty',

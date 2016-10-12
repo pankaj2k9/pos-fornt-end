@@ -91,21 +91,21 @@ class SettingsTab extends Component {
     let query
     if (customerContactFilter) {
       // query for phoneNumber if customer contact filter has value
-      query = { query: { phoneNumber: customerContactFilter } }
+      query = { query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }
     } else {
       if (customerFilter !== '' && customerSearchKey === '') {
-        query = { query: { firstName: customerFilter } }
+        query = { query: { firstName: { $like: `%${customerFilter}%` } } }
       } else if (customerFilter !== '' && customerSearchKey !== '') {
         if (isNaN(parseInt(customerSearchKey))) {
           query = {
-            query: { firstName: customerFilter, lastName: customerSearchKey }
+            query: { firstName: { $like: `%${customerFilter}%` }, lastName: { $like: `%${customerSearchKey}%` } }
           }
         } else {
           query = { query: { odboId: Number(customerSearchKey) } }
         }
       } else if (customerFilter === '' && customerSearchKey !== '') {
         if (isNaN(parseInt(customerSearchKey))) {
-          query = { query: { lastName: customerSearchKey } }
+          query = { query: { lastName: { $like: `%${customerSearchKey}%` } } }
         } else {
           query = { query: { odboId: Number(customerSearchKey) } }
         }
@@ -286,15 +286,6 @@ class SettingsTab extends Component {
     return (
       <div>
         <div className='columns'>
-          <div className='column is-3'
-            style={{justifyContent: 'center'}}>
-            <p className='subtitle'>
-              <br />
-              <span>
-                <FormattedMessage id={'app.page.settings.customersDesc2'} />
-              </span>
-            </p>
-          </div>
           <div className='column is-3'>
             <LabeledControl label='app.ph.searchFn'>
               <SearchBar
@@ -326,21 +317,6 @@ class SettingsTab extends Component {
             </LabeledControl>
           </div>
           <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCust'>
-              <SearchBar
-                id='odboIdSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKey.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
             <LabeledControl label='app.ph.searchPhone'>
               <SearchBar
                 id='phoneNumberSearch'
@@ -349,6 +325,21 @@ class SettingsTab extends Component {
                 placeholder={'app.ph.keyword'}
                 confirmButton={<i className='fa fa-search' />}
                 onChange={this.setCustomerContactFilter.bind(this)}
+                onSubmit={this.onSubmit.bind(this)}
+                onFocus={this.onFocus.bind(this)}
+                confirmEvent={this.onSubmit.bind(this)}
+                />
+            </LabeledControl>
+          </div>
+          <div className='column is-3'>
+            <LabeledControl label='app.ph.searchCust'>
+              <SearchBar
+                id='odboIdSearch'
+                size='is-medium'
+                value={customerSearchKey}
+                placeholder={'app.ph.keyword'}
+                confirmButton={<i className='fa fa-search' />}
+                onChange={this.setCustomerSearchKey.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
                 confirmEvent={this.onSubmit.bind(this)}
@@ -390,6 +381,10 @@ class SettingsTab extends Component {
                         <li>
                           <strong>ODBO ID: </strong>
                           {`${zeroes}${customer.odboId}`}
+                        </li>
+                        <li>
+                          <strong><FormattedMessage id={'app.general.contactNo'} />: </strong>
+                          {customer.phoneNumber}
                         </li>
                         <li>
                           <strong><FormattedMessage id={'app.general.membership'} />: </strong>
