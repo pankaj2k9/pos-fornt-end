@@ -1,16 +1,55 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { FormattedMessage, FormattedDate } from 'react-intl'
+import { FormattedMessage } from 'react-intl'
+import moment from 'moment'
+import { DatePicker } from 'react-input-enhancements'
 
 import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
 
-import { reportsSetTab } from '../actions/reports'
+import {
+  completeSalesFetch,
+  storeOrdersFetch,
+  productSalesFetch,
+  reportsSetTab,
+  reportsSetDate
+} from '../actions/reports'
 
 class Reports extends React.Component {
   _onPressTab (tab) {
     this.props.dispatch(reportsSetTab(tab))
+  }
+
+  onChangeDate (event) {
+    event.preventDefault
+    var selectedDate = event.toDate()
+    const { dispatch, store, activeTab, limit } = this.props
+
+    let storeId = store.source
+
+    dispatch(reportsSetDate(selectedDate))
+    if (activeTab === 'completeSales') {
+      dispatch(completeSalesFetch(store.source, selectedDate))
+    } else if (activeTab === 'orders') {
+      // get sales today
+      const from = selectedDate
+      from.setHours(0, 0, 0, 0)
+
+      const to = event.toDate()
+      let newSkip = 0
+      to.setHours(23, 59, 59, 999)
+      const params = {
+        storeId,
+        from,
+        to,
+        limit,
+        skip: newSkip
+      }
+      dispatch(storeOrdersFetch(params))
+    } else if (activeTab === 'sales') {
+      dispatch(productSalesFetch(storeId, selectedDate, selectedDate))
+    }
   }
 
   renderTab () {
@@ -28,19 +67,39 @@ class Reports extends React.Component {
   }
 
   render () {
-    const { activeTab, store } = this.props
-    const today = new Date()
+    const { activeTab, csDate } = this.props
 
     return (
       <section className='section is-fullheight'>
         <div className='container'>
-          <div className='container'>
-            <FormattedMessage id='app.page.reports.storeId' />
-            <strong>{`: ${store.name}`}</strong>
-          </div>
-          <div className='container'>
-            <FormattedMessage id='app.page.reports.date' />{': '}
-            <strong><FormattedDate value={today} /></strong>
+          <div className='content is-clearfix'>
+            <div className='control is-pulled-right' style={{marginRight: 100}}>
+              <label className='label'>Select Date</label>
+              <DatePicker
+                value={moment(csDate).format('ddd DD/MMM/YYYY')}
+                onChange={this.onChangeDate.bind(this)}
+                // this callback will parse inserted timestamp
+                onValuePreUpdate={v => parseInt(v, 10) > 1e8
+                  ? moment(parseInt(v, 10)).format('ddd DD/MMM/YYYY') : v
+                }
+              >
+                {(inputProps, { registerInput }) =>
+                  <p className='control'>
+                    <input
+                      {...inputProps}
+                      className='input is-medium'
+                      style={{ fontFamily: 'monospace' }}
+                      id='selectedDate'
+                      type='text'
+                    />
+                  </p>
+                }
+              </DatePicker>
+            </div>
+            <div className='title is-marginless'>
+              <strong>Currently Viewing:</strong>
+              <p>{moment(csDate).format('ddd DD/MMM/YYYY')}</p>
+            </div>
           </div>
 
           <div className='tabs is-centered'>
@@ -70,8 +129,12 @@ class Reports extends React.Component {
 
 function mapStateToProps (state) {
   return {
+    csDate: state.reports.completeSales.date,
     activeTab: state.reports.activeTab,
-    store: state.application.store
+    store: state.application.store,
+    page: state.reports.storeOrders.page,
+    limit: state.reports.storeOrders.limit,
+    skip: state.reports.storeOrders.skip
   }
 }
 
