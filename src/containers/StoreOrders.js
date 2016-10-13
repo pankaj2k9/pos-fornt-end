@@ -2,10 +2,16 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
-import ViewOrder from '../components/ViewOrder'
-import SimpleModal from '../components/SimpleModal'
+// import ViewOrder from '../components/ViewOrder'
+// import SimpleModal from '../components/SimpleModal'
 import Table from '../components/Table'
 import LoadingPane from '../components/LoadingPane'
+import DetailsModal from '../components/DetailsModal'
+
+import {
+  closeActiveModal,
+  setActiveModal
+} from '../actions/application'
 
 import {
   storeOrdersFetch,
@@ -28,14 +34,21 @@ class StoreOrders extends React.Component {
     this._fetchOrdersToday()
   }
 
+  onClickCloseModal () {
+    const {dispatch} = this.props
+    dispatch(closeActiveModal())
+  }
+
   _fetchOrdersToday (query) {
     const { dispatch, store, limit, date } = this.props
     let storeId = store.source
     // get sales today
     const from = date || new Date()
     from.setHours(0, 0, 0, 0)
+    console.log('date', from)
 
-    const to = new Date(date) || new Date()
+    const to = date ? new Date(date) : new Date()
+    console.log('date 2: ', to)
     let newSkip = !query ? 0 : query.skip < 10 ? 0 : query.skip
     to.setHours(23, 59, 59, 999)
 
@@ -52,8 +65,8 @@ class StoreOrders extends React.Component {
 
   _handleOrderClick (orderId) {
     const { dispatch } = this.props
-
     dispatch(storeOrdersSetActiveId(orderId))
+    dispatch(setActiveModal('orderDetailReport'))
   }
 
   _onClickModalClose () {
@@ -95,7 +108,7 @@ class StoreOrders extends React.Component {
         ? `${intl.formatMessage({id: 'app.general.refundedOrder'})} "${refundRemark.substring(0, remarkLength) + '...'}"`
         : ''
       return {
-        id: `${order.id} ${isRefunded}`,
+        id: order.id,
         dateCreated: {
           value: order.dateCreated,
           type: 'date'
@@ -105,7 +118,7 @@ class StoreOrders extends React.Component {
           type: 'string'
         },
         subtotal: {
-          value: `${order.isRefunded ? '-' : ''}${order.subtotal} ${currency}`,
+          value: `${order.isRefunded ? '-' : ''}${order.subtotal} ${currency} ${isRefunded}`,
           type: 'string'
         }
       }
@@ -165,7 +178,7 @@ class StoreOrders extends React.Component {
   }
 
   render () {
-    const { locale, isLoading, orderItems, activeModal, activeOrder } = this.props
+    const { locale, isLoading, orderItems, activeModalId, activeOrder, intl } = this.props
 
     const productOrderItems = this._constructOrderItems(orderItems)
     const columnHeaders = [
@@ -174,11 +187,13 @@ class StoreOrders extends React.Component {
       <FormattedMessage id='app.page.reports.currency' />,
       <FormattedMessage id='app.page.reports.total' />
     ]
-    const modalTitle = <FormattedMessage id='app.modal.order' />
-    const ViewComponent = activeOrder
-      ? <ViewOrder orderItemData={activeOrder} />
-      : null
+    // const modalTitle = <FormattedMessage id='app.modal.order' />
+    // console.log('activeOrder', activeOrder)
+    // const ViewComponent = activeOrder
+    //   ? <ViewOrder orderItemData={activeOrder} />
+    //   : null
 
+    console.log('activeModalId: ', activeModalId)
     return (isLoading
       ? <LoadingPane
         headerMessage={<FormattedMessage id='app.page.reports.loadingStoreOrders' />} />
@@ -192,19 +207,28 @@ class StoreOrders extends React.Component {
           onClickRow={this._handleOrderClick}
         />
         {this._renderPagination()}
-
-        <SimpleModal
-          modalClass={`modal ${activeModal === 'view' ? 'is-active' : null}`}
-          modalTitle={modalTitle}
-          modalBodyComponent={ViewComponent}
-          modalBtnCloseClass={'delete'}
-          modalCloseBtnOnClick={this._onClickModalClose}
-          modalPrimaryBtnLabel={null}
-          modalPrimaryBtnOnClick={null}
-          modalPrimaryBtnClass={'button is-primary'}
-          modalCancelBtnLabel={null}
-          modalCancelBtnClass={'button'}
-          modalCancelBtnOnClick={null} />
+        {activeOrder
+          ? <DetailsModal
+            title='app.page.settings.customersDet'
+            activeModalId={activeModalId}
+            id='orderDetailReport'
+            items={[
+             {name2: 'Order Id: ', desc: activeOrder.id},
+             {name: 'app.general.custName',
+              desc: `${!activeOrder.users ? 'Walkin Customer' : activeOrder.users.firstName}`},
+             {name2: 'Date Ordered'},
+             {desc: `Date: ${intl.formatDate(activeOrder.dateCreated)}`},
+             {desc: `Time: ${intl.formatTime(activeOrder.dateCreated)}`},
+             {name2: 'Order Summary'},
+             {desc: `Mode of Payment: ${activeOrder.posTrans.type}`},
+             {desc: `Payment: ${activeOrder.posTrans.payment}`},
+             {desc: `Subtotal: ${activeOrder.subtotal}`},
+             {desc: `Total: ${activeOrder.total}`}
+            ]}
+            hideDetails={false}
+            close={this.onClickCloseModal.bind(this)} />
+          : null
+        }
       </div>
     )
   }
@@ -217,6 +241,7 @@ function mapStateToProps (state) {
 
   return {
     locale: state.intl.locale,
+    activeModalId: state.application.activeModalId,
     store: state.application.store,
     date: state.reports.date,
     isLoading: state.reports.storeOrders.isLoading,

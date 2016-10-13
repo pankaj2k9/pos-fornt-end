@@ -6,7 +6,7 @@ import {
 
 function customers (state = {
   customersArray: [],
-  customersById: null,
+  customersById: {},
   isFetching: false,
   shouldUpdate: false
 }, action) {

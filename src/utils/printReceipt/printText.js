@@ -208,7 +208,8 @@ export const buildComputation = (trans) => {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST : </div>${formatCurrency(0)}</div>`
       if (trans.voucherDiscount) {
         comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHER DISCOUNT : </div>${trans.voucherDiscount}</div>`
-      } else if (trans.customDiscount) {
+      }
+      if (trans.customDiscount) {
         comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>OVERALL DISCOUNT : </div>${trans.customDiscount}</div>`
       }
       comp += RECEIPT_DIVIDER

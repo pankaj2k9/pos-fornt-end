@@ -16,14 +16,12 @@ import { fetchCustomers } from '../actions/customers'
 
 class Settings extends Component {
 
-  componentWillMount () {
-    const { dispatch } = this.props
-    dispatch(fetchCustomers())
-  }
-
   onClickTab (tabName) {
     const {dispatch} = this.props
     dispatch(setSettingsActiveTab(tabName))
+    if (tabName === 'customers') {
+      dispatch(fetchCustomers())
+    }
   }
 
   onClickRefund () {

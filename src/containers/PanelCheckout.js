@@ -164,6 +164,7 @@ class PanelCheckout extends Component {
         walkinCustomer={walkinCustomer}
         voucher={voucher}
         sumOfCartItems={subtotal}
+        overAllDeduct={this.overAllDeduct()}
         overAllTotal={this.overAllTotal()}
         orderNote={orderNote}
         card={card} />
