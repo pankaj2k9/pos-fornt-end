@@ -15,6 +15,8 @@ import {
   setActiveModal
 } from '../actions/application'
 
+import { fetchCustomers } from '../actions/customers'
+
 import {
   storeOrdersSetSearchKey,
   customersSetSearchKey,
@@ -39,7 +41,7 @@ class SettingsTab extends Component {
     const {activeModalId} = this.props
     if (activeModalId === 'verifyStorePin') {
       document.getElementById('storePinCode').focus()
-    } else if (activeModalId === 'refundModal' || 'reprintModal') {
+    } else if (activeModalId === 'refundModal' || activeModalId === 'reprintModal') {
       document.getElementById('orderSearch').focus()
     }
   }
@@ -68,6 +70,9 @@ class SettingsTab extends Component {
   onClickOption (tabName) {
     const {dispatch} = this.props
     dispatch(setSettingsActiveTab(tabName))
+    if (tabName === 'customers') {
+      dispatch(fetchCustomers())
+    }
   }
 
   setCustomerSearchKey (value) {
@@ -123,7 +128,6 @@ class SettingsTab extends Component {
       document.getElementById('firstNameSearch').value = ''
       document.getElementById('lastNameSearch').value = ''
     }
-    document.getElementById(inputId).value = ''
     dispatch(searchCustomer()) // refetch 1st 40 customers
   }
 
@@ -360,14 +364,14 @@ class SettingsTab extends Component {
                   dispatch(setActiveModal('customerDetails'))
                   dispatch(customersSetActiveId(customer.odboId))
                 }
+                let odboId = String(customer.odboId)
                 let zeroes = ''
-                var i
-                for (i = customer.odboId.length; i < 7; i++) {
-                  zeroes += 0
+                for (var i = odboId.length; i < 7; i++) {
+                  zeroes = zeroes + '0'
                 }
                 let stat = customer.status === 'active'
-                  ? <FormattedMessage id={'app.general.active'} />
-                  : <FormattedMessage id={'app.general.notActive'} />
+                  ? <span style={{color: 'green'}}><FormattedMessage id={'app.general.active'} /></span>
+                  : <span style={{color: 'red'}}><FormattedMessage id={'app.general.notActive'} /></span>
                 return (
                   <div key={key} className='column is-half'>
                     <BoxItem
@@ -377,24 +381,32 @@ class SettingsTab extends Component {
                       }}
                       image={{icon: 'fa fa-user fa-4x'}}
                       button={{name: 'app.button.view', onClick: view}}>
-                      <ul className='is-marginless'>
-                        <li>
-                          <strong>ODBO ID: </strong>
-                          {`${zeroes}${customer.odboId}`}
-                        </li>
-                        <li>
-                          <strong><FormattedMessage id={'app.general.contactNo'} />: </strong>
-                          {customer.phoneNumber}
-                        </li>
-                        <li>
-                          <strong><FormattedMessage id={'app.general.membership'} />: </strong>
-                          {customer.membership}
-                        </li>
-                        <li>
-                          <strong><FormattedMessage id={'app.general.ob'} />: </strong>
-                          {customer.odboCoins}
-                        </li>
-                      </ul>
+                      <div className='columns'>
+                        <div className='column'>
+                          <ul className='is-marginless'>
+                            <li>
+                              <strong>ODBO ID: </strong>
+                              {`${zeroes}${customer.odboId}`}
+                            </li>
+                            <li>
+                              <strong><FormattedMessage id={'app.general.contactNo'} />: </strong>
+                              {customer.phoneNumber}
+                            </li>
+                          </ul>
+                        </div>
+                        <div className='column'>
+                          <ul className='is-marginless'>
+                            <li>
+                              <strong><FormattedMessage id={'app.general.membership'} />: </strong>
+                              {customer.membership}
+                            </li>
+                            <li>
+                              <strong><FormattedMessage id={'app.general.ob'} />: </strong>
+                              {customer.odboCoins}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </BoxItem>
                   </div>
                 )

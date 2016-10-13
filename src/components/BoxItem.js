@@ -18,7 +18,7 @@ const BoxItem = (props) => {
           <div className='level-item'>
             <a className='button'
               onClick={button.onClick}>
-              <span className='icon'>
+              <span className='icon' style={{color: 'green'}}>
                 <i className='fa fa-eye' />
               </span>
               <span><FormattedMessage id={button.name} /></span>
