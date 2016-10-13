@@ -35,16 +35,18 @@ const DetailsModal = (props) => {
         <section className='modal-card-body'>
           {!hideDetails
             ? <section>
-              <div className='is-pulled-right'>
+              {id === 'orderDetailReport'
+              ? null
+              : <div className='is-pulled-right'>
                 <a className='button is-success' onClick={onClick}>
                   <FormattedMessage id={'app.general.updateOdbo'} />
                 </a>
-              </div>
+              </div>}
               <ul style={{fontSize: 16}}>
                 {
                   items.map(function (item, key) {
                     let listName = item.name === undefined
-                      ? null
+                      ? <strong>{item.name2} </strong>
                       : <strong><FormattedMessage id={item.name} />: </strong>
                     return (
                       <li key={key}>
