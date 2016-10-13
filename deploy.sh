@@ -3,6 +3,8 @@
 # Exit when fail
 set -e
 
+cd "${0%/*}"
+
 npm install
 
 npm run build
