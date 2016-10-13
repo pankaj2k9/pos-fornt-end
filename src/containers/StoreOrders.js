@@ -214,7 +214,8 @@ class StoreOrders extends React.Component {
             id='orderDetailReport'
             items={[
              {name2: 'Order Id: ', desc: activeOrder.id},
-             {name: 'app.general.custName', desc: `${activeOrder.users.firstName || 'Walkin Customer'} ${activeOrder.users.lastName || ''}`},
+             {name: 'app.general.custName',
+              desc: `${!activeOrder.users ? 'Walkin Customer' : activeOrder.users.firstName}`},
              {name2: 'Date Ordered'},
              {desc: `Date: ${intl.formatDate(activeOrder.dateCreated)}`},
              {desc: `Time: ${intl.formatTime(activeOrder.dateCreated)}`},
