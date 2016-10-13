@@ -55,7 +55,7 @@ class CheckoutModal extends Component {
             transNumber, storeId, voucher,
             orderNote, isDiscounted, overAllTotal,
             bonusPoints, walkinCustomer, store,
-            sumOfCartItems
+            sumOfCartItems, overAllDeduct
           } = this.props
 
     let staff = `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
@@ -76,7 +76,7 @@ class CheckoutModal extends Component {
           : customDiscount
       }
     })
-
+    console.log('overAllDeduct: ', overAllDeduct)
     let items = []
     orderItems.forEach(item => {
       let itemCD = Number(item.customDiscount)
@@ -159,7 +159,7 @@ class CheckoutModal extends Component {
           change: data.change,
           voucherDiscount: voucherAmount,
           sumOfCartItems: sumOfCartItems,
-          customDiscount: customDiscount,
+          customDiscount: customDiscount ? overAllDeduct : undefined,
           orderNote
         }
         : {
@@ -173,7 +173,7 @@ class CheckoutModal extends Component {
           provider: !card.provider ? undefined : card.provider,
           voucherDiscount: voucherAmount,
           sumOfCartItems: sumOfCartItems,
-          customDiscount: customDiscount,
+          customDiscount: customDiscount ? overAllDeduct : undefined,
           orderNote
         }
       : {
@@ -430,6 +430,7 @@ CheckoutModal.PropTypes = {
   walkinCustomer: PropTypes.string,
   voucherDiscount: PropTypes.number,
   orderNote: PropTypes.array,
+  overAllDeduct: PropTypes.number,
   sumOfCartItems: PropTypes.number,
   overAllTotal: PropTypes.number,
   card: PropTypes.object,

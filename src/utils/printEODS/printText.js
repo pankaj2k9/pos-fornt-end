@@ -394,7 +394,7 @@ export const buildPaymentDetails = (orders) => {
   orders.forEach(order => {
     const posTrans = order.posTrans
     let orderType
-    if (posTrans.provider && posTrans.cardType === 'debit') {
+    if (posTrans.cardType === 'debit') {
       orderType = 'NETS'
     } else if (posTrans.provider && posTrans.cardType === 'credit') {
       orderType = posTrans.provider
