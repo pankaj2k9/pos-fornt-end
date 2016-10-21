@@ -1,5 +1,28 @@
 import ordersService from '../services/orders'
 
+export const SALES_REPORT_CH_TYPE = 'SALES_REPORT_CH_TYPE'
+export function changeReportType (reportType) {
+  return { type: SALES_REPORT_CH_TYPE, reportType }
+}
+
+export const SALES_REPORT_CH_DATEPICKER_TO = 'SALES_REPORT_CH_DATEPICKER_TO'
+export function changeDatepickerTo (date) {
+  return { type: SALES_REPORT_CH_DATEPICKER_TO, date }
+}
+export const SALES_REPORT_CH_DATEPICKER_FR = 'SALES_REPORT_CH_DATEPICKER_FR'
+export function changeDatepickerFr (date) {
+  return { type: SALES_REPORT_CH_DATEPICKER_FR, date }
+}
+
+export const SALES_REPORT_CH_INPUT_IDTO = 'SALES_REPORT_CH_INPUT_IDTO'
+export function changeInputIdTo (value) {
+  return { type: SALES_REPORT_CH_INPUT_IDTO, value }
+}
+export const SALES_REPORT_CH_INPUT_IDFR = 'SALES_REPORT_CH_INPUT_IDFR'
+export function changeInputIdFr (value) {
+  return { type: SALES_REPORT_CH_INPUT_IDFR, value }
+}
+
 export const SALES_REPORT_FETCH_REQUEST = 'SALES_REPORT_FETCH_REQUEST'
 export const SALES_REPORT_FETCH_SUCCESS = 'SALES_REPORT_FETCH_SUCCESS'
 export const SALES_REPORT_FETCH_FAILURE = 'SALES_REPORT_FETCH_FAILURE'
