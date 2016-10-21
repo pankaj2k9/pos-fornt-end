@@ -5,7 +5,7 @@ set -e
 
 cd "${0%/*}"
 
-npm install
+yarn install --pure-lockfile
 
 npm run build
 
