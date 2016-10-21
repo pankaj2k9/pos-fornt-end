@@ -3,7 +3,9 @@
 # Exit when fail
 set -e
 
-npm install
+cd "${0%/*}"
+
+yarn install --pure-lockfile
 
 npm run build
 
