@@ -8,18 +8,30 @@ const orders = {
   },
 
   find (params) {
-    const { storeId, to, from, limit, skip } = params
+    const { storeId, to, from, idTo, idFrom, limit, skip } = params
+
     const query = {
       $sort: { dateOrdered: -1 },
       $eager: '[users, items, items.product]',
       source: storeId,
-      dateCreated: {
-        $lte: to,
-        $gte: from
-      },
       $limit: limit,
       $skip: skip
     }
+
+    if (to && from) {
+      query.dateCreated = {
+        $lte: to,
+        $gte: from
+      }
+    }
+
+    if (idFrom && idTo) {
+      query.id = {
+        $gte: idFrom,
+        $lte: idTo
+      }
+    }
+    console.log('QUERY', query)
 
     return ordersService.find({ query })
   },
