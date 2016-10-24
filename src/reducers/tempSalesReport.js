@@ -29,7 +29,7 @@ function tempSalesReport (state = {
       })
     case SALES_REPORT_FETCH_SUCCESS:
       return Object.assign({}, state, {
-        orders: action.orders.data,
+        orders: action.orders,
         isProcessing: false
       })
     case SALES_REPORT_FETCH_FAILURE:

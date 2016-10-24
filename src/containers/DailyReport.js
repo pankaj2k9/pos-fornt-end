@@ -20,18 +20,23 @@ class DailyReport extends React.Component {
     this.renderDatePickers = this.renderDatePickers.bind(this)
     this.renderIdInputs = this.renderIdInputs.bind(this)
     this.handleChangeRadio = this.handleChangeRadio.bind(this)
+    this.handleSearchOrders = this.handleSearchOrders.bind(this)
   }
 
-  componentDidMount () {
-    const { dispatch, store } = this.props
+  handleSearchOrders () {
+    const { dispatch, store, from, to, idFrom, idTo, reportType } = this.props
 
-    const today = new Date()
-    const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-    dispatch(salesReportFetch(store.source, lastMonth, today))
+    switch (reportType) {
+      case 'id':
+        dispatch(salesReportFetch(store.source, null, null, idFrom, idTo))
+        break
+      case 'date':
+        dispatch(salesReportFetch(store.source, from, to))
+        break
+    }
   }
 
-  onChangeDatePicker (picker, value) {
+  handleChangeDatePicker (picker, value) {
     const { dispatch, from, to } = this.props
     const date = value.toDate()
 
@@ -53,10 +58,7 @@ class DailyReport extends React.Component {
     }
   }
 
-  onChangeInputId (input, event) {
-    console.log('evt', event)
-    console.log('input', input)
-
+  handleChangeInputId (input, event) {
     const { dispatch } = this.props
 
     switch (input) {
@@ -85,7 +87,7 @@ class DailyReport extends React.Component {
         <DatePicker
           value={moment(from).format('ddd DD/MM/YYYY')}
           pattern='ddd DD/MM/YYYY'
-          onChange={this.onChangeDatePicker.bind(this, 'from')}
+          onChange={this.handleChangeDatePicker.bind(this, 'from')}
           onValuePreUpdate={v => parseInt(v, 10) > 1e8
             ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
           }>
@@ -100,7 +102,7 @@ class DailyReport extends React.Component {
         <DatePicker
           value={moment(to).format('ddd DD/MM/YYYY')}
           pattern='ddd DD/MM/YYYY'
-          onChange={this.onChangeDatePicker.bind(this, 'to')}
+          onChange={this.handleChangeDatePicker.bind(this, 'to')}
           onValuePreUpdate={v => parseInt(v, 10) > 1e8
             ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
           }>
@@ -126,7 +128,7 @@ class DailyReport extends React.Component {
             type='text'
             placeholder='Input transaction ID'
             value={idFrom}
-            onChange={this.onChangeInputId.bind(this, 'idFrom')}
+            onChange={this.handleChangeInputId.bind(this, 'idFrom')}
           />
         </p>
 
@@ -137,9 +139,9 @@ class DailyReport extends React.Component {
             type='text'
             placeholder='Input transaction ID'
             value={idTo}
-            onChange={this.onChangeInputId.bind(this, 'idTo')}
+            onChange={this.handleChangeInputId.bind(this, 'idTo')}
           />
-        </p>
+        </p><p />
       </div>
     )
   }
@@ -177,6 +179,11 @@ class DailyReport extends React.Component {
               ? this.renderDatePickers()
               : this.renderIdInputs()
             }
+
+            <button className='button is-primary'
+              onClick={this.handleSearchOrders}>
+              Process
+            </button>
           </div>
         </div>
       </div>
@@ -185,11 +192,16 @@ class DailyReport extends React.Component {
 }
 
 function mapStateToProps (state) {
+  const { from, to, idFrom, idTo, reportType, orders } = state.tempSalesReport
+
   return {
     store: state.application.store,
-    from: state.tempSalesReport.from,
-    to: state.tempSalesReport.to,
-    reportType: state.tempSalesReport.reportType
+    from,
+    to,
+    idFrom,
+    idTo,
+    reportType,
+    orders
   }
 }
 

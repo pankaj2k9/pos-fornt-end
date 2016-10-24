@@ -41,10 +41,10 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
 
     const params = {
       storeId: source,
-      to: dateTo,
       from: dateFrom,
-      idTo: idTo,
-      idFrom: idFrom
+      to: dateTo,
+      idFrom,
+      idTo
     }
 
     return ordersService.find(params)
