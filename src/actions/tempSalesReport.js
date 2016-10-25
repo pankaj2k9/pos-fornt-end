@@ -1,4 +1,5 @@
 import ordersService from '../services/orders'
+import printTransactionReport from '../utils/printDailyReport/print'
 
 export const SALES_REPORT_CH_TYPE = 'SALES_REPORT_CH_TYPE'
 export function changeReportType (reportType) {
@@ -54,7 +55,7 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
     return ordersService.find(params)
       .then(response => {
         // Store first fetch
-        dispatch(salesReportStoreOrders(response))
+        let allOrders = [...response.data]
 
         const { total, data, limit } = response
         const firstResponseCount = data.length
@@ -84,13 +85,13 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
           // Run all order fetch
           global.Promise.all(ordersFetchArray)
             .then((response) => {
-              let allOrders = []
               response.forEach((fetchResponse) => {
                 allOrders = [...allOrders, ...fetchResponse.data]
               })
 
               dispatch(salesReportStoreOrders({ data: allOrders }))
               dispatch(salesReportFetchSuccess())
+              printTransactionReport({ orders: allOrders })
             })
             .catch((error) => {
               dispatch(salesReportFetchFailure(error))
@@ -98,6 +99,7 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
         } else {
           // End if all orders are fetched
           dispatch(salesReportFetchSuccess())
+          printTransactionReport({ orders: allOrders })
         }
       })
       .catch(error => {
