@@ -10,7 +10,6 @@ const orders = {
 
   find (params) {
     const { storeId, to, from, idTo, idFrom, limit, skip, sort } = params
-    console.log('params', params)
 
     const query = {
       $sort: sort || { dateOrdered: -1 },
@@ -33,7 +32,7 @@ const orders = {
         $lte: buildOrderId(storeId, idTo)
       }
     }
-    console.log('QUERY', query)
+    // console.log('QUERY', query)
 
     return ordersService.find({ query })
   },
