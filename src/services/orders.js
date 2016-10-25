@@ -32,7 +32,6 @@ const orders = {
         $lte: buildOrderId(storeId, idTo)
       }
     }
-    // console.log('QUERY', query)
 
     return ordersService.find({ query })
   },

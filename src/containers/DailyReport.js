@@ -82,7 +82,7 @@ class DailyReport extends React.Component {
     const { from, to } = this.props
 
     return (
-      <div className='tile is-child is-primary'>
+      <div id='trans-report-date' className='tile is-child is-primary is-6'>
         <label className='label'>From</label>
         <DatePicker
           value={moment(from).format('ddd DD/MM/YYYY')}
@@ -100,6 +100,7 @@ class DailyReport extends React.Component {
 
         <label className='label'>To</label>
         <DatePicker
+          style={{ display: 'block' }}
           value={moment(to).format('ddd DD/MM/YYYY')}
           pattern='ddd DD/MM/YYYY'
           onChange={this.handleChangeDatePicker.bind(this, 'to')}
@@ -120,7 +121,7 @@ class DailyReport extends React.Component {
     const { idFrom, idTo } = this.props
 
     return (
-      <div className='tile is-child'>
+      <div className='tile is-child is-6'>
         <p className='control'>
           <label className='label'>From (Transaction ID)</label>
           <input
@@ -174,16 +175,18 @@ class DailyReport extends React.Component {
             </div>
           </div>
 
-          <div className='tile is-parent'>
+          <div className='tile is-parent is-vertical'>
             {reportType === 'date'
               ? this.renderDatePickers()
               : this.renderIdInputs()
             }
 
-            <button className='button is-primary'
-              onClick={this.handleSearchOrders}>
-              Process
-            </button>
+            <div className='tile is-child'>
+              <button className='button is-primary'
+                onClick={this.handleSearchOrders}>
+                Process
+              </button>
+            </div>
           </div>
         </div>
       </div>
