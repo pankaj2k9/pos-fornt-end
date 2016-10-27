@@ -45,10 +45,8 @@ class StoreOrders extends React.Component {
     // get sales today
     const from = date || new Date()
     from.setHours(0, 0, 0, 0)
-    console.log('date', from)
 
     const to = date ? new Date(date) : new Date()
-    console.log('date 2: ', to)
     let newSkip = !query ? 0 : query.skip < 10 ? 0 : query.skip
     to.setHours(23, 59, 59, 999)
 
@@ -208,7 +206,46 @@ class StoreOrders extends React.Component {
     //   ? <ViewOrder orderItemData={activeOrder} />
     //   : null
 
-    console.log('activeModalId: ', activeModalId)
+    let details = [
+      {name2: 'Order Id', desc: activeOrder.id},
+      {name: 'app.general.custName',
+       desc: `${!activeOrder.users ? 'Walkin Customer' : activeOrder.users.firstName}`},
+      {name2: 'Date Ordered',
+       desc: `${intl.formatDate(activeOrder.dateCreated)}, ${intl.formatTime(activeOrder.dateCreated)}`},
+      {name2: 'Order Summary'}
+    ]
+
+    if (activeOrder.posTrans) {
+      details = [
+        ...details,
+        {desc: `Mode of Payment: ${activeOrder.posTrans && activeOrder.posTrans.type}`},
+        {desc: `Payment: ${activeOrder.posTrans && activeOrder.posTrans.payment}`},
+        {desc: `Subtotal: ${activeOrder.subtotal}`},
+        {desc: `Total: ${activeOrder.total}`}
+      ]
+    } else if (activeOrder.payments) {
+      let orderTotal = 0
+
+      activeOrder.payments.forEach((payment, index) => {
+        orderTotal += Number(payment.amount)
+        details = [
+          ...details,
+          {desc: `Payment #${index + 1}: ${payment.type}`},
+          {desc: `Subtotal: SGD ${payment.amount}`}
+        ]
+      })
+
+      details = [
+        ...details,
+        {
+          name2: 'Order Total',
+          desc: `SGD ${intl.formatNumber(orderTotal, {
+            minimumFractionDigits: 2, maximumFractionDigits: 2
+          })}`
+        }
+      ]
+    }
+
     return (isLoading
       ? <LoadingPane
         headerMessage={<FormattedMessage id='app.page.reports.loadingStoreOrders' />} />
@@ -224,22 +261,10 @@ class StoreOrders extends React.Component {
         {this._renderPagination()}
         {activeOrder
           ? <DetailsModal
-            title='app.page.settings.customersDet'
+            title='app.page.settings.orderDetails'
             activeModalId={activeModalId}
             id='orderDetailReport'
-            items={[
-             {name2: 'Order Id: ', desc: activeOrder.id},
-             {name: 'app.general.custName',
-              desc: `${!activeOrder.users ? 'Walkin Customer' : activeOrder.users.firstName}`},
-             {name2: 'Date Ordered'},
-             {desc: `Date: ${intl.formatDate(activeOrder.dateCreated)}`},
-             {desc: `Time: ${intl.formatTime(activeOrder.dateCreated)}`},
-             {name2: 'Order Summary'},
-             {desc: `Mode of Payment: ${activeOrder.posTrans.type}`},
-             {desc: `Payment: ${activeOrder.posTrans.payment}`},
-             {desc: `Subtotal: ${activeOrder.subtotal}`},
-             {desc: `Total: ${activeOrder.total}`}
-            ]}
+            items={details}
             hideDetails={false}
             close={this.onClickCloseModal.bind(this)} />
           : null

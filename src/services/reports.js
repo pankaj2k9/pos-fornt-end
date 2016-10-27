@@ -10,14 +10,7 @@ const reports = {
    * @return {Promise}
    */
   findProductSales (source, from, to) {
-    return reportsService.find({
-      query: {
-        $eager: '[items, items.product, payments]',
-        source,
-        from,
-        to
-      }
-    })
+    return reportsService.find({ query: { source, from, to } })
   },
 
   findCompleteSales (source, date) {

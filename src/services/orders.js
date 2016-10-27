@@ -13,9 +13,9 @@ const orders = {
 
     const query = {
       $sort: sort || { dateOrdered: -1 },
-      $eager: eager || '[users, items, items.product]',
+      $eager: eager || '[users, items, items.product, payments, vouchers]',
       source: {
-        $in: storeId || ['s1', 's2', 's3']
+        $in: [storeId] || ['s1', 's2', 's3']
       },
       $limit: limit,
       $skip: skip
