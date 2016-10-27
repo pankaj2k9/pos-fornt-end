@@ -49,7 +49,8 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
       from: dateFrom,
       to: dateTo,
       idFrom,
-      idTo
+      idTo,
+      eager: '[staff, users, items, items.product]'
     }
 
     return ordersService.find(params)

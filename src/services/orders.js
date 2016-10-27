@@ -9,11 +9,11 @@ const orders = {
   },
 
   find (params) {
-    const { storeId, to, from, idTo, idFrom, limit, skip, sort } = params
+    const { storeId, to, from, idTo, idFrom, limit, skip, sort, eager } = params
 
     const query = {
       $sort: sort || { dateOrdered: -1 },
-      $eager: '[users, items, items.product]',
+      $eager: eager || '[users, items, items.product]',
       source: storeId,
       $limit: limit,
       $skip: skip

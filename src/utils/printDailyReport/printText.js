@@ -7,9 +7,11 @@ const RECEIPT_FONT_SIZE = 12
 const RECEIPT_LINE_HEIGHT = 18
 const RECEIPT_DIVIDER_DBL = '=================================='
 const RECEIPT_DIVIDER = '------------------------------------------------------------'
-const RECEIPT_NEWLINE = '<br /><br />'
+// const RECEIPT_NEWLINE = '<br /><br />'
 const RECEIPT_STYLES = '' +
   '.row { display: flex; justify-content: space-between; }\n' +
+  '.row { font-family: "Courier New", Courier, monospace; }\n' +
+  '.row.spaced { margin-bottom: 5px; }\n' +
   '.row.col3 .col:nth-child(1) { width: 150px; }\n' +
   '.row.col3 .col:nth-child(2) { width: 30px; text-align: right; }\n' +
   '.row.col3 .col:nth-child(3) { width: 60px; text-align: right; }\n' +
@@ -17,10 +19,10 @@ const RECEIPT_STYLES = '' +
   '.row.col4 > div { width: 55px; text-align: right; }\n' +
   '.row.col4 .col:nth-child(1) { width: 80px; text-align: left; }\n' +
 
-  '.row.col4 .col.col-sh:nth-child(1) { width: 30px; text-align: left; }\n' +
+  '.row.col4 .col.col-sh:nth-child(1) { width: 25px; text-align: left; }\n' +
   '.row.col4 .col.col-sh:nth-child(2) { width: 100px; text-align: left; }\n' +
   '.row.col4 .col.col-sh:nth-child(3) { width: 50px; text-align: right; }\n' +
-  '.row.col4 .col.col-sh:nth-child(4) { width: 60px; text-align: right; }\n'
+  '.row.col4 .col.col-sh:nth-child(4) { width: 65px; text-align: right; }\n'
 
 // const LI_NAME_MAX = 24
 
@@ -32,11 +34,11 @@ const BODY_STYLE = `font-family: ${RECEIPT_FONT};
   font-size: ${RECEIPT_FONT_SIZE}px;
   line-height: ${RECEIPT_LINE_HEIGHT}px;`
 
-const buildRow = (cols, colType) => {
+const buildRow = (cols, colType, rowType) => {
   let rowText = ''
   const colLength = cols.length
 
-  rowText += `<div class="row col${colLength}">`
+  rowText += `<div class="row ${rowType} col${colLength}">`
   cols.forEach(col => { rowText += `<div class="col col-${colType}">${col}</div>` })
   rowText += '</div>'
 
@@ -112,7 +114,7 @@ export const buildHeader = (info) => {
   header += buildRow(['<div>** TRANSACTION REPORT **</div>'])
   header += buildRow(['<div>SALES PERSON DETAILS REPORT</div>'])
   header += RECEIPT_DIVIDER
-  header += buildRow(['NET INCOME:', count, formatCurrency(total)])
+  header += buildRow([`NET INCOME: ${count}`, formatCurrency(total)])
   header += RECEIPT_DIVIDER_DBL
 
   return header
@@ -130,7 +132,7 @@ export const buildTransactionsList = (orders) => {
     tlist += buildRow([
       `${orderCount}.`,
       order.id,
-      'Someone',
+      order.staff.username.toUpperCase(),
       ''
     ], 'sh')
 
@@ -142,10 +144,8 @@ export const buildTransactionsList = (orders) => {
         item.product.barcodeInfo,
         item.quantity,
         formatCurrency(subtotal)
-      ], 'sh')
+      ], 'sh', 'spaced')
     })
-
-    tlist += RECEIPT_NEWLINE
   })
 
   return tlist
