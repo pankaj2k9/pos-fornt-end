@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 
 import DailyReport from '../containers/DailyReport'
+import ProductsStock from './ProductsStock'
 import LoadingPane from '../components/LoadingPane'
 // import { completeSalesFetch } from '../actions/reports'
 
@@ -94,6 +95,12 @@ class SalesReportComplete extends React.Component {
               </p>
             </div>
           }
+
+          <div className='tile is-parent'>
+            <div className='tile is-child'>
+              <ProductsStock />
+            </div>
+          </div>
         </div>
     )
   }
