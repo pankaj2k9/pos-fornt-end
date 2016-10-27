@@ -206,44 +206,66 @@ class StoreOrders extends React.Component {
     //   ? <ViewOrder orderItemData={activeOrder} />
     //   : null
 
-    let details = [
-      {name2: 'Order Id', desc: activeOrder.id},
-      {name: 'app.general.custName',
-       desc: `${!activeOrder.users ? 'Walkin Customer' : activeOrder.users.firstName}`},
-      {name2: 'Date Ordered',
-       desc: `${intl.formatDate(activeOrder.dateCreated)}, ${intl.formatTime(activeOrder.dateCreated)}`},
-      {name2: 'Order Summary'}
-    ]
-
-    if (activeOrder.posTrans) {
+    let details = []
+    if (activeOrder) {
       details = [
-        ...details,
-        {desc: `Mode of Payment: ${activeOrder.posTrans && activeOrder.posTrans.type}`},
-        {desc: `Payment: ${activeOrder.posTrans && activeOrder.posTrans.payment}`},
-        {desc: `Subtotal: ${activeOrder.subtotal}`},
-        {desc: `Total: ${activeOrder.total}`}
+        {name2: 'Order Id', desc: activeOrder.id},
+        {name: 'app.general.custName',
+         desc: `${!activeOrder.users ? 'Walkin Customer' : activeOrder.users.firstName}`},
+        {name2: 'Date Ordered',
+         desc: `${intl.formatDate(activeOrder.dateCreated)}, ${intl.formatTime(activeOrder.dateCreated)}`},
+        {name2: 'Order Summary'}
       ]
-    } else if (activeOrder.payments) {
-      let orderTotal = 0
 
-      activeOrder.payments.forEach((payment, index) => {
-        orderTotal += Number(payment.amount)
+      if (activeOrder.vouchers) {
+        details = [...details, {name2: 'Vouchers'}]
+
+        activeOrder.vouchers.forEach((voucher, index) => {
+          const voucherNumber = index + 1
+          details = [
+            ...details,
+            {
+              name2: `Deduction (Voucher #${voucherNumber}`,
+              desc: voucher.deduction
+            },
+            {
+              name2: `Remarks (Voucher #${voucherNumber}`,
+              desc: voucher.remarks
+            }
+          ]
+        })
+      }
+
+      if (activeOrder.posTrans) {
         details = [
           ...details,
-          {desc: `Payment #${index + 1}: ${payment.type}`},
-          {desc: `Subtotal: SGD ${payment.amount}`}
+          {desc: `Mode of Payment: ${activeOrder.posTrans && activeOrder.posTrans.type}`},
+          {desc: `Payment: ${activeOrder.posTrans && activeOrder.posTrans.payment}`},
+          {desc: `Subtotal: ${activeOrder.subtotal}`},
+          {desc: `Total: ${activeOrder.total}`}
         ]
-      })
+      } else if (activeOrder.payments) {
+        let orderTotal = 0
 
-      details = [
-        ...details,
-        {
-          name2: 'Order Total',
-          desc: `SGD ${intl.formatNumber(orderTotal, {
-            minimumFractionDigits: 2, maximumFractionDigits: 2
-          })}`
-        }
-      ]
+        activeOrder.payments.forEach((payment, index) => {
+          orderTotal += Number(payment.amount)
+          details = [
+            ...details,
+            {desc: `Payment #${index + 1}: ${payment.type}`},
+            {desc: `Subtotal: SGD ${payment.amount}`}
+          ]
+        })
+
+        details = [
+          ...details,
+          {
+            name2: 'Order Total',
+            desc: `SGD ${intl.formatNumber(orderTotal, {
+              minimumFractionDigits: 2, maximumFractionDigits: 2
+            })}`
+          }
+        ]
+      }
     }
 
     return (isLoading
