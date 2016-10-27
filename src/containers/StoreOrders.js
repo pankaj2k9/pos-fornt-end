@@ -107,6 +107,21 @@ class StoreOrders extends React.Component {
       let isRefunded = order.isRefunded
         ? `${intl.formatMessage({id: 'app.general.refundedOrder'})} "${refundRemark.substring(0, remarkLength) + '...'}"`
         : ''
+      let type = 'N/A'
+
+      const paymentsCount = order.payments && order.payments.length
+      if (paymentsCount) {
+        type = ''
+
+        order.payments.forEach((payment, index) => {
+          type += payment.type
+
+          if (index + 1 < paymentsCount) { type += `, ` }
+        })
+      } else if (order.posTrans && order.posTrans.type) {
+        type = order.posTrans.type
+      }
+
       return {
         id: order.id,
         dateCreated: {
@@ -114,7 +129,7 @@ class StoreOrders extends React.Component {
           type: 'date'
         },
         type: {
-          value: order.posTrans.type,
+          value: type,
           type: 'string'
         },
         subtotal: {
