@@ -51,10 +51,15 @@ export const buildReceipt = (data) => {
   data.summary = data.summary.filter(item => {
     return item.type !== 'odbo'
   })
-  data.orders = data.orders.filter(item => {
-    if (item.posTrans.type === 'odbo') { data.orders = Number(data.orders) - 1 }
-    return item.posTrans.type !== 'odbo'
-  })
+  // data.orders = data.orders.filter(item => {
+  //   if (item.posTrans) {
+  //     if (item.posTrans.type === 'odbo') {
+  //       data.orders = Number(data.orders) - 1
+  //     }
+
+  //     return item.posTrans.type !== 'odbo'
+  //   }
+  // })
 
   // end remove ODBO transactions
 
@@ -393,33 +398,51 @@ export const buildPaymentDetails = (orders) => {
   const paymentDetails = {}
   orders.forEach(order => {
     const posTrans = order.posTrans
-    let orderType
-    if (posTrans.cardType === 'debit') {
-      orderType = 'NETS'
-    } else if (posTrans.provider && posTrans.cardType === 'credit') {
-      orderType = posTrans.provider
-    } else {
-      orderType = posTrans.type
+
+    const updatePaymentDetails = (orderType, orderAmount, orderID) => {
+      // Add order to existing type
+      if (paymentDetails && Object.keys(paymentDetails).find(type => type === orderType)) {
+        paymentDetails[orderType] = {
+          subtotal: paymentDetails[orderType].subtotal + orderAmount,
+          trans: [...paymentDetails[orderType].trans,
+            { id: orderID, total: orderAmount }
+          ]
+        }
+      } else { // Create new type in paymentDetails
+        paymentDetails[orderType] = {}
+        paymentDetails[orderType] = {
+          subtotal: orderAmount,
+          trans: [{ id: orderID, total: orderAmount }]
+        }
+      }
     }
 
-    const orderTotal = order.total
-    const orderID = order.id
-    paymentDetailsTotal += Number(orderTotal)
+    // Extract and update order type from posTrans
+    if (posTrans) {
+      let orderType = 'N/A'
+      if (posTrans.cardType === 'debit') {
+        orderType = 'NETS'
+      } else if (posTrans.provider && posTrans.cardType === 'credit') {
+        orderType = posTrans.provider
+      } else {
+        orderType = posTrans.type
+      }
 
-    // Add order to existing type
-    if (paymentDetails && Object.keys(paymentDetails).find(type => type === orderType)) {
-      paymentDetails[orderType] = {
-        subtotal: paymentDetails[orderType].subtotal + Number(orderTotal),
-        trans: [...paymentDetails[orderType].trans,
-          { id: orderID, total: Number(orderTotal) }
-        ]
-      }
-    } else { // Create new type in paymentDetails
-      paymentDetails[orderType] = {}
-      paymentDetails[orderType] = {
-        subtotal: Number(orderTotal),
-        trans: [{ id: orderID, total: Number(orderTotal) }]
-      }
+      const orderAmount = Number(order.total)
+      const orderID = order.id
+      paymentDetailsTotal += orderAmount
+
+      updatePaymentDetails(orderType, orderAmount, orderID)
+    } else if (order.payments && order.payments.length) {
+      // Extract payment types from order.payments array
+      order.payments.forEach((payment) => {
+        let orderType = payment.type || 'N/A'
+        const orderAmount = Number(payment.amount)
+        const orderID = order.id
+        paymentDetailsTotal += orderAmount
+
+        updatePaymentDetails(orderType, orderAmount, orderID)
+      })
     }
   })
 
@@ -480,7 +503,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  printWindow.document.close()
-  printWindow.focus()
-  printWindow.close()
+  // printWindow.document.close()
+  // printWindow.focus()
+  // printWindow.close()
 }
