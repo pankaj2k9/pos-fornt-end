@@ -2,6 +2,7 @@ import {
   SET_PAYMENT_MODE,
   SET_DISCOUNT,
   SET_CASH_TENDERED,
+  ADD_PAYMENT_TYPE,
   SET_TRANS_NUMBER,
   SET_CARD_TYPE,
   SET_CARD_PROVIDER,
@@ -18,15 +19,21 @@ import {
   VERIFY_VOUCHER_FAILURE
 } from '../actions/panelCheckout'
 
-function checkout (state = {
-  paymentMode: 'cash',
+function panelCheckout (state = {
+  paymentMode: null,
   cashTendered: 0,
+  payments: [
+    { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
+    { type: 'credit', amount: null, transNumber: null, provider: null, remarks: 'Needs more' },
+    { type: 'nets', amount: null, transNumber: null, remarks: 'Needs more' },
+    { type: 'voucher', total: 0, vouchers: [] }
+  ],
   card: {
     type: 'credit',
     provider: null
   },
   bonusPoints: false,
-  customDiscount: undefined,
+  customDiscount: 0,
   transNumber: '',
   pincode: '',
   orderNote: [],
@@ -36,7 +43,8 @@ function checkout (state = {
   switch (action.type) {
     case SET_PAYMENT_MODE:
       return Object.assign({}, state, {
-        paymentMode: action.mode
+        paymentMode: action.mode,
+        shouldUpdate: true
       })
     case SET_DISCOUNT:
       state.shouldUpdate = true
@@ -48,6 +56,41 @@ function checkout (state = {
       const cash = (action.cash === '') ? 0 : action.cash
       return Object.assign({}, state, {
         cashTendered: cash
+      })
+    case ADD_PAYMENT_TYPE:
+      state.shouldUpdate = true
+      const paymentToCompare = [action.payment]
+      const currentPayments = state.payments
+      paymentToCompare.forEach(function (payment) {
+        var existing = currentPayments.filter(function (prev, i) {
+          return prev.type === payment.type
+        })
+        if (existing.length) {
+          console.log('existing', existing.length)
+          var key = currentPayments.indexOf(existing[0])
+          if (currentPayments[key].type === 'cash') {
+            currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
+            currentPayments[key].cash = Number(action.payment.cash).toFixed(2)
+          } else if (currentPayments[key].type === 'credit') {
+            currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
+            currentPayments[key].transNumber = action.payment.transNumber
+            currentPayments[key].provider = action.payment.provider
+          } else if (currentPayments[key].type === 'nets') {
+            currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
+            currentPayments[key].transNumber = action.payment.transNumber
+          } else if (currentPayments[key].type === 'voucher') {
+            let vouchers = currentPayments[key].vouchers
+            vouchers.push(action.payment.voucher)
+            currentPayments[key].total = Number(currentPayments[key].total) + Number(action.payment.voucher.deduction)
+            console.log('vouchers', vouchers)
+          }
+        } else {
+          currentPayments.push(action.payment)
+        }
+      })
+      return Object.assign({}, state, {
+        payments: state.payments,
+        shouldUpdate: false
       })
     case SET_CARD_TYPE:
       return Object.assign({}, state, {
@@ -88,19 +131,24 @@ function checkout (state = {
       })
     case PANEL_CHECKOUT_SHOULD_UPDATE:
       return Object.assign({}, state, {
-        orderNote: state.orderNote,
-        shouldUpdate: true
+        shouldUpdate: action.value
       })
     case PANEL_CHECKOUT_RESET:
       return Object.assign({}, state, {
         bonusPoints: false,
         isProcessing: false,
-        paymentMode: 'cash',
+        paymentMode: null,
         cashTendered: 0,
         card: { type: 'credit', provider: null },
-        customDiscount: undefined,
+        customDiscount: 0,
         transNumber: '',
         pincode: '',
+        payments: [
+          { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
+          { type: 'credit', amount: null, transNumber: null, provider: null, remarks: 'Needs more' },
+          { type: 'nets', amount: null, transNumber: null, remarks: 'Needs more' },
+          { type: 'voucher', total: 0, vouchers: [] }
+        ],
         orderNote: []
       })
     case CHECKOUT_FIELDS_RESET:
@@ -133,4 +181,4 @@ function checkout (state = {
   }
 }
 
-export default checkout
+export default panelCheckout

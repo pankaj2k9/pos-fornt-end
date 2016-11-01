@@ -43,6 +43,8 @@ function products (state = {
         productById[product.id] = product
       })
       return Object.assign({}, state, {
+        isFetching: true,
+        shouldUpdate: true,
         productsArray: action.productsArray,
         productsById: productById
       })

@@ -1,5 +1,6 @@
 export const SET_PAYMENT_MODE = 'SET_PAYMENT_MODE'
 export const SET_DISCOUNT = 'SET_DISCOUNT'
+export const ADD_PAYMENT_TYPE = 'ADD_PAYMENT_TYPE'
 export const SET_CASH_TENDERED = 'SET_CASH_TENDERED'
 export const SET_TRANS_NUMBER = 'SET_TRANS_NUMBER'
 export const SET_ORDER_NOTE = 'SET_ORDER_NOTE'
@@ -38,6 +39,13 @@ export function setCashTendered (cash) {
   return {
     type: SET_CASH_TENDERED,
     cash
+  }
+}
+
+export function addPaymentType (payment) {
+  return {
+    type: ADD_PAYMENT_TYPE,
+    payment
   }
 }
 
@@ -83,9 +91,10 @@ export function setPinCode (pincode) {
   }
 }
 
-export function panelCheckoutShouldUpdate () {
+export function panelCheckoutShouldUpdate (value) {
   return {
-    type: PANEL_CHECKOUT_SHOULD_UPDATE
+    type: PANEL_CHECKOUT_SHOULD_UPDATE,
+    value
   }
 }
 

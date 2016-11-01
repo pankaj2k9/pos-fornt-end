@@ -6,7 +6,6 @@ export const PRODUCT_SET_ACTIVE_ID = 'PRODUCT_SET_ACTIVE_ID'
 export const RESET_PRODUCTS_PANEL = 'RESET_PRODUCTS_PANEL'
 
 import { panelCartShouldUpdate, addCartItem } from './panelCart'
-import { setPaymentMode } from './panelCheckout'
 
 export function panelProductsShouldUpdate () {
   return {
@@ -53,7 +52,6 @@ export function addItemToCart (product, currency) {
     dispatch(panelProductsShouldUpdate())
     dispatch(panelCartShouldUpdate(true))
     dispatch(addCartItem(product, currency))
-    dispatch(setPaymentMode('cash'))
     dispatch(resetProductsPanel())
   }
 }
