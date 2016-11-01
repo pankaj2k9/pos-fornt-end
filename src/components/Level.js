@@ -12,7 +12,7 @@ const Level = (props) => {
   return (
     <div className='level is-marginless is-mobile'>
       {left !== null || undefined
-        ? <div className={'level-left is-marginless'}>
+        ? <div className={'level-left is-marginless'} style={{width: 190}}>
           {left}
         </div>
         : null
