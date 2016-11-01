@@ -59,7 +59,7 @@ const en = {
   'app.general.storePin': 'Store PIN Code',
   'app.general.overallDiscount': 'Apply Overall Discount',
   'app.general.refundedOrder': ' [ Refunded ] Reason: ',
-  'app.general.bonusPoints': 'Bonus Points x2',
+  'app.general.bonusPoints': 'Bonus Points',
   'app.general.enabled': ' Enabled',
   'app.general.disabled': ' Disabled',
   'app.general.updateOdbo': 'Update Odbo Balance',
@@ -76,8 +76,8 @@ const en = {
   'app.general.updateCashDrawer': 'Update Amount of CashDrawer',
   'app.general.setCashAmount': 'Set Cash Drawer Amount',
 
-  'app.panel.products': 'Products',
-  'app.panel.sales': 'Sales',
+  'app.panel.products': 'Barcode Input',
+  'app.panel.sales': 'Order Items',
   'app.panel.checkout': 'Checkout',
 
   'app.button.logout': 'Logout',
@@ -112,7 +112,7 @@ const en = {
   'app.button.changeCashier': 'Change Cashier',
   'app.button.clickHere': 'Click Here',
 
-  'app.ph.searchOrBarcode': 'Search Product or Scan Barcode',
+  'app.ph.searchOrBarcode': 'Scan Barcode',
   'app.ph.searchCust': 'Search Odbo ID',
   'app.ph.searchCust2': 'Search Customer',
   'app.ph.searchCustErr': 'Error on searching Odbo ID',
