@@ -9,13 +9,16 @@ const orders = {
   },
 
   find (params) {
-    const { storeId, to, from, idTo, idFrom, limit, skip, sort, eager } = params
+    const { storeId, stores, to, from, idTo, idFrom, limit, skip, sort, eager } = params
+
+    const storeIds = stores.map((store) => { return store.source })
+    const storeIn = storeId ? [storeId] : storeIds
 
     const query = {
       $sort: sort || { dateOrdered: -1 },
       $eager: eager || '[users, items, items.product, payments, vouchers]',
       source: {
-        $in: [storeId] || ['s1', 's2', 's3']
+        $in: storeIn
       },
       $limit: limit,
       $skip: skip
@@ -30,8 +33,8 @@ const orders = {
 
     if (idFrom && idTo) {
       query.id = {
-        $gte: buildOrderId(storeId, idFrom),
-        $lte: buildOrderId(storeId, idTo)
+        $gte: buildOrderId(storeId, idFrom, null, stores),
+        $lte: buildOrderId(storeId, idTo, null, stores)
       }
     }
 

@@ -25,8 +25,7 @@ class ViewBills extends React.Component {
   }
 
   handleSearchOrders () {
-    const { dispatch, stores, store, to, idFrom, idTo, reportType } = this.props
-    let { from } = this.props
+    const { dispatch, stores, store, from, to, idFrom, idTo, reportType } = this.props
 
     switch (reportType) {
       case 'id':

@@ -154,6 +154,7 @@ export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) 
       idFrom,
       idTo,
       storeId: source,
+      stores,
       eager: '[payments, staff, users, items, items.product]'
     }
 

@@ -56,26 +56,16 @@ export const splitStringByWordIntoLines = (str, max) => {
  * @param {string} store id of store
  * @param {string || number} id order id
  * @param {number} idLength default `7`
+ * @param {[object]} stores list of stores
  *
  * @returns {array} of strings split from str that is below
  */
-export const buildOrderId = (store, id, idLength) => {
+export const buildOrderId = (store, id, idLength, stores) => {
   const ID_LENGTH_WITHOUT_PREFIX = idLength || 7
 
   if (!isNaN(id)) {
-    let prefix = ''
-
-    switch (store) {
-      case 's1': // Bugis
-        prefix = 'BG'
-        break
-      case 's2': // Dhoby
-        prefix = 'DG'
-        break
-      case 's3': // Tampines
-        prefix = 'TP'
-        break
-    }
+    const activeStore = stores.filter((st) => { return st.source === store })[0]
+    let prefix = activeStore && activeStore.code || ''
 
     let zeros = ''
     for (let i = 0; i < ID_LENGTH_WITHOUT_PREFIX - String(id).length; i++) {

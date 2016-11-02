@@ -72,38 +72,14 @@ export const buildReceipt = (data) => {
 const addAddress = (sourceId, stores) => {
   let addr = ''
 
-  // Use storeNIL in case store id is not in store list
-  const storeNIL = { address: '', source: '' }
   const store = stores.filter((store) => {
     return store.source === sourceId
-  })[0] || storeNIL
+  })[0] || {}
 
-  const storeAddress = store.address
+  const storeAddress = store.address || 'SINGAPORE 188021\nTELEPHONE:6238 1337'
 
   if (storeAddress) {
     storeAddress.split('\n').forEach((section) => {
-      addr += buildRow([section])
-    })
-  } else {
-    let tempAddr
-
-    // If store address is null
-    switch (store.source) {
-      case 's1':
-        tempAddr = '200 VICTORIA STREET\nBUGIS JUNCTION #02-22\nSINGAPORE 188021\nTELEPHONE: 6238 1337'
-        break
-      case 's2':
-        tempAddr = 'MIDDLEARTH STREET\nSAURON JUNCTION #02-22\nSINGAPORE 188021\nTELEPHONE: 6238 1337'
-        break
-      case 's3':
-        tempAddr = 'S3 STREET\nSAURON JUNCTION #02-22\nSINGAPORE 188021\nTELEPHONE: 6238 1337'
-        break
-      default:
-        tempAddr = 'N/A'
-    }
-
-    addr = ''
-    tempAddr.split('\n').forEach((section) => {
       addr += buildRow([section])
     })
   }
@@ -209,7 +185,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  // printWindow.document.close()
-  // printWindow.focus()
-  // printWindow.close()
+  printWindow.document.close()
+  printWindow.focus()
+  printWindow.close()
 }
