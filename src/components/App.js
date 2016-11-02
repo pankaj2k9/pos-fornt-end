@@ -35,7 +35,7 @@ class App extends React.Component {
 
   componentDidUpdate () {
     const { activeCashier, activeCashdrawer, activeModalId, shouldUpdate } = this.props
-    if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
+    if (!activeCashdrawer || activeCashdrawer.float > 0) {
       if (activeModalId === 'verifyStaff' && activeCashier && !shouldUpdate) {
         document.getElementById('staffPassword').focus()
       }
@@ -99,7 +99,8 @@ class App extends React.Component {
     }
     let data = {
       date: activeCashdrawer.date,
-      amount: amountToAdd
+      amount: amountToAdd,
+      count: activeCashdrawer.cashDrawerOpenCount
     }
     if (amountToAdd <= 0 || isNaN(amountToAdd)) {
       dispatch(setCashdrawerFailure('You have entered an invalid amount'))
