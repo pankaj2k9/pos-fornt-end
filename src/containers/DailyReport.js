@@ -24,14 +24,14 @@ class DailyReport extends React.Component {
   }
 
   handleSearchOrders () {
-    const { dispatch, store, from, to, idFrom, idTo, reportType } = this.props
+    const { dispatch, stores, store, from, to, idFrom, idTo, reportType } = this.props
 
     switch (reportType) {
       case 'id':
-        dispatch(salesReportFetch(store.source, null, null, idFrom, idTo))
+        dispatch(salesReportFetch(store.source, null, null, idFrom, idTo, stores))
         break
       case 'date':
-        dispatch(salesReportFetch(store.source, from, to))
+        dispatch(salesReportFetch(store.source, from, to, null, null, stores))
         break
     }
   }
@@ -198,6 +198,7 @@ function mapStateToProps (state) {
   const { from, to, idFrom, idTo, reportType, orders } = state.tempSalesReport
 
   return {
+    stores: state.application.storeIds,
     store: state.application.store,
     from,
     to,

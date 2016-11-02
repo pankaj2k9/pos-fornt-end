@@ -1,5 +1,5 @@
 import ordersService from '../services/orders'
-import printTransactionReport from '../utils/printDailyReport/print'
+import printBills from '../utils/printBills/print'
 
 export const SALES_REPORT_CH_TYPE = 'SALES_REPORT_CH_TYPE'
 export function changeReportType (reportType) {
@@ -40,17 +40,16 @@ export function salesReportFetchSuccess () {
 export function salesReportFetchFailure (error) {
   return { type: SALES_REPORT_FETCH_FAILURE, error }
 }
-export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
+export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo, stores) {
   return (dispatch) => {
     dispatch(salesReportFetchRequest())
 
     const params = {
-      storeId: source,
       from: dateFrom,
       to: dateTo,
       idFrom,
       idTo,
-      eager: '[staff, users, items, items.product]'
+      eager: '[payments, staff, users, items, items.product]'
     }
 
     return ordersService.find(params)
@@ -92,7 +91,7 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
 
               dispatch(salesReportStoreOrders({ data: allOrders }))
               dispatch(salesReportFetchSuccess())
-              printTransactionReport({ orders: allOrders })
+              printBills({ orders: allOrders, stores })
             })
             .catch((error) => {
               dispatch(salesReportFetchFailure(error))
@@ -100,7 +99,7 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo) {
         } else {
           // End if all orders are fetched
           dispatch(salesReportFetchSuccess())
-          printTransactionReport({ orders: allOrders })
+          printBills({ orders: allOrders, stores })
         }
       })
       .catch(error => {
