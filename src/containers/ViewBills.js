@@ -5,15 +5,15 @@ import { DatePicker } from 'react-input-enhancements'
 
 // import { completeSalesFetch } from '../actions/reports'
 import {
-  salesReportFetch,
+  viewBillsFetch,
   changeDatepickerTo,
   changeDatepickerFr,
   changeInputIdTo,
   changeInputIdFr,
   changeReportType
-} from '../actions/tempSalesReport'
+} from '../actions/reports'
 
-class DailyReport extends React.Component {
+class ViewBills extends React.Component {
   constructor (props) {
     super(props)
 
@@ -24,14 +24,15 @@ class DailyReport extends React.Component {
   }
 
   handleSearchOrders () {
-    const { dispatch, stores, store, from, to, idFrom, idTo, reportType } = this.props
+    const { dispatch, stores, store, to, idFrom, idTo, reportType } = this.props
+    let { from } = this.props
 
     switch (reportType) {
       case 'id':
-        dispatch(salesReportFetch(store.source, null, null, idFrom, idTo, stores))
+        dispatch(viewBillsFetch(store.source, null, null, idFrom, idTo, stores))
         break
       case 'date':
-        dispatch(salesReportFetch(store.source, from, to, null, null, stores))
+        dispatch(viewBillsFetch(store.source, from, to, null, null, stores))
         break
     }
   }
@@ -42,11 +43,14 @@ class DailyReport extends React.Component {
 
     switch (picker) {
       case 'from':
-        if (date > to) {
+        // set from to start of day
+        const newFrom = moment(date).startOf('day').toDate()
+
+        if (newFrom > to) {
           global.alert('from cannot be ahead to')
         }
 
-        dispatch(changeDatepickerFr(date))
+        dispatch(changeDatepickerFr(newFrom))
         break
       case 'to':
         if (date < from) {
@@ -195,7 +199,7 @@ class DailyReport extends React.Component {
 }
 
 function mapStateToProps (state) {
-  const { from, to, idFrom, idTo, reportType, orders } = state.tempSalesReport
+  const { from, to, idFrom, idTo, reportType, orders } = state.reports.viewBills
 
   return {
     stores: state.application.storeIds,
@@ -209,4 +213,4 @@ function mapStateToProps (state) {
   }
 }
 
-export default connect(mapStateToProps)(DailyReport)
+export default connect(mapStateToProps)(ViewBills)

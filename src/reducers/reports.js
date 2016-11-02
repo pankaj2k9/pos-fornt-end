@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 import {
   REPORTS_SET_TAB,
   REPORTS_SET_DATE,
@@ -12,8 +14,68 @@ import {
   STOREORDERS_FETCH_REQUEST,
   STOREORDERS_FETCH_SUCCESS,
   STOREORDERS_FETCH_FAILURE,
-  REPORTS_STATE_RESET
+  REPORTS_STATE_RESET,
+
+  VIEW_BILLS_FETCH_REQUEST,
+  VIEW_BILLS_FETCH_SUCCESS,
+  VIEW_BILLS_FETCH_FAILURE,
+  VIEW_BILLS_STORE_ORDERS,
+
+  VIEW_BILLS_CH_DATEPICKER_FR,
+  VIEW_BILLS_CH_DATEPICKER_TO,
+
+  VIEW_BILLS_CH_INPUT_IDTO,
+  VIEW_BILLS_CH_INPUT_IDFR,
+
+  VIEW_BILLS_CH_TYPE
 } from '../actions/reports'
+
+function viewBills (state, action) {
+  switch (action.type) {
+    case VIEW_BILLS_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        orders: [],
+        isProcessing: true
+      })
+    case VIEW_BILLS_FETCH_SUCCESS:
+      return Object.assign({}, state, {
+        isProcessing: false
+      })
+    case VIEW_BILLS_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        isProcessing: false,
+        error: action.error
+      })
+    case VIEW_BILLS_STORE_ORDERS:
+      let orders = [...state.orders, ...action.response.data]
+
+      return Object.assign({}, state, {
+        orders
+      })
+    case VIEW_BILLS_CH_DATEPICKER_FR:
+      return Object.assign({}, state, {
+        from: action.date
+      })
+    case VIEW_BILLS_CH_DATEPICKER_TO:
+      return Object.assign({}, state, {
+        to: action.date
+      })
+    case VIEW_BILLS_CH_INPUT_IDTO:
+      return Object.assign({}, state, {
+        idTo: action.value
+      })
+    case VIEW_BILLS_CH_INPUT_IDFR:
+      return Object.assign({}, state, {
+        idFrom: action.value
+      })
+    case VIEW_BILLS_CH_TYPE:
+      return Object.assign({}, state, {
+        reportType: action.reportType
+      })
+    default:
+      return state
+  }
+}
 
 function productSales (state, action) {
   switch (action.type) {
@@ -126,6 +188,16 @@ function report (state = {
     limit: 10,
     skip: 0,
     total: 0
+  },
+  viewBills: {
+    isProcessing: false,
+    error: undefined,
+    orders: [],
+    from: moment().startOf('day').toDate(), // set `from` to start of day
+    to: new Date(),
+    idFrom: undefined,
+    idTo: undefined,
+    reportType: 'date'
   }
 }, action) {
   switch (action.type) {
@@ -180,6 +252,18 @@ function report (state = {
           from: new Date(),
           to: new Date()
         }
+      })
+    case VIEW_BILLS_FETCH_REQUEST:
+    case VIEW_BILLS_FETCH_SUCCESS:
+    case VIEW_BILLS_FETCH_FAILURE:
+    case VIEW_BILLS_STORE_ORDERS:
+    case VIEW_BILLS_CH_DATEPICKER_FR:
+    case VIEW_BILLS_CH_DATEPICKER_TO:
+    case VIEW_BILLS_CH_INPUT_IDTO:
+    case VIEW_BILLS_CH_INPUT_IDFR:
+    case VIEW_BILLS_CH_TYPE:
+      return Object.assign({}, state, {
+        viewBills: viewBills(state.viewBills, action)
       })
     default:
       return state

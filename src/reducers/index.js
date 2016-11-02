@@ -16,7 +16,6 @@ import orders from './orders'
 import reports from './reports'
 import ordersOnHold from './ordersOnHold'
 import settings from './settings'
-import tempSalesReport from './tempSalesReport'
 
 addLocaleData([
   ...enLocaleData,
@@ -34,8 +33,7 @@ const rootReducer = combineReducers({
   orders,
   ordersOnHold,
   reports,
-  settings,
-  tempSalesReport
+  settings
 })
 
 export default rootReducer

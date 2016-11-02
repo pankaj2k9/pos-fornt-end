@@ -7,7 +7,7 @@ import { DatePicker } from 'react-input-enhancements'
 import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
-import ViewBills from '../containers/DailyReport'
+import ViewBills from '../containers/ViewBills'
 import ProductsStock from './ProductsStock'
 
 import {

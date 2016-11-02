@@ -35,7 +35,6 @@ const orders = {
       }
     }
 
-    console.log('QUERY', query)
     return ordersService.find({ query })
   },
   get (orderId) {
