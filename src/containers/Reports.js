@@ -8,7 +8,7 @@ import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
 import ViewBills from '../containers/ViewBills'
-import ProductsStock from './ProductsStock'
+import OutletStock from './OutletStock'
 
 import {
   completeSalesFetch,
@@ -66,7 +66,7 @@ class Reports extends React.Component {
       case 'orders':
         return <StoreOrders />
       case 'stocks':
-        return <ProductsStock />
+        return <OutletStock />
       default:
         return <SalesReportComplete />
     }
