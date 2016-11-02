@@ -7,6 +7,8 @@ import { DatePicker } from 'react-input-enhancements'
 import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
+import ViewBills from '../containers/DailyReport'
+import ProductsStock from './ProductsStock'
 
 import {
   completeSalesFetch,
@@ -57,10 +59,14 @@ class Reports extends React.Component {
     switch (activeTab) {
       case 'sales':
         return <SalesReport />
+      case 'bills':
+        return <ViewBills />
       case 'completeSales':
         return <SalesReportComplete />
       case 'orders':
         return <StoreOrders />
+      case 'stocks':
+        return <ProductsStock />
       default:
         return <SalesReportComplete />
     }
@@ -108,6 +114,10 @@ class Reports extends React.Component {
                 onClick={this._onPressTab.bind(this, 'completeSales')}>
                 <a><FormattedMessage id='app.general.completeSales' /></a>
               </li>
+              <li className={activeTab === 'bills' ? 'is-active' : ''}
+                onClick={this._onPressTab.bind(this, 'bills')}>
+                <a>View Bills</a>
+              </li>
               <li className={activeTab === 'sales' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'sales')}>
                 <a><FormattedMessage id='app.page.reports.salesReport' /></a>
@@ -115,6 +125,10 @@ class Reports extends React.Component {
               <li className={activeTab === 'orders' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'orders')}>
                 <a><FormattedMessage id='app.page.reports.storeOrders' /></a>
+              </li>
+              <li className={activeTab === 'stocks' ? 'is-active' : ''}
+                onClick={this._onPressTab.bind(this, 'stocks')}>
+                <a>Product Stock</a>
               </li>
             </ul>
           </div>

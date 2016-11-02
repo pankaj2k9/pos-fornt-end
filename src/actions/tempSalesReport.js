@@ -49,6 +49,7 @@ export function salesReportFetch (source, dateFrom, dateTo, idFrom, idTo, stores
       to: dateTo,
       idFrom,
       idTo,
+      storeId: source,
       eager: '[payments, staff, users, items, items.product]'
     }
 

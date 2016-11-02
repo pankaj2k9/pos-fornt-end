@@ -2,25 +2,12 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 
-import DailyReport from '../containers/DailyReport'
-import ProductsStock from './ProductsStock'
 import LoadingPane from '../components/LoadingPane'
 // import { completeSalesFetch } from '../actions/reports'
 
 import printEODS from '../utils/printEODS/print'
 
 class SalesReportComplete extends React.Component {
-  componentWillMount () {
-    // const { dispatch, date, store } = this.props
-
-    // get sales today
-    // const today = date || new Date()
-    // const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-    // dispatch(completeSalesFetch(store.source, today))
-    // dispatch(salesReportFetch(store.source, lastMonth, today))
-  }
-
   printEndOfDaySales () {
     let { completeSales, store, cashier } = this.props
     var drawerData = this.cashdrawerData()
@@ -70,7 +57,6 @@ class SalesReportComplete extends React.Component {
         ? <LoadingPane
           headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
         : <div>
-          <DailyReport />
           {drawerData
             ? <div className='tile is-ancestor box'>
               <div className='tile is-vertical is-8'>
@@ -95,12 +81,6 @@ class SalesReportComplete extends React.Component {
               </p>
             </div>
           }
-
-          <div className='tile is-parent'>
-            <div className='tile is-child'>
-              <ProductsStock />
-            </div>
-          </div>
         </div>
     )
   }

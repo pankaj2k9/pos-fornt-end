@@ -72,9 +72,11 @@ export const buildReceipt = (data) => {
 const addAddress = (sourceId, stores) => {
   let addr = ''
 
+  // Use storeNIL in case store id is not in store list
+  const storeNIL = { address: '', source: '' }
   const store = stores.filter((store) => {
     return store.source === sourceId
-  })[0]
+  })[0] || storeNIL
 
   const storeAddress = store.address
 
@@ -96,6 +98,8 @@ const addAddress = (sourceId, stores) => {
       case 's3':
         tempAddr = 'S3 STREET\nSAURON JUNCTION #02-22\nSINGAPORE 188021\nTELEPHONE: 6238 1337'
         break
+      default:
+        tempAddr = 'N/A'
     }
 
     addr = ''
