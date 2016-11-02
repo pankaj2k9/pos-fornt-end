@@ -9,11 +9,11 @@ import NavBar from './NavBar'
 import {
   hamburgerToggle,
   setActiveModal,
+  closeActiveModal,
   resetStaffState,
   validateAndUpdateCashdrawer,
   setCashdrawerFailure,
-  setCashierLoggedIn,
-  authCashierStaff
+  setCashierLoggedIn
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
@@ -69,6 +69,7 @@ class App extends React.Component {
     for (var i = 0; i < staffs.length; i++) {
       if (staffs[i].id === staffId) {
         dispatch(setCashierLoggedIn(staffs[i]))
+        dispatch(closeActiveModal())
       }
     }
   }
@@ -81,19 +82,8 @@ class App extends React.Component {
     return active
   }
 
-  verifyStaff (event) {
-    event.preventDefault()
-    const {dispatch, activeCashier} = this.props
-    let staffData = {
-      username: activeCashier.username,
-      password: document.getElementById('staffPassword').value
-    }
-    dispatch(authCashierStaff(staffData))
-  }
-
   openChooseUserModal () {
     const { dispatch } = this.props
-    dispatch(resetStaffState())
     dispatch(setActiveModal('verifyStaff'))
   }
 
@@ -209,8 +199,7 @@ class App extends React.Component {
   }
 
   chooseUserModal () {
-    const {intl, activeModalId, staff,
-           activeCashier, shouldUpdate, error} = this.props
+    const { activeModalId, staff, shouldUpdate, error } = this.props
     const active = activeModalId === 'verifyStaff' ? 'is-active' : ''
     return (
       <div id='verifyStaff' className={`modal ${active}`}>
@@ -261,29 +250,6 @@ class App extends React.Component {
                       </span>
                     </div>
                   </div>
-                  {!activeCashier
-                    ? null
-                    : <div>
-                      <div className='container'>
-                        <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
-                          <p className='control is-fullwidth'>
-                            <input id='staffPassword' autoComplete='off'
-                              className='input is-large' type='password'
-                              placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
-                          </p>
-                        </form>
-                        <hr />
-                      </div>
-                      <div className='columns'>
-                        <p className='column is-6 is-offset-3'>
-                          <a className='button is-large is-fullwidth is-success'
-                            onClick={this.verifyStaff.bind(this)} >
-                            <FormattedMessage id='app.button.verify' />
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                  }
                 </div>
               </div>
             }

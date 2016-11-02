@@ -129,11 +129,11 @@ class Store extends Component {
   }
 
   render () {
-    const {adminToken} = this.props
+    const {activeCashier} = this.props
     return (
       <div>
         {
-          !adminToken
+          !activeCashier
           ? this.renderDisabledStore()
           : this.renderStore()
         }
