@@ -128,7 +128,7 @@ class Reports extends React.Component {
               </li>
               <li className={activeTab === 'stocks' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'stocks')}>
-                <a><FormattedMessage id='app.general.productStock' /></a>
+                <a><FormattedMessage id='app.general.outletStock' /></a>
               </li>
             </ul>
           </div>

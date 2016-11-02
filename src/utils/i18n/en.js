@@ -70,7 +70,7 @@ const en = {
   'app.general.reprintSuccess': 'Check Printer for the Receipt',
   'app.general.completeSales': 'Complete Sales Report',
   'app.general.viewBills': 'View Bills',
-  'app.general.productStock': 'Product Stock',
+  'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
 
   'app.general.cashDrawerEmpty': 'Cash Drawer Empty',

@@ -27,8 +27,20 @@ import {
   VIEW_BILLS_CH_INPUT_IDTO,
   VIEW_BILLS_CH_INPUT_IDFR,
 
-  VIEW_BILLS_CH_TYPE
+  VIEW_BILLS_CH_TYPE,
+  OUTLET_STOCKS_CH_SOURCE
 } from '../actions/reports'
+
+function outletStocks (state, action) {
+  switch (action.type) {
+    case OUTLET_STOCKS_CH_SOURCE:
+      return Object.assign({}, state, {
+        source: action.source
+      })
+    default:
+      return state
+  }
+}
 
 function viewBills (state, action) {
   switch (action.type) {
@@ -198,6 +210,9 @@ function report (state = {
     idFrom: undefined,
     idTo: undefined,
     reportType: 'date'
+  },
+  outletStocks: {
+    source: undefined
   }
 }, action) {
   switch (action.type) {
@@ -264,6 +279,10 @@ function report (state = {
     case VIEW_BILLS_CH_TYPE:
       return Object.assign({}, state, {
         viewBills: viewBills(state.viewBills, action)
+      })
+    case OUTLET_STOCKS_CH_SOURCE:
+      return Object.assign({}, state, {
+        outletStocks: outletStocks(state.outletStocks, action)
       })
     default:
       return state

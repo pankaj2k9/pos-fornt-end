@@ -214,3 +214,8 @@ export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) 
   }
 }
 
+export const OUTLET_STOCKS_CH_SOURCE = 'OUTLET_STOCKS_CH_SOURCE'
+export function outletStocksChSource (source) {
+  return { type: OUTLET_STOCKS_CH_SOURCE, source }
+}
+

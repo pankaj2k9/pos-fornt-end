@@ -70,7 +70,7 @@ const zh = {
   'app.general.reprintSuccess': '检查打印机对于收据',
   'app.general.completeSales': '齐全销售报告',
   'app.general.viewBills': '查看帐单',
-  'app.general.productStock': '产品库存',
+  'app.general.outletStock': '商店股票',
   'app.general.updateCD': '更新钱箱？',
 
   'app.general.cashDrawerEmpty': '钱箱空物',
