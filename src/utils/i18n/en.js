@@ -69,6 +69,8 @@ const en = {
   'app.general.refundSuccess': 'Refund Success!',
   'app.general.reprintSuccess': 'Check Printer for the Receipt',
   'app.general.completeSales': 'Complete Sales Report',
+  'app.general.viewBills': 'View Bills',
+  'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
 
   'app.general.cashDrawerEmpty': 'Cash Drawer Empty',
@@ -223,7 +225,14 @@ const en = {
   'app.page.settings.changePwMin3Chars': 'Must be at least 3 characters.',
   'app.page.settings.changePwDoNotMatch': 'Passwords do not match.',
   'app.page.settings.changePwInfo1': 'You are logged in with ',
-  'app.page.settings.changePwInfo2': ' account. Only staff account\'s passwords can be changed here. You can change this account\'s password on the Admin.'
+  'app.page.settings.changePwInfo2': ' account. Only staff account\'s passwords can be changed here. You can change this account\'s password on the Admin.',
+  'app.page.settings.date': 'Date',
+  'app.page.settings.transID': 'Transaction ID',
+  'app.page.settings.from': 'From',
+  'app.page.settings.to': 'To',
+  'app.page.settings.transFrom': 'From (Transaction ID)',
+  'app.page.settings.transTo': 'To (Transaction ID)',
+  'app.page.settings.process': 'Process'
 }
 
 export default en

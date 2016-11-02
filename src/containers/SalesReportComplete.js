@@ -3,20 +3,11 @@ import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 
 import LoadingPane from '../components/LoadingPane'
-import { completeSalesFetch } from '../actions/reports'
+// import { completeSalesFetch } from '../actions/reports'
 
 import printEODS from '../utils/printEODS/print'
 
 class SalesReportComplete extends React.Component {
-  componentWillMount () {
-    const { dispatch, date, store } = this.props
-
-    // get sales today
-    const today = date || new Date()
-
-    dispatch(completeSalesFetch(store.source, today))
-  }
-
   printEndOfDaySales () {
     let { completeSales, store, cashier } = this.props
     var drawerData = this.cashdrawerData()

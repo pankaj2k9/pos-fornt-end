@@ -50,8 +50,14 @@ const DetailsModal = (props) => {
                       : <strong><FormattedMessage id={item.name} />: </strong>
                     return (
                       <li key={key}>
-                        {listName}
-                        {item.desc}
+                        <div className='columns is-gapless is-mobile'>
+                          <div className='column is-3'>
+                            {listName}
+                          </div>
+                          <div className='column is-9'>
+                            {item.desc}
+                          </div>
+                        </div>
                       </li>
                     )
                   }, this)
