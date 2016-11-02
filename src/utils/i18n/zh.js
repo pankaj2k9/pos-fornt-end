@@ -66,9 +66,11 @@ const zh = {
   'app.general.forbidden': '被禁止!',
   'app.general.onlyMaster': '只有主人可以打开这个页面...',
   'app.general.transDetails': '交易细节',
-  'app.generel.refundSuccess': '退成功!',
-  'app.generel.reprintSuccess': '检查打印机对于收据',
-  'app.generel.completeSales': '齐全销售报告',
+  'app.general.refundSuccess': '退成功!',
+  'app.general.reprintSuccess': '检查打印机对于收据',
+  'app.general.completeSales': '齐全销售报告',
+  'app.general.viewBills': '查看帐单',
+  'app.general.productStock': '产品库存',
   'app.general.updateCD': '更新钱箱？',
 
   'app.general.cashDrawerEmpty': '钱箱空物',
@@ -223,7 +225,14 @@ const zh = {
   'app.page.settings.changePwMin3Chars': '密码必须至少为3个字符。',
   'app.page.settings.changePwDoNotMatch': '密码不匹配。',
   'app.page.settings.changePwInfo1': '您登录使用 ',
-  'app.page.settings.changePwInfo2': ' 帐户。 唯一的“工作人员”帐户的密码，可以从这里改变。只能在管理员更改此帐户的密码。'
+  'app.page.settings.changePwInfo2': ' 帐户。 唯一的“工作人员”帐户的密码，可以从这里改变。只能在管理员更改此帐户的密码。',
+  'app.page.settings.date': '日期',
+  'app.page.settings.transID': '事务ID',
+  'app.page.settings.from': '从',
+  'app.page.settings.to': '至',
+  'app.page.settings.transFrom': '从 (事务ID)',
+  'app.page.settings.transTo': '至 (事务ID)',
+  'app.page.settings.process': '处理'
 }
 
 export default zh

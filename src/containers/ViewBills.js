@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { injectIntl, FormattedMessage } from 'react-intl'
 import moment from 'moment'
 import { DatePicker } from 'react-input-enhancements'
 
@@ -87,7 +88,9 @@ class ViewBills extends React.Component {
 
     return (
       <div id='trans-report-date' className='tile is-child is-primary is-6'>
-        <label className='label'>From</label>
+        <label className='label'>
+          <FormattedMessage id='app.page.settings.from' />
+        </label>
         <DatePicker
           value={moment(from).format('ddd DD/MM/YYYY')}
           pattern='ddd DD/MM/YYYY'
@@ -102,7 +105,9 @@ class ViewBills extends React.Component {
           }
         </DatePicker>
 
-        <label className='label'>To</label>
+        <label className='label'>
+          <FormattedMessage id='app.page.settings.to' />
+        </label>
         <DatePicker
           style={{ display: 'block' }}
           value={moment(to).format('ddd DD/MM/YYYY')}
@@ -122,27 +127,31 @@ class ViewBills extends React.Component {
   }
 
   renderIdInputs () {
-    const { idFrom, idTo } = this.props
+    const { intl, idFrom, idTo } = this.props
 
     return (
       <div className='tile is-child is-6'>
         <p className='control'>
-          <label className='label'>From (Transaction ID)</label>
+          <label className='label'>
+            <FormattedMessage id='app.page.settings.transFrom' />
+          </label>
           <input
             className='input'
             type='text'
-            placeholder='Input transaction ID'
+            placeholder={intl.formatMessage({ id: 'app.page.settings.transFrom' })}
             value={idFrom}
             onChange={this.handleChangeInputId.bind(this, 'idFrom')}
           />
         </p>
 
         <p className='control'>
-          <label className='label'>To (Transaction ID)</label>
+          <label className='label'>
+            <FormattedMessage id='app.page.settings.transTo' />
+          </label>
           <input
             className='input'
             type='text'
-            placeholder='Input transaction ID'
+            placeholder={intl.formatMessage({ id: 'app.page.settings.transTo' })}
             value={idTo}
             onChange={this.handleChangeInputId.bind(this, 'idTo')}
           />
@@ -165,7 +174,8 @@ class ViewBills extends React.Component {
                     type='radio'
                     name='date'
                     checked={reportType === 'date'}
-                    onChange={this.handleChangeRadio.bind(this)} /> Date
+                    onChange={this.handleChangeRadio.bind(this)} />
+                  <FormattedMessage id='app.page.settings.date' />
                 </label>
 
                 <label className='radio'>
@@ -173,7 +183,8 @@ class ViewBills extends React.Component {
                     type='radio'
                     name='id'
                     checked={reportType === 'id'}
-                    onChange={this.handleChangeRadio.bind(this)} /> Transaction ID
+                    onChange={this.handleChangeRadio.bind(this)} />
+                  <FormattedMessage id='app.page.settings.transID' />
                 </label>
               </p>
             </div>
@@ -188,7 +199,7 @@ class ViewBills extends React.Component {
             <div className='tile is-child'>
               <button className='button is-primary'
                 onClick={this.handleSearchOrders}>
-                Process
+                <FormattedMessage id='app.page.settings.process' />
               </button>
             </div>
           </div>
@@ -202,6 +213,7 @@ function mapStateToProps (state) {
   const { from, to, idFrom, idTo, reportType, orders } = state.reports.viewBills
 
   return {
+    intl: state.intl,
     stores: state.application.storeIds,
     store: state.application.store,
     from,
@@ -213,4 +225,4 @@ function mapStateToProps (state) {
   }
 }
 
-export default connect(mapStateToProps)(ViewBills)
+export default connect(mapStateToProps)(injectIntl(ViewBills))

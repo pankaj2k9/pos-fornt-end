@@ -19,16 +19,16 @@ class ProductsStock extends React.Component {
 
     return (isLoading
       ? <LoadingPane
-        headerMessage={<FormattedMessage id='app.page.reports.loadingStoreOrders' />} />
+        headerMessage={<FormattedMessage id='app.page.products.loadingProd' />} />
       : <div className='container'>
         <table className='table is-bordered is-unselectable'>
           <thead>
             <tr>
-              <th>Product</th>
-              <th>Barcode</th>
-              <th>Date Created</th>
-              <th>Last updated</th>
-              <th>In Stock</th>
+              <th><FormattedMessage id='app.general.product' /></th>
+              <th><FormattedMessage id='app.general.barcode' /></th>
+              <th><FormattedMessage id='app.modal.dateCreated' /></th>
+              <th><FormattedMessage id='app.modal.dateUpdated' /></th>
+              <th><FormattedMessage id='app.general.stock' /></th>
             </tr>
           </thead>
 
