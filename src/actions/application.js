@@ -202,7 +202,6 @@ export function updateCashDrawer (staff, data) {
     dispatch(updateCashDrawerRequest())
     return dailyDataService.patch(data)
       .then(response => {
-        console.log('updated CashDrawer: ', response)
         const receipt = {
           info: {
             date: new Date(),
@@ -276,10 +275,8 @@ export function createDailyData (storeId, dailyData) {
       cashDrawerOpenCount: 0,
       float: 0
     }
-    console.log('initial: ', initial)
     return dailyDataService.create(dailyData || initial)
       .then(response => {
-        console.log('created dailyData: ', response)
         dispatch(dailyDataCreateSuccess(response))
         dispatch(setActiveCashdrawer(response))
       })
@@ -311,28 +308,27 @@ export function storeGetDailyData (storeId, cashdrawer) {
       query: { storeId: storeId }
     }
     function validateCashdrawer (data) {
-      let matchCount
+      let matchedDrawer
       data.find(function (drawer) {
-        let date1 = drawer.date
+        let date1 = new Date(drawer.date).toISOString().slice(0, 10)
         let date2 = new Date().toISOString().slice(0, 10)
         if (date1 === date2) {
-          dispatch(setActiveCashdrawer(drawer))
-          matchCount = 1
-          if (drawer.initialAmount === 0) {
-            dispatch(setActiveModal('updateCashDrawer'))
-          }
+          matchedDrawer = drawer
         }
       })
-      if (!matchCount) {
-        console.log('no Matches')
+      if (!matchedDrawer) {
         dispatch(createDailyData(storeId))
         dispatch(setActiveModal('updateCashDrawer'))
+      } else {
+        dispatch(setActiveCashdrawer(matchedDrawer))
+        if (matchedDrawer.initialAmount === 0) {
+          dispatch(setActiveModal('updateCashDrawer'))
+        }
       }
     }
     return dailyDataService.find(query)
       .then(response => {
         // set store id with the first item
-        console.log('fetch dailyData', response)
         if (response.data.length > 0) {
           validateCashdrawer(response.data)
           dispatch(dailyDataFetchDataSuccess(response.data))
