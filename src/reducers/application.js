@@ -118,16 +118,13 @@ function application (state = {
         var existing = output.filter(function (oldData, i) {
           return oldData.date === newData.date
         })
-        console.log('existing', existing)
         if (existing.length) {
           var key = output.indexOf(existing[0])
           output[key].cashDrawerOpenCount = newData.cashDrawerOpenCount
           output[key].float = newData.float
           newActiveCD = output[key]
         }
-        console.log('activeCD: ', newActiveCD)
       })
-      console.log('output asdf:', output)
       return Object.assign({}, state, {
         cashdrawer: output,
         activeCashdrawer: newActiveCD,
