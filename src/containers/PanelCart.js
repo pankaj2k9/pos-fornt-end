@@ -6,9 +6,9 @@ import Counter from '../components/Counter'
 import Panel from '../components/Panel'
 import Level from '../components/Level'
 import SearchModal from './SearchModal'
-import SearchBar from '../components/SearchBar'
-import Toggle from '../components/Toggle'
+// import SearchBar from '../components/SearchBar'
 import Truncate from '../components/Truncate'
+import FunctionButtons from '../components/FunctionButtons'
 
 import {
   setCustomerInputActive,
@@ -24,13 +24,22 @@ import {
 } from '../actions/panelCart'
 
 import {
+  setDiscount,
+  panelCheckoutShouldUpdate
+} from '../actions/panelCheckout'
+
+import {
   setOrderSearchKey
 } from '../actions/ordersOnHold'
+
+import { customersSetSearchKey } from '../actions/settings'
 
 import {
   holdOrderAndReset,
   recallOrderOnHold,
-  closeAndResetRecallModal
+  closeAndResetRecallModal,
+  closeAndResetCustomerModal,
+  setActiveCustomerAndFocus
 } from '../actions/helpers'
 
 import {
@@ -51,13 +60,13 @@ class PanelCart extends Component {
     }
   }
 
-  onClickPanelHeaderBtns (inputAction) {
+  _clickPanelHeaderBtns (inputAction) {
     const {dispatch} = this.props
     dispatch(setCustomerInputActive(inputAction))
     document.getElementById('customerInput').focus()
   }
 
-  onClickRemoveCustomer () {
+  _clickRemoveCustomer () {
     const {dispatch} = this.props
     dispatch(removeCustomer())
   }
@@ -83,7 +92,7 @@ class PanelCart extends Component {
     document.getElementById('productsSearch').focus()
   }
 
-  onClickCurrencyToggle () {
+  _clickCurrencyToggle () {
     const {dispatch, currency} = this.props
     currency === 'sgd'
     ? dispatch(setCurrencyType('odbo'))
@@ -91,7 +100,7 @@ class PanelCart extends Component {
     document.getElementById('productsSearch').focus()
   }
 
-  onClickHoldOrder () {
+  _clickHoldOrder () {
     const {
       dispatch, activeCustomer,
       walkinCustomer, cartItemsArray,
@@ -107,15 +116,116 @@ class PanelCart extends Component {
     dispatch(holdOrderAndReset(orderData))
   }
 
-  recallModal () {
-    const {dispatch, activeModalId} = this.props
-    activeModalId === null || undefined || ''
-    ? dispatch(setActiveModal('recallOrder'))
-    : dispatch(closeActiveModal())
-    document.getElementById('productsSearch').focus()
+  _openModal (modalToOpen) {
+    const { dispatch, activeModalId } = this.props
+    if (activeModalId === null || undefined || '') {
+      dispatch(setActiveModal(modalToOpen))
+    } else {
+      dispatch(closeActiveModal())
+      dispatch(setActiveModal(modalToOpen))
+    }
   }
 
-  renderChildren () {
+  _closeModal (event) {
+    const { activeModalId, dispatch } = this.props
+    if (activeModalId === 'addCustomDiscount') {
+      event.preventDefault()
+      dispatch(closeActiveModal())
+    }
+    dispatch(closeActiveModal())
+  }
+
+  _clickButtons (buttonName) {
+    const button = buttonName.toLowerCase()
+    switch (button) {
+      case 'recall order':
+        this._openModal('recallOrder')
+        break
+      case 'hold order':
+        this._clickHoldOrder()
+        break
+      case 'search customer':
+        this._openModal('searchOdboUser')
+        break
+      case 'add overall discount':
+        this._openModal('addCustomDiscount')
+        break
+      default:
+    }
+  }
+
+  /*
+  / COMPUTATIONS
+  */
+
+  sumOfCartItems () {
+    const {cartItemsArray, currency} = this.props
+
+    let x = cartItemsArray
+    let sumOfItemsSgd = 0.00
+    let sumOfItemsOdbo = 0
+
+    for (var i = 0; i < x.length; i++) {
+      sumOfItemsSgd = sumOfItemsSgd + Number(x[i].subTotalPrice)
+      sumOfItemsOdbo = sumOfItemsOdbo + Number(x[i].subTotalOdboPrice)
+    }
+
+    let sumOfItems = currency === 'sgd'
+      ? Number(sumOfItemsSgd.toFixed(2))
+      : Number(sumOfItemsOdbo.toFixed(0))
+
+    return sumOfItems
+  }
+
+  sumOfCartDiscounts () {
+    const {cartItemsArray, currency, shouldUpdate} = this.props
+    let x = cartItemsArray
+    let sumOfDiscounts = 0
+    for (var i = 0; i < x.length; i++) {
+      // validate if there is no custom discount
+      sumOfDiscounts = x[i].customDiscount === 0
+        // if none then check if product has default discount
+        ? x[i].isDiscounted
+          // if isDiscounted then compute the default discounts
+          ? currency === 'sgd'
+            ? (x[i].qty * (Number(x[i].priceDiscount) / 100) * x[i].price) + sumOfDiscounts
+            : (x[i].qty * Math.round((Number(x[i].odboPriceDiscount) / 100) * x[i].odboPrice)) + sumOfDiscounts
+          // else value is zero
+          : sumOfDiscounts
+        /* if custom discount then is creater than zero then computed the custom
+         discount together with the price of the product */
+        : currency === 'sgd'
+          ? (x[i].qty * (Number(x[i].customDiscount) / 100) * x[i].price) + sumOfDiscounts
+          : (x[i].qty * Math.round((Number(x[i].customDiscount) / 100) * x[i].odboPrice)) + sumOfDiscounts
+    }
+
+    let updatedDiscount = shouldUpdate // detects changes in discount
+      ? null
+      : currency === 'sgd'
+        ? Math.round(sumOfDiscounts)
+        : Math.round(sumOfDiscounts)
+    return updatedDiscount
+  }
+
+  overAllDeduct () {
+    const {overallDiscount, currency} = this.props
+    let discount = overallDiscount === 0
+      ? 0 : Number(overallDiscount)
+    let overAllDeduct = currency === 'sgd'
+      ? (discount / 100) * this.sumOfCartItems()
+      : Math.round((discount / 100) * this.sumOfCartItems())
+    return overAllDeduct
+  }
+
+  orderTotal () {
+    const { overallDiscount } = this.props
+    let subtotal = overallDiscount === 0
+      ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
+      : Number(this.sumOfCartItems() - this.overAllDeduct()).toFixed(2)
+    return subtotal
+  }
+
+  renderOrderItems () {
     const { dispatch, cartItemsArray, currency,
             locale, shouldUpdate, overallDiscount } = this.props
     const notEmpty = (cartItemsArray !== null || undefined)
@@ -197,7 +307,7 @@ class PanelCart extends Component {
           </td>
           <td><Truncate text={productName} maxLength={26} /></td>
           {
-            !overallDiscount || overallDiscount === 0
+            Number(overallDiscount) === 0
               ? <td>
                 <form onSubmit={e => {
                   e.preventDefault()
@@ -236,7 +346,213 @@ class PanelCart extends Component {
     })
   }
 
+  render () {
+    var intFrameHeight = window.innerHeight
+    const {
+      activeCustomer,
+      walkinCustomer,
+      cartItemsArray,
+      // currency,
+      overallDiscount,
+      shouldUpdate
+    } = this.props
+    const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
+
+    var buttons = [
+      {name: 'Reprint/ Refund', icon: 'fa fa-cog'},
+      {name: 'Reports', icon: 'fa fa-files-o'},
+      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o'},
+      {name: 'Hold Order', icon: 'fa fa-hand-rock-o'},
+      {name: 'Recall Order', icon: 'fa fa-hand-lizard-o'},
+      {name: 'Search Customer', icon: 'fa fa-search'}
+    ]
+
+    return (
+      <div>
+        <Panel>
+          <div className='panel-block'>
+            <FunctionButtons buttons={buttons} onClickButton={this._clickButtons.bind(this)} />
+          </div>
+        </Panel>
+        <Panel
+          panelName={<FormattedMessage id='app.panel.sales' />}>
+          <div className='panel-block'>
+            {!shouldUpdate
+              ? <Level
+                left={
+                  <h4 className='title is-4 is-marginless'>
+                    Order Items
+                  </h4>
+                }
+                right={
+                  <div>
+                    {activeCustomer !== null || undefined
+                    ? <div>
+                      <p className='is-marginless'>
+                        <FormattedMessage id='app.general.cust' />:
+                        <strong>{` ${activeCustomer.firstName}`}</strong>
+                      </p>
+                      <a style={{color: 'orange'}}
+                        onClick={this._clickRemoveCustomer.bind(this)}>
+                        <i className='fa fa-times' />
+                        <FormattedMessage id='app.button.remove' />
+                      </a>
+                    </div>
+                    : <div>
+                      {walkinCustomer === ''
+                        ? <h4 className='is-marginless'>
+                          <FormattedMessage id='app.general.walkinCust' />
+                        </h4>
+                        : <div>
+                          <p className='is-marginless'>
+                            <FormattedMessage id='app.general.cust' />:
+                            <strong>{` ${walkinCustomer}`}</strong>
+                          </p>
+                          <a style={{color: 'orange'}}
+                            onClick={this._clickRemoveCustomer.bind(this)}>
+                            <i className='fa fa-times' />
+                            <FormattedMessage id='app.button.remove' />
+                          </a>
+                        </div>
+                      }
+                    </div>
+                    }
+                  </div>
+                } />
+              : <div className='has-text-centered'>
+                <i className='fa fa-spinner fa-pulse fa-fw' />
+              </div>
+            }
+          </div>
+          <div className='panel-block' style={{padding: 0}}>
+            <div className='content'
+              style={{height: intFrameHeight / 2.7, overflowY: 'scroll'}}>
+              {!empty
+                ? <table className='table'>
+                  <thead>
+                    <tr>
+                      <th><FormattedMessage id='app.general.qty' /></th>
+                      <th><FormattedMessage id='app.general.product' /></th>
+                      {!overallDiscount || overallDiscount === 0
+                        ? <th><FormattedMessage id='app.general.discount' /></th>
+                        : null
+                      }
+                      <th><FormattedMessage id='app.general.subtotal' /></th>
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.renderOrderItems()}
+                  </tbody>
+                </table>
+                : <div className='section has-text-centered is-fullheight'
+                  style={{height: intFrameHeight / 4, overflowY: 'scroll'}}>
+                  <p>
+                    <strong><FormattedMessage id='app.error.noCartItems' /></strong>
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+          <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
+            <Level left={
+              <strong>Subtotal</strong>
+              }
+              right={<strong>{this.sumOfCartItems()}</strong>} />
+            <Level left={
+              <strong>Discounts</strong>
+              }
+              right={<strong>{
+                overallDiscount === 0
+                ? this.sumOfCartDiscounts()
+                : this.overAllDeduct()
+              }</strong>} />
+            <Level left={
+              <strong>Order Total</strong>
+              }
+              right={
+                <h3 className='is-marginless'>
+                  <strong>{this.orderTotal()}</strong>
+                </h3>
+            } />
+          </div>
+          {this.renderModal()}
+        </Panel>
+      </div>
+    )
+  }
+
   renderModal () {
+    const { activeModalId, ordersOnHold } = this.props
+    if (activeModalId === 'recallOrder') {
+      let modalToRender
+      if (ordersOnHold || ordersOnHold.length > 0) {
+        modalToRender = this.renderRecallOrderModal()
+      }
+      return modalToRender
+    } else if (activeModalId === 'searchOdboUser') {
+      return this.renderCustomerModal()
+    } else if (activeModalId === 'addCustomDiscount') {
+      return this.renderCustomDiscount()
+    }
+  }
+
+  _setOverallDiscount (value) {
+    const {dispatch} = this.props
+    dispatch(panelCheckoutShouldUpdate(true))
+    let discount = value === ''
+      ? 0
+      : Number(value) > 100 ? 100 : value
+    dispatch(setDiscount(discount))
+  }
+
+  renderCustomDiscount () {
+    const { activeModalId, overallDiscount } = this.props
+    let modalActive = activeModalId === 'addCustomDiscount'
+      ? 'modal is-active'
+      : 'modal'
+    // @discountPH: Discount Placeholder
+    let discountPH = overallDiscount === '' || !overallDiscount
+      ? 0
+      : Number(overallDiscount)
+    // @discount: discount value to be displayed
+    let discount = overallDiscount === '' || !overallDiscount
+      ? ''
+      : Number(overallDiscount) > 100 ? 100 : overallDiscount
+    // @subtotal: display apropriate computation of discounts
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              Set Overall Discount
+            </p>
+            <button className='delete' onClick={this._closeModal.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-8 is-offset-2'>
+                <div className='control is-horizontal'>
+                  <p className='control-label'><h3 className='label'>Discount Percent</h3></p>
+                  <p className='control has-addons'>
+                    <form onSubmit={this._closeModal.bind(this)} >
+                      <input id='itemDiscount' className='input is-large' type='Number' style={{maxWidth: 80}}
+                        placeholder={discountPH} value={discount}
+                        onChange={e => this._setOverallDiscount(e.target.value)} />
+                      <a className='button is-large'>%</a>
+                    </form>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderRecallOrderModal () {
     const {activeModalId, ordersOnHold, ordersSearchKey} = this.props
     let filteredOrders = []
     if (ordersSearchKey === '') {
@@ -268,163 +584,30 @@ class PanelCart extends Component {
     )
   }
 
-  render () {
-    var intFrameHeight = window.innerHeight
+  renderCustomerModal () {
     const {
-      activeCustomer,
-      walkinCustomer,
-      cartItemsArray,
-      currency,
-      inputActive,
-      inputAction,
-      searchKey,
-      customerSearchError,
-      ordersOnHold,
-      overallDiscount,
-      shouldUpdate
+      activeModalId,
+      customersArray,
+      customerSearchKey,
+      customerFilter,
+      fetchingCustomers
     } = this.props
-    const emptyOrdersOnHold = (ordersOnHold.length === 0) || (ordersOnHold === null || undefined)
-    const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
-    const buttonOne = empty
-      ? undefined
-      : {
-        name: 'app.button.holdOrder',
-        class: '',
-        type: 'button',
-        onClick: this.onClickHoldOrder.bind(this)
-      }
-    const buttonTwo = emptyOrdersOnHold
-    ? undefined
-    : {
-      name: 'app.button.recallOrder',
-      class: 'is-dark',
-      onClick: this.recallModal.bind(this)
-    }
     return (
-      <Panel
-        panelName={<FormattedMessage id='app.panel.sales' />}
-        buttonOne={buttonOne}
-        buttonTwo={buttonTwo}
-      >
-        <div className='panel-block'>
-          {inputActive
-            ? !shouldUpdate
-              ? <SearchBar
-                id='customerInput'
-                autoFocus={inputActive}
-                value={inputAction === 'search' ? searchKey : walkinCustomer}
-                placeholder={
-                  inputAction === 'search'
-                  ? customerSearchError === null
-                    ? 'app.ph.searchCust' : 'app.ph.searchCustErr'
-                  : 'app.ph.placeCustName'
-                }
-                confirmButton={<i className='fa fa-plus' />}
-                cancelButton={<i className='fa fa-times' />}
-                confirmEvent={this.buttonConfirm.bind(this)}
-                cancelEvent={this.buttonCancel.bind(this)}
-                onChange={this.keyInput.bind(this)}
-                onSubmit={this.buttonConfirm.bind(this)}
-                icon={inputAction === 'search' ? 'fa fa-search' : 'fa fa-user'} />
-              : <div className='has-text-centered'>
-                <i className='fa fa-spinner fa-pulse fa-fw' />
-              </div>
-            : <Level
-              left={
-                <div>
-                  {activeCustomer !== null || undefined
-                  ? <div>
-                    <p className='is-marginless'>
-                      <FormattedMessage id='app.general.cust' />:
-                      <strong>{` ${activeCustomer.firstName}`}</strong>
-                    </p>
-                    <a style={{color: 'orange'}}
-                      onClick={this.onClickRemoveCustomer.bind(this)}>
-                      <i className='fa fa-times' />
-                      <FormattedMessage id='app.button.remove' />
-                    </a>
-                  </div>
-                  : <div>
-                    {walkinCustomer === ''
-                      ? <h4 className='is-marginless'>
-                        <FormattedMessage id='app.general.walkinCust' />
-                        <a style={{marginLeft: 12}}
-                          onClick={this.onClickPanelHeaderBtns.bind(this, 'add')}>
-                          <FormattedMessage id='app.button.add' />{' '}
-                          <i className='fa fa-plus' />
-                        </a>
-                      </h4>
-                      : <div>
-                        <p className='is-marginless'>
-                          <FormattedMessage id='app.general.cust' />:
-                          <strong>{` ${walkinCustomer}`}</strong>
-                        </p>
-                        <a style={{color: 'orange'}}
-                          onClick={this.onClickRemoveCustomer.bind(this)}>
-                          <i className='fa fa-times' />
-                          <FormattedMessage id='app.button.remove' />
-                        </a>
-                      </div>
-                    }
-                  </div>
-                  }
-                </div>
-              }
-              center={
-                activeCustomer !== null
-                ? <Toggle
-                  switchAction={this.onClickCurrencyToggle.bind(this)}
-                  active={currency}
-                  toggleOne={{name: '$SGD', value: 'sgd'}}
-                  toggleTwo={{name: 'ODBO', value: 'odbo'}}
-                  buttonWidth={60} />
-                : null
-              }
-              action={this.onClickPanelHeaderBtns.bind(this, 'search')}
-              button={activeCustomer !== null || undefined
-                ? <FormattedMessage id='app.button.change' />
-                : <FormattedMessage id='app.button.searchCust' />}
-              buttonIcon={
-                activeCustomer !== null || undefined
-                ? 'fa fa-pencil' : 'fa fa-search'} />
-          }
-        </div>
-        <div className='panel-block' style={{padding: 0}}>
-          <div className='content'
-            style={{height: intFrameHeight / 3.5, overflowY: 'scroll'}}>
-            {!empty
-              ? <table className='table'>
-                <thead>
-                  <tr>
-                    <th><FormattedMessage id='app.general.qty' /></th>
-                    <th><FormattedMessage id='app.general.product' /></th>
-                    {!overallDiscount || overallDiscount === 0
-                      ? <th><FormattedMessage id='app.general.discount' /></th>
-                      : null
-                    }
-                    <th><FormattedMessage id='app.general.subtotal' /></th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.renderChildren()}
-                </tbody>
-              </table>
-              : <div className='section has-text-centered is-fullheight'
-                style={{height: intFrameHeight / 4, overflowY: 'scroll'}}>
-                <p>
-                  <strong><FormattedMessage id='app.error.noCartItems' /></strong>
-                </p>
-              </div>
-            }
-          </div>
-        </div>
-        {
-          ordersOnHold === undefined || null || ordersOnHold.length === 0
-          ? null
-          : this.renderModal()
-        }
-      </Panel>
+      <SearchModal
+        id='searchOdboUser'
+        title='ODBO Users'
+        active={activeModalId}
+        items={customersArray}
+        filter={customerFilter}
+        isFetching={fetchingCustomers}
+        search={{id: 'searchEvent',
+          value: customerSearchKey,
+          placeholder: 'app.ph.searchCust2',
+          onChange: customersSetSearchKey}}
+        closeButton={{name: <FormattedMessage id='app.button.cancel' />,
+          event: closeAndResetCustomerModal}}
+        listButton={{name: 'Select Customer',
+          event: setActiveCustomerAndFocus}} />
     )
   }
 }
@@ -441,6 +624,9 @@ PanelCart.propTypes = {
 
 function mapStateToProps (state) {
   return {
+    fetchingCustomers: state.data.customers.isFetching,
+    customerSearchKey: state.settings.customerSearchKey,
+    customerFilter: state.settings.customerFilter,
     activeCustomer: state.panelCart.activeCustomer,
     walkinCustomer: state.panelCart.walkinCustomer,
     customerSearchError: state.panelCart.customerSearchError,

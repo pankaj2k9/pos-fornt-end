@@ -9,12 +9,14 @@ import NavBar from './NavBar'
 import {
   hamburgerToggle,
   setActiveModal,
+  closeActiveModal,
   resetStaffState,
   validateAndUpdateCashdrawer,
   setCashdrawerFailure,
-  setCashierLoggedIn,
-  authCashierStaff
+  setCashierLoggedIn
 } from '../actions/application'
+
+import { verifyStorePin } from '../actions/settings'
 
 import { logout } from '../actions/login'
 import { onLogout } from '../actions/helpers'
@@ -33,7 +35,7 @@ class App extends React.Component {
 
   componentDidUpdate () {
     const { activeCashier, activeCashdrawer, activeModalId, shouldUpdate } = this.props
-    if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
+    if (!activeCashdrawer || activeCashdrawer.float > 0) {
       if (activeModalId === 'verifyStaff' && activeCashier && !shouldUpdate) {
         document.getElementById('staffPassword').focus()
       }
@@ -67,6 +69,7 @@ class App extends React.Component {
     for (var i = 0; i < staffs.length; i++) {
       if (staffs[i].id === staffId) {
         dispatch(setCashierLoggedIn(staffs[i]))
+        dispatch(closeActiveModal())
       }
     }
   }
@@ -79,19 +82,8 @@ class App extends React.Component {
     return active
   }
 
-  verifyStaff (event) {
-    event.preventDefault()
-    const {dispatch, activeCashier} = this.props
-    let staffData = {
-      username: activeCashier.username,
-      password: document.getElementById('staffPassword').value
-    }
-    dispatch(authCashierStaff(staffData))
-  }
-
   openChooseUserModal () {
     const { dispatch } = this.props
-    dispatch(resetStaffState())
     dispatch(setActiveModal('verifyStaff'))
   }
 
@@ -107,13 +99,32 @@ class App extends React.Component {
     }
     let data = {
       date: activeCashdrawer.date,
-      amount: amountToAdd
+      amount: amountToAdd,
+      count: activeCashdrawer.cashDrawerOpenCount
     }
     if (amountToAdd <= 0 || isNaN(amountToAdd)) {
       dispatch(setCashdrawerFailure('You have entered an invalid amount'))
     } else {
       dispatch(validateAndUpdateCashdrawer(query, staff, data))
     }
+  }
+
+  onClickVerifyPin (event) {
+    event.preventDefault()
+    const {dispatch, storeId, activeCashier, staff} = this.props
+    let query = {
+      query: {
+        store: storeId,
+        pinCode: document.getElementById('storePinCode').value
+      }
+    }
+    let staffName = !activeCashier ? staff : activeCashier
+    dispatch(verifyStorePin(query, staffName))
+  }
+
+  openCashdrawerModal () {
+    const {dispatch} = this.props
+    dispatch(setActiveModal('updateCashDrawer'))
   }
 
   renderCashDrawerModal () {
@@ -189,8 +200,7 @@ class App extends React.Component {
   }
 
   chooseUserModal () {
-    const {intl, activeModalId, staff,
-           activeCashier, shouldUpdate, error} = this.props
+    const { activeModalId, staff, shouldUpdate, error } = this.props
     const active = activeModalId === 'verifyStaff' ? 'is-active' : ''
     return (
       <div id='verifyStaff' className={`modal ${active}`}>
@@ -241,32 +251,64 @@ class App extends React.Component {
                       </span>
                     </div>
                   </div>
-                  {!activeCashier
-                    ? null
-                    : <div>
-                      <div className='container'>
-                        <form autoComplete='off' onSubmit={this.verifyStaff.bind(this)}>
-                          <p className='control is-fullwidth'>
-                            <input id='staffPassword' autoComplete='off'
-                              className='input is-large' type='password'
-                              placeholder={intl.formatMessage({ id: 'app.ph.enterPassword' })} />
-                          </p>
-                        </form>
-                        <hr />
-                      </div>
-                      <div className='columns'>
-                        <p className='column is-6 is-offset-3'>
-                          <a className='button is-large is-fullwidth is-success'
-                            onClick={this.verifyStaff.bind(this)} >
-                            <FormattedMessage id='app.button.verify' />
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                  }
                 </div>
               </div>
             }
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderVerifyStorePinCode () {
+    const {intl, activeModalId, error, errorMessage, isProcessing} = this.props
+    const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
+    return (
+      <div id='verifyStorePin' className={`modal ${active}`}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <div className='modal-card-title is-marginless has-text-centered'>
+              <h1 className='title'><FormattedMessage id='app.general.storePin' /></h1>
+            </div>
+            <button className='delete' onClick={this.close.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content'>
+              {!error
+                ? null
+                : <p className='subtitle'>
+                  {errorMessage}
+                </p>
+              }
+              <p className='subtitle'>
+                <FormattedMessage id='app.general.updateCD' />
+                <a onClick={this.openCashdrawerModal.bind(this)}>
+                  <FormattedMessage id='app.button.clickHere' />
+                </a>
+              </p>
+              <div className='control is-expanded'>
+                <form autoComplete={false} onSubmit={this.onClickVerifyPin.bind(this)}>
+                  <input id='storePinCode' className='input is-large' type='password'
+                    placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
+                </form>
+              </div>
+              <div className='columns'>
+                <div className='column is-6 is-offset-3'>
+                  {!isProcessing
+                    ? <a className='button is-large is-fullwidth is-success'
+                      onClick={this.onClickVerifyPin.bind(this)}>
+                      <FormattedMessage id='app.button.verify' />
+                    </a>
+                    : <a className='button is-large is-fullwidth is-success is-disabled'>
+                      <p className='has-text-centered'>
+                        <i className='fa fa-spinner fa-pulse fa-fw' />
+                      </p>
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -302,6 +344,7 @@ class App extends React.Component {
           ? this.chooseUserModal()
           : null
         }
+        {this.renderVerifyStorePinCode()}
       </div>
     )
   }

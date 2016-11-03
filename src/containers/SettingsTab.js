@@ -24,7 +24,6 @@ import {
   customersSetActiveId,
   customersSetContactFilter,
   setSettingsActiveTab,
-  verifyStorePin,
   resetSettingsState,
   updateCustomerShow,
   updateCustomer
@@ -592,77 +591,9 @@ class SettingsTab extends Component {
     )
   }
 
-  onClickVerifyPin (event) {
-    event.preventDefault()
-    const {dispatch, storeId, activeCashier, staff} = this.props
-    let query = {
-      query: {
-        store: storeId,
-        pinCode: document.getElementById('storePinCode').value
-      }
-    }
-    let staffName = !activeCashier ? staff : activeCashier
-    dispatch(verifyStorePin(query, staffName))
-  }
-
   openCashdrawerModal () {
     const {dispatch} = this.props
     dispatch(setActiveModal('updateCashDrawer'))
-  }
-
-  renderVerifyStorePinCode () {
-    const {intl, activeModalId, error, errorMessage, isProcessing} = this.props
-    const active = activeModalId === 'verifyStorePin' ? 'is-active' : ''
-    return (
-      <div id='verifyStorePin' className={`modal ${active}`}>
-        <div className='modal-background' />
-        <div className='modal-card'>
-          <header className='modal-card-head'>
-            <div className='modal-card-title is-marginless has-text-centered'>
-              <h1 className='title'><FormattedMessage id='app.general.storePin' /></h1>
-            </div>
-            <button className='delete' onClick={this.onClickCloseModal.bind(this)} />
-          </header>
-          <div className='modal-card-body'>
-            <div className='content'>
-              {!error
-                ? null
-                : <p className='subtitle'>
-                  {errorMessage}
-                </p>
-              }
-              <p className='subtitle'>
-                <FormattedMessage id='app.general.updateCD' />
-                <a onClick={this.openCashdrawerModal.bind(this)}>
-                  <FormattedMessage id='app.button.clickHere' />
-                </a>
-              </p>
-              <div className='control is-expanded'>
-                <form autoComplete={false} onSubmit={this.onClickVerifyPin.bind(this)}>
-                  <input id='storePinCode' className='input is-large' type='password'
-                    placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
-                </form>
-              </div>
-              <div className='columns'>
-                <div className='column is-6 is-offset-3'>
-                  {!isProcessing
-                    ? <a className='button is-large is-fullwidth is-success'
-                      onClick={this.onClickVerifyPin.bind(this)}>
-                      <FormattedMessage id='app.button.verify' />
-                    </a>
-                    : <a className='button is-large is-fullwidth is-success is-disabled'>
-                      <p className='has-text-centered'>
-                        <i className='fa fa-spinner fa-pulse fa-fw' />
-                      </p>
-                    </a>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   render () {
@@ -686,7 +617,6 @@ class SettingsTab extends Component {
       <div className='is-fullheight'>
         {visibleContent}
         {this.renderOrderSearchModal()}
-        {this.renderVerifyStorePinCode()}
       </div>
     )
   }

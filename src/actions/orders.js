@@ -5,7 +5,14 @@ export const ORDER_STATE_RESET = 'ORDER_STATE_RESET'
 export const TEMPORARY_RECEIPT_DATA = 'TEMPORARY_RECEIPT_DATA'
 export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 
-import { addCashdrawerOpenCount } from './application'
+import {
+  addCashdrawerOpenCount,
+  setActiveModal
+ } from './application'
+
+import {
+  afterOrderProcessed
+} from './helpers'
 
 import ordersService from '../services/orders'
 import print from '../utils/printReceipt/print'
@@ -50,6 +57,7 @@ export function orderStateReset () {
 
 export function processOrder (orderInfo, receipt, staff) {
   return (dispatch) => {
+    dispatch(setActiveModal('orderProcessing'))
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
@@ -65,10 +73,12 @@ export function processOrder (orderInfo, receipt, staff) {
           staff,
           orderId: order.id
         },
+        // trans: Object.assign(receipt.trans),
         trans: Object.assign(receipt.trans, newPoints),
         headerText: receipt.headerText,
         footerText: receipt.footerText
       }
+      dispatch(afterOrderProcessed())
       dispatch(temporaryReceiptData(newReceipt))
       if (order.id) {
         print(newReceipt)
@@ -88,6 +98,7 @@ export function processOrder (orderInfo, receipt, staff) {
     })
     .catch(error => {
       dispatch(orderFailure(error))
+      dispatch(afterOrderProcessed())
     })
   }
 }

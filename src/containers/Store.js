@@ -6,41 +6,13 @@ import PanelProducts from './PanelProducts'
 import PanelCart from './PanelCart'
 import PanelCheckout from './PanelCheckout'
 
-import { fetchAllProducts } from '../actions/products'
-import { fetchCustomers } from '../actions/customers'
-import {
-  setActiveModal
-} from '../actions/application'
+import { storeGetDailyData } from '../actions/application'
 
 class Store extends Component {
 
-  componentDidUpdate () {
-    const { activeCashier, activeCashdrawer, activeModalId } = this.props
-    if (!activeCashdrawer || activeCashdrawer.initialAmount > 0) {
-      if (activeModalId === '' || !activeModalId) {
-        if (activeCashier) {
-          document.getElementById('productsSearch').focus()
-        }
-      }
-    }
-  }
-
-  componentWillMount () {
-    const {
-      dispatch,
-      locale,
-      productsById,
-      productsFilter
-    } = this.props
-    if (!productsById) {
-      dispatch(fetchAllProducts(locale, productsFilter))
-      dispatch(fetchCustomers())
-    }
-  }
-
-  close () {
-    const {dispatch} = this.props
-    dispatch(setActiveModal(''))
+  componentDidMount () {
+    const {dispatch, storeId, cashdrawer} = this.props
+    dispatch(storeGetDailyData(storeId, cashdrawer))
   }
 
   renderDisabledStore () {
@@ -82,8 +54,6 @@ class Store extends Component {
       customersById,
       cartItemsArray,
       productsAreFetching,
-      productsArray,
-      productsById,
       items, // ordersOnHold,
       staff,
       storeId
@@ -93,31 +63,27 @@ class Store extends Component {
         <div className='hero-body' style={{padding: 0}}>
           <div className='content'>
             <div className='tile is-ancestor is-fullwidth'>
-              <div className='tile is-parent is-6'>
+              <div className='tile is-parent is-6 is-vertical'>
                 <div className='tile is-child'>
+                  <PanelCart
+                    locale={locale}
+                    activeModalId={activeModalId}
+                    cartItemsArray={cartItemsArray}
+                    customersArefetching={customersArefetching}
+                    customersArray={customersArray}
+                    customersById={customersById}
+                    ordersOnHold={items} />
+                </div>
+                <div className='tile is-child' style={{maxHeight: 50}}>
                   <PanelProducts
                     locale={locale}
                     productsAreFetching={productsAreFetching}
-                    productsArray={productsArray}
-                    productById={productsById}
                     staff={staff}
                     storeId={storeId}
                     />
                 </div>
               </div>
               <div className='tile is-parent is-vertical'>
-                <div>
-                  <div className='tile is-child'>
-                    <PanelCart
-                      locale={locale}
-                      activeModalId={activeModalId}
-                      cartItemsArray={cartItemsArray}
-                      customersArefetching={customersArefetching}
-                      customersArray={customersArray}
-                      customersById={customersById}
-                      ordersOnHold={items} />
-                  </div>
-                </div>
                 <div>
                   <div className='tile is-child'>
                     <PanelCheckout
@@ -135,11 +101,11 @@ class Store extends Component {
   }
 
   render () {
-    const {adminToken} = this.props
+    const {activeCashier} = this.props
     return (
       <div>
         {
-          !adminToken
+          !activeCashier
           ? this.renderDisabledStore()
           : this.renderStore()
         }
@@ -168,6 +134,7 @@ function mapStateToProps (state) {
     cartItemsArray: state.panelCart.items,
     staff: state.application.staff.data,
     storeId: state.application.storeId,
+    store: state.application.store,
     intl: state.intl
   }
 }

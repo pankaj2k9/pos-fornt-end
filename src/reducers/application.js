@@ -6,9 +6,12 @@ import {
   SET_STAFF_LOGGED_IN,
   ADD_CASHDRAWER_DATA,
   ADD_CASHDRAWER_OPENCOUNT,
-  SET_CASHDRAWER_REQUEST,
-  SET_CASHDRAWER_SUCCESS,
-  SET_CASHDRAWER_FAILURE,
+  VALIDATE_STOREPIN_REQUEST,
+  VALIDATE_STOREPIN_SUCCESS,
+  VALIDATE_STOREPIN_FAILURE,
+  UPDATE_CASHDRAWER_REQUEST,
+  UPDATE_CASHDRAWER_SUCCESS,
+  UPDATE_CASHDRAWER_FAILURE,
   SET_ACTIVE_CASHDRAWER,
   SET_CASHIER_LOGGED_IN,
   STORE_GET_IDS_REQUEST,
@@ -19,6 +22,12 @@ import {
   AUTH_STAFF_SUCCESS,
   AUTH_STAFF_REQUEST,
   AUTH_STAFF_FAILURE,
+  DAILYDATA_FETCH_REQUEST,
+  DAILYDATA_FETCH_SUCCESS,
+  DAILYDATA_FETCH_FAILURE,
+  DAILYDATA_CREATE_REQUEST,
+  DAILYDATA_CREATE_SUCCESS,
+  DAILYDATA_CREATE_FAILURE,
   RESET_STAFF_STATE,
   RESET_ERROR_STATE,
   RESET_APP_STATE
@@ -66,7 +75,7 @@ function application (state = {
         })
         if (existing.length) {
           var key = toUpdate.indexOf(existing[0])
-          toUpdate[key].openCount += 1
+          toUpdate[key].cashDrawerOpenCount += 1
           updatedCount = toUpdate[key]
         }
       })
@@ -76,18 +85,33 @@ function application (state = {
         shouldUpdate: false,
         error: null
       })
-    case SET_CASHDRAWER_REQUEST:
+    case VALIDATE_STOREPIN_REQUEST:
       return Object.assign({}, state, {
         shouldUpdate: true,
         error: null
       })
-    case SET_CASHDRAWER_SUCCESS:
+    case VALIDATE_STOREPIN_SUCCESS:
+      return Object.assign({}, state, {
+        shouldUpdate: false,
+        error: null
+      })
+    case VALIDATE_STOREPIN_FAILURE:
+      return Object.assign({}, state, {
+        shouldUpdate: false,
+        error: action.error
+      })
+    case UPDATE_CASHDRAWER_REQUEST:
+      return Object.assign({}, state, {
+        shouldUpdate: true,
+        error: null
+      })
+    case UPDATE_CASHDRAWER_SUCCESS:
       let output = state.cashdrawer
       let newData = [{
-        source: state.activeCashdrawer.source,
+        storeId: state.activeCashdrawer.storeId,
         date: state.activeCashdrawer.date,
-        openCount: state.activeCashdrawer.openCount + 1,
-        initialAmount: action.data.amount
+        cashDrawerOpenCount: state.activeCashdrawer.cashDrawerOpenCount + 1,
+        float: action.data.amount
       }]
       let newActiveCD
       newData.forEach(function (newData) {
@@ -96,8 +120,8 @@ function application (state = {
         })
         if (existing.length) {
           var key = output.indexOf(existing[0])
-          output[key].openCount = newData.openCount
-          output[key].initialAmount = newData.initialAmount
+          output[key].cashDrawerOpenCount = newData.cashDrawerOpenCount
+          output[key].float = newData.float
           newActiveCD = output[key]
         }
       })
@@ -107,7 +131,7 @@ function application (state = {
         shouldUpdate: false,
         error: null
       })
-    case SET_CASHDRAWER_FAILURE:
+    case UPDATE_CASHDRAWER_FAILURE:
       return Object.assign({}, state, {
         shouldUpdate: false,
         error: action.error
@@ -164,6 +188,34 @@ function application (state = {
         adminToken: action.token
       })
     case AUTH_STAFF_FAILURE:
+      return Object.assign({}, state, {
+        shouldUpdate: false,
+        error: action.error
+      })
+    case DAILYDATA_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        shouldUpdate: true
+      })
+    case DAILYDATA_FETCH_SUCCESS:
+      return Object.assign({}, state, {
+        shouldUpdate: false,
+        cashdrawer: action.storeDailyData
+      })
+    case DAILYDATA_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        shouldUpdate: false,
+        error: action.error
+      })
+    case DAILYDATA_CREATE_REQUEST:
+      return Object.assign({}, state, {
+        shouldUpdate: true
+      })
+    case DAILYDATA_CREATE_SUCCESS:
+      return Object.assign({}, state, {
+        shouldUpdate: false,
+        activeCashdrawer: action.data
+      })
+    case DAILYDATA_CREATE_FAILURE:
       return Object.assign({}, state, {
         shouldUpdate: false,
         error: action.error

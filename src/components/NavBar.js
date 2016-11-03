@@ -51,7 +51,7 @@ const NavBar = ({
               </span>
               {staff.role === 'master'
                 ? <div>
-                  {adminToken === null
+                  {!activeCashier
                     ? <a className={`button is-light is-outlined ${isLoggingOut
                       ? 'is-loading' : null}`} onClick={openChooseUser}>
                       <span><FormattedMessage id='app.button.logCashier' /></span>
@@ -85,9 +85,9 @@ const NavBar = ({
             <span className='nav-item' style={{ paddingRight: 10 }}>
               <a className={`button is-light is-outlined ${isLoggingOut
                 ? 'is-loading' : null}`}
-                onClick={adminToken === null ? onLogout : onLogoutCashier}>
+                onClick={!activeCashier ? onLogout : onLogoutCashier}>
                 <span>
-                  {adminToken === null
+                  {!activeCashier
                   ? <FormattedMessage id='app.button.logout' />
                   : <FormattedMessage id='app.button.logoutCashier' />
                   }

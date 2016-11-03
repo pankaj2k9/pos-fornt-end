@@ -1,6 +1,7 @@
 import { browserHistory } from 'react-router'
 
 import storesService from '../services/stores'
+import dailyDataService from '../services/dailyData'
 import authStaffService from '../services/authStaff'
 import noSalesService from '../services/noSales'
 
@@ -126,29 +127,6 @@ export function addCashdrawerOpenCount () {
   }
 }
 
-export const SET_CASHDRAWER_REQUEST = 'SET_CASHDRAWER_REQUEST'
-export function setCashdrawerRequest () {
-  return {
-    type: SET_CASHDRAWER_REQUEST
-  }
-}
-
-export const SET_CASHDRAWER_SUCCESS = 'SET_CASHDRAWER_SUCCESS'
-export function setCashdrawerSuccess (data) {
-  return {
-    type: SET_CASHDRAWER_SUCCESS,
-    data
-  }
-}
-
-export const SET_CASHDRAWER_FAILURE = 'SET_CASHDRAWER_FAILURE'
-export function setCashdrawerFailure (error) {
-  return {
-    type: SET_CASHDRAWER_FAILURE,
-    error
-  }
-}
-
 export const SET_ACTIVE_CASHDRAWER = 'SET_ACTIVE_CASHDRAWER'
 export function setActiveCashdrawer (cashdrawer) {
   return {
@@ -157,10 +135,72 @@ export function setActiveCashdrawer (cashdrawer) {
   }
 }
 
+export const VALIDATE_STOREPIN_REQUEST = 'VALIDATE_STOREPIN_REQUEST'
+export const VALIDATE_STOREPIN_SUCCESS = 'VALIDATE_STOREPIN_SUCCESS'
+export const VALIDATE_STOREPIN_FAILURE = 'VALIDATE_STOREPIN_FAILURE'
+
+export function validateStorepinRequest () {
+  return {
+    type: VALIDATE_STOREPIN_REQUEST
+  }
+}
+
+export function validateStorepinSuccess (data) {
+  return {
+    type: VALIDATE_STOREPIN_SUCCESS,
+    data
+  }
+}
+
+export function validateStorepinFailure (error) {
+  return {
+    type: VALIDATE_STOREPIN_FAILURE,
+    error
+  }
+}
+
 export function validateAndUpdateCashdrawer (query, staff, data) {
   return (dispatch) => {
-    dispatch(setCashdrawerRequest(data))
+    dispatch(validateStorepinRequest())
     return noSalesService.find(query)
+      .then(response => {
+        dispatch(updateCashDrawer(staff, data))
+      })
+      .catch(error => {
+        document.getElementById('storePinCode2').value = ''
+        dispatch(validateStorepinFailure(error.message))
+      })
+  }
+}
+
+export const UPDATE_CASHDRAWER_REQUEST = 'UPDATE_CASHDRAWER_REQUEST'
+export const UPDATE_CASHDRAWER_SUCCESS = 'UPDATE_CASHDRAWER_SUCCESS'
+export const UPDATE_CASHDRAWER_FAILURE = 'UPDATE_CASHDRAWER_FAILURE'
+
+export function updateCashDrawerRequest () {
+  return {
+    type: UPDATE_CASHDRAWER_REQUEST
+  }
+}
+
+export function updateCashDrawerSuccess (data) {
+  return {
+    type: UPDATE_CASHDRAWER_SUCCESS,
+    data
+  }
+}
+
+export function updateCashDrawerFailure (error) {
+  return {
+    type: UPDATE_CASHDRAWER_FAILURE,
+    error
+  }
+}
+
+export function updateCashDrawer (staff, data) {
+  return (dispatch) => {
+    dispatch(updateCashDrawerRequest())
+    return dailyDataService.patch(data)
       .then(response => {
         const receipt = {
           info: {
@@ -170,12 +210,12 @@ export function validateAndUpdateCashdrawer (query, staff, data) {
           footerText: ['No sales']
         }
         print(receipt)
-        dispatch(setActiveModal(''))
-        dispatch(setCashdrawerSuccess(data))
+        dispatch(closeActiveModal())
+        dispatch(updateCashDrawerSuccess(data))
       })
       .catch(error => {
         document.getElementById('storePinCode2').value = ''
-        dispatch(setCashdrawerFailure(error.message))
+        dispatch(updateCashDrawerFailure(error.message))
       })
   }
 }
@@ -209,6 +249,95 @@ export function storeGetIds () {
       })
       .catch(error => {
         dispatch(storeGetIdsFailure(error))
+      })
+  }
+}
+
+export const DAILYDATA_CREATE_REQUEST = 'DAILYDATA_CREATE_REQUEST'
+export const DAILYDATA_CREATE_SUCCESS = 'DAILYDATA_CREATE_SUCCESS'
+export const DAILYDATA_CREATE_FAILURE = 'DAILYDATA_CREATE_FAILURE'
+export function dailyDataCreateRequest () {
+  return { type: DAILYDATA_CREATE_REQUEST }
+}
+export function dailyDataCreateSuccess (data) {
+  return { type: DAILYDATA_CREATE_SUCCESS, data }
+}
+export function dailyDataCreateFailure (error) {
+  return { type: DAILYDATA_CREATE_FAILURE, error }
+}
+
+export function createDailyData (storeId, dailyData) {
+  return (dispatch) => {
+    dispatch(dailyDataCreateRequest())
+    let initial = {
+      storeId: storeId,
+      date: new Date().toISOString().slice(0, 10),
+      cashDrawerOpenCount: 0,
+      float: 0
+    }
+    return dailyDataService.create(dailyData || initial)
+      .then(response => {
+        dispatch(dailyDataCreateSuccess(response))
+        dispatch(setActiveCashdrawer(response))
+      })
+      .catch(error => {
+        dispatch(dailyDataCreateFailure(error))
+      })
+  }
+}
+
+export const DAILYDATA_FETCH_REQUEST = 'DAILYDATA_FETCH_REQUEST'
+export const DAILYDATA_FETCH_SUCCESS = 'DAILYDATA_FETCH_SUCCESS'
+export const DAILYDATA_FETCH_FAILURE = 'DAILYDATA_FETCH_FAILURE'
+export function dailyDataFetchDataRequest () {
+  return { type: DAILYDATA_FETCH_REQUEST }
+}
+
+export function dailyDataFetchDataSuccess (storeDailyData) {
+  return { type: DAILYDATA_FETCH_SUCCESS, storeDailyData }
+}
+
+export function dailyDataFetchDataFailure (error) {
+  return { type: DAILYDATA_FETCH_FAILURE, error }
+}
+
+export function storeGetDailyData (storeId, cashdrawer) {
+  return (dispatch) => {
+    dispatch(dailyDataFetchDataRequest())
+    let query = {
+      query: { storeId: storeId }
+    }
+    function validateCashdrawer (data) {
+      let matchedDrawer
+      data.find(function (drawer) {
+        let date1 = new Date(drawer.date).toISOString().slice(0, 10)
+        let date2 = new Date().toISOString().slice(0, 10)
+        if (date1 === date2) {
+          matchedDrawer = drawer
+        }
+      })
+      if (!matchedDrawer) {
+        dispatch(createDailyData(storeId))
+        dispatch(setActiveModal('updateCashDrawer'))
+      } else {
+        dispatch(setActiveCashdrawer(matchedDrawer))
+        if (matchedDrawer.initialAmount === 0) {
+          dispatch(setActiveModal('updateCashDrawer'))
+        }
+      }
+    }
+    return dailyDataService.find(query)
+      .then(response => {
+        // set store id with the first item
+        if (response.data.length > 0) {
+          validateCashdrawer(response.data)
+          dispatch(dailyDataFetchDataSuccess(response.data))
+        } else if (response.data.length === 0) {
+          validateCashdrawer(cashdrawer)
+        }
+      })
+      .catch(error => {
+        dispatch(dailyDataFetchDataFailure(error))
       })
   }
 }

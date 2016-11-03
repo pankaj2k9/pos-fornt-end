@@ -26,6 +26,7 @@ import {
 
 import {
   closeActiveModal,
+  setActiveModal,
   addCashdrawerOpenCount,
   resetAppState
 } from './application'
@@ -36,7 +37,8 @@ import {
 } from './orders'
 
 import {
-  resetSettingsState
+  resetSettingsState,
+  customersSetSearchKey
 } from './settings'
 
 import print from '../utils/printReceipt/print'
@@ -76,6 +78,13 @@ export function resetCheckoutModal () {
   }
 }
 
+export function afterOrderProcessed () {
+  return (dispatch) => {
+    dispatch(closeActiveModal())
+    dispatch(setActiveModal('orderProcessed'))
+  }
+}
+
 export function holdOrderAndReset (orderData) {
   return (dispatch) => {
     dispatch(holdOrder(orderData))
@@ -97,7 +106,15 @@ export function recallOrderOnHold (dispatch, cartData, key) {
       cartData.totalOdboPrice)
     )
     dispatch(recallOrder(key))
-    dispatch(closeActiveModal(''))
+    dispatch(closeActiveModal())
+    document.getElementById('productsSearch').focus()
+  }
+}
+
+export function setActiveCustomerAndFocus (dispatch, customer, key) {
+  return () => {
+    dispatch(setActiveCustomer(customer))
+    dispatch(closeActiveModal())
     document.getElementById('productsSearch').focus()
   }
 }
@@ -120,6 +137,14 @@ export function closeAndResetRecallModal (dispatch) {
   return () => {
     dispatch(closeActiveModal())
     dispatch(setOrderSearchKey(''))
+    document.getElementById('productsSearch').focus()
+  }
+}
+
+export function closeAndResetCustomerModal (dispatch) {
+  return () => {
+    dispatch(closeActiveModal())
+    dispatch(customersSetSearchKey(null))
     document.getElementById('productsSearch').focus()
   }
 }

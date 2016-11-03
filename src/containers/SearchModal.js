@@ -6,49 +6,75 @@ import { FormattedMessage, FormattedDate, FormattedTime } from 'react-intl'
 import SearchBar from '../components/SearchBar'
 import Level from '../components/Level'
 import Truncate from '../components/Truncate'
+import Dropdown from '../components/Dropdown'
 
 import {
   storeOrderFetch,
   storeOrdersSetSearchKey,
-  reprintingReceipt
+  reprintingReceipt,
+  customersSetFilter
 } from '../actions/settings'
 
 import {
   refund
 } from '../actions/refund'
 
+import {
+  searchCustomer
+} from '../actions/helpers'
+
 import print from '../utils/printReceipt/print'
 
 const List = (props) => {
-  const {dispatch, items, listButton} = props
+  const {dispatch, items, listButton, id, isFetching} = props
   return (
-    <table className='table'>
-      <tbody>
-        {
-          items.map(function (item, key) {
-            let cartData = item
-            return (
-              <tr key={key}>
-                <td>
-                  {item.activeCustomer !== null || undefined
-                    ? <div><strong>{item.activeCustomer.firstName}</strong><br /><p>member</p></div>
-                    : item.walkinCustomer === ''
-                      ? <p><strong>No Name</strong><br />Walk-in Customer</p>
-                      : <p><strong>{item.walkinCustomer}</strong><br />Walk-in Customer</p>
-                  }
-                </td>
-                <td><p><strong>{item.cartItemsArray.length}</strong><br />cart items</p></td>
-                <td className='is-icon'>
-                  <a className='button is-medium' onClick={listButton.event(dispatch, cartData, key)}>
-                    {listButton.name}
-                  </a>
-                </td>
-              </tr>
-            )
-          }, this)
-        }
-      </tbody>
-    </table>
+    <div>
+      {id === 'searchOdboUser'
+        ? !isFetching
+          ? null
+          : <div className='container has-text-centered'>
+            <i className='fa fa-spinner fa-pulse fa-5x fa-fw' />
+            <h1>Searching ODBO Users...</h1>
+          </div>
+        : null
+      }
+      <table className='table'>
+        <tbody>
+          {
+            items.map(function (item, key) {
+              let data = item
+              return (
+                id === 'searchOdboUser'
+                ? <tr key={key}>
+                  <td>{<div><strong>{item.firstName}</strong><br /><p>[{item.membership}] member</p></div>}</td>
+                  <td><p><strong>{item.odboCoins}</strong><br />coins</p></td>
+                  <td className='is-icon'>
+                    <a className='button is-medium' onClick={listButton.event(dispatch, data, key)}>
+                      {listButton.name}
+                    </a>
+                  </td>
+                </tr>
+                : <tr key={key}>
+                  <td>
+                    {item.activeCustomer !== null || undefined
+                      ? <div><strong>{item.activeCustomer.firstName}</strong><br /><p>member</p></div>
+                      : item.walkinCustomer === ''
+                        ? <p><strong>No Name</strong><br />Walk-in Customer</p>
+                        : <p><strong>{item.walkinCustomer}</strong><br />Walk-in Customer</p>
+                    }</td>
+                  <td><p><strong>{item.cartItemsArray.length}</strong><br />cart items</p></td>
+                  <td className='is-icon'>
+                    <a className='button is-medium' onClick={listButton.event(dispatch, data, key)}>
+                      {listButton.name}
+                    </a>
+                  </td>
+                </tr>
+              )
+            }, this)
+          }
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -155,6 +181,42 @@ class SearchModal extends Component {
     dispatch(storeOrderFetch(orderSearchKey))
   }
 
+  _setCustomerFilter (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetFilter(value))
+  }
+
+  _searchCustomer (event) {
+    event.preventDefault()
+    const {dispatch, filter, search} = this.props
+    let customerSearchKey = search.value
+    let query
+    switch (filter) {
+      case 'last name':
+        query = {
+          query: { lastName: { $like: `%${customerSearchKey}%` } }
+        }
+        break
+      case 'first name':
+        query = {
+          query: { firstName: { $like: `%${customerSearchKey}%` } }
+        }
+        break
+      case 'odbo id':
+        query = {
+          query: { odboID: Number(customerSearchKey) }
+        }
+        break
+      case 'phone number':
+        query = {
+          query: { phoneNumber: { $like: `%${customerSearchKey}%` } }
+        }
+        break
+      default:
+    }
+    dispatch(searchCustomer(query))
+  }
+
   onClickOption (event) {
     event.preventDefault()
     const {dispatch, orderSearchKey, type, details} = this.props
@@ -180,15 +242,27 @@ class SearchModal extends Component {
       closeButton,
       listButton,
       modalStatus,
-      processing
+      processing,
+      filter,
+      isFetching
     } = this.props
 
     return (
       <div id={id} className={'modal ' + (active === id ? 'is-active' : '')}>
         <div className='modal-background' />
         <div className='modal-card'>
-          <header className='modal-card-head' style={{padding: 15}}>
-            <div style={{flex: 1}}>
+          <header className='modal-card-head columns is-marginless' style={{padding: 5}}>
+            {id === 'searchOdboUser'
+              ? <div className='column is-4'>
+                <Dropdown
+                  value={filter}
+                  size='is-medium'
+                  options={['odbo id', 'phone number', 'first name', 'last name']}
+                  onChange={this._setCustomerFilter.bind(this)} />
+              </div>
+              : null
+            }
+            <div className={id === 'searchOdboUser' ? 'column is-8' : 'column is-12'}>
               {displayData === 'details'
                 ? <SearchBar
                   id='orderSearch'
@@ -203,9 +277,13 @@ class SearchModal extends Component {
                 />
                 : <SearchBar
                   id='orderSearch'
+                  size='is-medium'
                   value={search.value}
                   placeholder={search.placeholder}
                   onChange={this.orderSearchKeyInput.bind(this)}
+                  confirmButton={id === 'searchOdboUser' ? <i className='fa fa-search' /> : undefined}
+                  onSubmit={id === 'searchOdboUser' ? this._searchCustomer.bind(this) : undefined}
+                  confirmEvent={id === 'searchOdboUser' ? this._searchCustomer.bind(this) : undefined}
                 />
               }
             </div>
@@ -214,7 +292,7 @@ class SearchModal extends Component {
             {displayData === 'details'
               ? <Details type={type} details={details} status={modalStatus}
                 processing={processing} onClickOption={this.onClickOption.bind(this)} />
-              : <List items={items} dispatch={dispatch} listButton={listButton} />
+              : <List id={id} items={items} dispatch={dispatch} listButton={listButton} isFetching={isFetching} />
             }
           </section>
           <footer className='modal-card-foot'>
@@ -268,7 +346,8 @@ SearchModal.PropTypes = {
   modalStatus: PropTypes.object,
   processing: PropTypes.bool,
   storeDetails: PropTypes.object,
-  inputPh: PropTypes.string
+  inputPh: PropTypes.string,
+  isFetching: PropTypes.bool
 }
 
 export default connect()(SearchModal)

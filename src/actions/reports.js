@@ -1,5 +1,6 @@
 import reportsService from '../services/reports'
 import ordersService from '../services/orders'
+import printBills from '../utils/printBills/print'
 
 export const REPORTS_SET_TAB = 'REPORTS_SET_TAB'
 export function reportsSetTab (tab) {
@@ -103,3 +104,118 @@ export function storeOrdersFetch (params) {
       })
   }
 }
+
+export const VIEW_BILLS_CH_TYPE = 'VIEW_BILLS_CH_TYPE'
+export function changeReportType (reportType) {
+  return { type: VIEW_BILLS_CH_TYPE, reportType }
+}
+
+export const VIEW_BILLS_CH_DATEPICKER_TO = 'VIEW_BILLS_CH_DATEPICKER_TO'
+export function changeDatepickerTo (date) {
+  return { type: VIEW_BILLS_CH_DATEPICKER_TO, date }
+}
+export const VIEW_BILLS_CH_DATEPICKER_FR = 'VIEW_BILLS_CH_DATEPICKER_FR'
+export function changeDatepickerFr (date) {
+  return { type: VIEW_BILLS_CH_DATEPICKER_FR, date }
+}
+
+export const VIEW_BILLS_CH_INPUT_IDTO = 'VIEW_BILLS_CH_INPUT_IDTO'
+export function changeInputIdTo (value) {
+  return { type: VIEW_BILLS_CH_INPUT_IDTO, value }
+}
+export const VIEW_BILLS_CH_INPUT_IDFR = 'VIEW_BILLS_CH_INPUT_IDFR'
+export function changeInputIdFr (value) {
+  return { type: VIEW_BILLS_CH_INPUT_IDFR, value }
+}
+
+export const VIEW_BILLS_STORE_ORDERS = 'VIEW_BILLS_STORE_ORDERS'
+export function viewBillsStoreOrders (response) {
+  return { type: VIEW_BILLS_STORE_ORDERS, response }
+}
+export const VIEW_BILLS_FETCH_REQUEST = 'VIEW_BILLS_FETCH_REQUEST'
+export const VIEW_BILLS_FETCH_SUCCESS = 'VIEW_BILLS_FETCH_SUCCESS'
+export const VIEW_BILLS_FETCH_FAILURE = 'VIEW_BILLS_FETCH_FAILURE'
+export function viewBillsFetchRequest () {
+  return { type: VIEW_BILLS_FETCH_REQUEST }
+}
+export function viewBillsFetchSuccess () {
+  return { type: VIEW_BILLS_FETCH_SUCCESS }
+}
+export function viewBillsFetchFailure (error) {
+  return { type: VIEW_BILLS_FETCH_FAILURE, error }
+}
+export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) {
+  return (dispatch) => {
+    dispatch(viewBillsFetchRequest())
+
+    const params = {
+      from: dateFrom,
+      to: dateTo,
+      idFrom,
+      idTo,
+      storeId: source,
+      stores,
+      eager: '[payments, staff, users, items, items.product]'
+    }
+
+    return ordersService.find(params)
+      .then(response => {
+        // Store first fetch
+        let allOrders = [...response.data]
+
+        const { total, data, limit } = response
+        const firstResponseCount = data.length
+        const goal = Number(total)
+
+        // If not all orders are fetched, run server queries until complete
+        if (goal > firstResponseCount) {
+          const firstLimit = limit
+          let ordersFetchArray = []
+          let newSkip = firstResponseCount
+
+          while (newSkip < goal) {
+            const nextParams = params
+
+            nextParams.limit = firstLimit
+            nextParams.skip = newSkip
+            newSkip += firstLimit
+
+            const ordersFetch = new Promise((resolve, reject) => {
+              return ordersService.find(nextParams)
+                .then((response) => { resolve(response) })
+                .catch(() => { reject('Failed fetching order') })
+            })
+            ordersFetchArray.push(ordersFetch)
+          }
+
+          // Run all order fetch
+          global.Promise.all(ordersFetchArray)
+            .then((response) => {
+              response.forEach((fetchResponse) => {
+                allOrders = [...allOrders, ...fetchResponse.data]
+              })
+
+              dispatch(viewBillsStoreOrders({ data: allOrders }))
+              dispatch(viewBillsFetchSuccess())
+              printBills({ orders: allOrders, stores })
+            })
+            .catch((error) => {
+              dispatch(viewBillsFetchFailure(error))
+            })
+        } else {
+          // End if all orders are fetched
+          dispatch(viewBillsFetchSuccess())
+          printBills({ orders: allOrders, stores })
+        }
+      })
+      .catch(error => {
+        dispatch(viewBillsFetchFailure(error))
+      })
+  }
+}
+
+export const OUTLET_STOCKS_CH_SOURCE = 'OUTLET_STOCKS_CH_SOURCE'
+export function outletStocksChSource (source) {
+  return { type: OUTLET_STOCKS_CH_SOURCE, source }
+}
+

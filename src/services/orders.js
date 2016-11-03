@@ -1,4 +1,5 @@
 import api from './api'
+import { buildOrderId } from '../utils/string'
 
 const ordersService = api.service('/orders')
 
@@ -8,17 +9,33 @@ const orders = {
   },
 
   find (params) {
-    const { storeId, to, from, limit, skip } = params
+    const { storeId, stores, to, from, idTo, idFrom, limit, skip, sort, eager } = params
+
+    const storeIds = stores.map((store) => { return store.source })
+    const storeIn = storeId ? [storeId] : storeIds
+
     const query = {
-      $sort: { dateOrdered: -1 },
-      $eager: '[users, items, items.product]',
-      source: storeId,
-      dateCreated: {
-        $lte: to,
-        $gte: from
+      $sort: sort || { dateOrdered: -1 },
+      $eager: eager || '[users, items, items.product, payments, vouchers]',
+      source: {
+        $in: storeIn
       },
       $limit: limit,
       $skip: skip
+    }
+
+    if (to && from) {
+      query.dateCreated = {
+        $lte: to,
+        $gte: from
+      }
+    }
+
+    if (idFrom && idTo) {
+      query.id = {
+        $gte: buildOrderId(storeId, idFrom, null, stores),
+        $lte: buildOrderId(storeId, idTo, null, stores)
+      }
     }
 
     return ordersService.find({ query })
