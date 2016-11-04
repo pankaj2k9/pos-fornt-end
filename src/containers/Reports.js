@@ -26,13 +26,13 @@ class Reports extends React.Component {
   onChangeDate (event) {
     event.preventDefault
     var selectedDate = event.toDate()
-    const { dispatch, store, activeTab, limit } = this.props
+    const { dispatch, store, activeTab, limit, completeSalesSource } = this.props
 
     let storeId = store.source
 
     dispatch(reportsSetDate(selectedDate))
     if (activeTab === 'completeSales') {
-      dispatch(completeSalesFetch(store.source, selectedDate))
+      dispatch(completeSalesFetch(completeSalesSource || store.source, selectedDate))
     } else if (activeTab === 'orders') {
       // get sales today
       const from = selectedDate
@@ -148,7 +148,8 @@ function mapStateToProps (state) {
     store: state.application.store,
     page: state.reports.storeOrders.page,
     limit: state.reports.storeOrders.limit,
-    skip: state.reports.storeOrders.skip
+    skip: state.reports.storeOrders.skip,
+    completeSalesSource: state.reports.completeSales.source
   }
 }
 

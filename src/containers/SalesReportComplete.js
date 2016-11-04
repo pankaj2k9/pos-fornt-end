@@ -5,13 +5,19 @@ import { FormattedMessage } from 'react-intl'
 import LoadingPane from '../components/LoadingPane'
 import StoresDropdown from '../components/StoresDropdown'
 import {
-  // completeSalesFetch,
+  completeSalesFetch,
   completeSalesChSource
 } from '../actions/reports'
 
 import printEODS from '../utils/printEODS/print'
 
 class SalesReportComplete extends React.Component {
+  componentWillMount () {
+    const { dispatch, storeId, selectedDate } = this.props
+
+    dispatch(completeSalesFetch(storeId, selectedDate))
+  }
+
   printEndOfDaySales () {
     let { completeSales, store, cashier } = this.props
     var drawerData = this.cashdrawerData()
@@ -53,53 +59,55 @@ class SalesReportComplete extends React.Component {
   }
 
   _handleSourceChange (event) {
-    const { dispatch } = this.props
+    const { dispatch, storeId, selectedDate } = this.props
 
     dispatch(completeSalesChSource(event.target.value))
+    dispatch(completeSalesFetch(event.target.value || storeId, selectedDate))
   }
 
   render () {
     const { isLoading, storeId, storeIds, selectedStore } = this.props
-    var drawerData = this.cashdrawerData()
+    // var drawerData = this.cashdrawerData()
 
     // Filter products by source
     const filterSource = selectedStore || storeId
 
-    return (
-      isLoading
-        ? <LoadingPane
-          headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
-        : <div>
-          <StoresDropdown
-            storeIds={storeIds}
-            selectedStore={filterSource}
-            onChange={this._handleSourceChange.bind(this)} />
+    return (isLoading
+      ? <LoadingPane
+        headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
+      : <div>
+        <StoresDropdown
+          storeIds={storeIds}
+          selectedStore={filterSource}
+          onChange={this._handleSourceChange.bind(this)} />
 
-          {drawerData
-            ? <div className='tile is-ancestor box'>
-              <div className='tile is-vertical is-8'>
-                <article className='tile is-child'>
-                  <p className='title' style={{maxWidth: 250}}>{'Print the summary of sales this day'}</p>
-                </article>
-              </div>
-              <div className='tile is-vertical is-4 has-text-centered'>
-                <article className='tile is-child'>
-                  <div className='content'>
-                    <button className='button is-success is-large'
-                      onClick={this.printEndOfDaySales.bind(this)}>
-                      Print Summary
-                    </button>
-                  </div>
-                </article>
-              </div>
+        {/*
+        {drawerData
+          ? <div className='tile is-ancestor box'>
+            <div className='tile is-vertical is-8'>
+              <article className='tile is-child'>
+                <p className='title' style={{maxWidth: 250}}>{'Print the summary of sales this day'}</p>
+              </article>
             </div>
-            : <div className='content box hero is-medium has-text-centered'>
-              <p className='title hero-body'>
-                <FormattedMessage id='app.page.reports.noData' />
-              </p>
+            <div className='tile is-vertical is-4 has-text-centered'>
+              <article className='tile is-child'>
+                <div className='content'>
+                  <button className='button is-success is-large'
+                    onClick={this.printEndOfDaySales.bind(this)}>
+                    Print Summary
+                  </button>
+                </div>
+              </article>
             </div>
-          }
-        </div>
+          </div>
+          : <div className='content box hero is-medium has-text-centered'>
+            <p className='title hero-body'>
+              <FormattedMessage id='app.page.reports.noData' />
+            </p>
+          </div>
+        }
+        */}
+      </div>
     )
   }
 }
@@ -121,7 +129,8 @@ function mapStateToProps (state) {
     cashInDrawer: state.application.activeCashdrawer.initialAmount,
     storeId: state.application.storeId,
     storeIds: state.application.storeIds,
-    selectedStore: state.reports.completeSales.source
+    selectedStore: state.reports.completeSales.source,
+    selectedDate: state.reports.date
   }
 }
 

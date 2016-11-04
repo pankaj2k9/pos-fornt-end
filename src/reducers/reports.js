@@ -180,7 +180,7 @@ function storeOrders (state, action) {
 
 function report (state = {
   activeTab: 'completeSales',
-  date: null,
+  date: new Date(),
   productSales: {
     isLoading: false,
     productSales: [],
@@ -253,7 +253,7 @@ function report (state = {
       })
     case REPORTS_STATE_RESET:
       return Object.assign({}, state, {
-        date: null,
+        date: new Date(),
         storeOrders: {
           isLoading: false,
           orderItems: [],
