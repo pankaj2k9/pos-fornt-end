@@ -46,7 +46,7 @@ export const printReceiptFromString = (receiptHtmlString) => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  // printWindow.document.close()
-  // printWindow.focus()
-  // printWindow.close()
+  printWindow.document.close()
+  printWindow.focus()
+  printWindow.close()
 }
