@@ -161,7 +161,7 @@ class ViewBills extends React.Component {
   }
 
   render () {
-    const { reportType, orders, stores } = this.props
+    const { reportType, orders, stores, isProcessing } = this.props
 
     return (
       <div className='tile is-ancestor'>
@@ -197,7 +197,7 @@ class ViewBills extends React.Component {
             }
 
             <div className='tile is-child'>
-              <button className='button is-primary'
+              <button className={`button is-primary${isProcessing ? ' is-loading' : ''}`}
                 onClick={this.handleSearchOrders}>
                 <FormattedMessage id='app.page.settings.process' />
               </button>
@@ -220,7 +220,15 @@ class ViewBills extends React.Component {
 }
 
 function mapStateToProps (state) {
-  const { from, to, idFrom, idTo, reportType, orders } = state.reports.viewBills
+  const {
+    from,
+    to,
+    idFrom,
+    idTo,
+    reportType,
+    orders,
+    isProcessing
+  } = state.reports.viewBills
 
   return {
     intl: state.intl,
@@ -231,7 +239,8 @@ function mapStateToProps (state) {
     idFrom,
     idTo,
     reportType,
-    orders
+    orders,
+    isProcessing
   }
 }
 

@@ -14,7 +14,7 @@ export const ReceiptRowNewLine = () => {
   return <span><br /><br /></span>
 }
 
-const ReceiptPreviewRow = ({cols, colType, rowType}) => {
+const ReceiptPreviewRow = ({cols, colType, rowType, keyPrefix}) => {
   const colCount = cols.length
 
   let rowClass = `row col${colCount || 1}`
@@ -25,8 +25,8 @@ const ReceiptPreviewRow = ({cols, colType, rowType}) => {
 
   return (
     <div className={rowClass}>
-      {cols.map((col) => {
-        return (<div className={colClass}>{col}</div>)
+      {cols.map((col, i) => {
+        return (<div key={`${keyPrefix}-${i}`} className={colClass}>{col}</div>)
       })}
     </div>
   )

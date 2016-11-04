@@ -1,6 +1,5 @@
 import reportsService from '../services/reports'
 import ordersService from '../services/orders'
-import printBills from '../utils/printBills/print'
 
 export const REPORTS_SET_TAB = 'REPORTS_SET_TAB'
 export function reportsSetTab (tab) {
@@ -197,7 +196,6 @@ export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) 
 
               dispatch(viewBillsStoreOrders({ data: allOrders }))
               dispatch(viewBillsFetchSuccess())
-              printBills({ orders: allOrders, stores })
             })
             .catch((error) => {
               dispatch(viewBillsFetchFailure(error))
@@ -206,7 +204,6 @@ export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) 
           // End if all orders are fetched
           dispatch(viewBillsStoreOrders({ data: allOrders }))
           dispatch(viewBillsFetchSuccess())
-          printBills({ orders: allOrders, stores })
         }
       })
       .catch(error => {

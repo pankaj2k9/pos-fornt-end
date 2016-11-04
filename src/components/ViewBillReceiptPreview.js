@@ -67,30 +67,44 @@ export default class ViewBillReceiptPreview extends React.Component {
               ? `${order.users.firstName} ${order.users.lastName}`.toUpperCase()
               : 'N/A'
             const itemCount = order.items.length
+            const keyPref = `rcptprev-vb-${order.id}-`
 
             return (
-              <span key={`vb-preview-${order.id}`}>
+              <span key={`${keyPref}${order.id}`}>
                 {/* Address */}
-                {addrList.map((addr) => {
-                  return <ReceiptPreviewRow cols={[addr]} />
+                {addrList.map((addr, i) => {
+                  const key = `${keyPref}addr-${i}`
+
+                  return <ReceiptPreviewRow
+                    key={key}
+                    keyPrefix={key}
+                    cols={[addr]} />
                 })}
 
                 {/* Customer name */}
-                <ReceiptPreviewRow cols={[`CUSTOMER: ${cust}`]} />
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}cust`}
+                  cols={[`CUSTOMER: ${cust}`]} />
                 <ReceiptRowDivider />
 
                 {/* Date and order ID */}
-                <ReceiptPreviewRow cols={[
-                  formatDate(new Date(order.dateOrdered), dateOptions),
-                  order.id
-                ]} />
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}date-id`}
+                  cols={[
+                    formatDate(new Date(order.dateOrdered), dateOptions),
+                    order.id
+                  ]} />
                 <ReceiptRowDivider />
 
                 {/* Items list */}
-                {order.items.map((item) => {
+                {order.items.map((item, i) => {
+                  const key = `${keyPref}item-${item.id || i}`
+
                   return (
-                    <span key={`vb-preview-item-${item.id}`} className='item'>
-                      <ReceiptPreviewRow cols={[item.product.nameEn]} />
+                    <span key={key} className='item'>
+                      <ReceiptPreviewRow
+                        keyPrefix={key}
+                        cols={[item.product.nameEn]} />
                       <ReceiptPreviewRow cols={[
                         item.product.barcodeInfo,
                         `${item.quantity}x`,
@@ -100,20 +114,30 @@ export default class ViewBillReceiptPreview extends React.Component {
                   )
                 })}
 
-                {/* Items list */}
-                <ReceiptPreviewRow cols={[
-                  `Total (${itemCount}) item${itemCount > 1 ? 's' : ''}.`
-                ]} />
+                {/* Items list info */}
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}item-list-info`}
+                  cols={[
+                    `Total (${itemCount}) item${itemCount === 1 ? '' : 's'}.`
+                  ]} />
                 <ReceiptRowDivider />
 
                 {/* Totals */}
-                <ReceiptPreviewRow cols={['Sub-TOTAL S$', order.subtotal]} />
-                <ReceiptPreviewRow cols={['TOTAL S$', order.total]} />
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}subtotal`}
+                  cols={['Sub-TOTAL S$', order.subtotal]} />
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}total`}
+                  cols={['TOTAL S$', order.total]} />
 
                 {/* Payments */}
-                <ReceiptPreviewRow cols={['PAYMENT(S):']} />
-                {order.payments.map((payment) => {
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}payments`}
+                  cols={['PAYMENT(S):']} />
+
+                {order.payments.map((payment, i) => {
                   let type = ''
+                  const key = `${keyPref}payment-${payment.id || i}`
 
                   // Figure out the type of payment
                   if (payment.provider && payment.type === 'debit') {
@@ -124,7 +148,10 @@ export default class ViewBillReceiptPreview extends React.Component {
                     type = payment.type && payment.type.toUpperCase()
                   }
 
-                  return <ReceiptPreviewRow cols={[type, payment.amount]} />
+                  return <ReceiptPreviewRow
+                    key={key}
+                    keyPrefix={key}
+                    cols={[type, payment.amount]} />
                 })}
 
                 <ReceiptRowDividerDbl />
