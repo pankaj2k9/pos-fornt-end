@@ -11,7 +11,9 @@ const orders = {
   find (params) {
     const { storeId, stores, to, from, idTo, idFrom, limit, skip, sort, eager } = params
 
-    const storeIds = stores.map((store) => { return store.source })
+    const storeIds = stores && stores.length
+      ? stores.map((store) => { return store.source })
+      : []
     const storeIn = storeId ? [storeId] : storeIds
 
     const query = {
