@@ -66,7 +66,6 @@ function panelCheckout (state = {
           return prev.type === payment.type
         })
         if (existing.length) {
-          console.log('existing', existing.length)
           var key = currentPayments.indexOf(existing[0])
           if (currentPayments[key].type === 'cash') {
             currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
@@ -82,7 +81,6 @@ function panelCheckout (state = {
             let vouchers = currentPayments[key].vouchers
             vouchers.push(action.payment.voucher)
             currentPayments[key].total = Number(currentPayments[key].total) + Number(action.payment.voucher.deduction)
-            console.log('vouchers', vouchers)
           }
         } else {
           currentPayments.push(action.payment)

@@ -37,7 +37,9 @@ function application (state = {
   cashdrawer: [],
   activeCashdrawer: null,
   activeModalId: null,
+  focusedInput: null,
   isHamburgerOpen: false,
+  isProcessing: false,
   isFetchingStoreIds: false,
   store: null,
   storeIds: [],
@@ -87,21 +89,25 @@ function application (state = {
       })
     case VALIDATE_STOREPIN_REQUEST:
       return Object.assign({}, state, {
+        isProcessing: true,
         shouldUpdate: true,
         error: null
       })
     case VALIDATE_STOREPIN_SUCCESS:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: null
       })
     case VALIDATE_STOREPIN_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: action.error
       })
     case UPDATE_CASHDRAWER_REQUEST:
       return Object.assign({}, state, {
+        isProcessing: true,
         shouldUpdate: true,
         error: null
       })
@@ -126,6 +132,7 @@ function application (state = {
         }
       })
       return Object.assign({}, state, {
+        isProcessing: false,
         cashdrawer: output,
         activeCashdrawer: newActiveCD,
         shouldUpdate: false,
@@ -133,6 +140,7 @@ function application (state = {
       })
     case UPDATE_CASHDRAWER_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: action.error
       })
@@ -142,15 +150,18 @@ function application (state = {
       })
     case SET_ACTIVE_MODAL:
       return Object.assign({}, state, {
-        activeModalId: action.activeModalId
+        activeModalId: action.activeModalId,
+        focusedInput: action.inputToFocus
       })
     case CLOSE_ACTIVE_MODAL:
       return Object.assign({}, state, {
-        activeModalId: null
+        activeModalId: null,
+        focusedInput: action.inputToFocus
       })
     case SET_STAFF_LOGGED_IN:
       return Object.assign({}, state, {
-        staff: action.userData
+        staff: action.userData,
+        focusedInput: 'productsSearch'
       })
     case SET_CASHIER_LOGGED_IN:
       return Object.assign({}, state, {
@@ -166,29 +177,35 @@ function application (state = {
       })
     case STORE_GET_IDS_SUCCESS:
       return Object.assign({}, state, {
+        isProcessing: false,
         storeIds: action.storeIds,
         isFetchingStoreIds: false
       })
     case STORE_GET_IDS_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         storeIdsError: action.error,
         isFetchingStoreIds: false
       })
     case STORE_GET_IDS_REQUEST:
       return Object.assign({}, state, {
+        isProcessing: true,
         isFetchingStoreIds: true
       })
     case AUTH_STAFF_REQUEST:
       return Object.assign({}, state, {
+        isProcessing: true,
         shouldUpdate: true
       })
     case AUTH_STAFF_SUCCESS:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         adminToken: action.token
       })
     case AUTH_STAFF_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: action.error
       })
@@ -203,25 +220,30 @@ function application (state = {
       })
     case DAILYDATA_FETCH_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: action.error
       })
     case DAILYDATA_CREATE_REQUEST:
       return Object.assign({}, state, {
+        isProcessing: true,
         shouldUpdate: true
       })
     case DAILYDATA_CREATE_SUCCESS:
       return Object.assign({}, state, {
         shouldUpdate: false,
-        activeCashdrawer: action.data
+        activeCashdrawer: action.data,
+        focusedInput: 'productsSearch'
       })
     case DAILYDATA_CREATE_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: action.error
       })
     case RESET_STAFF_STATE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: null,
         adminToken: null,
@@ -229,6 +251,7 @@ function application (state = {
       })
     case RESET_ERROR_STATE:
       return Object.assign({}, state, {
+        isProcessing: false,
         shouldUpdate: false,
         error: null
       })
@@ -236,6 +259,7 @@ function application (state = {
       return Object.assign({}, state, {
         activeCashdrawer: null,
         activeModalId: null,
+        isProcessing: false,
         isHamburgerOpen: false,
         isFetchingStoreIds: false,
         storeIds: [],

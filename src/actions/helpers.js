@@ -43,6 +43,8 @@ import {
 
 import print from '../utils/printReceipt/print'
 
+const focusProductSearch = 'productsSearch'
+
 export function reprintReceipt (receiptData) {
   return (dispatch) => {
     /**
@@ -65,7 +67,7 @@ export function resetStore (locale) {
   return (dispatch) => {
     dispatch(panelCheckoutReset())
     dispatch(panelCartReset())
-    dispatch(closeActiveModal(''))
+    dispatch(closeActiveModal(focusProductSearch))
     dispatch(orderStateReset())
     dispatch(fetchAllProducts(locale))
   }
@@ -91,7 +93,7 @@ export function holdOrderAndReset (orderData) {
     dispatch(panelCartReset())
     dispatch(panelCheckoutReset())
     dispatch(orderStateReset())
-    document.getElementById('productsSearch').focus()
+    dispatch(closeActiveModal(focusProductSearch))
   }
 }
 
@@ -106,16 +108,14 @@ export function recallOrderOnHold (dispatch, cartData, key) {
       cartData.totalOdboPrice)
     )
     dispatch(recallOrder(key))
-    dispatch(closeActiveModal())
-    document.getElementById('productsSearch').focus()
+    dispatch(closeActiveModal(focusProductSearch))
   }
 }
 
 export function setActiveCustomerAndFocus (dispatch, customer, key) {
   return () => {
     dispatch(setActiveCustomer(customer))
-    dispatch(closeActiveModal())
-    document.getElementById('productsSearch').focus()
+    dispatch(closeActiveModal(focusProductSearch))
   }
 }
 
@@ -135,17 +135,15 @@ export function onLogout () {
 
 export function closeAndResetRecallModal (dispatch) {
   return () => {
-    dispatch(closeActiveModal())
+    dispatch(closeActiveModal(focusProductSearch))
     dispatch(setOrderSearchKey(''))
-    document.getElementById('productsSearch').focus()
   }
 }
 
 export function closeAndResetCustomerModal (dispatch) {
   return () => {
-    dispatch(closeActiveModal())
+    dispatch(closeActiveModal(focusProductSearch))
     dispatch(customersSetSearchKey(null))
-    document.getElementById('productsSearch').focus()
   }
 }
 

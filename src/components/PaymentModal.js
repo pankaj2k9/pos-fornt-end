@@ -18,12 +18,16 @@ import {
 class PaymentModal extends Component {
 
   componentDidMount () {
-    document.getElementById('paymentValue').focus()
+    const {paymentMode} = this.props
+    if (paymentMode !== 'voucher') {
+      document.getElementById('paymentValue').focus()
+    }
   }
 
   _closeModal () {
     const { dispatch } = this.props
-    dispatch(closeActiveModal())
+    const inputToFocus = 'productsSearch'
+    dispatch(closeActiveModal(inputToFocus))
   }
 
   _clickConfirm (event) {

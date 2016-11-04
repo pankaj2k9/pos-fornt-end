@@ -34,6 +34,8 @@ import {
 
 import {processOrder} from '../actions/orders'
 
+const focusProductSearch = 'productsSearch'
+
 class PanelCheckout extends Component {
 
   _clickConfirm () {
@@ -62,7 +64,7 @@ class PanelCheckout extends Component {
 
   _closeModal () {
     const { dispatch, activeModalId, orderSuccess } = this.props
-    dispatch(closeActiveModal())
+    dispatch(closeActiveModal(focusProductSearch))
     dispatch(panelCheckoutShouldUpdate(false))
     if (activeModalId === 'orderProcessed') {
       if (orderSuccess) {
@@ -104,7 +106,7 @@ class PanelCheckout extends Component {
     } else if (mode === 'double points') {
       let boolVal = !bonusPoints
       dispatch(toggleBonusPoints(boolVal))
-      document.getElementById('productsSearch').focus()
+      dispatch(closeActiveModal(focusProductSearch))
     } else {
       dispatch(setActiveModal('paymentModal'))
       dispatch(setPaymentMode(mode))
