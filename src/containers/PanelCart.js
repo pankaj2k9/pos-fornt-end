@@ -11,11 +11,8 @@ import Truncate from '../components/Truncate'
 import FunctionButtons from '../components/FunctionButtons'
 
 import {
-  setCustomerInputActive,
-  setCustomerInputDisabled,
   setWalkinCustomer,
   setInputOdboID,
-  setCurrencyType,
   setCartItemQty,
   setCustomDiscount,
   removeCartItem,
@@ -43,28 +40,23 @@ import {
 } from '../actions/helpers'
 
 import {
-  fetchCustomerByOdboId
-} from '../actions/customers'
-
-import {
   closeActiveModal,
   setActiveModal
 } from '../actions/application'
 
+const focusProductSearch = 'productsSearch'
+const focusOrderSearch = 'orderSearch'
+const focusOdboUserSearch = 'odboUserSearch'
+const focusDiscountInput = 'overallDiscountInput'
+
 class PanelCart extends Component {
 
-  componentDidUpdate () {
-    const {activeModalId} = this.props
-    if (activeModalId === 'recallOrder') {
-      document.getElementById('orderSearch').focus()
-    }
-  }
-
-  _clickPanelHeaderBtns (inputAction) {
-    const {dispatch} = this.props
-    dispatch(setCustomerInputActive(inputAction))
-    document.getElementById('customerInput').focus()
-  }
+  // componentDidUpdate () {
+  //   const {activeModalId, focusedInput} = this.props
+  //   if (activeModalId && focusedInput) {
+  //     document.getElementById(focusedInput).focus()
+  //   }
+  // }
 
   _clickRemoveCustomer () {
     const {dispatch} = this.props
@@ -76,28 +68,6 @@ class PanelCart extends Component {
     inputAction === 'search'
     ? dispatch(setInputOdboID(inputValue))
     : dispatch(setWalkinCustomer(inputValue))
-  }
-
-  buttonConfirm (event) {
-    event.preventDefault()
-    const {dispatch, searchKey, inputAction} = this.props
-    inputAction === 'search'
-    ? dispatch(fetchCustomerByOdboId(searchKey))
-    : dispatch(setCustomerInputDisabled()) && document.getElementById('productsSearch').focus()
-  }
-
-  buttonCancel () {
-    const {dispatch} = this.props
-    dispatch(setCustomerInputDisabled())
-    document.getElementById('productsSearch').focus()
-  }
-
-  _clickCurrencyToggle () {
-    const {dispatch, currency} = this.props
-    currency === 'sgd'
-    ? dispatch(setCurrencyType('odbo'))
-    : dispatch(setCurrencyType('sgd'))
-    document.getElementById('productsSearch').focus()
   }
 
   _clickHoldOrder () {
@@ -116,13 +86,13 @@ class PanelCart extends Component {
     dispatch(holdOrderAndReset(orderData))
   }
 
-  _openModal (modalToOpen) {
+  _openModal (modalToOpen, inputToFocus) {
     const { dispatch, activeModalId } = this.props
     if (activeModalId === null || undefined || '') {
-      dispatch(setActiveModal(modalToOpen))
+      dispatch(setActiveModal(modalToOpen, inputToFocus || null))
     } else {
       dispatch(closeActiveModal())
-      dispatch(setActiveModal(modalToOpen))
+      dispatch(setActiveModal(modalToOpen, inputToFocus || null))
     }
   }
 
@@ -132,23 +102,23 @@ class PanelCart extends Component {
       event.preventDefault()
       dispatch(closeActiveModal())
     }
-    dispatch(closeActiveModal())
+    dispatch(closeActiveModal(focusProductSearch))
   }
 
   _clickButtons (buttonName) {
     const button = buttonName.toLowerCase()
     switch (button) {
       case 'recall order':
-        this._openModal('recallOrder')
+        this._openModal('recallOrder', focusOrderSearch)
         break
       case 'hold order':
         this._clickHoldOrder()
         break
       case 'search customer':
-        this._openModal('searchOdboUser')
+        this._openModal('searchOdboUser', focusOdboUserSearch)
         break
       case 'add overall discount':
-        this._openModal('addCustomDiscount')
+        this._openModal('addCustomDiscount', focusDiscountInput)
         break
       default:
     }
@@ -537,7 +507,7 @@ class PanelCart extends Component {
                   <p className='control-label'><h3 className='label'>Discount Percent</h3></p>
                   <p className='control has-addons'>
                     <form onSubmit={this._closeModal.bind(this)} >
-                      <input id='itemDiscount' className='input is-large' type='Number' style={{maxWidth: 80}}
+                      <input id='overallDiscountInput' className='input is-large' type='Number' style={{maxWidth: 80}}
                         placeholder={discountPH} value={discount}
                         onChange={e => this._setOverallDiscount(e.target.value)} />
                       <a className='button is-large'>%</a>
@@ -624,6 +594,7 @@ PanelCart.propTypes = {
 
 function mapStateToProps (state) {
   return {
+    focusedInput: state.application.focusedInput,
     fetchingCustomers: state.data.customers.isFetching,
     customerSearchKey: state.settings.customerSearchKey,
     customerFilter: state.settings.customerFilter,
@@ -633,8 +604,6 @@ function mapStateToProps (state) {
     currency: state.panelCart.currency,
     customDiscount: state.panelCart.customDiscount,
     shouldUpdate: state.panelCart.shouldUpdate,
-    inputActive: state.panelCart.customerInputActive,
-    inputAction: state.panelCart.customerInputAction,
     searchKey: state.panelCart.customerSearchKey,
     totalPrice: state.panelCart.totalPrice,
     totalOdboPrice: state.panelCart.totalOdboPrice,

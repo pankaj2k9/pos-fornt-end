@@ -6,18 +6,14 @@ import Panel from '../components/Panel'
 
 import {
   addItemToCart,
-  productsSetSearchkey,
-  resetProductsPanel
+  productsSetSearchkey
 } from '../actions/panelProducts'
 
 import { fetchAllProducts } from '../actions/products'
 import { fetchCustomers } from '../actions/customers'
 
-import {
-  panelCartShouldUpdate
-} from '../actions/panelCart'
-
 class PanelProducts extends Component {
+
   componentWillMount () {
     const {
       dispatch,
@@ -42,22 +38,16 @@ class PanelProducts extends Component {
       dispatch,
       productsById,
       productsArray,
-      productsSearchKey, currency
+      productsSearchKey,
+      currency
     } = this.props
     const barcodeItem = productsArray.filter(function (product) {
       return product.barcodeInfo === (productsSearchKey)
     })
     const product = productsById[barcodeItem[0].id] // item extracted from productsById
+    document.getElementById('productsSearch').value = ''
     if (product !== undefined || product === null) {
-      dispatch(panelCartShouldUpdate(true))
       dispatch(addItemToCart(product, currency))
-      dispatch(resetProductsPanel())
-      document.getElementById('productsSearch').value = ''
-      document.getElementById('productsSearch').focus()
-    } else {
-      dispatch(resetProductsPanel())
-      document.getElementById('productsSearch').value = ''
-      document.getElementById('productsSearch').focus()
     }
   }
 
@@ -94,10 +84,12 @@ PanelProducts.propTypes = {
 }
 
 function mapStateToProps (state) {
+  const focusedInput = state.application.focusedInput || state.panelCart.focusedInput
   return {
     activeProductId: state.panelProducts.activeProductId,
     activeProduct: state.panelProducts.activeProduct,
     filters: state.panelProducts.filters,
+    focusedInput,
     shouldUpdate: state.data.products.shouldUpdate,
     isFetching: state.data.products.isFetching,
     productsArray: state.data.products.productsArray,

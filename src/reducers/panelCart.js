@@ -1,12 +1,9 @@
 import {
   PANEL_CART_SHOULD_UPDATE,
-  SET_WALKIN_CUSTOMER,
   SET_INPUT_ODBO_ID,
   SET_ACTIVE_CUSTOMER,
   SET_ACTIVE_CUSTOMER_ERROR,
   SET_CURRENCY_TYPE,
-  SET_CUSTOMER_INPUT_ACTIVE,
-  SET_CUSTOMER_INPUT_DISABLED,
   SET_VOUCHER_DISCOUNT,
   ADD_CART_ITEM,
   SET_CART_ITEM_QTY,
@@ -24,6 +21,7 @@ function panelCart (state = {
   customerSearchKey: '',
   customerSearchError: null,
   currency: 'sgd',
+  focusedInput: null,
   items: [],
   itemsById: null,
   voucher: null,
@@ -38,21 +36,6 @@ function panelCart (state = {
     case PANEL_CART_SHOULD_UPDATE:
       return Object.assign({}, state, {
         shouldUpdate: action.value
-      })
-    case SET_CUSTOMER_INPUT_ACTIVE:
-      return Object.assign({}, state, {
-        customerInputActive: true,
-        customerInputAction: action.inputAction
-      })
-    case SET_CUSTOMER_INPUT_DISABLED:
-      return Object.assign({}, state, {
-        customerInputActive: false,
-        customerInputAction: '',
-        customerSearchError: null
-      })
-    case SET_WALKIN_CUSTOMER:
-      return Object.assign({}, state, {
-        walkinCustomer: action.name
       })
     case SET_INPUT_ODBO_ID:
       return Object.assign({}, state, {
@@ -80,6 +63,7 @@ function panelCart (state = {
       })
     case REMOVE_CUSTOMER:
       return Object.assign({}, state, {
+        focusedInput: 'productsSearch',
         activeCustomer: null,
         walkinCustomer: ''
       })
@@ -112,6 +96,7 @@ function panelCart (state = {
       state.customerSearchKey = ''
       return Object.assign({}, state, {
         items: output,
+        focusedInput: 'productsSearch',
         shouldUpdate: false,
         itemsById: itemsById,
         totalPrice: state.totalPrice,
@@ -146,6 +131,7 @@ function panelCart (state = {
         }
       })
       return Object.assign({}, state, {
+        focusedInput: 'productsSearch',
         customerSearchKey: '',
         items: state.items,
         totalPrice: state.totalPrice,
@@ -176,6 +162,7 @@ function panelCart (state = {
         }
       })
       return Object.assign({}, state, {
+        focusedInput: 'productsSearch',
         customerSearchKey: '',
         items: state.items,
         totalPrice: state.totalPrice,

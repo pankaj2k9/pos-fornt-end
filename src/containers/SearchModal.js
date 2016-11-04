@@ -247,6 +247,8 @@ class SearchModal extends Component {
       isFetching
     } = this.props
 
+    const inputRef = id === 'searchOdboUser' ? 'odboUserSearch' : 'orderSearch'
+
     return (
       <div id={id} className={'modal ' + (active === id ? 'is-active' : '')}>
         <div className='modal-background' />
@@ -276,7 +278,8 @@ class SearchModal extends Component {
                   onSubmit={this.onSubmitKey.bind(this)}
                 />
                 : <SearchBar
-                  id='orderSearch'
+                  id={inputRef}
+                  ref={inputRef}
                   size='is-medium'
                   value={search.value}
                   placeholder={search.placeholder}

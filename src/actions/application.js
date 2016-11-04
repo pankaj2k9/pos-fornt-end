@@ -22,10 +22,11 @@ export function hamburgerClose () {
 }
 
 export const SET_ACTIVE_MODAL = 'SET_ACTIVE_MODAL'
-export function setActiveModal (activeModalId) {
+export function setActiveModal (activeModalId, inputToFocus) {
   return {
     type: SET_ACTIVE_MODAL,
-    activeModalId
+    activeModalId,
+    inputToFocus
   }
 }
 
@@ -53,9 +54,10 @@ export function authStaffFailure (error) {
 }
 
 export const CLOSE_ACTIVE_MODAL = 'CLOSE_ACTIVE_MODAL'
-export function closeActiveModal () {
+export function closeActiveModal (inputToFocus) {
   return {
-    type: CLOSE_ACTIVE_MODAL
+    type: CLOSE_ACTIVE_MODAL,
+    inputToFocus
   }
 }
 

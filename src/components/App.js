@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { connect } from 'react-redux'
 import { browserHistory } from 'react-router'
 
@@ -34,10 +35,17 @@ class App extends React.Component {
   }
 
   componentDidUpdate () {
-    const { activeCashier, activeCashdrawer, activeModalId, shouldUpdate } = this.props
-    if (!activeCashdrawer || activeCashdrawer.float > 0) {
-      if (activeModalId === 'verifyStaff' && activeCashier && !shouldUpdate) {
-        document.getElementById('staffPassword').focus()
+    const { focusedInput, location, activeCashdrawer, activeCashier, isProcessing, activeModalId } = this.props
+    var currentLocation = location.pathname
+    if (!isProcessing && focusedInput) {
+      if (currentLocation !== '/store') {
+        if (activeCashier && activeCashdrawer) {
+          document.getElementById(focusedInput).focus()
+        }
+      } else if (currentLocation !== '/settings') {
+        if (activeModalId) {
+          document.getElementById(focusedInput).focus()
+        }
       }
     }
   }
@@ -200,7 +208,7 @@ class App extends React.Component {
   }
 
   chooseUserModal () {
-    const { activeModalId, staff, shouldUpdate, error } = this.props
+    const { activeModalId, staff, error } = this.props
     const active = activeModalId === 'verifyStaff' ? 'is-active' : ''
     return (
       <div id='verifyStaff' className={`modal ${active}`}>
@@ -213,47 +221,34 @@ class App extends React.Component {
             <button className='delete' onClick={this.close.bind(this)} />
           </header>
           <div className='modal-card-body'>
-            {shouldUpdate
-              ? <div className='content has-text-centered'>
-                <h1 className='subtitle'>
-                  <FormattedMessage id='app.general.verifyingStaff' />
-                </h1>
-                <p className='has-text-centered'>
-                  <i className='fa fa-spinner fa-pulse fa-2x fa-fw' />
+            <div className='content has-text-centered'>
+              {!error
+                ? null
+                : <p className='subtitle'>
+                  {error}
                 </p>
-                <div />
-              </div>
-              : <div>
-                <div className='content has-text-centered'>
-                  {!error
-                    ? null
-                    : <p className='subtitle'>
-                      {error}
-                    </p>
-                  }
-                  <div className='control is-horizontal'>
-                    <div className='control'>
-                      <span className='select is-large is-fullwidth'>
-                        <select
-                          onChange={e => this.onChange(e.target.value)}
-                          value={this.activeCashier()}
-                          style={{backgroundColor: 'rgba(255,255,255,0.0)'}}>
-                          <option>{this.activeCashier()}</option>
-                          {staff.data.staffs.map(function (cashier, key) {
-                            return (
-                              <option key={key} value={cashier.id}>
-                                {cashier.username}
-                              </option>
-                            )
-                          }, this)
-                          }
-                        </select>
-                      </span>
-                    </div>
-                  </div>
+              }
+              <div className='control is-horizontal'>
+                <div className='control'>
+                  <span className='select is-large is-fullwidth'>
+                    <select
+                      onChange={e => this.onChange(e.target.value)}
+                      value={this.activeCashier()}
+                      style={{backgroundColor: 'rgba(255,255,255,0.0)'}}>
+                      <option>{this.activeCashier()}</option>
+                      {staff.data.staffs.map(function (cashier, key) {
+                        return (
+                          <option key={key} value={cashier.id}>
+                            {cashier.username}
+                          </option>
+                        )
+                      }, this)
+                      }
+                    </select>
+                  </span>
                 </div>
               </div>
-            }
+            </div>
           </div>
         </div>
       </div>
@@ -359,6 +354,7 @@ function mapStateToProps (state) {
     shouldUpdate: state.application.shouldUpdate,
     error: state.application.error,
     activeModalId: state.application.activeModalId,
+    focusedInput: state.application.focusedInput || state.panelCart.focusedInput,
     activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
     adminToken: state.application.adminToken,

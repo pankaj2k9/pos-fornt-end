@@ -39,9 +39,8 @@ class SalesReportComplete extends React.Component {
     const { cashdrawers, csDate } = this.props
     var drawerData
     cashdrawers.find(function (drawer) {
-      let date = new Date(csDate)
-      let date1 = drawer.date
-      let date2 = String(`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`)
+      let date1 = new Date(drawer.date).toISOString().slice(0, 10)
+      let date2 = new Date(csDate).toISOString().slice(0, 10)
       if (date1 === date2) {
         drawerData = drawer
       }
