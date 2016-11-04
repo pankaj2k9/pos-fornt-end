@@ -1,0 +1,46 @@
+.st-icon, .st-name {
+  &.st-clr-white {
+    color: $white;
+    border-color: $white !important;
+  }
+
+  &.st-clr-red {
+    color: $red;
+    border-color: $red !important;
+  }
+
+  &.st-clr-green {
+    color: $green;
+    border-color: $green !important;
+  }
+
+  &.st-clr-blue {
+    color: $blue;
+    border-color: $blue !important;
+  }
+
+  &.st-clr-yellow {
+    color: $yellow;
+    border-color: $yellow !important;
+  }
+
+  &.st-clr-yellow {
+    color: $yellow;
+    border-color: $yellow !important;
+  }
+
+  &.st-clr-orange {
+    color: $orange;
+    border-color: $orange !important;
+  }
+
+  &.st-clr-turquoise {
+    color: $turquoise;
+    border-color: $turquoise !important;
+  }
+
+  &.st-clr-purple {
+    color: $purple;
+    border-color: $purple !important;
+  }
+}

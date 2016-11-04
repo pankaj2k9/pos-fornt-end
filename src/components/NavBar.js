@@ -38,6 +38,16 @@ const NavBar = ({
 
   const userNameStyle = {fontSize: 24, lineHeight: 0.7, textAlign: 'left'}
 
+  // Choose staff color
+  const STAFF_COLORS = [ 'white', 'red', 'green', 'blue', 'yellow', 'orange', 'turquoise', 'purple' ]
+  let colorIndex = 0
+  staff.staffs.forEach((st, i) => {
+    if (st.id === activeCashier.id) {
+      colorIndex = i
+    }
+  })
+  const staffColor = `st-clr-${STAFF_COLORS[colorIndex] || 0}`
+
   return (
     <div className='hero is-black'>
       <div className='hero-head'>
@@ -46,7 +56,7 @@ const NavBar = ({
           <div className='nav-left'>
             <div className='nav-item' style={{padding: 5}}>
               <span style={{margin: 5}}>
-                <i className='fa fa-user fa-2x'
+                <i className={`fa fa-user fa-2x st-icon ${staffColor}`}
                   style={userIconStyle} />
               </span>
               {staff.role === 'master'
@@ -61,7 +71,7 @@ const NavBar = ({
                     </a>
                     : activeCashier === null
                       ? null
-                      : <p style={userNameStyle}>
+                      : <p className={`st-name ${staffColor}`} style={userNameStyle}>
                         <Truncate text={staffName} maxLength={12} />
                         <br />
                         <em style={{fontSize: 14}}>
