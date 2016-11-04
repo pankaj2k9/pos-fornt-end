@@ -3,7 +3,11 @@ import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 
 import LoadingPane from '../components/LoadingPane'
-// import { completeSalesFetch } from '../actions/reports'
+import StoresDropdown from '../components/StoresDropdown'
+import {
+  // completeSalesFetch,
+  completeSalesChSource
+} from '../actions/reports'
 
 import printEODS from '../utils/printEODS/print'
 
@@ -48,14 +52,29 @@ class SalesReportComplete extends React.Component {
     return drawerData
   }
 
+  _handleSourceChange (event) {
+    const { dispatch } = this.props
+
+    dispatch(completeSalesChSource(event.target.value))
+  }
+
   render () {
-    const { isLoading } = this.props
+    const { isLoading, storeId, storeIds, selectedStore } = this.props
     var drawerData = this.cashdrawerData()
+
+    // Filter products by source
+    const filterSource = selectedStore || storeId
+
     return (
       isLoading
         ? <LoadingPane
           headerMessage={<FormattedMessage id='app.page.reports.loadingSalesReport' />} />
         : <div>
+          <StoresDropdown
+            storeIds={storeIds}
+            selectedStore={filterSource}
+            onChange={this._handleSourceChange.bind(this)} />
+
           {drawerData
             ? <div className='tile is-ancestor box'>
               <div className='tile is-vertical is-8'>
@@ -99,7 +118,10 @@ function mapStateToProps (state) {
     from: state.reports.completeSales.date,
     cashdrawers: state.application.cashdrawer,
     openCount: state.application.activeCashdrawer.openCount,
-    cashInDrawer: state.application.activeCashdrawer.initialAmount
+    cashInDrawer: state.application.activeCashdrawer.initialAmount,
+    storeId: state.application.storeId,
+    storeIds: state.application.storeIds,
+    selectedStore: state.reports.completeSales.source
   }
 }
 

@@ -42,6 +42,10 @@ export function productSalesFetch (source, from, to) {
   }
 }
 
+export const COMPLETESALES_CH_SOURCE = 'COMPLETESALES_CH_SOURCE'
+export function completeSalesChSource (source) {
+  return { type: COMPLETESALES_CH_SOURCE, source }
+}
 export const COMPLETESALES_FETCH_REQUEST = 'COMPLETESALES_FETCH_REQUEST'
 export const COMPLETESALES_FETCH_SUCCESS = 'COMPLETESALES_FETCH_SUCCESS'
 export const COMPLETESALES_FETCH_FAILURE = 'COMPLETESALES_FETCH_FAILURE'

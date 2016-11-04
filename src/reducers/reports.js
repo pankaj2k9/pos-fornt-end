@@ -9,6 +9,7 @@ import {
   COMPLETESALES_FETCH_REQUEST,
   COMPLETESALES_FETCH_SUCCESS,
   COMPLETESALES_FETCH_FAILURE,
+  COMPLETESALES_CH_SOURCE,
   STOREORDERS_SET_ACTIVE_ID,
   STOREORDERS_SET_PAGE,
   STOREORDERS_FETCH_REQUEST,
@@ -127,6 +128,10 @@ function completeSales (state, action) {
         isLoading: false,
         error: action.error
       })
+    case COMPLETESALES_CH_SOURCE:
+      return Object.assign({}, state, {
+        source: action.source
+      })
     default:
       return state
   }
@@ -185,7 +190,8 @@ function report (state = {
   completeSales: {
     isLoading: false,
     completeSales: null,
-    date: new Date()
+    date: new Date(),
+    source: undefined
   },
   storeOrders: {
     isLoading: false,
@@ -233,6 +239,7 @@ function report (state = {
     case COMPLETESALES_FETCH_REQUEST:
     case COMPLETESALES_FETCH_SUCCESS:
     case COMPLETESALES_FETCH_FAILURE:
+    case COMPLETESALES_CH_SOURCE:
       return Object.assign({}, state, {
         completeSales: completeSales(state.completeSales, action)
       })
