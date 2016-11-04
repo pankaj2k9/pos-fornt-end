@@ -41,11 +41,13 @@ const NavBar = ({
   // Choose staff color
   const STAFF_COLORS = [ 'white', 'red', 'green', 'blue', 'yellow', 'orange', 'turquoise', 'purple' ]
   let colorIndex = 0
-  staff.staffs.forEach((st, i) => {
-    if (st.id === activeCashier.id) {
-      colorIndex = i
-    }
-  })
+  if (staff && staff.staffs) {
+    staff.staffs.forEach((st, i) => {
+      if (activeCashier && activeCashier.id === st.id) {
+        colorIndex = i
+      }
+    })
+  }
   const staffColor = `st-clr-${STAFF_COLORS[colorIndex] || 0}`
 
   return (
