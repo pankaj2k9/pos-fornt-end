@@ -77,6 +77,7 @@ const zh = {
   'app.general.initCashDrawer': '初始确认金额',
   'app.general.updateCashDrawer': '更新钱箱量',
   'app.general.setCashAmount': '更新钱箱量',
+  'app.general.printReceipt': '打印收据',
 
   'app.panel.products': '制品',
   'app.panel.sales': '销售',

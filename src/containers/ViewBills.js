@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 import moment from 'moment'
 import { DatePicker } from 'react-input-enhancements'
+import ViewBillReceiptPreview from '../components/ViewBillReceiptPreview'
 
 // import { completeSalesFetch } from '../actions/reports'
 import {
@@ -160,7 +161,7 @@ class ViewBills extends React.Component {
   }
 
   render () {
-    const { reportType } = this.props
+    const { reportType, orders, stores, isProcessing } = this.props
 
     return (
       <div className='tile is-ancestor'>
@@ -173,7 +174,7 @@ class ViewBills extends React.Component {
                     type='radio'
                     name='date'
                     checked={reportType === 'date'}
-                    onChange={this.handleChangeRadio.bind(this)} />
+                    onChange={this.handleChangeRadio.bind(this)} />{' '}
                   <FormattedMessage id='app.page.settings.date' />
                 </label>
 
@@ -182,7 +183,7 @@ class ViewBills extends React.Component {
                     type='radio'
                     name='id'
                     checked={reportType === 'id'}
-                    onChange={this.handleChangeRadio.bind(this)} />
+                    onChange={this.handleChangeRadio.bind(this)} />{' '}
                   <FormattedMessage id='app.page.settings.transID' />
                 </label>
               </p>
@@ -196,12 +197,22 @@ class ViewBills extends React.Component {
             }
 
             <div className='tile is-child'>
-              <button className='button is-primary'
+              <button className={`button is-primary${isProcessing ? ' is-loading' : ''}`}
                 onClick={this.handleSearchOrders}>
                 <FormattedMessage id='app.page.settings.process' />
               </button>
             </div>
           </div>
+
+          <div className='tile is-parent is-vertical'>
+            <div className='tile is-child'>
+              {orders.length
+                ? <ViewBillReceiptPreview orders={orders} stores={stores} />
+                : null
+              }
+            </div>
+          </div>
+
         </div>
       </div>
     )
@@ -209,7 +220,15 @@ class ViewBills extends React.Component {
 }
 
 function mapStateToProps (state) {
-  const { from, to, idFrom, idTo, reportType, orders } = state.reports.viewBills
+  const {
+    from,
+    to,
+    idFrom,
+    idTo,
+    reportType,
+    orders,
+    isProcessing
+  } = state.reports.viewBills
 
   return {
     intl: state.intl,
@@ -220,7 +239,8 @@ function mapStateToProps (state) {
     idFrom,
     idTo,
     reportType,
-    orders
+    orders,
+    isProcessing
   }
 }
 
