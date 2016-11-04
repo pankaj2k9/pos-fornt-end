@@ -77,6 +77,7 @@ const en = {
   'app.general.initCashDrawer': 'Initial Amount of Cash drawer',
   'app.general.updateCashDrawer': 'Update Amount of CashDrawer',
   'app.general.setCashAmount': 'Set Cash Drawer Amount',
+  'app.general.printReceipt': 'Print Receipt',
 
   'app.panel.products': 'Barcode Input',
   'app.panel.sales': 'Order Items',

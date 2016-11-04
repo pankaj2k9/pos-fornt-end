@@ -183,8 +183,8 @@ class ViewBills extends React.Component {
                     type='radio'
                     name='id'
                     checked={reportType === 'id'}
-                    onChange={this.handleChangeRadio.bind(this)} />
-                  <FormattedMessage id='app.page.settings.transID' />{' '}
+                    onChange={this.handleChangeRadio.bind(this)} />{' '}
+                  <FormattedMessage id='app.page.settings.transID' />
                 </label>
               </p>
             </div>
@@ -206,7 +206,10 @@ class ViewBills extends React.Component {
 
           <div className='tile is-parent is-vertical'>
             <div className='tile is-child'>
-              <ViewBillReceiptPreview orders={orders} stores={stores} />
+              {orders.length
+                ? <ViewBillReceiptPreview orders={orders} stores={stores} />
+                : null
+              }
             </div>
           </div>
 

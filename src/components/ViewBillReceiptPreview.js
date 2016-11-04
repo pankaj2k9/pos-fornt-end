@@ -1,4 +1,7 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
+import { FormattedMessage } from 'react-intl'
+
 import ReceiptPreview from './ReceiptPreview'
 import ReceiptPreviewRow, {
   ReceiptRowDivider,
@@ -6,9 +9,18 @@ import ReceiptPreviewRow, {
   ReceiptRowNewLine
 } from './ReceiptPreviewRow'
 
+import { printReceiptFromString } from '../utils/receipt'
+
 import { formatDate } from '../utils/string'
 
 export default class ViewBillReceiptPreview extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.renderPrintBtn = this.renderPrintBtn.bind(this)
+    this.handlePrint = this.handlePrint.bind(this)
+  }
+
   splitAddr (sourceId, stores) {
     const store = stores.filter((store) => {
       return store.source === sourceId
@@ -17,6 +29,21 @@ export default class ViewBillReceiptPreview extends React.Component {
     const storeAddress = store.address || 'SINGAPORE 188021\nTELEPHONE:6238 1337'
 
     return storeAddress.split('\\n')
+  }
+
+  renderPrintBtn () {
+    return (
+      <p className='control'>
+        <button className='button is-primary is-inverted' onClick={this.handlePrint}>
+          <FormattedMessage id='app.general.printReceipt' />
+        </button>
+      </p>
+    )
+  }
+
+  handlePrint () {
+    const receiptContent = ReactDOM.findDOMNode(this.refs.preview).innerHTML
+    printReceiptFromString(receiptContent)
   }
 
   render () {
@@ -31,77 +58,83 @@ export default class ViewBillReceiptPreview extends React.Component {
 
     return (
       <ReceiptPreview>
-        {orders.map((order) => {
-          const addrList = this.splitAddr(order.source, stores)
-          const cust = order.users
-            ? `${order.users.firstName} ${order.users.lastName}`.toUpperCase()
-            : 'N/A'
-          const itemCount = order.items.length
+        {this.renderPrintBtn()}
 
-          return (
-            <span key={`vb-preview-${order.id}`}>
-              {/* Address */}
-              {addrList.map((addr) => {
-                return <ReceiptPreviewRow cols={[addr]} />
-              })}
+        <span ref='preview'>
+          {orders.map((order) => {
+            const addrList = this.splitAddr(order.source, stores)
+            const cust = order.users
+              ? `${order.users.firstName} ${order.users.lastName}`.toUpperCase()
+              : 'N/A'
+            const itemCount = order.items.length
 
-              {/* Customer name */}
-              <ReceiptPreviewRow cols={[`CUSTOMER: ${cust}`]} />
-              <ReceiptRowDivider />
+            return (
+              <span key={`vb-preview-${order.id}`}>
+                {/* Address */}
+                {addrList.map((addr) => {
+                  return <ReceiptPreviewRow cols={[addr]} />
+                })}
 
-              {/* Date and order ID */}
-              <ReceiptPreviewRow cols={[
-                formatDate(new Date(order.dateOrdered), dateOptions),
-                order.id
-              ]} />
-              <ReceiptRowDivider />
+                {/* Customer name */}
+                <ReceiptPreviewRow cols={[`CUSTOMER: ${cust}`]} />
+                <ReceiptRowDivider />
 
-              {/* Items list */}
-              {order.items.map((item) => {
-                return (
-                  <span key={`vb-preview-item-${item.id}`} className='item'>
-                    <ReceiptPreviewRow cols={[item.product.nameEn]} />
-                    <ReceiptPreviewRow cols={[
-                      item.product.barcodeInfo,
-                      `${item.quantity}x`,
-                      item.totalCost
-                    ]} />
-                  </span>
-                )
-              })}
+                {/* Date and order ID */}
+                <ReceiptPreviewRow cols={[
+                  formatDate(new Date(order.dateOrdered), dateOptions),
+                  order.id
+                ]} />
+                <ReceiptRowDivider />
 
-              {/* Items list */}
-              <ReceiptPreviewRow cols={[
-                `Total (${itemCount}) item${itemCount > 1 ? 's' : ''}.`
-              ]} />
-              <ReceiptRowDivider />
+                {/* Items list */}
+                {order.items.map((item) => {
+                  return (
+                    <span key={`vb-preview-item-${item.id}`} className='item'>
+                      <ReceiptPreviewRow cols={[item.product.nameEn]} />
+                      <ReceiptPreviewRow cols={[
+                        item.product.barcodeInfo,
+                        `${item.quantity}x`,
+                        item.totalCost
+                      ]} />
+                    </span>
+                  )
+                })}
 
-              {/* Totals */}
-              <ReceiptPreviewRow cols={['Sub-TOTAL S$', order.subtotal]} />
-              <ReceiptPreviewRow cols={['TOTAL S$', order.total]} />
+                {/* Items list */}
+                <ReceiptPreviewRow cols={[
+                  `Total (${itemCount}) item${itemCount > 1 ? 's' : ''}.`
+                ]} />
+                <ReceiptRowDivider />
 
-              {/* Payments */}
-              <ReceiptPreviewRow cols={['PAYMENT(S):']} />
-              {order.payments.map((payment) => {
-                let type = ''
+                {/* Totals */}
+                <ReceiptPreviewRow cols={['Sub-TOTAL S$', order.subtotal]} />
+                <ReceiptPreviewRow cols={['TOTAL S$', order.total]} />
 
-                // Figure out the type of payment
-                if (payment.provider && payment.type === 'debit') {
-                  type = 'NETS'
-                } else if (payment.provider && payment.type === 'credit') {
-                  type = payment.provider.toUpperCase()
-                } else {
-                  type = payment.type && payment.type.toUpperCase()
-                }
+                {/* Payments */}
+                <ReceiptPreviewRow cols={['PAYMENT(S):']} />
+                {order.payments.map((payment) => {
+                  let type = ''
 
-                return <ReceiptPreviewRow cols={[type, payment.amount]} />
-              })}
+                  // Figure out the type of payment
+                  if (payment.provider && payment.type === 'debit') {
+                    type = 'NETS'
+                  } else if (payment.provider && payment.type === 'credit') {
+                    type = payment.provider.toUpperCase()
+                  } else {
+                    type = payment.type && payment.type.toUpperCase()
+                  }
 
-              <ReceiptRowDividerDbl />
-              <ReceiptRowNewLine />
-            </span>
-          )
-        })}
+                  return <ReceiptPreviewRow cols={[type, payment.amount]} />
+                })}
+
+                <ReceiptRowDividerDbl />
+                <ReceiptRowNewLine />
+              </span>
+            )
+          })}
+        </span>
+
+        {this.renderPrintBtn()}
       </ReceiptPreview>
     )
   }

@@ -163,9 +163,10 @@ export const buildBillsList = (orders, stores) => {
 /**
  * Print receipt
  */
-export const printReceiptFromString = () => {
+export const printReceiptFromString = (str) => {
   const width = window.innderWidth
   const height = window.innderHeight
+  const htmlStr = str || receiptHtmlString
 
   const content = '<!DOCTYPE html>' +
                   '<html>' +
@@ -174,7 +175,7 @@ export const printReceiptFromString = () => {
                   '<style>' + RECEIPT_STYLES + '</style>' +
                   '</head>' +
                   '<body style="' + BODY_STYLE + '" onload="window.focus(); window.print(); window.close();">' +
-                  receiptHtmlString +
+                  htmlStr +
                   '</body>' +
                   '</html>'
   const options = 'toolbar=no,location=no,directories=no,menubar=no,scrollbars=yes,width=' + width + ',height=' + height
