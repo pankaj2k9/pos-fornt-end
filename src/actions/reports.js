@@ -204,6 +204,7 @@ export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) 
             })
         } else {
           // End if all orders are fetched
+          dispatch(viewBillsStoreOrders({ data: allOrders }))
           dispatch(viewBillsFetchSuccess())
           printBills({ orders: allOrders, stores })
         }

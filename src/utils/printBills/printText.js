@@ -1,19 +1,19 @@
-import {
-  // formatCurrency,
-  formatDate
-} from '../string'
+import { formatDate } from '../string'
 
 const RECEIPT_WIDTH = 240
 const RECEIPT_MARGIN = 6
-const RECEIPT_FONT = 'sans-serif'
+const RECEIPT_FONT = 'Courier New, Courier, monospace;'
 const RECEIPT_FONT_SIZE = 12
 const RECEIPT_LINE_HEIGHT = 18
-const RECEIPT_DIVIDER_DBL = '=================================='
-const RECEIPT_DIVIDER = '------------------------------------------------------------'
+const RECEIPT_DIVIDER_DBL = '<span class="divider">' +
+  '=================================</span>'
+const RECEIPT_DIVIDER = '<span class="divider">' +
+  '---------------------------------</span>'
 const RECEIPT_NEWLINE = '<br /><br />'
+
+// styles
 const RECEIPT_STYLES = '' +
   '.row { display: flex; justify-content: space-between; }\n' +
-  '.row { font-family: "Courier New", Courier, monospace; }\n' +
   '.row.spaced { margin-bottom: 5px; }\n' +
   '.row.col3 .col:nth-child(1) { width: 140px; }\n' +
   '.row.col3 .col:nth-child(2) { width: 30px; text-align: right; }\n' +
@@ -27,16 +27,12 @@ const RECEIPT_STYLES = '' +
   '.row.col4 .col.col-sh:nth-child(3) { width: 50px; text-align: right; }\n' +
   '.row.col4 .col.col-sh:nth-child(4) { width: 65px; text-align: right; }\n'
 
-// const LI_NAME_MAX = 24
-
-// styles
 const RECEIPT_STYLE = `width: ${RECEIPT_WIDTH}px; margin: ${RECEIPT_MARGIN}px`
-// const HEADER_STYLE = `display: flex; flex-direction: column; align-items: center; margin-bottom: ${RECEIPT_MARGIN}px;`
-let receiptHtmlString = ''
 const BODY_STYLE = `font-family: ${RECEIPT_FONT};
   font-size: ${RECEIPT_FONT_SIZE}px;
   line-height: ${RECEIPT_LINE_HEIGHT}px;`
 
+let receiptHtmlString = ''
 const buildRow = (cols, colType, rowType) => {
   let rowText = ''
   const colLength = cols.length
@@ -79,7 +75,7 @@ const addAddress = (sourceId, stores) => {
   const storeAddress = store.address || 'SINGAPORE 188021\nTELEPHONE:6238 1337'
 
   if (storeAddress) {
-    storeAddress.split('\n').forEach((section) => {
+    storeAddress.split('\\n').forEach((section) => {
       addr += buildRow([section])
     })
   }
@@ -177,7 +173,7 @@ export const printReceiptFromString = () => {
                   '<title>Print Receipt</title>' +
                   '<style>' + RECEIPT_STYLES + '</style>' +
                   '</head>' +
-                  '<body style="' + BODY_STYLE + '"onload="window.focus(); window.print(); window.close();">' +
+                  '<body style="' + BODY_STYLE + '" onload="window.focus(); window.print(); window.close();">' +
                   receiptHtmlString +
                   '</body>' +
                   '</html>'
@@ -185,7 +181,7 @@ export const printReceiptFromString = () => {
   const printWindow = window.open('', 'Printing receipt...', options)
   printWindow.document.open()
   printWindow.document.write(content)
-  printWindow.document.close()
-  printWindow.focus()
-  printWindow.close()
+  // printWindow.document.close()
+  // printWindow.focus()
+  // printWindow.close()
 }

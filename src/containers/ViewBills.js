@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 import moment from 'moment'
 import { DatePicker } from 'react-input-enhancements'
+import ViewBillReceiptPreview from '../components/ViewBillReceiptPreview'
 
 // import { completeSalesFetch } from '../actions/reports'
 import {
@@ -160,7 +161,7 @@ class ViewBills extends React.Component {
   }
 
   render () {
-    const { reportType } = this.props
+    const { reportType, orders, stores } = this.props
 
     return (
       <div className='tile is-ancestor'>
@@ -173,7 +174,7 @@ class ViewBills extends React.Component {
                     type='radio'
                     name='date'
                     checked={reportType === 'date'}
-                    onChange={this.handleChangeRadio.bind(this)} />
+                    onChange={this.handleChangeRadio.bind(this)} />{' '}
                   <FormattedMessage id='app.page.settings.date' />
                 </label>
 
@@ -183,7 +184,7 @@ class ViewBills extends React.Component {
                     name='id'
                     checked={reportType === 'id'}
                     onChange={this.handleChangeRadio.bind(this)} />
-                  <FormattedMessage id='app.page.settings.transID' />
+                  <FormattedMessage id='app.page.settings.transID' />{' '}
                 </label>
               </p>
             </div>
@@ -202,6 +203,13 @@ class ViewBills extends React.Component {
               </button>
             </div>
           </div>
+
+          <div className='tile is-parent is-vertical'>
+            <div className='tile is-child'>
+              <ViewBillReceiptPreview orders={orders} stores={stores} />
+            </div>
+          </div>
+
         </div>
       </div>
     )
