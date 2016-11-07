@@ -26,7 +26,7 @@ class SalesReportComplete extends React.Component {
     let { completeSales, store, cashier } = this.props
     var drawerData = this.cashdrawerData()
 
-    if (completeSales) {
+    if (completeSales && drawerData) {
       // put real store address here
       const addr = store.address ? store.address.split('\\n') : ['200 Victoria Street']
       completeSales.headerText = [
@@ -55,15 +55,15 @@ class SalesReportComplete extends React.Component {
   }
 
   cashdrawerData () {
-    const { cashdrawers, csDate } = this.props
-    var drawerData
-    cashdrawers.find(function (drawer) {
+    const { cashdrawers, csDate, selectedStore } = this.props
+
+    const drawerData = cashdrawers.find(function (drawer) {
       let date1 = new Date(drawer.date).toISOString().slice(0, 10)
       let date2 = new Date(csDate).toISOString().slice(0, 10)
-      if (date1 === date2) {
-        drawerData = drawer
-      }
+
+      return date1 === date2 && selectedStore === drawer.storeId
     })
+
     return drawerData
   }
 
@@ -77,8 +77,8 @@ class SalesReportComplete extends React.Component {
   render () {
     const { isLoading, storeId, storeIds, selectedStore } = this.props
     const drawerData = this.cashdrawerData()
-
     const salesData = this.getCompleteSalesData()
+    const reportCanBeGenerated = !!drawerData && !!salesData
 
     // Filter products by source
     const filterSource = selectedStore || storeId
@@ -93,7 +93,7 @@ class SalesReportComplete extends React.Component {
             selectedStore={filterSource}
             onChange={this._handleSourceChange.bind(this)} />
 
-          {drawerData && salesData
+          {reportCanBeGenerated
             ? <div className='tile is-child'>
               <XZReadingReceiptPreview data={salesData} />
             </div>
@@ -101,33 +101,6 @@ class SalesReportComplete extends React.Component {
               <FormattedMessage id='app.page.reports.noData' />
             </div>
           }
-
-          {/*
-          {drawerData
-            ? <div className='tile is-ancestor box'>
-              <div className='tile is-vertical is-8'>
-                <article className='tile is-child'>
-                  <p className='title' style={{maxWidth: 250}}>{'Print the summary of sales this day'}</p>
-                </article>
-              </div>
-              <div className='tile is-vertical is-4 has-text-centered'>
-                <article className='tile is-child'>
-                  <div className='content'>
-                    <button className='button is-success is-large'
-                      onClick={this.printEndOfDaySales.bind(this)}>
-                      Print Summary
-                    </button>
-                  </div>
-                </article>
-              </div>
-            </div>
-            : <div className='content box hero is-medium has-text-centered'>
-              <p className='title hero-body'>
-                <FormattedMessage id='app.page.reports.noData' />
-              </p>
-            </div>
-          }
-          */}
         </div>
       </div>
     )
