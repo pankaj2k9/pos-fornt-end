@@ -3,34 +3,83 @@ import moment from 'moment'
 import {
   REPORTS_SET_TAB,
   REPORTS_SET_DATE,
+
   PRODUCTSALES_FETCH_REQUEST,
   PRODUCTSALES_FETCH_SUCCESS,
   PRODUCTSALES_FETCH_FAILURE,
+
   COMPLETESALES_FETCH_REQUEST,
   COMPLETESALES_FETCH_SUCCESS,
   COMPLETESALES_FETCH_FAILURE,
   COMPLETESALES_CH_SOURCE,
+
   STOREORDERS_SET_ACTIVE_ID,
   STOREORDERS_SET_PAGE,
   STOREORDERS_FETCH_REQUEST,
   STOREORDERS_FETCH_SUCCESS,
   STOREORDERS_FETCH_FAILURE,
+
   REPORTS_STATE_RESET,
 
   VIEW_BILLS_FETCH_REQUEST,
   VIEW_BILLS_FETCH_SUCCESS,
   VIEW_BILLS_FETCH_FAILURE,
   VIEW_BILLS_STORE_ORDERS,
-
   VIEW_BILLS_CH_DATEPICKER_FR,
   VIEW_BILLS_CH_DATEPICKER_TO,
-
   VIEW_BILLS_CH_INPUT_IDTO,
   VIEW_BILLS_CH_INPUT_IDFR,
-
   VIEW_BILLS_CH_TYPE,
-  OUTLET_STOCKS_CH_SOURCE
+
+  OUTLET_STOCKS_CH_SOURCE,
+
+  STAFF_SALES_CH_STAFF,
+  STAFF_SALES_CH_INPUT_TO,
+  STAFF_SALES_CH_INPUT_FR,
+  STAFF_SALES_STORE_ORDERS,
+  STAFF_SALES_FETCH_REQUEST,
+  STAFF_SALES_FETCH_SUCCESS,
+  STAFF_SALES_FETCH_FAILURE
 } from '../actions/reports'
+
+function staffSales (state, action) {
+  switch (action.type) {
+    case STAFF_SALES_CH_STAFF:
+      return Object.assign({}, state, {
+        staffId: action.staffId
+      })
+    case STAFF_SALES_CH_INPUT_TO:
+      return Object.assign({}, state, {
+        to: action.date
+      })
+    case STAFF_SALES_CH_INPUT_FR:
+      return Object.assign({}, state, {
+        from: action.date
+      })
+    case STAFF_SALES_STORE_ORDERS:
+      let orders = [...state.orders, ...action.response.data]
+
+      return Object.assign({}, state, {
+        orders
+      })
+    case STAFF_SALES_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        orders: [],
+        isProcessing: true
+      })
+    case STAFF_SALES_FETCH_SUCCESS:
+      return Object.assign({}, state, {
+        isProcessing: false
+      })
+    case STAFF_SALES_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        isProcessing: false,
+        error: action.error
+      })
+    default:
+      return state
+  }
+}
 
 function outletStocks (state, action) {
   switch (action.type) {
@@ -219,6 +268,14 @@ function report (state = {
   },
   outletStocks: {
     source: undefined
+  },
+  staffSales: {
+    isProcessing: false,
+    error: undefined,
+    staffId: undefined,
+    orders: [],
+    from: moment().startOf('day').toDate(), // set `from` to start of day
+    to: new Date()
   }
 }, action) {
   switch (action.type) {
@@ -290,6 +347,16 @@ function report (state = {
     case OUTLET_STOCKS_CH_SOURCE:
       return Object.assign({}, state, {
         outletStocks: outletStocks(state.outletStocks, action)
+      })
+    case STAFF_SALES_CH_STAFF:
+    case STAFF_SALES_CH_INPUT_TO:
+    case STAFF_SALES_CH_INPUT_FR:
+    case STAFF_SALES_STORE_ORDERS:
+    case STAFF_SALES_FETCH_REQUEST:
+    case STAFF_SALES_FETCH_SUCCESS:
+    case STAFF_SALES_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        staffSales: staffSales(state.staffSales, action)
       })
     default:
       return state

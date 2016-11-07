@@ -9,21 +9,36 @@ const orders = {
   },
 
   find (params) {
-    const { storeId, stores, to, from, idTo, idFrom, limit, skip, sort, eager } = params
-
-    const storeIds = stores && stores.length
-      ? stores.map((store) => { return store.source })
-      : []
-    const storeIn = storeId ? [storeId] : storeIds
+    const {
+      storeId,
+      stores,
+      staffId,
+      to,
+      from,
+      idTo,
+      idFrom,
+      limit,
+      skip,
+      sort,
+      eager
+    } = params
 
     const query = {
       $sort: sort || { dateOrdered: -1 },
       $eager: eager || '[users, items, items.product, payments, vouchers]',
-      source: {
-        $in: storeIn
-      },
       $limit: limit,
       $skip: skip
+    }
+
+    if (staffId) {
+      query.adminId = staffId
+    }
+
+    if (storeId) {
+      const storeIds = stores ? stores.map((store) => { return store.source }) : []
+      const storeIn = storeId ? [storeId] : storeIds
+
+      query.source = { $in: storeIn }
     }
 
     if (to && from) {
@@ -39,6 +54,8 @@ const orders = {
         $lte: buildOrderId(storeId, idTo, null, stores)
       }
     }
+
+    console.log('ORDER QUERY', query)
 
     return ordersService.find({ query })
   },

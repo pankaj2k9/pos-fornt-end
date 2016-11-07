@@ -221,3 +221,98 @@ export function outletStocksChSource (source) {
   return { type: OUTLET_STOCKS_CH_SOURCE, source }
 }
 
+export const STAFF_SALES_CH_STAFF = 'STAFF_SALES_CH_STAFF'
+export function staffSalesStaff (staffId) {
+  return { type: STAFF_SALES_CH_STAFF, staffId }
+}
+
+export const STAFF_SALES_CH_INPUT_TO = 'STAFF_SALES_CH_INPUT_TO'
+export function staffSalesChangeInputIdTo (date) {
+  return { type: STAFF_SALES_CH_INPUT_TO, date }
+}
+export const STAFF_SALES_CH_INPUT_FR = 'STAFF_SALES_CH_INPUT_FR'
+export function staffSalesChangeInputIdFr (date) {
+  return { type: STAFF_SALES_CH_INPUT_FR, date }
+}
+
+export const STAFF_SALES_STORE_ORDERS = 'STAFF_SALES_STORE_ORDERS'
+export function staffSalesStoreOrders (response) {
+  return { type: STAFF_SALES_STORE_ORDERS, response }
+}
+export const STAFF_SALES_FETCH_REQUEST = 'STAFF_SALES_FETCH_REQUEST'
+export const STAFF_SALES_FETCH_SUCCESS = 'STAFF_SALES_FETCH_SUCCESS'
+export const STAFF_SALES_FETCH_FAILURE = 'STAFF_SALES_FETCH_FAILURE'
+export function staffSalesFetchRequest () {
+  return { type: STAFF_SALES_FETCH_REQUEST }
+}
+export function staffSalesFetchSuccess () {
+  return { type: STAFF_SALES_FETCH_SUCCESS }
+}
+export function staffSalesFetchFailure (error) {
+  return { type: STAFF_SALES_FETCH_FAILURE, error }
+}
+export function staffSalesFetch (staffId, dateFrom, dateTo) {
+  return (dispatch) => {
+    dispatch(staffSalesFetchRequest())
+
+    const params = {
+      from: dateFrom,
+      to: dateTo,
+      staffId,
+      eager: '[payments, staff, users, items, items.product]'
+    }
+
+    return ordersService.find(params)
+      .then(response => {
+        // Store first fetch
+        let allOrders = [...response.data]
+
+        const { total, data, limit } = response
+        const firstResponseCount = data.length
+        const goal = Number(total)
+
+        // If not all orders are fetched, run server queries until complete
+        if (goal > firstResponseCount) {
+          const firstLimit = limit
+          let ordersFetchArray = []
+          let newSkip = firstResponseCount
+
+          while (newSkip < goal) {
+            const nextParams = params
+
+            nextParams.limit = firstLimit
+            nextParams.skip = newSkip
+            newSkip += firstLimit
+
+            const ordersFetch = new Promise((resolve, reject) => {
+              return ordersService.find(nextParams)
+                .then((response) => { resolve(response) })
+                .catch(() => { reject('Failed fetching order') })
+            })
+            ordersFetchArray.push(ordersFetch)
+          }
+
+          // Run all order fetch
+          global.Promise.all(ordersFetchArray)
+            .then((response) => {
+              response.forEach((fetchResponse) => {
+                allOrders = [...allOrders, ...fetchResponse.data]
+              })
+
+              dispatch(staffSalesStoreOrders({ data: allOrders }))
+              dispatch(staffSalesFetchSuccess())
+            })
+            .catch((error) => {
+              dispatch(staffSalesFetchFailure(error))
+            })
+        } else {
+          // End if all orders are fetched
+          dispatch(staffSalesStoreOrders({ data: allOrders }))
+          dispatch(staffSalesFetchSuccess())
+        }
+      })
+      .catch(error => {
+        dispatch(staffSalesFetchFailure(error))
+      })
+  }
+}
