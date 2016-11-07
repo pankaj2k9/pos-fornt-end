@@ -227,11 +227,11 @@ export function staffSalesStaff (staffId) {
 }
 
 export const STAFF_SALES_CH_INPUT_TO = 'STAFF_SALES_CH_INPUT_TO'
-export function staffSalesChangeInputIdTo (date) {
+export function staffSalesChangeInputTo (date) {
   return { type: STAFF_SALES_CH_INPUT_TO, date }
 }
 export const STAFF_SALES_CH_INPUT_FR = 'STAFF_SALES_CH_INPUT_FR'
-export function staffSalesChangeInputIdFr (date) {
+export function staffSalesChangeInputFr (date) {
   return { type: STAFF_SALES_CH_INPUT_FR, date }
 }
 
