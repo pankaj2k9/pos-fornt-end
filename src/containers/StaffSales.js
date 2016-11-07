@@ -3,26 +3,28 @@ import { FormattedMessage } from 'react-intl'
 import { DatePicker } from 'react-input-enhancements'
 import { connect } from 'react-redux'
 
+import StaffsDropdown from '../components/StaffDropdown'
+
 import moment from 'moment'
 import {
   staffSalesFetch,
   staffSalesChangeInputTo,
-  staffSalesChangeInputFr
+  staffSalesChangeInputFr,
+  staffSalesStaff
 } from '../actions/reports'
 
 class StaffSales extends React.Component {
   constructor (props) {
     super(props)
 
-    this.renderDatePickers = this.renderDatePickers.bind(this)
+    this.renderFilters = this.renderFilters.bind(this)
+    this.handleChangeStaff = this.handleChangeStaff.bind(this)
+    this.handleSearchOrders = this.handleSearchOrders.bind(this)
   }
 
-  componentDidMount () {
-    const { dispatch, activeCashier, selectedStaffId } = this.props
+  handleSearchOrders () {
+    const { dispatch, activeCashier, selectedStaffId, from, to } = this.props
     const searchStaffId = activeCashier && activeCashier.id || selectedStaffId
-
-    const from = moment().subtract(100, 'days').startOf('day').toDate()
-    const to = new Date()
 
     dispatch(staffSalesFetch(searchStaffId, from, to))
   }
@@ -52,11 +54,17 @@ class StaffSales extends React.Component {
     }
   }
 
-  renderDatePickers () {
-    const { from, to } = this.props
+  renderFilters () {
+    const { staffs, selectedStaffId: selected, activeCashier: ac, from, to } = this.props
+    const selectedStaff = selected || ac && ac.id || staffs[0].id
 
     return (
       <div id='trans-report-date' className='tile is-child is-primary is-6'>
+        <StaffsDropdown
+          staffs={staffs}
+          selectedStaff={selectedStaff}
+          onChange={this.handleChangeStaff} />
+
         <label className='label'>
           <FormattedMessage id='app.page.settings.from' />
         </label>
@@ -95,12 +103,27 @@ class StaffSales extends React.Component {
     )
   }
 
+  handleChangeStaff (event) {
+    const { dispatch } = this.props
+
+    dispatch(staffSalesStaff(event.target.value))
+  }
+
   render () {
+    const { isProcessing } = this.props
+
     return (
       <div className='tile is-ancestor'>
         <div className='tile is-vertical'>
           <div className='tile is-parent is-vertical'>
-            {this.renderDatePickers()}
+            {this.renderFilters()}
+
+            <div className='tile is-child'>
+              <button className={`button is-primary${isProcessing ? ' is-loading' : ''}`}
+                onClick={this.handleSearchOrders}>
+                <FormattedMessage id='app.page.settings.process' />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -112,10 +135,12 @@ const mapStateToProps = (state) => {
   const { staffSales } = state.reports
 
   return {
+    isProcessing: staffSales.isProcessing,
     activeCashier: state.application.activeCashier,
     selectedStaffId: staffSales.staffId,
     from: staffSales.from,
-    to: staffSales.tot
+    to: staffSales.to,
+    staffs: state.application.staff.data.staffs
   }
 }
 
