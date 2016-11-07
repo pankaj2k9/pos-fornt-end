@@ -21,19 +21,22 @@ class StaffSales extends React.Component {
     this.renderFilters = this.renderFilters.bind(this)
     this.handleChangeStaff = this.handleChangeStaff.bind(this)
     this.handleSearchOrders = this.handleSearchOrders.bind(this)
+    this.startFetch = this.startFetch.bind(this)
+  }
+
+  componentDidMount () { this.startFetch() }
+  handleSearchOrders () { this.startFetch() }
+  startFetch () {
+    const { dispatch, activeCashier, selectedStaffId, from, to, staffs } = this.props
+    const searchStaffId = this.getSelectedStaff(selectedStaffId, activeCashier, staffs).id
+
+    dispatch(staffSalesFetch(searchStaffId, from, to))
   }
 
   getSelectedStaff (selected, active, staffs) {
     const searchStaffId = selected || active && active.id || staffs[0].id || {}
 
     return staffs.filter((staff) => staff.id === searchStaffId)[0]
-  }
-
-  handleSearchOrders () {
-    const { dispatch, activeCashier, selectedStaffId, from, to, staffs } = this.props
-    const searchStaffId = this.getSelectedStaff(selectedStaffId, activeCashier, staffs).id
-
-    dispatch(staffSalesFetch(searchStaffId, from, to))
   }
 
   handleChangeDatePicker (picker, value) {
@@ -125,11 +128,8 @@ class StaffSales extends React.Component {
       activeCashier
     } = this.props
 
-    console.log(staffs)
-    console.log(selectedStaffId)
     const selectedStaff = this.getSelectedStaff(selectedStaffId, activeCashier, staffs)
 
-    console.log(selectedStaff)
     const data = {
       orders,
       staff: selectedStaff
@@ -149,14 +149,17 @@ class StaffSales extends React.Component {
             </div>
           </div>
 
-          <div className='tile is-parent is-vertical'>
-            <div className='tile is-child'>
-              {orders.length
-                ? <StaffSalesReceiptPreview data={data} />
-                : <span>No orders found</span>
-              }
+          {!isProcessing
+            ? <div className='tile is-parent is-vertical'>
+              <div className='tile is-child'>
+                {orders.length && !isProcessing
+                  ? <StaffSalesReceiptPreview data={data} />
+                  : <span>No orders found</span>
+                }
+              </div>
             </div>
-          </div>
+            : null
+          }
 
         </div>
       </div>

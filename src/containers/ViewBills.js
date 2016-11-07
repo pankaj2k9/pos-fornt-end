@@ -23,9 +23,12 @@ class ViewBills extends React.Component {
     this.renderIdInputs = this.renderIdInputs.bind(this)
     this.handleChangeRadio = this.handleChangeRadio.bind(this)
     this.handleSearchOrders = this.handleSearchOrders.bind(this)
+    this.startFetch = this.startFetch.bind(this)
   }
 
-  handleSearchOrders () {
+  componentDidMount () { this.startFetch() }
+  handleSearchOrders () { this.startFetch() }
+  startFetch () {
     const { dispatch, stores, store, from, to, idFrom, idTo, reportType } = this.props
 
     switch (reportType) {
@@ -204,15 +207,17 @@ class ViewBills extends React.Component {
             </div>
           </div>
 
-          <div className='tile is-parent is-vertical'>
-            <div className='tile is-child'>
-              {orders.length
-                ? <ViewBillReceiptPreview orders={orders} stores={stores} />
-                : null
-              }
+          {!isProcessing
+            ? <div className='tile is-parent is-vertical'>
+              <div className='tile is-child'>
+                {orders.length
+                  ? <ViewBillReceiptPreview orders={orders} stores={stores} />
+                  : <span>No orders found</span>
+                }
+              </div>
             </div>
-          </div>
-
+            : null
+          }
         </div>
       </div>
     )
