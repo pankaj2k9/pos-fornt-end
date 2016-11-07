@@ -13,7 +13,7 @@ import { printReceiptFromString } from '../utils/receipt'
 
 import { formatDate } from '../utils/string'
 
-export default class ViewBillReceiptPreview extends React.Component {
+export default class ViewBillReceiptPreview extends React.PureComponent {
   constructor (props) {
     super(props)
 

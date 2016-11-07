@@ -69,6 +69,7 @@ const en = {
   'app.general.refundSuccess': 'Refund Success!',
   'app.general.reprintSuccess': 'Check Printer for the Receipt',
   'app.general.completeSales': 'Complete Sales Report',
+  'app.general.xzReading': 'X/Z Reading',
   'app.general.viewBills': 'View Bills',
   'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
