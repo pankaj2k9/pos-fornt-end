@@ -70,7 +70,7 @@ export default class ViewBillReceiptPreview extends React.Component {
             const keyPref = `rcptprev-vb-${order.id}-`
 
             return (
-              <span key={`${keyPref}${order.id}`}>
+              <span key={`${keyPref}`}>
                 {/* Address */}
                 {addrList.map((addr, i) => {
                   const key = `${keyPref}addr-${i}`

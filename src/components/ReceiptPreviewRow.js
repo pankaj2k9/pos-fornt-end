@@ -21,7 +21,7 @@ const ReceiptPreviewRow = ({cols, colType, rowType, keyPrefix}) => {
   if (rowType) { rowClass += ` ${rowType}` }
 
   let colClass = `col`
-  if (colType) { colClass += `col${colType}` }
+  if (colType) { colClass += ` col-${colType}` }
 
   return (
     <div className={rowClass}>

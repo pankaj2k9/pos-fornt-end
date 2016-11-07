@@ -9,13 +9,14 @@
     justify-content: space-between;
 
     &.spaced { margin-bottom: 5px; }
+    &.centered { justify-content: center; }
 
     &.col3 .col:nth-child(1) { width: 140px; }
     &.col3 .col:nth-child(2) { width: 30px; text-align: right; }
     &.row.col3 .col:nth-child(3) { width: 70px; text-align: right; }
 
     &.row.col4 > div { width: 55px; text-align: right; }
-    &.row.col4 .col:nth-child(1) { width: 80px; text-align: left; }
+    &.row.col4 .col:nth-child(1) { width: 60px; text-align: left; }
 
     &.row.col4 .col.col-sh:nth-child(1) { width: 25px; text-align: left; }
     &.row.col4 .col.col-sh:nth-child(2) { width: 100px; text-align: left; }
