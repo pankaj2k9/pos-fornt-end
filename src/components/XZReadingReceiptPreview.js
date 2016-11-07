@@ -1,10 +1,11 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
+import { FormattedMessage } from 'react-intl'
 
 import ReceiptPreview from './ReceiptPreview'
 import ReceiptPreviewRow, {
   ReceiptRowDivider,
   ReceiptRowNewLine
-//   ReceiptRowDividerDbl
 } from './ReceiptPreviewRow'
 
 import {
@@ -12,7 +13,31 @@ import {
   formatDate
 } from '../utils/string'
 
+import { printReceiptFromString } from '../utils/receipt'
+
 export default class XZReadingReceiptPreview extends React.PureComponent {
+  constructor (props) {
+    super(props)
+
+    this.renderPrintBtn = this.renderPrintBtn.bind(this)
+    this.handlePrint = this.handlePrint.bind(this)
+  }
+
+  renderPrintBtn () {
+    return (
+      <p className='control'>
+        <button className='button is-primary is-inverted' onClick={this.handlePrint}>
+          <FormattedMessage id='app.general.printReceipt' />
+        </button>
+      </p>
+    )
+  }
+
+  handlePrint () {
+    const receiptContent = ReactDOM.findDOMNode(this.refs.preview).innerHTML
+    printReceiptFromString(receiptContent)
+  }
+
   getPaymentDetails (orders) {
     const paymentDetails = {}
     let paymentDetailsTotal = 0
@@ -199,6 +224,8 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
     const keyPref = 'rcptprev-xz'
     return (
       <ReceiptPreview>
+        {this.renderPrintBtn()}
+
         <span ref='preview'>
           {/* Header */}
           {data.headerText.map((headerText, i) => {
@@ -475,6 +502,8 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
             keyPrefix={`${keyPref}-dateprinted`}
             cols={[`Date Printed : ${formatDate(new Date())}`]} />
         </span>
+
+        {this.renderPrintBtn()}
       </ReceiptPreview>
     )
   }

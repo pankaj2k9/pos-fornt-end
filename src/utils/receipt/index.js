@@ -7,6 +7,7 @@ const RECEIPT_LINE_HEIGHT = 18
 export const RECEIPT_STYLES = '' +
   '.row { display: flex; justify-content: space-between; }\n' +
   '.row.spaced { margin-bottom: 5px; }\n' +
+  '.row.centered { justify-content: center; }\n' +
   '.row.col3 .col:nth-child(1) { width: 140px; }\n' +
   '.row.col3 .col:nth-child(2) { width: 30px; text-align: right; }\n' +
   '.row.col3 .col:nth-child(3) { width: 70px; text-align: right; }\n' +

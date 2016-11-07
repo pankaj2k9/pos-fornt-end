@@ -10,8 +10,6 @@ import {
   completeSalesChSource
 } from '../actions/reports'
 
-// import printEODS from '../utils/printEODS/print'
-
 class SalesReportComplete extends React.Component {
   constructor (props) {
     super(props)
@@ -27,7 +25,6 @@ class SalesReportComplete extends React.Component {
   getCompleteSalesData () {
     let { completeSales, store, cashier } = this.props
     var drawerData = this.cashdrawerData()
-    console.log('DRAWER DATA', drawerData)
 
     if (completeSales) {
       // put real store address here
@@ -54,7 +51,6 @@ class SalesReportComplete extends React.Component {
       }
 
       return completeSales
-      // printEODS(completeSales)
     }
   }
 
@@ -99,7 +95,6 @@ class SalesReportComplete extends React.Component {
 
           {drawerData && salesData
             ? <div className='tile is-child'>
-              Display receipt preview here
               <XZReadingReceiptPreview data={salesData} />
             </div>
             : <div className='tile is-child'>
