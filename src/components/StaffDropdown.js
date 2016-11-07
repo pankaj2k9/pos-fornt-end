@@ -1,4 +1,5 @@
 import React from 'react'
+import { FormattedMessage } from 'react-intl'
 
 export default class StaffsDropdown extends React.PureComponent {
   render () {
@@ -14,7 +15,10 @@ export default class StaffsDropdown extends React.PureComponent {
 
     return (
       <p className='control is-expanded'>
-        <label className='label'>Staff</label>
+        <label className='label'>
+          <FormattedMessage id='app.general.staffSales' />
+        </label>
+
         <span className='select'>
           <select
             value={selectedStaff}

@@ -154,7 +154,7 @@ class StaffSales extends React.Component {
               <div className='tile is-child'>
                 {orders.length && !isProcessing
                   ? <StaffSalesReceiptPreview data={data} />
-                  : <span>No orders found</span>
+                  : <FormattedMessage id='app.page.reports.noData' />
                 }
               </div>
             </div>

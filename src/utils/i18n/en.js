@@ -80,6 +80,7 @@ const en = {
   'app.general.updateCashDrawer': 'Update Amount of CashDrawer',
   'app.general.setCashAmount': 'Set Cash Drawer Amount',
   'app.general.printReceipt': 'Print Receipt',
+  'app.general.staff': 'Staff',
 
   'app.panel.products': 'Barcode Input',
   'app.panel.sales': 'Order Items',
@@ -193,7 +194,7 @@ const en = {
   'app.page.reports.storeId': 'Store ID',
   'app.page.reports.date': 'Date',
   'app.page.reports.currency': 'Currency',
-  'app.page.reports.noData': 'There are no recorded data for the selected date',
+  'app.page.reports.noData': 'There are no recorded data for the selected date.',
 
   'app.page.settings.tabMain': 'Main',
   'app.page.settings.tabOrders': 'Orders',

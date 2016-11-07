@@ -212,7 +212,7 @@ class ViewBills extends React.Component {
               <div className='tile is-child'>
                 {orders.length
                   ? <ViewBillReceiptPreview orders={orders} stores={stores} />
-                  : <span>No orders found</span>
+                  : <FormattedMessage id='app.page.reports.noData' />
                 }
               </div>
             </div>

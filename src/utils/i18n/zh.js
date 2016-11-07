@@ -80,6 +80,7 @@ const zh = {
   'app.general.updateCashDrawer': '更新钱箱量',
   'app.general.setCashAmount': '更新钱箱量',
   'app.general.printReceipt': '打印收据',
+  'app.general.staff': '员工',
 
   'app.panel.products': '制品',
   'app.panel.sales': '销售',
@@ -193,7 +194,7 @@ const zh = {
   'app.page.reports.storeId': '店铺ID',
   'app.page.reports.date': '日期',
   'app.page.reports.currency': '货币',
-  'app.page.reports.noData': '没有记录的数据上选定的日期',
+  'app.page.reports.noData': '没有记录的数据上选定的日期。',
 
   'app.page.settings.tabMain': '主要',
   'app.page.settings.tabOrders': '命令',
