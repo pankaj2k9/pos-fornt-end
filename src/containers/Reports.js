@@ -7,7 +7,8 @@ import { DatePicker } from 'react-input-enhancements'
 import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
-import ViewBills from '../containers/ViewBills'
+import ViewBills from './ViewBills'
+import StaffSales from './StaffSales'
 import OutletStock from './OutletStock'
 
 import {
@@ -61,6 +62,8 @@ class Reports extends React.Component {
         return <SalesReport />
       case 'bills':
         return <ViewBills />
+      case 'staffSales':
+        return <StaffSales />
       case 'completeSales':
         return <SalesReportComplete />
       case 'orders':
@@ -117,6 +120,10 @@ class Reports extends React.Component {
               <li className={activeTab === 'bills' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'bills')}>
                 <a><FormattedMessage id='app.general.viewBills' /></a>
+              </li>
+              <li className={activeTab === 'staffSales' ? 'is-active' : ''}
+                onClick={this._onPressTab.bind(this, 'staffSales')}>
+                <a><FormattedMessage id='app.general.staffSales' /></a>
               </li>
               <li className={activeTab === 'sales' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'sales')}>

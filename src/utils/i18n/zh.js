@@ -71,6 +71,7 @@ const zh = {
   'app.general.completeSales': '齐全销售报告',
   'app.general.xzReading': 'X/Z阅读',
   'app.general.viewBills': '查看帐单',
+  'app.general.staffSales': '雇员销售',
   'app.general.outletStock': '商店股票',
   'app.general.updateCD': '更新钱箱？',
 

@@ -71,6 +71,7 @@ const en = {
   'app.general.completeSales': 'Complete Sales Report',
   'app.general.xzReading': 'X/Z Reading',
   'app.general.viewBills': 'View Bills',
+  'app.general.staffSales': 'Staff Sales',
   'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
 
