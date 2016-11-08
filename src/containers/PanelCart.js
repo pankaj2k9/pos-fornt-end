@@ -1,35 +1,41 @@
 import React, { Component, PropTypes } from 'react'
+import { browserHistory } from 'react-router'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 
-import Counter from '../components/Counter'
 import Panel from '../components/Panel'
-import Level from '../components/Level'
+// import Level from '../components/Level'
 import SearchModal from './SearchModal'
 // import SearchBar from '../components/SearchBar'
-import Truncate from '../components/Truncate'
 import FunctionButtons from '../components/FunctionButtons'
 
 import {
   setWalkinCustomer,
   setInputOdboID,
-  setCartItemQty,
-  setCustomDiscount,
-  removeCartItem,
   removeCustomer,
-  panelCartShouldUpdate
+  setCurrencyType
 } from '../actions/panelCart'
 
 import {
   setDiscount,
-  panelCheckoutShouldUpdate
+  panelCheckoutShouldUpdate,
+  addPaymentType,
+  setPaymentMode,
+  toggleBonusPoints
 } from '../actions/panelCheckout'
 
 import {
   setOrderSearchKey
 } from '../actions/ordersOnHold'
 
-import { customersSetSearchKey } from '../actions/settings'
+import {
+  customersSetSearchKey,
+  setSettingsActiveTab
+} from '../actions/settings'
+
+import {
+  reportsSetTab
+} from '../actions/reports'
 
 import {
   holdOrderAndReset,
@@ -51,12 +57,10 @@ const focusDiscountInput = 'overallDiscountInput'
 
 class PanelCart extends Component {
 
-  // componentDidUpdate () {
-  //   const {activeModalId, focusedInput} = this.props
-  //   if (activeModalId && focusedInput) {
-  //     document.getElementById(focusedInput).focus()
-  //   }
-  // }
+  componentDidUpdate () {
+    const {focusedInput} = this.props
+    document.getElementById(focusedInput).focus()
+  }
 
   _clickRemoveCustomer () {
     const {dispatch} = this.props
@@ -100,14 +104,27 @@ class PanelCart extends Component {
     const { activeModalId, dispatch } = this.props
     if (activeModalId === 'addCustomDiscount') {
       event.preventDefault()
-      dispatch(closeActiveModal())
+      dispatch(closeActiveModal(focusProductSearch))
     }
     dispatch(closeActiveModal(focusProductSearch))
   }
 
   _clickButtons (buttonName) {
+    const {dispatch} = this.props
     const button = buttonName.toLowerCase()
     switch (button) {
+      case 'view bill':
+        dispatch(reportsSetTab('bills'))
+        browserHistory.push('reports')
+        break
+      case 'outlet stock':
+        dispatch(reportsSetTab('stocks'))
+        browserHistory.push('reports')
+        break
+      case 'reprint/ refund':
+        dispatch(setSettingsActiveTab('orders'))
+        browserHistory.push('settings')
+        break
       case 'recall order':
         this._openModal('recallOrder', focusOrderSearch)
         break
@@ -121,6 +138,44 @@ class PanelCart extends Component {
         this._openModal('addCustomDiscount', focusDiscountInput)
         break
       default:
+    }
+  }
+
+  _clickOtherButtons (buttonName) {
+    const { dispatch } = this.props
+    let mode = buttonName.toLowerCase()
+    if (mode === 'admin') {
+      window.open('https://uat-admin.theodbocare.com/', '_blank') // temporary link
+    } else if (mode === 'checkout order') {
+      this._processOrder()
+      dispatch(panelCheckoutShouldUpdate(true))
+    } else if (mode === 'search customer') {
+      this._openModal('searchOdboUser', focusOdboUserSearch)
+    }
+  }
+
+  _clickPaymentButtons (buttonName) {
+    const { dispatch, currency, bonusPoints, activeCustomer, cartItemsArray } = this.props
+    let mode = buttonName.toLowerCase()
+    if (cartItemsArray.length > 0) {
+      if (mode === 'use odbo coins') {
+        currency === 'sgd'
+        ? dispatch(setCurrencyType('odbo'))
+        : dispatch(setCurrencyType('sgd'))
+        if (activeCustomer && activeCustomer.odboCoins - this.orderTotal() >= 0) {
+          var odboPayment = {type: 'odbo', amount: this.orderTotal(), remarks: 'odbo payment'}
+          dispatch(addPaymentType(odboPayment))
+        }
+      } else if (mode === 'double points') {
+        let boolVal = !bonusPoints
+        dispatch(toggleBonusPoints(boolVal))
+        dispatch(closeActiveModal(focusProductSearch))
+      } else {
+        dispatch(setActiveModal('paymentModal'))
+        dispatch(setPaymentMode(mode))
+      }
+    } else {
+      document.getElementById('productsSearch').focus()
     }
   }
 
@@ -172,15 +227,32 @@ class PanelCart extends Component {
     let updatedDiscount = shouldUpdate // detects changes in discount
       ? null
       : currency === 'sgd'
-        ? Math.round(sumOfDiscounts)
-        : Math.round(sumOfDiscounts)
+        ? Number(sumOfDiscounts.toFixed(2))
+        : Number(sumOfDiscounts.toFixed(0))
     return updatedDiscount
   }
 
+  sumOfPayments () {
+    const { payments } = this.props
+    let x = payments
+    let voucherTotal = this.vouchers() ? this.vouchers().voucherTotal : 0
+    let sumOfPayments = 0
+    if (x) {
+      for (var i = 0; i < x.length; i++) {
+        sumOfPayments = sumOfPayments + (Number(x[i].amount) || 0)
+      }
+    }
+    if (!sumOfPayments) {
+      return 0
+    } else {
+      return sumOfPayments + voucherTotal
+    }
+  }
+
   overAllDeduct () {
-    const {overallDiscount, currency} = this.props
-    let discount = overallDiscount === 0
-      ? 0 : Number(overallDiscount)
+    const {customDiscount, currency} = this.props
+    let discount = !customDiscount || customDiscount === '' || customDiscount === 0
+      ? 0 : Number(customDiscount)
     let overAllDeduct = currency === 'sgd'
       ? (discount / 100) * this.sumOfCartItems()
       : Math.round((discount / 100) * this.sumOfCartItems())
@@ -188,264 +260,107 @@ class PanelCart extends Component {
   }
 
   orderTotal () {
-    const { overallDiscount } = this.props
-    let subtotal = overallDiscount === 0
-      ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
-      : Number(this.sumOfCartItems() - this.overAllDeduct()).toFixed(2)
-    return subtotal
+    const { customDiscount } = this.props
+    let subtotal = !customDiscount || customDiscount === 0
+      ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts())
+      : this.sumOfCartItems() - this.overAllDeduct()
+    return Number(subtotal)
   }
 
-  renderOrderItems () {
-    const { dispatch, cartItemsArray, currency,
-            locale, shouldUpdate, overallDiscount } = this.props
-    const notEmpty = (cartItemsArray !== null || undefined)
-    // const add = this.addProductQty
-    return cartItemsArray.map(function (item, key) {
-      function plus () {
-        dispatch(panelCartShouldUpdate(true))
-        dispatch(setCartItemQty(item.id, 'plus'))
-        document.getElementById('productsSearch').focus()
-      }
+  paymentMinusOrderTotal () {
+    return this.sumOfPayments() - this.orderTotal()
+  }
 
-      function minus () {
-        dispatch(panelCartShouldUpdate(true))
-        dispatch(setCartItemQty(item.id, 'minus'))
-        document.getElementById('productsSearch').focus()
-      }
-
-      function remove () {
-        dispatch(panelCartShouldUpdate(true))
-        dispatch(removeCartItem(item.id))
-        document.getElementById('orderSearch').value = 0
-        document.getElementById('productsSearch').focus()
-      }
-
-      function setDiscount (value) {
-        let discount = Number(value) > 100 ? 100 : value
-        dispatch(panelCartShouldUpdate(true))
-        dispatch(setCustomDiscount(discount, item.id))
-      }
-
-      let productName = locale === 'en' ? item.nameEn : item.nameZh
-      let itemDiscount = Number(item.priceDiscount)
-      let odboDiscount = Number(item.odboPriceDiscount)
-      let customDiscount = Number(item.customDiscount)
-      let price = Number(item.price)
-      let odboPrice = Number(item.odboPrice)
-
-      // validate customDiscount is equal to 0
-      let discountPH = item.customDiscount === 0
-        ? item.isDiscounted
-          ? currency === 'sgd'
-            ? itemDiscount
-            : odboDiscount
-          : 0.00
-        : customDiscount
-
-      // input value: 100 is max value
-      let discountVal = odboDiscount === 0
-        ? ''
-        : customDiscount
-
-      // validate customDiscount is equal to 0
-      let discount = customDiscount === 0
-        // if true then validate if item discount is enabled
-        ? item.isDiscounted
-          ? currency === 'sgd'
-            ? Math.round((itemDiscount / 100) * price)
-            : Math.round((odboDiscount / 100) * odboPrice)
-          // else if item discount not enabled, discount is zero
-          : 0.00
-        // else if customDiscount is not zero, compute overall discount of sale
-        : currency === 'sgd'
-          ? Math.round((customDiscount / 100) * price)
-          : Math.round((customDiscount / 100) * odboPrice)
-
-      let computedDiscount = currency === 'sgd'
-        ? price - discount
-        : odboPrice - Math.round(discount)
-
-      return (
-        notEmpty
-        ? <tr key={key}>
-          <td className='is-icon'>
-            <Counter
-              size='small'
-              count={item.qty}
-              plus={plus}
-              minus={minus} />
-          </td>
-          <td><Truncate text={productName} maxLength={26} /></td>
-          {
-            Number(overallDiscount) === 0
-              ? <td>
-                <form onSubmit={e => {
-                  e.preventDefault()
-                  document.getElementById('productsSearch').focus()
-                }}>
-                  <p className='control has-addons' style={{width: 50}}>
-                    <input id='itemDiscount' className='input is-small' type='Number'
-                      placeholder={discountPH} value={discountVal}
-                      onChange={e => setDiscount(e.target.value)} />
-                    <a className='button is-small'>%</a>
-                  </p>
-                </form>
-              </td>
-              : null
+  vouchers () {
+    const {payments} = this.props
+    let voucherToString = ''
+    let voucherList = []
+    let voucherTotal = 0
+    let vouchers
+    payments.forEach(payment => {
+      if (payment.type === 'voucher' && payment.vouchers.length > 0) {
+        payment.vouchers.forEach(voucher => {
+          let v1 = `${voucher.deduction}, `
+          voucherList.push(voucher)
+          voucherTotal += Number(voucher.deduction)
+          voucherToString = voucherToString.concat(v1)
+          vouchers = {
+            voucherToString: voucherToString,
+            voucherList: voucherList,
+            voucherTotal: voucherTotal
           }
-          <td>
-            <p>
-              {shouldUpdate
-                ? null
-                : currency === 'sgd'
-                  ? Number(Number(item.qty) * computedDiscount).toFixed(2)
-                  : parseInt(item.qty) * Number(computedDiscount)}
-            </p>
-          </td>
-          <td className='is-icon'>
-            <a
-              className='button is-inverted is-danger is-small'
-              style={{padding: 0}}
-              onClick={remove}>
-              <span className='icon fa fa-times is-marginless' />
-            </a>
-          </td>
-        </tr>
-        : <tr />
-      )
+        })
+      }
     })
+    return vouchers
+  }
+
+  cashChange () {
+    const { payments } = this.props
+    let change
+    payments.forEach(function (payment) {
+      if (payment.type === 'cash') {
+        change = Number(payment.cash) - payment.amount
+      }
+    })
+    return change || 0
   }
 
   render () {
-    var intFrameHeight = window.innerHeight
     const {
       activeCustomer,
-      walkinCustomer,
       cartItemsArray,
-      // currency,
-      overallDiscount,
-      shouldUpdate
+      ordersOnHold
+      // overallDiscount,
+      // shouldUpdate
     } = this.props
-    const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
 
-    var buttons = [
+    var buttons1 = [
+      {name: 'X/Z Reading', icon: 'fa fa-files-o'},
+      {name: 'View Bill', icon: 'fa fa-files-o'},
+      {name: 'Staff Sales', icon: 'fa fa-files-o'},
+      {name: 'Outlet Stock', icon: 'fa fa-files-o'},
       {name: 'Reprint/ Refund', icon: 'fa fa-cog'},
-      {name: 'Reports', icon: 'fa fa-files-o'},
-      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o'},
-      {name: 'Hold Order', icon: 'fa fa-hand-rock-o'},
-      {name: 'Recall Order', icon: 'fa fa-hand-lizard-o'},
+      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o', customColor: cartItemsArray ? 'black' : 'grey'},
+      {name: 'Recall Order', icon: 'fa fa-hand-lizard-o', customColor: ordersOnHold.length > 0 ? '#23d160' : 'grey'},
+      {name: 'Hold Order', icon: 'fa fa-hand-rock-o', customColor: cartItemsArray ? 'black' : 'grey'},
+      {name: 'Print Total', icon: 'fa fa-print', customColor: cartItemsArray ? 'black' : 'grey'}
+    ]
+
+    var buttons2 = [
+      {name: 'Cash', icon: 'fa fa-money', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'},
+      {name: 'Credit', icon: 'fa fa-credit-card', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'},
+      {name: 'Nets', icon: 'fa fa-credit-card', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'},
+      {name: 'Double Points', icon: 'fa fa-star-o', customColor: activeCustomer ? 'orange' : 'grey'},
+      {name: 'Use Odbo Coins', icon: 'fa fa-asterisk', customColor: activeCustomer ? '#23d160' : 'grey'},
+      {name: 'Voucher', icon: 'fa fa-file-excel-o', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'}
+    ]
+
+    var buttons3 = [
+      {name: 'Admin', icon: 'fa fa-user-secret', color: ''},
+      {name: 'Product List', icon: 'fa fa-shopping-bag', color: ''},
       {name: 'Search Customer', icon: 'fa fa-search'}
     ]
 
     return (
       <div>
         <Panel>
-          <div className='panel-block'>
-            <FunctionButtons buttons={buttons} onClickButton={this._clickButtons.bind(this)} />
+          <div className='panel-block' style={{padding: 5}}>
+            <FunctionButtons buttons={buttons3} onClickButton={this._clickOtherButtons.bind(this)} />
+          </div>
+        </Panel>
+        <Panel>
+          <div className='panel-block' style={{padding: 5}}>
+            <FunctionButtons buttons={buttons1} onClickButton={this._clickButtons.bind(this)} />
+          </div>
+        </Panel>
+        <Panel>
+          <div className='panel-block' style={{padding: 5}}>
+            <FunctionButtons buttons={buttons2} onClickButton={this._clickPaymentButtons.bind(this)} />
           </div>
         </Panel>
         <Panel
           panelName={<FormattedMessage id='app.panel.sales' />}>
-          <div className='panel-block'>
-            {!shouldUpdate
-              ? <Level
-                left={
-                  <h4 className='title is-4 is-marginless'>
-                    Order Items
-                  </h4>
-                }
-                right={
-                  <div>
-                    {activeCustomer !== null || undefined
-                    ? <div>
-                      <p className='is-marginless'>
-                        <FormattedMessage id='app.general.cust' />:
-                        <strong>{` ${activeCustomer.firstName}`}</strong>
-                      </p>
-                      <a style={{color: 'orange'}}
-                        onClick={this._clickRemoveCustomer.bind(this)}>
-                        <i className='fa fa-times' />
-                        <FormattedMessage id='app.button.remove' />
-                      </a>
-                    </div>
-                    : <div>
-                      {walkinCustomer === ''
-                        ? <h4 className='is-marginless'>
-                          <FormattedMessage id='app.general.walkinCust' />
-                        </h4>
-                        : <div>
-                          <p className='is-marginless'>
-                            <FormattedMessage id='app.general.cust' />:
-                            <strong>{` ${walkinCustomer}`}</strong>
-                          </p>
-                          <a style={{color: 'orange'}}
-                            onClick={this._clickRemoveCustomer.bind(this)}>
-                            <i className='fa fa-times' />
-                            <FormattedMessage id='app.button.remove' />
-                          </a>
-                        </div>
-                      }
-                    </div>
-                    }
-                  </div>
-                } />
-              : <div className='has-text-centered'>
-                <i className='fa fa-spinner fa-pulse fa-fw' />
-              </div>
-            }
-          </div>
-          <div className='panel-block' style={{padding: 0}}>
-            <div className='content'
-              style={{height: intFrameHeight / 2.7, overflowY: 'scroll'}}>
-              {!empty
-                ? <table className='table'>
-                  <thead>
-                    <tr>
-                      <th><FormattedMessage id='app.general.qty' /></th>
-                      <th><FormattedMessage id='app.general.product' /></th>
-                      {!overallDiscount || overallDiscount === 0
-                        ? <th><FormattedMessage id='app.general.discount' /></th>
-                        : null
-                      }
-                      <th><FormattedMessage id='app.general.subtotal' /></th>
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {this.renderOrderItems()}
-                  </tbody>
-                </table>
-                : <div className='section has-text-centered is-fullheight'
-                  style={{height: intFrameHeight / 4, overflowY: 'scroll'}}>
-                  <p>
-                    <strong><FormattedMessage id='app.error.noCartItems' /></strong>
-                  </p>
-                </div>
-              }
-            </div>
-          </div>
-          <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
-            <Level left={
-              <strong>Subtotal</strong>
-              }
-              right={<strong>{this.sumOfCartItems()}</strong>} />
-            <Level left={
-              <strong>Discounts</strong>
-              }
-              right={<strong>{
-                overallDiscount === 0
-                ? this.sumOfCartDiscounts()
-                : this.overAllDeduct()
-              }</strong>} />
-            <Level left={
-              <strong>Order Total</strong>
-              }
-              right={
-                <h3 className='is-marginless'>
-                  <strong>{this.orderTotal()}</strong>
-                </h3>
-            } />
-          </div>
           {this.renderModal()}
         </Panel>
       </div>
