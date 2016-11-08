@@ -1,4 +1,8 @@
-import {panelCheckoutReset, checkoutFieldsReset} from './panelCheckout'
+import {
+  panelCheckoutReset,
+  checkoutFieldsReset,
+  printPreviewTotal
+} from './panelCheckout'
 import {
   panelCartReset,
   setWalkinCustomer,
@@ -44,6 +48,33 @@ import {
 import print from '../utils/printReceipt/print'
 
 const focusProductSearch = 'productsSearch'
+
+export function printPreviewTotalReceipt (receipt, activeCustomer) {
+  return (dispatch) => {
+    /**
+     * reprintingReceipt sets reprinting state
+     * when reprinting state is set to true value, it diplays a loading text
+     * when reprinting state is set to false value, it hides the loading text
+     * print() function does not detect the printing state so setTimeout is used
+     * setTimeout() is used to emulate the change in reprinting state
+     */
+    if (activeCustomer) {
+      let newPoints = {
+        points: receipt.trans.computations.total,
+        newOdbo: Number(receipt.trans.previousOdbo) + Number(receipt.trans.computations.total)
+      }
+      receipt.trans = Object.assign(receipt.trans, newPoints)
+    }
+    receipt.info = { date: new Date() }
+    print(receipt)
+    setTimeout(function () {
+      let print = false
+      let shouldUpdate = false
+      dispatch(printPreviewTotal(print, shouldUpdate))
+      dispatch(closeActiveModal())
+    }, 2000)
+  }
+}
 
 export function reprintReceipt (receiptData) {
   return (dispatch) => {

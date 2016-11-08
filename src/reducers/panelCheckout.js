@@ -13,6 +13,7 @@ import {
   PANEL_CHECKOUT_RESET,
   CHECKOUT_FIELDS_RESET,
   TOGGLE_BONUS_POINTS,
+  PRINT_PREVIEW_TOTAL,
 
   VERIFY_VOUCHER_REQUEST,
   VERIFY_VOUCHER_SUCCESS,
@@ -32,6 +33,7 @@ function panelCheckout (state = {
     type: 'credit',
     provider: null
   },
+  printPreviewTotal: false,
   bonusPoints: false,
   customDiscount: 0,
   transNumber: '',
@@ -41,6 +43,11 @@ function panelCheckout (state = {
   error: null
 }, action) {
   switch (action.type) {
+    case PRINT_PREVIEW_TOTAL:
+      return Object.assign({}, state, {
+        printPreviewTotal: action.print,
+        shouldUpdate: action.shouldUpdate
+      })
     case SET_PAYMENT_MODE:
       return Object.assign({}, state, {
         paymentMode: action.mode,
