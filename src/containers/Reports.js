@@ -7,7 +7,8 @@ import { DatePicker } from 'react-input-enhancements'
 import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
 import StoreOrders from './StoreOrders'
-import ViewBills from '../containers/ViewBills'
+import ViewBills from './ViewBills'
+import StaffSales from './StaffSales'
 import OutletStock from './OutletStock'
 
 import {
@@ -26,13 +27,13 @@ class Reports extends React.Component {
   onChangeDate (event) {
     event.preventDefault
     var selectedDate = event.toDate()
-    const { dispatch, store, activeTab, limit } = this.props
+    const { dispatch, store, activeTab, limit, completeSalesSource } = this.props
 
     let storeId = store.source
 
     dispatch(reportsSetDate(selectedDate))
     if (activeTab === 'completeSales') {
-      dispatch(completeSalesFetch(store.source, selectedDate))
+      dispatch(completeSalesFetch(completeSalesSource || store.source, selectedDate))
     } else if (activeTab === 'orders') {
       // get sales today
       const from = selectedDate
@@ -61,6 +62,8 @@ class Reports extends React.Component {
         return <SalesReport />
       case 'bills':
         return <ViewBills />
+      case 'staffSales':
+        return <StaffSales />
       case 'completeSales':
         return <SalesReportComplete />
       case 'orders':
@@ -112,11 +115,15 @@ class Reports extends React.Component {
             <ul>
               <li className={activeTab === 'completeSales' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'completeSales')}>
-                <a><FormattedMessage id='app.general.completeSales' /></a>
+                <a><FormattedMessage id='app.general.xzReading' /></a>
               </li>
               <li className={activeTab === 'bills' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'bills')}>
                 <a><FormattedMessage id='app.general.viewBills' /></a>
+              </li>
+              <li className={activeTab === 'staffSales' ? 'is-active' : ''}
+                onClick={this._onPressTab.bind(this, 'staffSales')}>
+                <a><FormattedMessage id='app.general.staffSales' /></a>
               </li>
               <li className={activeTab === 'sales' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'sales')}>
@@ -148,7 +155,8 @@ function mapStateToProps (state) {
     store: state.application.store,
     page: state.reports.storeOrders.page,
     limit: state.reports.storeOrders.limit,
-    skip: state.reports.storeOrders.skip
+    skip: state.reports.storeOrders.skip,
+    completeSalesSource: state.reports.completeSales.source
   }
 }
 

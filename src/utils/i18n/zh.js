@@ -69,7 +69,9 @@ const zh = {
   'app.general.refundSuccess': '退成功!',
   'app.general.reprintSuccess': '检查打印机对于收据',
   'app.general.completeSales': '齐全销售报告',
+  'app.general.xzReading': 'X/Z阅读',
   'app.general.viewBills': '查看帐单',
+  'app.general.staffSales': '雇员销售',
   'app.general.outletStock': '商店股票',
   'app.general.updateCD': '更新钱箱？',
 
@@ -78,6 +80,7 @@ const zh = {
   'app.general.updateCashDrawer': '更新钱箱量',
   'app.general.setCashAmount': '更新钱箱量',
   'app.general.printReceipt': '打印收据',
+  'app.general.staff': '员工',
 
   'app.panel.products': '制品',
   'app.panel.sales': '销售',
@@ -191,7 +194,7 @@ const zh = {
   'app.page.reports.storeId': '店铺ID',
   'app.page.reports.date': '日期',
   'app.page.reports.currency': '货币',
-  'app.page.reports.noData': '没有记录的数据上选定的日期',
+  'app.page.reports.noData': '没有记录的数据上选定的日期。',
 
   'app.page.settings.tabMain': '主要',
   'app.page.settings.tabOrders': '命令',

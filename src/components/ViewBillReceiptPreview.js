@@ -13,7 +13,7 @@ import { printReceiptFromString } from '../utils/receipt'
 
 import { formatDate } from '../utils/string'
 
-export default class ViewBillReceiptPreview extends React.Component {
+export default class ViewBillReceiptPreview extends React.PureComponent {
   constructor (props) {
     super(props)
 
@@ -70,7 +70,7 @@ export default class ViewBillReceiptPreview extends React.Component {
             const keyPref = `rcptprev-vb-${order.id}-`
 
             return (
-              <span key={`${keyPref}${order.id}`}>
+              <span key={`${keyPref}`}>
                 {/* Address */}
                 {addrList.map((addr, i) => {
                   const key = `${keyPref}addr-${i}`
