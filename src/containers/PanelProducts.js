@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 
 import SearchBar from '../components/SearchBar'
-import Panel from '../components/Panel'
 
 import {
   addItemToCart,
@@ -58,18 +57,14 @@ class PanelProducts extends Component {
     } = this.props
     return (
       !shouldUpdate && !isFetching
-      ? <div className='is-fullheight'>
-        <Panel>
-          <div className='panel-heading'>
-            <SearchBar
-              id='productsSearch'
-              autoFocus={autofocusSearchInput}
-              value={productsSearchKey}
-              placeholder='app.ph.searchOrBarcode'
-              onChange={this.searchKeyInput.bind(this)}
-              onSubmit={this.barcodeInput.bind(this)} />
-          </div>
-        </Panel>
+      ? <div>
+        <SearchBar
+          id='productsSearch'
+          autoFocus={autofocusSearchInput}
+          value={productsSearchKey}
+          placeholder='app.ph.searchOrBarcode'
+          onChange={this.searchKeyInput.bind(this)}
+          onSubmit={this.barcodeInput.bind(this)} />
       </div>
       : null
     )
