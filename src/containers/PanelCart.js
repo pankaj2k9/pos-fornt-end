@@ -6,7 +6,7 @@ import { FormattedMessage } from 'react-intl'
 import Panel from '../components/Panel'
 // import Level from '../components/Level'
 import SearchModal from './SearchModal'
-// import SearchBar from '../components/SearchBar'
+import Truncate from '../components/Truncate'
 import FunctionButtons from '../components/FunctionButtons'
 
 import {
@@ -15,6 +15,10 @@ import {
   removeCustomer,
   setCurrencyType
 } from '../actions/panelCart'
+
+import {
+  addItemToCart
+} from '../actions/panelProducts'
 
 import {
   setDiscount,
@@ -105,6 +109,14 @@ class PanelCart extends Component {
     dispatch(closeActiveModal(focusProductSearch))
   }
 
+  onClickProduct (productId) {
+    const {dispatch, productsById} = this.props
+    const product = productsById[productId]
+    dispatch(addItemToCart(product))
+    this._closeModal()
+    document.getElementById('productsSearch').focus()
+  }
+
   _clickButtons (buttonName) {
     const {dispatch, cartItemsArray} = this.props
     const button = buttonName.toLowerCase()
@@ -162,9 +174,8 @@ class PanelCart extends Component {
     let mode = buttonName.toLowerCase()
     if (mode === 'admin') {
       window.open('https://uat-admin.theodbocare.com/', '_blank') // temporary link
-    } else if (mode === 'checkout order') {
-      this._processOrder()
-      dispatch(panelCheckoutShouldUpdate(true))
+    } else if (mode === 'product list') {
+      dispatch(setActiveModal('productsList'))
     } else if (mode === 'search customer') {
       this._openModal('searchOdboUser', focusOdboUserSearch)
     }
@@ -383,6 +394,97 @@ class PanelCart extends Component {
     )
   }
 
+  renderChildren () {
+    const {
+      locale,
+      productsArray,
+      productsSearchKey,
+      productsFilter,
+      storeId
+    } = this.props
+    let filterString = productsFilter.trim().toLowerCase()
+    let searchKey = productsSearchKey.trim().toLowerCase()
+    let firstFilter = []
+    let filteredProducts = []
+
+    if (productsFilter === 'all' && productsSearchKey === '') {
+      filteredProducts = productsArray
+    } else if (productsFilter === 'all' && productsSearchKey !== '') {
+      filteredProducts = productsArray.filter(function (product) {
+        return product.nameEn.toLowerCase().match(searchKey) ||
+          product.descriptionEn.toLowerCase().match(searchKey) ||
+          product.nameZh.toLowerCase().match(searchKey) ||
+          product.descriptionZh.toLowerCase().match(searchKey)
+      })
+    } else if (productsFilter !== 'all' && productsSearchKey === '') {
+      filteredProducts = productsArray.filter(function (product) {
+        return product.type.toLowerCase().match(filterString)
+      })
+    } else if (productsFilter !== 'all' || productsSearchKey !== '') {
+      firstFilter = productsArray.filter(function (product) {
+        return product.type.toLowerCase().match(filterString)
+      })
+      filteredProducts = firstFilter.filter(function (product) {
+        return product.nameEn.toLowerCase().match(searchKey) ||
+          product.descriptionEn.toLowerCase().match(searchKey) ||
+          product.nameZh.toLowerCase().match(searchKey) ||
+          product.descriptionZh.toLowerCase().match(searchKey)
+      })
+    }
+    return filteredProducts.map(function (product, key) {
+      let productStock = {}
+      product.stock.forEach(obj => {
+        if (obj.storeId === storeId) {
+          let tagColor
+          if (obj.stock >= 51) {
+            tagColor = {color: 'green'}
+          } else if (obj.stock <= 50) {
+            if (obj.stock > 20) {
+              tagColor = {color: 'orange'}
+            } else if (obj.stock < 20) {
+              tagColor = {color: 'red'}
+            }
+          }
+          productStock = {stock: obj.stock, tag: tagColor}
+        }
+      })
+      let tag = productStock.tag
+      let productName = locale === 'en' ? product.nameEn : product.nameZh
+
+      return (
+        <div
+          key={key}
+          className={`column is-4`}
+          onClick={this.onClickProduct.bind(this, product.id)}>
+          <div className='card' style={{height: 140}}>
+            <div className='section' style={{padding: 20, backgroundColor: 'transparent'}}>
+              <div className='title is-5'>
+                <Truncate text={productName} maxLength={25} />
+              </div>
+
+              {product.stock.length === 0 || Object.keys(productStock).length === 0
+                ? <p style={{
+                  color: 'red',
+                  fontSize: 16 }}>
+                  update stock on admin
+                </p>
+                : <div>
+                  {'stock: '}
+                  <span
+                    style={{fontSize: 18}}>
+                    <strong style={tag}>
+                      {productStock.stock}
+                    </strong>
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      )
+    }, this)
+  }
+
   renderModal () {
     const { activeModalId, ordersOnHold } = this.props
     if (activeModalId === 'recallOrder') {
@@ -395,6 +497,8 @@ class PanelCart extends Component {
       return this.renderCustomerModal()
     } else if (activeModalId === 'addCustomDiscount') {
       return this.renderCustomDiscount()
+    } else if (activeModalId === 'productsList') {
+      return this.renderProductsList()
     }
   }
 
@@ -405,6 +509,32 @@ class PanelCart extends Component {
       ? 0
       : Number(value) > 100 ? 100 : value
     dispatch(setDiscount(discount))
+  }
+
+  renderProductsList () {
+    const {activeModalId} = this.props
+    var modalActive = activeModalId === 'productsList'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background'>
+          <div className='modal-card'>
+            <header className='modal-card-head'>
+              <p className='modal-card-title is-marginless has-text-centered'>
+                Products List
+              </p>
+              <button className='delete' onClick={this._closeModal.bind(this)} />
+            </header>
+            <div className='modal-card-body'>
+              <div className='columns is-multiline is-mobile'>
+                {this.renderChildren()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   renderCustomDiscount () {
@@ -525,7 +655,12 @@ PanelCart.propTypes = {
 
 function mapStateToProps (state) {
   return {
+    storeId: state.application.storeId,
     focusedInput: state.application.focusedInput,
+    productsArray: state.data.products.productsArray,
+    productsById: state.data.products.productsById,
+    productsSearchKey: state.panelProducts.productsSearchKey,
+    productsFilter: state.panelProducts.productsFilter,
     fetchingCustomers: state.data.customers.isFetching,
     customerSearchKey: state.settings.customerSearchKey,
     customerFilter: state.settings.customerFilter,

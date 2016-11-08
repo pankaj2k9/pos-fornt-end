@@ -262,7 +262,6 @@ class PanelCheckout extends Component {
       function remove () {
         dispatch(panelCartShouldUpdate(true))
         dispatch(removeCartItem(item.id))
-        document.getElementById('orderSearch').value = 0
         document.getElementById('productsSearch').focus()
       }
 
