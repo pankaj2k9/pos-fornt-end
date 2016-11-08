@@ -21,7 +21,8 @@ import {
   panelCheckoutShouldUpdate,
   addPaymentType,
   setPaymentMode,
-  toggleBonusPoints
+  toggleBonusPoints,
+  printPreviewTotal
 } from '../actions/panelCheckout'
 
 import {
@@ -56,11 +57,6 @@ const focusOdboUserSearch = 'odboUserSearch'
 const focusDiscountInput = 'overallDiscountInput'
 
 class PanelCart extends Component {
-
-  componentDidUpdate () {
-    const {focusedInput} = this.props
-    document.getElementById(focusedInput).focus()
-  }
 
   _clickRemoveCustomer () {
     const {dispatch} = this.props
@@ -110,8 +106,29 @@ class PanelCart extends Component {
   }
 
   _clickButtons (buttonName) {
-    const {dispatch} = this.props
+    const {dispatch, cartItemsArray} = this.props
     const button = buttonName.toLowerCase()
+    if (cartItemsArray.length > 0) {
+      switch (button) {
+        case 'hold order':
+          this._clickHoldOrder()
+          break
+        case 'add overall discount':
+          this._openModal('addCustomDiscount', focusDiscountInput)
+          break
+        case 'print total':
+          if (cartItemsArray.length > 0) {
+            let print = true
+            let shouldUpdate = true
+            dispatch(printPreviewTotal(print, shouldUpdate))
+            dispatch(setActiveModal('printingPreview'))
+          }
+          break
+        default:
+      }
+    } else {
+      document.getElementById('productsSearch').focus()
+    }
     switch (button) {
       case 'view bill':
         dispatch(reportsSetTab('bills'))
@@ -127,15 +144,6 @@ class PanelCart extends Component {
         break
       case 'recall order':
         this._openModal('recallOrder', focusOrderSearch)
-        break
-      case 'hold order':
-        this._clickHoldOrder()
-        break
-      case 'search customer':
-        this._openModal('searchOdboUser', focusOdboUserSearch)
-        break
-      case 'add overall discount':
-        this._openModal('addCustomDiscount', focusDiscountInput)
         break
       default:
     }
@@ -321,10 +329,10 @@ class PanelCart extends Component {
       {name: 'Staff Sales', icon: 'fa fa-files-o'},
       {name: 'Outlet Stock', icon: 'fa fa-files-o'},
       {name: 'Reprint/ Refund', icon: 'fa fa-cog'},
-      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o', customColor: cartItemsArray ? 'black' : 'grey'},
+      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o', customColor: cartItemsArray.length > 0 ? 'black' : 'grey'},
       {name: 'Recall Order', icon: 'fa fa-hand-lizard-o', customColor: ordersOnHold.length > 0 ? '#23d160' : 'grey'},
-      {name: 'Hold Order', icon: 'fa fa-hand-rock-o', customColor: cartItemsArray ? 'black' : 'grey'},
-      {name: 'Print Total', icon: 'fa fa-print', customColor: cartItemsArray ? 'black' : 'grey'}
+      {name: 'Hold Order', icon: 'fa fa-hand-rock-o', customColor: cartItemsArray.length > 0 ? 'black' : 'grey'},
+      {name: 'Print Total', icon: 'fa fa-print', customColor: cartItemsArray.length > 0 ? 'black' : 'grey'}
     ]
 
     var buttons2 = [

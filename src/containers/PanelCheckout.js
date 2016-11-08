@@ -34,7 +34,8 @@ import {
 
 import {
   resetStore,
-  reprintReceipt
+  reprintReceipt,
+  printPreviewTotalReceipt
 } from '../actions/helpers'
 
 import {processOrder} from '../actions/orders'
@@ -42,6 +43,13 @@ import {processOrder} from '../actions/orders'
 const focusProductSearch = 'productsSearch'
 
 class PanelCheckout extends Component {
+  componentDidUpdate () {
+    const {printPreviewTotal} = this.props
+    if (printPreviewTotal) {
+      this._processOrder()
+    }
+  }
+
   _clickRemoveCustomer () {
     const {dispatch} = this.props
     dispatch(removeCustomer())
@@ -537,17 +545,19 @@ class PanelCheckout extends Component {
                   }
                   center={
                     <p>
-                    currency === 'sgd'
-                      ? <strong
-                        style={{color: bonusPoints ? 'green' : 'red'}}> [ x2 {bonusPoints
-                        ? <FormattedMessage id='app.general.enabled' />
-                        : <FormattedMessage id='app.general.disabled' />
-                      } ]</strong>
-                      : null
+                      {currency === 'sgd'
+                        ? <strong style={{color: bonusPoints ? 'green' : 'grey'}}>
+                          [ x2 {bonusPoints
+                          ? <FormattedMessage id='app.general.enabled' />
+                          : <FormattedMessage id='app.general.disabled' />
+                        } ]
+                        </strong>
+                        : null
+                      }
                     </p>
                   }
                   right={<h3 className='is-marginless'>
-                    currency === 'sgd'
+                    {currency === 'sgd'
                     ? <strong style={{color: 'green'}}>{activeCustomer
                       ? bonusPoints
                         ? Number(this.sumOfCartItems().toFixed(0)) * 2
@@ -555,7 +565,7 @@ class PanelCheckout extends Component {
                       : '0.00'
                     } Points
                     </strong>
-                    : null
+                    : null}
                   </h3>}
                    />
             }
@@ -617,6 +627,8 @@ class PanelCheckout extends Component {
         return this.renderOrderProcessing()
       case 'orderProcessed':
         return this.renderOrderProcessed()
+      case 'printingPreview':
+        return this.renderPrintingPreview()
       default:
     }
   }
@@ -634,6 +646,24 @@ class PanelCheckout extends Component {
         paymentMode={this.props.paymentMode}
         currency={this.props.currency}
         payments={payments} />
+    )
+  }
+
+  renderPrintingPreview () {
+    const { activeModalId } = this.props
+    let modalActive = activeModalId === 'printingPreview'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-content'>
+          <div className='box has-text-centered' style={{backgroundColor: 'transparent'}}>
+            <i className='fa fa-spinner fa-pulse fa-5x fa-fw' style={{color: 'white'}} />
+            <h1 className='title is-1' style={{color: 'white'}}>Printing...</h1>
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -766,7 +796,8 @@ class PanelCheckout extends Component {
       activeCashier,
       activeCustomer,
       customDiscount,
-      cartItemsArray
+      cartItemsArray,
+      printPreviewTotal
     } = this.props
 
     /*
@@ -895,10 +926,13 @@ class PanelCheckout extends Component {
         previousOdbo: activeCustomer ? Number(activeCustomer.odboCoins) : undefined
       },
       headerText: storeAddress,
-      footerText: ['Thank you', 'Have a nice day!']
+      footerText: !printPreviewTotal ? ['Thank you', 'Have a nice day!'] : ['']
     }
-
-    dispatch(processOrder(orderInfo, receipt, staff))
+    if (printPreviewTotal) {
+      dispatch(printPreviewTotalReceipt(receipt, activeCustomer))
+    } else {
+      dispatch(processOrder(orderInfo, receipt, staff))
+    }
   }
 }
 
@@ -933,6 +967,7 @@ function mapStateToProps (state) {
     orderError: state.orders.orderError,
     orderSuccess: state.orders.orderSuccess,
     productsAreFetching: state.data.products.isFetching,
+    printPreviewTotal: state.panelCheckout.printPreviewTotal,
     reprinting: state.orders.reprinting,
     error: state.panelCheckout.error,
     locale: state.intl.locale,
