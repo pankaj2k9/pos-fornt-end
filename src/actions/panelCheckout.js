@@ -12,6 +12,7 @@ export const PANEL_CHECKOUT_SHOULD_UPDATE = ' PANEL_CHECKOUT_SHOULD_UPDATE'
 export const PANEL_CHECKOUT_RESET = 'PANEL_CHECKOUT_RESET'
 export const CHECKOUT_FIELDS_RESET = 'CHECKOUT_FIELDS_RESET'
 export const TOGGLE_BONUS_POINTS = 'TOGGLE_BONUS_POINTS'
+export const PRINT_PREVIEW_TOTAL = 'PRINT_PREVIEW_TOTAL'
 
 export const VERIFY_VOUCHER_REQUEST = 'VERIFY_VOUCHER_REQUEST'
 export const VERIFY_VOUCHER_SUCCESS = 'VERIFY_VOUCHER_SUCCESS'
@@ -20,6 +21,14 @@ export const VERIFY_VOUCHER_FAILURE = 'VERIFY_VOUCHER_FAILURE'
 import voucherService from '../services/voucher'
 import {setVoucherDiscount} from './panelCart'
 import {setActiveModal} from './application'
+
+export function printPreviewTotal (print, shouldUpdate) {
+  return {
+    type: PRINT_PREVIEW_TOTAL,
+    print,
+    shouldUpdate
+  }
+}
 
 export function setPaymentMode (mode) {
   return {

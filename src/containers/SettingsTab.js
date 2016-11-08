@@ -92,41 +92,26 @@ class SettingsTab extends Component {
   onSubmit (event) {
     event.preventDefault()
     const {dispatch, customerFilter, customerSearchKey, customerContactFilter} = this.props
-    let query
-    if (customerContactFilter) {
-      // query for phoneNumber if customer contact filter has value
-      query = { query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }
-    } else {
-      if (customerFilter !== '' && customerSearchKey === '') {
-        query = { query: { firstName: { $like: `%${customerFilter}%` } } }
-      } else if (customerFilter !== '' && customerSearchKey !== '') {
-        if (isNaN(parseInt(customerSearchKey))) {
-          query = {
-            query: { firstName: { $like: `%${customerFilter}%` }, lastName: { $like: `%${customerSearchKey}%` } }
-          }
-        } else {
-          query = { query: { odboId: Number(customerSearchKey) } }
-        }
-      } else if (customerFilter === '' && customerSearchKey !== '') {
-        if (isNaN(parseInt(customerSearchKey))) {
-          query = { query: { lastName: { $like: `%${customerSearchKey}%` } } }
-        } else {
-          query = { query: { odboId: Number(customerSearchKey) } }
-        }
-      }
+    switch (customerFilter) {
+      case 'firstNameSearch':
+        return dispatch(searchCustomer({ query: { firstName: { $like: `%${customerSearchKey}%` } } }))
+      case 'lastNameSearch':
+        return dispatch(searchCustomer({ query: { lastName: { $like: `%${customerSearchKey}%` } } }))
+      case 'phoneNumberSearch':
+        return dispatch(searchCustomer({ query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }))
+      case 'odboIdSearch':
+        return dispatch(searchCustomer({ query: { odboId: Number(customerSearchKey) } }))
+      default:
     }
-    dispatch(searchCustomer(query))
   }
 
   onFocus (inputId) {
     const {dispatch} = this.props
-    if (inputId === 'firstNameSearch') {
-      dispatch(customersSetFilter(''))
-    } else if (inputId === 'odboIdSearch') {
-      // reset firstname and lastname fields if input id is 'odboIdSearch'
-      document.getElementById('firstNameSearch').value = ''
-      document.getElementById('lastNameSearch').value = ''
-    }
+    document.getElementById('firstNameSearch').value = ''
+    document.getElementById('lastNameSearch').value = ''
+    document.getElementById('phoneNumberSearch').value = ''
+    document.getElementById('odboIdSearch').value = ''
+    dispatch(customersSetFilter(inputId))
     dispatch(searchCustomer()) // refetch 1st 40 customers
   }
 
@@ -297,7 +282,7 @@ class SettingsTab extends Component {
                 value={customerSearchKey}
                 placeholder={'app.ph.keyword'}
                 confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerFilter.bind(this)}
+                onChange={this.setCustomerSearchKey.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
                 confirmEvent={this.onSubmit.bind(this)}

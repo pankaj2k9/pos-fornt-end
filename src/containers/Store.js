@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
-import PanelProducts from './PanelProducts'
 import PanelCart from './PanelCart'
 import PanelCheckout from './PanelCheckout'
 
@@ -53,10 +52,7 @@ class Store extends Component {
       customersArray,
       customersById,
       cartItemsArray,
-      productsAreFetching,
-      items, // ordersOnHold,
-      staff,
-      storeId
+      items // ordersOnHold,
     } = this.props
     return (
       <div className='hero'>
@@ -73,14 +69,6 @@ class Store extends Component {
                     customersArray={customersArray}
                     customersById={customersById}
                     ordersOnHold={items} />
-                </div>
-                <div className='tile is-child' style={{maxHeight: 50}}>
-                  <PanelProducts
-                    locale={locale}
-                    productsAreFetching={productsAreFetching}
-                    staff={staff}
-                    storeId={storeId}
-                    />
                 </div>
               </div>
               <div className='tile is-parent is-vertical'>

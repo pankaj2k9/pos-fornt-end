@@ -147,7 +147,7 @@ export const buildFooter = (footerText) => {
  * @param {Object} info of receipt
  */
 export const buildExtraInfo = (info) => {
-  let date = new Date(info.date)
+  let date = info.date ? new Date(info.date) : new Date()
   let extra = ''
   let orderId = info.orderId
     ? extra += `<div>Order ID : ${info.orderId}</div>`

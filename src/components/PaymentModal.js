@@ -15,6 +15,8 @@ import {
   setCardProvider
 } from '../actions/panelCheckout'
 
+const focusProductSearch = 'productsSearch'
+
 class PaymentModal extends Component {
 
   componentDidMount () {
@@ -26,8 +28,7 @@ class PaymentModal extends Component {
 
   _closeModal () {
     const { dispatch } = this.props
-    const inputToFocus = 'productsSearch'
-    dispatch(closeActiveModal(inputToFocus))
+    dispatch(closeActiveModal(focusProductSearch))
   }
 
   _clickConfirm (event) {
@@ -53,6 +54,7 @@ class PaymentModal extends Component {
       payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: '#'} }
     }
     dispatch(addPaymentType(payment))
+    dispatch(closeActiveModal(focusProductSearch))
   }
 
   _changeInputValue (value) {
