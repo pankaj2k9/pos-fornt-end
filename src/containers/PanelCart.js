@@ -130,8 +130,16 @@ class PanelCart extends Component {
       document.getElementById('productsSearch').focus()
     }
     switch (button) {
+      case 'x/z reading':
+        dispatch(reportsSetTab('completeSales'))
+        browserHistory.push('reports')
+        break
       case 'view bill':
         dispatch(reportsSetTab('bills'))
+        browserHistory.push('reports')
+        break
+      case 'staff sales':
+        dispatch(reportsSetTab('staffSales'))
         browserHistory.push('reports')
         break
       case 'outlet stock':
