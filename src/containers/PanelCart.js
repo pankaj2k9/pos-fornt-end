@@ -23,7 +23,6 @@ import {
 import {
   setDiscount,
   panelCheckoutShouldUpdate,
-  addPaymentType,
   setPaymentMode,
   toggleBonusPoints,
   printPreviewTotal
@@ -178,29 +177,27 @@ class PanelCart extends Component {
       dispatch(setActiveModal('productsList'))
     } else if (mode === 'search customer') {
       this._openModal('searchOdboUser', focusOdboUserSearch)
+    } else if (mode === 'adjust points') {
+      dispatch(setSettingsActiveTab('customers'))
+      browserHistory.push('settings')
     }
   }
 
   _clickPaymentButtons (buttonName) {
-    const { dispatch, currency, bonusPoints, activeCustomer, cartItemsArray } = this.props
+    const { dispatch, currency, activeCustomer, cartItemsArray } = this.props
     let mode = buttonName.toLowerCase()
-    if (cartItemsArray.length > 0) {
+    if (activeCustomer && cartItemsArray.length > 0 && mode === 'use odbo coins' || mode === 'double points') {
       if (mode === 'use odbo coins') {
         currency === 'sgd'
         ? dispatch(setCurrencyType('odbo'))
         : dispatch(setCurrencyType('sgd'))
-        if (activeCustomer && activeCustomer.odboCoins - this.orderTotal() >= 0) {
-          var odboPayment = {type: 'odbo', amount: this.orderTotal(), remarks: 'odbo payment'}
-          dispatch(addPaymentType(odboPayment))
-        }
       } else if (mode === 'double points') {
-        let boolVal = !bonusPoints
-        dispatch(toggleBonusPoints(boolVal))
-        dispatch(closeActiveModal(focusProductSearch))
-      } else {
-        dispatch(setActiveModal('paymentModal'))
-        dispatch(setPaymentMode(mode))
+        dispatch(toggleBonusPoints())
       }
+      document.getElementById('productsSearch').focus()
+    } else if (cartItemsArray.length > 0 && mode !== 'use odbo coins' && mode !== 'double points') {
+      dispatch(setActiveModal('paymentModal'))
+      dispatch(setPaymentMode(mode))
     } else {
       document.getElementById('productsSearch').focus()
     }
@@ -364,9 +361,10 @@ class PanelCart extends Component {
     ]
 
     var buttons3 = [
-      {name: 'Admin', icon: 'fa fa-user-secret', color: ''},
-      {name: 'Product List', icon: 'fa fa-shopping-bag', color: ''},
-      {name: 'Search Customer', icon: 'fa fa-search'}
+      {name: 'Admin', icon: 'fa fa-user-secret fa-lg', size: 'is-3'},
+      {name: 'Product List', icon: 'fa fa-shopping-bag fa-lg', size: 'is-3'},
+      {name: 'Search Customer', icon: 'fa fa-search fa-lg', size: 'is-3'},
+      {name: 'Adjust Points', icon: 'fa fa-arrows-v fa-lg', size: 'is-3'}
     ]
 
     return (
@@ -386,10 +384,7 @@ class PanelCart extends Component {
             <FunctionButtons buttons={buttons2} onClickButton={this._clickPaymentButtons.bind(this)} />
           </div>
         </Panel>
-        <Panel
-          panelName={<FormattedMessage id='app.panel.sales' />}>
-          {this.renderModal()}
-        </Panel>
+        {this.renderModal()}
       </div>
     )
   }
