@@ -37,7 +37,7 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += receipt.headerText ? RECEIPT_DIVIDER : ''
 
   // build extra info
-  receiptHtmlString += buildExtraInfo(receipt.info)
+  receiptHtmlString += buildExtraInfo(receipt.info, receipt.trans.activeCustomer)
   receiptHtmlString += receipt.info ? RECEIPT_DIVIDER : ''
 
   // build item list
@@ -146,11 +146,14 @@ export const buildFooter = (footerText) => {
  * Add staff, date, etc.
  * @param {Object} info of receipt
  */
-export const buildExtraInfo = (info) => {
+export const buildExtraInfo = (info, activeCustomer) => {
   let date = info.date ? new Date(info.date) : new Date()
   let extra = ''
   let orderId = info.orderId
-    ? extra += `<div>Order ID : ${info.orderId}</div>`
+    ? extra += `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${info.orderId}</div>`
+    : null
+  let customer = activeCustomer
+    ? extra += `<div style="${TOTAL_DIV_STYLE_1}">Customer : ${activeCustomer.firstName || ''} ${activeCustomer.lastName || ''}</div>`
     : null
   extra += '<div>'
   if (info.staff) {
@@ -158,6 +161,7 @@ export const buildExtraInfo = (info) => {
   }
   extra += `<div>${formatDate(date)}</div>`
   orderId
+  customer
   extra += '</div>'
 
   return extra
@@ -216,7 +220,7 @@ export const buildComputation = (trans) => {
         if (payment.type === 'credit') {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CREDIT</div></div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${payment.amount}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${payment.amount.toFixed(2)}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CARD TYPE : </div>${payment.provider}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
@@ -224,7 +228,7 @@ export const buildComputation = (trans) => {
         if (payment.type === 'nets') {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS</div></div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${payment.amount}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${payment.amount.toFixed(2)}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
         }
@@ -239,20 +243,25 @@ export const buildComputation = (trans) => {
         if (payment.type === 'cash') {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH</div></div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${payment.cash}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${payment.amount}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${computations.cashChange}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${payment.cash.toFixed(2)}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${payment.amount.toFixed(2)}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${computations.cashChange.toFixed(2)}</div>`
           }
         }
       } else if (currency === 'odbo') {
         if (payment.amount) {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO</div></div>`
+          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${trans.previousOdbo}</div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${payment.amount}</div>`
         }
       }
     })
 
-    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${computations.paymentTotal}</div>`
+    if (currency === 'odbo') {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.paymentMinusOrderTotal}</div>`
+    } else if (payments.length > 1) {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${computations.paymentTotal.toFixed(2)}</div>`
+    }
 
     if (currency === 'sgd') {
       if (customer) {
