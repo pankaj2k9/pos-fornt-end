@@ -96,7 +96,7 @@ export function setOrderNote (note) {
 export function setPinCode (pincode) {
   return {
     type: SET_PIN_CODE,
-    pincode
+    pincode: pincode === '' ? undefined : pincode
   }
 }
 
@@ -119,10 +119,9 @@ export function checkoutFieldsReset () {
   }
 }
 
-export function toggleBonusPoints (value) {
+export function toggleBonusPoints () {
   return {
-    type: TOGGLE_BONUS_POINTS,
-    value
+    type: TOGGLE_BONUS_POINTS
   }
 }
 
