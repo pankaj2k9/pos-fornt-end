@@ -11,9 +11,9 @@
     &.spaced { margin-bottom: 5px; }
     &.centered { justify-content: center; }
 
-    &.col3 .col:nth-child(1) { width: 140px; }
-    &.col3 .col:nth-child(2) { width: 30px; text-align: right; }
-    &.row.col3 .col:nth-child(3) { width: 70px; text-align: right; }
+    &.col3 .col:nth-child(1) { width: 125px; }
+    &.col3 .col:nth-child(2) { width: 25px; text-align: right; }
+    &.row.col3 .col:nth-child(3) { width: 90px; text-align: right; }
 
     &.row.col4 > div { width: 55px; text-align: right; }
     &.row.col4 .col:nth-child(1) { width: 60px; text-align: left; }
