@@ -48,13 +48,14 @@ const orders = {
       }
     }
 
-    if (idFrom) {
-      query.id = { $gte: buildOrderId(storeId, idFrom, null, stores) }
+    if (idFrom || idTo) {
+      query.id = {}
+      if (idFrom) { query.id.$gte = buildOrderId(storeId, idFrom, null, stores) }
+      if (idTo) { query.id.$lte = buildOrderId(storeId, idTo, null, stores) }
     }
 
-    if (idTo) {
-      query.id = { $lte: buildOrderId(storeId, idTo, null, stores) }
-    }
+    console.log('from-to', idFrom, idTo, query)
+    // console.log('QUERY', query)
 
     return ordersService.find({ query })
   },
