@@ -45,6 +45,12 @@ export default class ViewBillReceiptPreview extends React.Component {
       minute: '2-digit'
     }
 
+    const plainDateOptions = {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric'
+    }
+
     let salesPerMonth = 0
     let salesPerDay = 1
 
@@ -77,7 +83,10 @@ export default class ViewBillReceiptPreview extends React.Component {
                 <ReceiptPreviewRow
                   key={idKey}
                   keyPrefix={idKey}
-                  cols={[`${order.id} (${staff.username.toUpperCase()})`]}
+                  cols={[
+                    `${order.id} (${staff.username.toUpperCase()})`,
+                    formatDate(new Date(order.dateCreated), plainDateOptions)
+                  ]}
                 />
 
                 {/* Order items */}
