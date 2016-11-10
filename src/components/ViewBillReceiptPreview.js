@@ -67,8 +67,10 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               ? `${order.users.firstName} ${order.users.lastName}`.toUpperCase()
               : 'N/A'
             const itemCount = order.items.length
-            const keyPref = `rcptprev-vb-${order.id}-`
+            const orderSalesPerson = order.staff && order.staff.username
+              ? order.staff.username.toUpperCase() : 'N/A'
 
+            const keyPref = `rcptprev-vb-${order.id}-`
             return (
               <span key={`${keyPref}`}>
                 {/* Address */}
@@ -94,6 +96,11 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                     formatDate(new Date(order.dateOrdered), dateOptions),
                     order.id
                   ]} />
+
+                {/* Order sales person */}
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}sales-person`}
+                  cols={[`SALES PERSON: ${orderSalesPerson}`]} />
                 <ReceiptRowDivider />
 
                 {/* Items list */}

@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 import api from './api'
 import { buildOrderId } from '../utils/string'
 
@@ -48,17 +50,15 @@ const orders = {
 
     if (to && from) {
       query.dateCreated = {
-        $lte: to,
-        $gte: from
+        $lte: moment(to).endOf('day').toDate(),
+        $gte: moment(from).startOf('day').toDate()
       }
     }
 
-    if (idFrom) {
-      query.id = { $gte: buildOrderId(storeId, idFrom, null, stores) }
-    }
-
-    if (idTo) {
-      query.id = { $lte: buildOrderId(storeId, idTo, null, stores) }
+    if (idFrom || idTo) {
+      query.id = {}
+      if (idFrom) { query.id.$gte = buildOrderId(storeId, idFrom, null, stores) }
+      if (idTo) { query.id.$lte = buildOrderId(storeId, idTo, null, stores) }
     }
 
     return ordersService.find({ query })
