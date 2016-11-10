@@ -10,6 +10,8 @@ import DetailsModal from '../components/DetailsModal'
 import LoadingPane from '../components/LoadingPane'
 import Account from '../containers/Account'
 
+const focusOrderSearch = 'orderSearch'
+
 import {
   closeActiveModal,
   setActiveModal
@@ -36,18 +38,9 @@ import {
 
 class SettingsTab extends Component {
 
-  componentDidUpdate () {
-    const {activeModalId} = this.props
-    if (activeModalId === 'verifyStorePin') {
-      document.getElementById('storePinCode').focus()
-    } else if (activeModalId === 'refundModal' || activeModalId === 'reprintModal') {
-      document.getElementById('orderSearch').focus()
-    }
-  }
-
   onClickRefund () {
     const {dispatch} = this.props
-    dispatch(setActiveModal('refundModal'))
+    dispatch(setActiveModal('refundModal', focusOrderSearch))
   }
 
   onClickNoSales (value) {
@@ -57,7 +50,7 @@ class SettingsTab extends Component {
 
   onClickReprint () {
     const {dispatch} = this.props
-    dispatch(setActiveModal('reprintModal'))
+    dispatch(setActiveModal('reprintModal', focusOrderSearch))
   }
 
   onClickCloseModal () {
@@ -498,65 +491,102 @@ class SettingsTab extends Component {
     const modalId = activeModalId === 'refundModal'
                     ? 'refundModal' : 'reprintModal'
     const type = activeModalId
-    let items = []
-    let trans
-    let info
-    let headerText
+
     if (orderDetails) {
-      orderDetails.items.forEach(item => {
+      const {currency, id, dateOrdered, items, payments, users, remarks, subtotal, total, vouchers} = orderDetails
+      let storeAddress = !storeDetails.storeAddress
+        ? [
+          'The ODBO',
+          '200 Victoria Street',
+          'Bugis Junction #02-22',
+          'SINGAPORE',
+          'Telephone : 6238 1337'
+        ]
+        : [storeDetails.name, storeDetails.storeAddress]
+
+      let processedPayments = []
+      let cashChange
+      payments.forEach(function (payment) {
+        if (currency === 'sgd') {
+          if (payment.amount || payment.amount > 0) {
+            if (payment.type !== 'odbo' && payment.type !== 'voucher') {
+              payment.amount = Number(payment.amount)
+              if (payment.type === 'cash') { payment.cash = Number(payment.cash) }
+              cashChange = Number(payment.cash) - Number(payment.amount)
+              processedPayments.push(payment)
+            }
+          }
+        } else {
+          if (payment.amount || payment.amount > 0) {
+            if (payment.type === 'odbo') {
+              payment.amount = Number(payment.amount)
+              processedPayments.push(payment)
+            }
+          }
+        }
+      })
+
+      let processedItems = []
+      items.forEach(item => {
         let itemQty = Number(item.quantity)
-        let prodName = locale === 'en' ? item.product.nameEn : item.product.nameZh
-        items.push({
-          name: `${prodName.substring(0, 18) + '...'}`,
+        let discountPercent = item.product.isDiscounted
+          ? currency === 'sgd'
+            ? `${item.product.priceDiscount}%`
+            : `${item.product.odboPriceDiscount}%`
+          : ''
+        let showDiscount = item.product.isDiscounted
+          ? locale === 'en'
+            ? `(less ${discountPercent})`
+            : `(减去 ${discountPercent})`
+          : ''
+        let discount = item.product.isDiscounted
+          ? currency === 'sgd'
+            ? (Number(item.product.priceDiscount) / 100) * item.product.price
+            : (parseInt(item.product.odboPriceDiscount) / 100) * item.product.odboPrice
+          : 0.00
+        let computedDiscount = currency === 'sgd'
+          ? Number(item.product.price) - discount
+          : Number(item.product.odboPrice) - Math.round(discount)
+        processedItems.push({
+          id: item.product.id,
+          name: `${item.product.nameEn.substring(0, 18)}...\n
+            #${item.product.barcodeInfo || ''}\n
+            ${showDiscount}`,
           qty: itemQty,
-          subtotal: item.totalCost
+          subtotal: currency === 'sgd'
+            ? Number(itemQty * computedDiscount.toFixed(2))
+            : itemQty * computedDiscount
         })
       })
-      let userTrans = orderDetails.users
-        ? {
-          customer: `${orderDetails.users.firstName} ${orderDetails.users.lastName}`,
-          previousOdbo: Number(orderDetails.users.odboCoins) - Number(orderDetails.redemptionPoints),
-          points: orderDetails.redemptionPoints,
-          newOdbo: Number(orderDetails.users.odboCoins)
-        }
-        : {}
-      let initialTrans = {
-        total: orderDetails.total,
-        voucherDiscount: orderDetails.voucherDeduction,
-        sumOfCartItems: orderDetails.subtotal,
-        orderNote: orderDetails.remarks
+
+      var receipt = {
+        info: {
+          orderId: id,
+          date: dateOrdered
+        },
+        items: processedItems,
+        trans: {
+          payments: processedPayments,
+          activeCustomer: users,
+          computations: {
+            total: total,
+            subtotal: subtotal,
+            cashChange: cashChange,
+            remainingOdbo: currency === 'odbo' ? Number(users.odboCoins) - Number(total) : null,
+            paymentTotal: total
+          },
+          vouchers: vouchers || [],
+          orderNote: remarks,
+          currency: currency,
+          previousOdbo: users ? Number(users.odboCoins) - Number(total) : undefined,
+          points: users ? Number(total) : undefined,
+          newOdbo: users ? Number(users.odboCoins) + Number(total) : undefined
+        },
+        headerText: storeAddress,
+        footerText: ['This is a reprinted receipt']
       }
-      trans = (orderDetails.currency === 'sgd')
-        ? (orderDetails.posTrans.type === 'cash')
-          ? Object.assign(initialTrans, userTrans, {
-            type: 'cash',
-            cash: orderDetails.posTrans.payment,
-            change: orderDetails.posTrans.change
-          })
-          : Object.assign(initialTrans, userTrans, {
-            type: 'credit',
-            cardType: orderDetails.posTrans.cardType,
-            provider: orderDetails.posTrans.provider,
-            transNo: orderDetails.posTrans.transNumber
-          })
-        : Object.assign(initialTrans, userTrans, {
-          type: 'odbo'
-        })
-      info = {
-        date: orderDetails.dateOrdered,
-        orderId: orderDetails.id
-      }
-      headerText = !storeDetails.storeAddress
-        ? ['485 Joo Christ Rd', 'Singapore', 'Tel. 02-323-1268']
-        : [storeDetails.name, storeDetails.storeAddress]
     }
-    var details = {
-      items,
-      info,
-      trans,
-      headerText,
-      footerText: ['This is a reprinted receipt']
-    }
+
     return (
       <SearchModal
         id={modalId}
@@ -568,7 +598,7 @@ class SettingsTab extends Component {
         active={activeModalId}
         processing={isProcessing}
         displayData='details'
-        details={!orderDetails ? undefined : details}
+        details={!orderDetails ? undefined : receipt}
         orderSearchKey={orderSearchKey}
         modalStatus={{refund: refundSuccess, reprintSuccess}}
         search={{ id: 'searchOrder', value: orderSearchKey, placeholder: 'Search Order Id', onChange: storeOrdersSetSearchKey }}

@@ -62,7 +62,7 @@ const en = {
   'app.general.bonusPoints': 'Bonus Points',
   'app.general.enabled': ' Enabled',
   'app.general.disabled': ' Disabled',
-  'app.general.updateOdbo': 'Update Odbo Balance',
+  'app.general.updateOdbo': 'Adjust Odbo Points',
   'app.general.forbidden': 'Forbidden!',
   'app.general.onlyMaster': 'Only a "Master Account" could navigate through this page',
   'app.general.transDetails': 'Transaction details',

@@ -19,9 +19,11 @@ import FunctionButtons from '../components/FunctionButtons'
 
 import { setActiveModal, closeActiveModal } from '../actions/application'
 import {
+  addPaymentType,
   setOrderNote,
   removeNote,
-  panelCheckoutShouldUpdate
+  panelCheckoutShouldUpdate,
+  setPinCode
 } from '../actions/panelCheckout'
 
 import {
@@ -29,7 +31,8 @@ import {
   setCustomDiscount,
   removeCartItem,
   removeCustomer,
-  panelCartShouldUpdate
+  panelCartShouldUpdate,
+  setCurrencyType
 } from '../actions/panelCart'
 
 import {
@@ -52,6 +55,7 @@ class PanelCheckout extends Component {
 
   _clickRemoveCustomer () {
     const {dispatch} = this.props
+    dispatch(setCurrencyType('sgd'))
     dispatch(removeCustomer())
   }
 
@@ -81,13 +85,13 @@ class PanelCheckout extends Component {
 
   _closeModal () {
     const { dispatch, activeModalId, orderSuccess } = this.props
-    dispatch(closeActiveModal(focusProductSearch))
-    dispatch(panelCheckoutShouldUpdate(false))
     if (activeModalId === 'orderProcessed') {
       if (orderSuccess) {
         dispatch(resetStore())
       }
     }
+    dispatch(closeActiveModal(focusProductSearch))
+    dispatch(panelCheckoutShouldUpdate(false))
   }
 
   _clickReprint () {
@@ -110,6 +114,11 @@ class PanelCheckout extends Component {
       dispatch(setActiveModal('verifyStorePin'))
       dispatch(panelCheckoutShouldUpdate(true))
     }
+  }
+
+  _setOdboUserPincode (value) {
+    const {dispatch} = this.props
+    dispatch(setPinCode(value))
   }
 
   /*
@@ -628,8 +637,45 @@ class PanelCheckout extends Component {
         return this.renderOrderProcessed()
       case 'printingPreview':
         return this.renderPrintingPreview()
+      case 'odboUserPincode':
+        return this.renderInputPincode()
       default:
     }
+  }
+
+  renderInputPincode () {
+    const { activeModalId } = this.props
+    let modalActive = activeModalId === 'odboUserPincode'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              Odbo User Pincode
+            </p>
+            <button className='delete' onClick={this._closeModal.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-8 is-offset-2'>
+                <div className='control is-horizontal is-fullwidth'>
+                  <div className='control-label' style={{width: 150}}>
+                    <h3 className='label is-marginless'>Input Pincode</h3>
+                  </div>
+                  <form onSubmit={this._processOrder.bind(this)} >
+                    <input id='userPincode' className='input is-large' type='Password'
+                      onChange={e => this._setOdboUserPincode(e.target.value)} />
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   renderPaymentModal () {
@@ -638,7 +684,7 @@ class PanelCheckout extends Component {
       <PaymentModal
         id={activeModalId}
         card={card}
-        cashTendered={cashTendered}
+        cashTendered={Number(cashTendered)}
         transNumber={transNumber}
         orderTotal={this.orderTotal()}
         paymentTotal={this.sumOfPayments()}
@@ -723,7 +769,7 @@ class PanelCheckout extends Component {
               </div>
               <div className='column is-6 is-offset-3'>
                 {orderSuccess
-                  ? <a className='button is-success is-large is-fullwidth'>
+                  ? <a className='button is-success is-large is-fullwidth' onClick={this._closeModal.bind(this)}>
                     Confirm
                   </a>
                   : <a className='button is-warning is-large is-fullwidth'>
@@ -783,7 +829,7 @@ class PanelCheckout extends Component {
     )
   }
 
-  _processOrder () {
+  _processOrder (event) {
     const {
       dispatch,
       locale,
@@ -791,6 +837,7 @@ class PanelCheckout extends Component {
       storeData,
       orderNote,
       payments,
+      pincode,
       bonusPoints,
       activeCashier,
       activeCustomer,
@@ -798,6 +845,10 @@ class PanelCheckout extends Component {
       cartItemsArray,
       printPreviewTotal
     } = this.props
+
+    if (currency === 'odbo' && pincode && event) {
+      event.preventDefault()
+    }
 
     /*
     / General Info
@@ -845,6 +896,13 @@ class PanelCheckout extends Component {
             processedPayments.push(payment)
           }
         }
+      } else {
+        if (payment.amount || payment.amount > 0) {
+          if (payment.type === 'odbo') {
+            payment.amount = Number(payment.amount)
+            processedPayments.push(payment)
+          }
+        }
       }
     })
 
@@ -854,6 +912,7 @@ class PanelCheckout extends Component {
       source: storeData.source,
       bonusPoints: bonusPoints ? 100 : 0,
       payments: processedPayments,
+      pinCode: pincode,
       adminId: activeCashier.id,
       vouchers: this.vouchers() ? this.vouchers().voucherList : undefined,
       odboId: activeCustomer ? String(activeCustomer.odboId) : undefined
@@ -910,13 +969,14 @@ class PanelCheckout extends Component {
     const receipt = {
       items,
       trans: {
-        payments,
+        payments: processedPayments,
         activeCustomer,
         computations: {
           total: Number(this.orderTotal()),
           subtotal: Number(this.sumOfCartItems()),
           customDiscount: Number(this.overAllDeduct()),
           cashChange: Number(this.cashChange()),
+          paymentMinusOrderTotal: Number(this.paymentMinusOrderTotal()),
           paymentTotal: Number(this.sumOfPayments())
         },
         vouchers: this.vouchers() ? this.vouchers().voucherList : [],
@@ -930,7 +990,14 @@ class PanelCheckout extends Component {
     if (printPreviewTotal) {
       dispatch(printPreviewTotalReceipt(receipt, activeCustomer))
     } else {
-      dispatch(processOrder(orderInfo, receipt, staff))
+      if (currency === 'odbo' && !pincode) {
+        var odboPayment = {type: 'odbo', amount: this.orderTotal(), remarks: 'odbo payment'}
+        dispatch(addPaymentType(odboPayment))
+        dispatch(setActiveModal('odboUserPincode', 'userPincode'))
+      } else {
+        dispatch(closeActiveModal())
+        dispatch(processOrder(orderInfo, receipt, staff))
+      }
     }
   }
 }

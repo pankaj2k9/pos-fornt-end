@@ -166,8 +166,9 @@ function panelCheckout (state = {
         orderNote: []
       })
     case TOGGLE_BONUS_POINTS:
+      let boolVal = !state.bonusPoints
       return Object.assign({}, state, {
-        bonusPoints: action.value
+        bonusPoints: boolVal
       })
     case VERIFY_VOUCHER_REQUEST:
       return Object.assign({}, state, {

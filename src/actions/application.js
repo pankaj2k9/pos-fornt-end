@@ -247,6 +247,7 @@ export function storeGetIds () {
         if (response.data.length > 0) {
           const firstStore = response.data[0]
           dispatch(storeSetId(firstStore.source))
+          dispatch(storeSetActive(firstStore))
         }
       })
       .catch(error => {
