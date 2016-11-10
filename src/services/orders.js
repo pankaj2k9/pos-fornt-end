@@ -56,9 +56,6 @@ const orders = {
       if (idTo) { query.id.$lte = buildOrderId(storeId, idTo, null, stores) }
     }
 
-    console.log('from-to', from, to, query)
-    // console.log('QUERY', query)
-
     return ordersService.find({ query })
   },
   get (orderId) {
