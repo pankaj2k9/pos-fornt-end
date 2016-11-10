@@ -6,10 +6,10 @@
  * @returns {array} of strings split from str that is below
  */
 export const formatCurrency = (number) => {
-  return Number(number).toLocaleString('en', {
+  return `$${Number(number).toLocaleString('en', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  })
+  })}`
 }
 
 /**

@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { FormattedMessage } from 'react-intl'
+import moment from 'moment'
 
 import ReceiptPreview from './ReceiptPreview'
 import ReceiptPreviewRow, {
@@ -35,7 +36,7 @@ export default class ViewBillReceiptPreview extends React.Component {
   }
 
   render () {
-    const { orders, staff } = this.props.data
+    const { orders, staff, from, to } = this.props.data
 
     const dateOptions = {
       day: 'numeric',
@@ -51,8 +52,10 @@ export default class ViewBillReceiptPreview extends React.Component {
       year: 'numeric'
     }
 
-    let salesPerMonth = 0
-    let salesPerDay = 1
+    const DAYS_IN_MONTH = 31
+    const daysCount = moment(to).diff(moment(from), 'days') + 1
+    const monthsCount = Math.ceil(daysCount / DAYS_IN_MONTH)
+    let total = 0
 
     const keyPref = 'rcptprev-ss'
     return (
@@ -76,6 +79,7 @@ export default class ViewBillReceiptPreview extends React.Component {
           {orders.map((order, i) => {
             const key = `${keyPref}-order-${i}`
             const idKey = `${key}-id-${order.id}`
+            total += Number(order.total) || 0
 
             return (
               <span key={key}>
@@ -83,11 +87,7 @@ export default class ViewBillReceiptPreview extends React.Component {
                 <ReceiptPreviewRow
                   key={idKey}
                   keyPrefix={idKey}
-                  cols={[
-                    `${order.id} (${staff.username.toUpperCase()})`,
-                    formatDate(new Date(order.dateCreated), plainDateOptions)
-                  ]}
-                />
+                  cols={[ `${order.id} (${staff.username.toUpperCase()})`, formatDate(new Date(order.dateCreated), plainDateOptions) ]} />
 
                 {/* Order items */}
                 {order.items.map((item, i) => {
@@ -96,9 +96,10 @@ export default class ViewBillReceiptPreview extends React.Component {
                     <ReceiptPreviewRow
                       key={itemKey}
                       keyPrefix={itemKey}
+                      rowType={'spaced'}
                       cols={[
                         item.product.barcodeInfo,
-                        item.quantity,
+                        `${item.quantity}x`,
                         formatCurrency(Number(item.totalCost))
                       ]}
                     />
@@ -113,12 +114,18 @@ export default class ViewBillReceiptPreview extends React.Component {
           <ReceiptPreviewRow
             key={`${keyPref}-salespermonth`}
             keyPrefix={`${keyPref}-salespermonth`}
-            cols={['Staff sales/month', formatCurrency(salesPerMonth)]} />
+            cols={[
+              'Staff sales/month',
+              formatCurrency(total / monthsCount)
+            ]} />
 
           <ReceiptPreviewRow
             key={`${keyPref}-salesperday`}
             keyPrefix={`${keyPref}-salesperday`}
-            cols={['Staff sales/day', formatCurrency(salesPerDay)]} />
+            cols={[
+              'Staff sales/day',
+              formatCurrency(total / daysCount)
+            ]} />
         </span>
 
         {this.renderPrintBtn()}

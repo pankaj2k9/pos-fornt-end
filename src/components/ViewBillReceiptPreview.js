@@ -11,7 +11,7 @@ import ReceiptPreviewRow, {
 
 import { printReceiptFromString } from '../utils/receipt'
 
-import { formatDate } from '../utils/string'
+import { formatCurrency, formatDate } from '../utils/string'
 
 export default class ViewBillReceiptPreview extends React.PureComponent {
   constructor (props) {
@@ -115,7 +115,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                       <ReceiptPreviewRow cols={[
                         item.product.barcodeInfo,
                         `${item.quantity}x`,
-                        item.totalCost
+                        formatCurrency(item.totalCost)
                       ]} />
                     </span>
                   )
@@ -132,10 +132,10 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 {/* Totals */}
                 <ReceiptPreviewRow
                   keyPrefix={`${keyPref}subtotal`}
-                  cols={['Sub-TOTAL S$', order.subtotal]} />
+                  cols={['Sub-TOTAL S$', formatCurrency(order.subtotal)]} />
                 <ReceiptPreviewRow
                   keyPrefix={`${keyPref}total`}
-                  cols={['TOTAL S$', order.total]} />
+                  cols={['TOTAL S$', formatCurrency(order.total)]} />
 
                 {/* Payments */}
                 <ReceiptPreviewRow
@@ -158,7 +158,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                   return <ReceiptPreviewRow
                     key={key}
                     keyPrefix={key}
-                    cols={[type, payment.amount]} />
+                    cols={[type, formatCurrency(payment.amount)]} />
                 })}
 
                 <ReceiptRowDividerDbl />

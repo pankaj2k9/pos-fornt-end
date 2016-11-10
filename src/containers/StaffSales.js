@@ -125,14 +125,18 @@ class StaffSales extends React.Component {
       orders,
       staffs,
       selectedStaffId,
-      activeCashier
+      activeCashier,
+      from,
+      to
     } = this.props
 
     const selectedStaff = this.getSelectedStaff(selectedStaffId, activeCashier, staffs)
 
     const data = {
       orders,
-      staff: selectedStaff
+      staff: selectedStaff,
+      from,
+      to
     }
 
     return (
