@@ -15,6 +15,7 @@ const orders = {
       staffId,
       to,
       from,
+      id,
       idTo,
       idFrom,
       limit,
@@ -26,8 +27,12 @@ const orders = {
     const query = {
       $sort: sort || { dateOrdered: -1 },
       $eager: eager || '[users, items, items.product, payments, vouchers]',
-      $limit: limit,
-      $skip: skip
+      $limit: limit || undefined,
+      $skip: skip || undefined
+    }
+
+    if (id) {
+      query.id = id
     }
 
     if (staffId) {

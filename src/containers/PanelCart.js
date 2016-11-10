@@ -319,17 +319,6 @@ class PanelCart extends Component {
     return vouchers
   }
 
-  cashChange () {
-    const { payments } = this.props
-    let change
-    payments.forEach(function (payment) {
-      if (payment.type === 'cash') {
-        change = Number(payment.cash) - payment.amount
-      }
-    })
-    return change || 0
-  }
-
   render () {
     const {
       activeCustomer,
@@ -389,7 +378,7 @@ class PanelCart extends Component {
     )
   }
 
-  renderChildren () {
+  renderProductItems () {
     const {
       locale,
       productsArray,
@@ -523,7 +512,7 @@ class PanelCart extends Component {
             </header>
             <div className='modal-card-body'>
               <div className='columns is-multiline is-mobile'>
-                {this.renderChildren()}
+                {this.renderProductItems()}
               </div>
             </div>
           </div>
@@ -651,7 +640,6 @@ PanelCart.propTypes = {
 function mapStateToProps (state) {
   return {
     storeId: state.application.storeId,
-    focusedInput: state.application.focusedInput,
     productsArray: state.data.products.productsArray,
     productsById: state.data.products.productsById,
     productsSearchKey: state.panelProducts.productsSearchKey,

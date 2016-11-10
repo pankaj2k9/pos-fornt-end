@@ -11,7 +11,6 @@ import Dropdown from '../components/Dropdown'
 import {
   storeOrderFetch,
   storeOrdersSetSearchKey,
-  reprintingReceipt,
   customersSetFilter
 } from '../actions/settings'
 
@@ -20,10 +19,9 @@ import {
 } from '../actions/refund'
 
 import {
-  searchCustomer
+  searchCustomer,
+  printPreviewTotalReceipt
 } from '../actions/helpers'
-
-import print from '../utils/printReceipt/print'
 
 const List = (props) => {
   const {dispatch, items, listButton, id, isFetching} = props
@@ -108,11 +106,11 @@ const Details = (props) => {
               </li>
               <li style={{margin: 0, padding: 10}}>
                 <strong><FormattedMessage id='app.general.transDetails' />:</strong>
-                <br />- <FormattedMessage id='app.modal.type' />: {details.trans.type}
-                <br />- <FormattedMessage id='app.general.total' />: {details.trans.total}
+                <br />- <FormattedMessage id='app.modal.type' />: {details.trans.currency}
+                <br />- <FormattedMessage id='app.general.total' />: {details.trans.computations.total}
               </li>
               <li style={{margin: 0, padding: 10}}>
-                <strong><FormattedMessage id='app.panel.products' />:</strong>
+                <strong>Products:</strong>
                 {details.items.map((item, key) => {
                   return (
                     <div key={key}>
@@ -171,14 +169,16 @@ class SearchModal extends Component {
   buttonCancel () {
     const {dispatch} = this.props
     dispatch(storeOrdersSetSearchKey(''))
-    document.getElementById('orderSearch').focus()
-    document.getElementById('orderSearch').value = ''
   }
 
   onSubmitKey (event) {
     event.preventDefault()
-    const {dispatch, orderSearchKey} = this.props
-    dispatch(storeOrderFetch(orderSearchKey))
+    const {dispatch, orderSearchKey, storeDetails} = this.props
+    var params = {
+      id: orderSearchKey,
+      storeId: storeDetails.source
+    }
+    dispatch(storeOrderFetch(params))
   }
 
   _setCustomerFilter (value) {
@@ -218,14 +218,14 @@ class SearchModal extends Component {
   }
 
   onClickOption (event) {
-    event.preventDefault()
-    const {dispatch, orderSearchKey, type, details} = this.props
+    if (event) { event.preventDefault() }
+    const {dispatch, orderSearchKey, type, details, closeButton} = this.props
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
       dispatch(refund(orderSearchKey, refundRemarks))
     } else if (type === 'reprintModal') {
-      print(details)
-      dispatch(reprintingReceipt(true))
+      dispatch(printPreviewTotalReceipt(details))
+      closeButton.event(dispatch)
     }
   }
 

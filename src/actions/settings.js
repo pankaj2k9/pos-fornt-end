@@ -78,12 +78,11 @@ export function storeOrderFetchSuccess (response) {
 export function storeOrderFetchFailure (error) {
   return { type: STOREORDER_FETCH_FAILURE, error }
 }
-export function storeOrderFetch (searchKey) {
+export function storeOrderFetch (params) {
   return (dispatch) => {
-    let orderId = searchKey // Number(orderSearchKey)
     dispatch(storeOrderFetchRequest())
 
-    return ordersService.get(orderId)
+    return ordersService.find(params)
       .then(response => {
         if (response) {
           if (!response.data[0]) {

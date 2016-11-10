@@ -260,7 +260,7 @@ export const buildComputation = (trans) => {
     if (currency === 'odbo') {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.paymentMinusOrderTotal}</div>`
     } else if (payments.length > 1) {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${computations.paymentTotal.toFixed(2)}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${Number(computations.paymentTotal).toFixed(2)}</div>`
     }
 
     if (currency === 'sgd') {
