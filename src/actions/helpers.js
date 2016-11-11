@@ -101,6 +101,7 @@ export function resetStore (locale) {
     dispatch(closeActiveModal(focusProductSearch))
     dispatch(orderStateReset())
     dispatch(fetchAllProducts(locale))
+    dispatch(fetchCustomers())
   }
 }
 

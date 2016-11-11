@@ -1,6 +1,7 @@
 export const SET_PAYMENT_MODE = 'SET_PAYMENT_MODE'
 export const SET_DISCOUNT = 'SET_DISCOUNT'
 export const ADD_PAYMENT_TYPE = 'ADD_PAYMENT_TYPE'
+export const REMOVE_PAYMENT_TYPE = 'REMOVE_PAYMENT_TYPE'
 export const SET_CASH_TENDERED = 'SET_CASH_TENDERED'
 export const SET_TRANS_NUMBER = 'SET_TRANS_NUMBER'
 export const SET_ORDER_NOTE = 'SET_ORDER_NOTE'
@@ -55,6 +56,13 @@ export function addPaymentType (payment) {
   return {
     type: ADD_PAYMENT_TYPE,
     payment
+  }
+}
+
+export function removePaymentType (paymentType) {
+  return {
+    type: REMOVE_PAYMENT_TYPE,
+    paymentType
   }
 }
 

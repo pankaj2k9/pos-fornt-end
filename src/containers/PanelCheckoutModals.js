@@ -1,0 +1,248 @@
+/*
+* TODO:
+*
+*
+*/
+
+import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
+import { injectIntl, FormattedMessage } from 'react-intl'
+
+import PaymentModal from '../components/PaymentModal'
+
+import {
+  removeNote,
+  panelCheckoutShouldUpdate
+} from '../actions/panelCheckout'
+
+class PanelCheckoutModals extends Component {
+
+  render () {
+    const {activeModalId} = this.props
+    switch (activeModalId) {
+      case 'notesModal':
+        return this.renderNoteModal()
+      case 'paymentModal':
+        return this.renderPaymentModal()
+      case 'orderProcessing':
+        return this.renderOrderProcessing()
+      case 'orderProcessed':
+        return this.renderOrderProcessed()
+      case 'printingPreview':
+        return this.renderPrintingPreview()
+      case 'odboUserPincode':
+        return this.renderInputPincode()
+      default:
+        return null
+    }
+  }
+
+  renderInputPincode () {
+    const { activeModalId } = this.props
+    let modalActive = activeModalId === 'odboUserPincode'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              Odbo User Pincode
+            </p>
+            <button className='delete' onClick={this._closeModal.bind(this)} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-8 is-offset-2'>
+                <div className='control is-horizontal is-fullwidth'>
+                  <div className='control-label' style={{width: 150}}>
+                    <h3 className='label is-marginless'>Input Pincode</h3>
+                  </div>
+                  <form onSubmit={this._processOrder.bind(this)} >
+                    <input id='userPincode' className='input is-large' type='Password'
+                      onChange={e => this._setOdboUserPincode(e.target.value)} />
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderPaymentModal () {
+    const {activeModalId, card, cashTendered, currency, orderTotal, paymentMode, paymentTotal, payments, transNumber} = this.props
+    return (
+      <PaymentModal
+        id={activeModalId}
+        card={card}
+        cashTendered={Number(cashTendered)}
+        transNumber={transNumber}
+        orderTotal={orderTotal}
+        paymentTotal={paymentTotal}
+        paymentMode={paymentMode}
+        currency={currency}
+        payments={payments} />
+    )
+  }
+
+  renderPrintingPreview () {
+    const { activeModalId } = this.props
+    let modalActive = activeModalId === 'printingPreview'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-content'>
+          <div className='box has-text-centered' style={{backgroundColor: 'transparent'}}>
+            <i className='fa fa-spinner fa-pulse fa-5x fa-fw' style={{color: 'white'}} />
+            <h1 className='title is-1' style={{color: 'white'}}>Printing...</h1>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderOrderProcessing () {
+    const { activeModalId } = this.props
+    let modalActive = activeModalId === 'orderProcessing'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-content'>
+          <div className='box has-text-centered' style={{backgroundColor: 'transparent'}}>
+            <i className='fa fa-spinner fa-pulse fa-5x fa-fw' style={{color: 'white'}} />
+            <h1 className='title is-1' style={{color: 'white'}}>Processing Order...</h1>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderOrderProcessed () {
+    const { activeModalId, orderError, orderSuccess, reprinting, closeModal, reprint } = this.props
+    let modalActive = activeModalId === 'orderProcessed'
+      ? 'modal is-active'
+      : 'modal'
+    return (
+      <div className={modalActive}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              Order Processed
+            </p>
+            <button className='delete' onClick={closeModal} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-12'>
+                {orderSuccess
+                  ? <h1 className='title is-marginless'>Order Success</h1>
+                  : <h1 className='title is-marginless' style={{color: 'red'}}>{orderError}</h1>
+                }
+              </div>
+              <div className='column is-6 is-offset-3'>
+                {orderSuccess
+                  ? <p className='is-subtitle'>
+                    <FormattedMessage id='app.general.checkPrinter' />
+                    {reprinting
+                      ? <span><br /><i className='fa fa-spinner fa-pulse fa-2x fa-fw' /></span>
+                      : <a className='button is-large is-light is-link' onClick={reprint}>
+                        <FormattedMessage id='app.general.reprint' />
+                      </a>
+                    }
+                  </p>
+                  : null
+                }
+              </div>
+              <div className='column is-6 is-offset-3'>
+                {orderSuccess
+                  ? <a className='button is-success is-large is-fullwidth' onClick={closeModal}>
+                    Confirm
+                  </a>
+                  : <a className='button is-warning is-large is-fullwidth'>
+                    Retry
+                  </a>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderNoteModal () {
+    const {dispatch, orderNote, activeModalId, cpShouldUpdate, closeModal} = this.props
+    const active = activeModalId === 'notesModal' ? 'is-active' : ''
+    return (
+      <div id='notesModal' className={`modal ${active}`}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              <FormattedMessage id='app.general.notes' />
+            </p>
+            <button className='delete' onClick={closeModal} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content'>
+              {!cpShouldUpdate
+                ? <ul>
+                  {!orderNote
+                    ? null
+                    : orderNote.map(function (item, key) {
+                      function remove () {
+                        dispatch(panelCheckoutShouldUpdate(true))
+                        dispatch(removeNote(item.message))
+                      }
+                      return (
+                        <li key={key}>
+                          {`${item.message} `}
+                          <span className='tag is-danger' style={{marginLeft: 10}}>
+                            <FormattedMessage id='app.button.removeNote' />
+                            <button className='delete' onClick={remove} />
+                          </span>
+                        </li>
+                      )
+                    }, this)
+                  }
+                </ul>
+                : null
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+}
+
+PanelCheckoutModals.propTypes = {
+  activeModalId: PropTypes.string,
+  card: PropTypes.object,
+  cashTendered: PropTypes.number,
+  cpShouldUpdate: PropTypes.bool,
+  currency: PropTypes.string,
+  orderError: PropTypes.string,
+  orderNote: PropTypes.array,
+  orderSuccess: PropTypes.bool,
+  orderTotal: PropTypes.number,
+  payments: PropTypes.array,
+  paymentMode: PropTypes.string,
+  paymentTotal: PropTypes.number,
+  reprinting: PropTypes.bool,
+  transNumber: PropTypes.string,
+  closeModal: PropTypes.func,
+  reprint: PropTypes.func,
+  processOrder: PropTypes.func
+}
+
+export default connect()(injectIntl(PanelCheckoutModals))

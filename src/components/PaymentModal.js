@@ -32,14 +32,16 @@ class PaymentModal extends Component {
   }
 
   _clickConfirm (event) {
-    event.preventDefault()
+    if (event) { event.preventDefault() }
     const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal } = this.props
     var orderMinusPayment = orderTotal - paymentTotal <= 0
       ? null
       : orderTotal - paymentTotal
     let paymentValue
+    let voucherCode
     if (paymentMode === 'voucher') {
       paymentValue = Number(transNumber)
+      voucherCode = document.getElementById('voucherCode').value
     } else {
       paymentValue = Number(document.getElementById('paymentValue').value) || orderMinusPayment
     }
@@ -51,7 +53,7 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'nets') {
       payment = { type: 'nets', amount: paymentValue, transNumber: transNumber, remarks: 'Needs more' }
     } else if (paymentMode === 'voucher') {
-      payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: '#'} }
+      payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
     }
     dispatch(addPaymentType(payment))
     dispatch(closeActiveModal(focusProductSearch))
@@ -101,20 +103,17 @@ class PaymentModal extends Component {
                   {error}
                 </p>
               }
-              {paymentMode !== 'voucher'
-                ? <div className='control is-horizontal'>
-                  <div className='control-label' style={{maxWidth: 130}}>
-                    <label className='label'>
-                      Amount to Pay
-                    </label>
-                  </div>
-                  <div className='control is-expanded'>
-                    <input id='paymentValue' className='input is-large'
-                      placeholder={orderMinusPayment < 0 ? 0 : orderMinusPayment} />
-                  </div>
+              <div className='control is-horizontal'>
+                <div className='control-label' style={{maxWidth: 130}}>
+                  <label className='label'>
+                    {paymentMode === 'voucher' ? 'Voucher Code' : 'Amount to Pay'}
+                  </label>
                 </div>
-                : null
-              }
+                <div className='control is-expanded'>
+                  <input id={paymentMode === 'voucher' ? 'voucherCode' : 'paymentValue'} className='input is-large'
+                    placeholder={orderMinusPayment < 0 ? 0 : orderMinusPayment} />
+                </div>
+              </div>
               <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
                 <div className='control is-horizontal'>
                   <div className='control-label' style={{width: 130, maxWidth: 130}}>
@@ -163,26 +162,41 @@ class PaymentModal extends Component {
                             <FormattedMessage id='app.general.cardAssoc' />
                           </p>
                           <div className='columns'>
-                            <div className='column is-4'>
+                            <div className='column is-1' />
+                            <div className='column is-2'>
                               <img style={card.provider === 'visa'
                                 ? selected
                                 : unselected}
                                 onClick={this._clickCardProvToggle.bind(this, 'visa')}
                                 src={require('../assets/card-visa.gif')} />
                             </div>
-                            <div className='column is-4'>
+                            <div className='column is-2'>
                               <img style={card.provider === 'master'
                                 ? selected
                                 : unselected}
                                 onClick={this._clickCardProvToggle.bind(this, 'master')}
                                 src={require('../assets/card-mc.gif')} />
                             </div>
-                            <div className='column is-4'>
+                            <div className='column is-2'>
                               <img style={card.provider === 'amex'
                                 ? selected
                                 : unselected}
                                 onClick={this._clickCardProvToggle.bind(this, 'amex')}
                                 src={require('../assets/card-amex.gif')} />
+                            </div>
+                            <div className='column is-2'>
+                              <img style={card.provider === 'master'
+                                ? selected
+                                : unselected}
+                                onClick={this._clickCardProvToggle.bind(this, 'master')}
+                                src={require('../assets/diners.png')} />
+                            </div>
+                            <div className='column is-2'>
+                              <img style={card.provider === 'amex'
+                                ? selected
+                                : unselected}
+                                onClick={this._clickCardProvToggle.bind(this, 'amex')}
+                                src={require('../assets/union.png')} />
                             </div>
                           </div>
                         </div>
