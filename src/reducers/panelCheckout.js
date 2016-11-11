@@ -3,6 +3,7 @@ import {
   SET_DISCOUNT,
   SET_CASH_TENDERED,
   ADD_PAYMENT_TYPE,
+  REMOVE_PAYMENT_TYPE,
   SET_TRANS_NUMBER,
   SET_CARD_TYPE,
   SET_CARD_PROVIDER,
@@ -95,6 +96,30 @@ function panelCheckout (state = {
       })
       return Object.assign({}, state, {
         payments: state.payments,
+        shouldUpdate: false
+      })
+    case REMOVE_PAYMENT_TYPE:
+      state.payments.forEach(function (payment) {
+        if (payment.type === action.paymentType) {
+          if (payment.type === 'cash') {
+            payment.amount = null
+            payment.cash = 0
+          } else if (payment.type === 'voucher') {
+            payment.total = 0
+            payment.vouchers = []
+          } else if (payment.type === 'credit') {
+            payment.amount = null
+            payment.transNumber = null
+            payment.provider = null
+          } else if (payment.type === 'nets') {
+            payment.amount = null
+            payment.transNumber = null
+            payment.provider = null
+          }
+        }
+      })
+      return Object.assign({}, state, {
+        payment: state.payments,
         shouldUpdate: false
       })
     case SET_CARD_TYPE:

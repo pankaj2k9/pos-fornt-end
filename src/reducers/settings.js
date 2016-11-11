@@ -123,7 +123,7 @@ function settings (state = {
   errorMessage: null,
   orderSearchKey: '',
   customerSearchKey: '',
-  customerFilter: '',
+  customerFilter: 'odbo id',
   customerContactFilter: '',
   refundSuccess: false,
   reprintSuccess: null,

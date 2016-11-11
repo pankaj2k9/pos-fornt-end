@@ -10,7 +10,7 @@ import { injectIntl, FormattedMessage } from 'react-intl'
 
 import Panel from '../components/Panel'
 import PanelProducts from './PanelProducts'
-import PaymentModal from '../components/PaymentModal'
+import PanelCheckoutModals from './PanelCheckoutModals'
 import Level from '../components/Level'
 import Counter from '../components/Counter'
 import Truncate from '../components/Truncate'
@@ -20,8 +20,8 @@ import FunctionButtons from '../components/FunctionButtons'
 import { setActiveModal, closeActiveModal } from '../actions/application'
 import {
   addPaymentType,
+  removePaymentType,
   setOrderNote,
-  removeNote,
   panelCheckoutShouldUpdate,
   setPinCode
 } from '../actions/panelCheckout'
@@ -42,6 +42,7 @@ import {
 } from '../actions/helpers'
 
 import {processOrder} from '../actions/orders'
+import { formatCurrency } from '../utils/string'
 
 const focusProductSearch = 'productsSearch'
 
@@ -117,8 +118,14 @@ class PanelCheckout extends Component {
   }
 
   _setOdboUserPincode (value) {
-    const {dispatch} = this.props
+    const { dispatch } = this.props
     dispatch(setPinCode(value))
+  }
+
+  _removePayment (value) {
+    const { dispatch } = this.props
+    dispatch(panelCheckoutShouldUpdate(true))
+    dispatch(removePaymentType(value))
   }
 
   /*
@@ -184,10 +191,8 @@ class PanelCheckout extends Component {
         sumOfPayments = sumOfPayments + (Number(x[i].amount) || 0)
       }
     }
-    if (currency === 'sgd' && !sumOfPayments) {
-      return 0
-    } else if (currency === 'sgd' && sumOfPayments) {
-      return sumOfPayments + voucherTotal
+    if (currency === 'sgd') {
+      return (sumOfPayments || 0) + voucherTotal || 0
     } else if (currency === 'odbo') {
       return Number(activeCustomer.odboCoins)
     }
@@ -352,8 +357,8 @@ class PanelCheckout extends Component {
               {shouldUpdate
                 ? null
                 : currency === 'sgd'
-                  ? Number(Number(item.qty) * computedDiscount).toFixed(2)
-                  : parseInt(item.qty) * Number(computedDiscount)}
+                  ? formatCurrency(item.qty * computedDiscount)
+                  : item.qty * computedDiscount}
             </p>
           </td>
           <td className='is-icon'>
@@ -372,21 +377,32 @@ class PanelCheckout extends Component {
 
   render () {
     var intFrameHeight = window.innerHeight
-    const { currency, intl, cpShouldUpdate, activeCustomer, locale, productsAreFetching, staff,
-            orderNote, shouldUpdate, cartItemsArray, showPayments, storeId,
-            bonusPoints, payments, customDiscount } = this.props
-    /** VAIDATION OF VALUES **/
-    /** @customDiscount: prop to be validated
-        @operator: customDiscount === '' || !customDiscount
-            - this validates the customDiscount if it's an empty string, null
-              or undefined
-            - returns true if value is an empty string, null, or undefined
-    **/
+    const {
+      activeCustomer,
+      activeModalId,
+      bonusPoints,
+      card,
+      cartItemsArray,
+      cashTendered,
+      cpShouldUpdate,
+      currency,
+      customDiscount,
+      intl,
+      locale,
+      orderError,
+      orderNote,
+      orderSuccess,
+      payments,
+      paymentMode,
+      productsAreFetching,
+      reprinting,
+      shouldUpdate,
+      showPayments,
+      staff,
+      storeId,
+      transNumber
+    } = this.props
 
-    // let subtotal = !customDiscount || customDiscount === 0
-    //   ? (this.sumOfCartItems() - this.sumOfCartDiscounts()).toFixed(2)
-    //   : this.sumOfCartItems()
-    // var voucherDiscount = !voucher ? 0.00 : voucher.amount
     const orderNoteCount = orderNote.length === 0 ? 0 : orderNote.length
     const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
 
@@ -399,13 +415,22 @@ class PanelCheckout extends Component {
       {name: 'Open Drawer', icon: 'fa fa-upload', customColor: '#3273dc'}
     ]
 
+    let voucherSum = this.vouchers() ? this.vouchers().voucherTotal : 0
+    var paymentList = {
+      cash: formatCurrency(payments[0].cash),
+      credit: formatCurrency(payments[1].amount),
+      nets: formatCurrency(payments[2].amount),
+      voucher: formatCurrency(voucherSum)
+    }
+
+    console.log(paymentList)
     return (
       <div>
         <Panel>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             {!shouldUpdate
               ? <div className='is-clearfix'>
-                <h4 className='title is-4 is-marginless is-pulled-left'>
+                <h4 className='title is-4 is-marginless is-pulled-left' style={{width: 150}}>
                 Order Items
                 </h4>
                 <div className='is-pulled-right'>
@@ -453,76 +478,59 @@ class PanelCheckout extends Component {
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             <Level left={
-              <p>Subtotal: {this.sumOfCartItems()}</p>
+              <p>Subtotal: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
               }
               center={<p className='has-text-left'>Discounts: {
                 customDiscount === 0
-                ? this.sumOfCartDiscounts()
-                : this.overAllDeduct()
+                ? currency === 'sgd' ? formatCurrency(this.sumOfCartDiscounts()) : this.sumOfCartDiscounts()
+                : currency === 'sgd' ? formatCurrency(this.overAllDeduct()) : this.overAllDeduct()
               }</p>}
               right={
                 <h3 className='is-marginless'>
                   Order Total: <strong>
-                    {`${currency === 'sgd' ? this.orderTotal().toFixed(2) : this.orderTotal().toFixed()}`}
+                    {`${currency === 'sgd' ? formatCurrency(this.orderTotal()) : this.orderTotal().toFixed()}`}
                   </strong>
                 </h3>
             } />
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
-            <Level left={<strong>Payments <a>[View]</a></strong>}
+            {currency === 'sgd' ? <h3 className='is-marginless'>Payments</h3> : null}
+            <Level left={currency === 'sgd'
+              ? <div>
+                <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
+                  <li onClick={this._removePayment.bind(this, 'cash')}><i className='fa fa-close' /> Cash: {paymentList.cash}</li>
+                  <li onClick={this._removePayment.bind(this, 'voucher')}><i className='fa fa-close' /> Voucher: {paymentList.voucher}</li>
+                </ul>
+              </div>
+              : null
+            }
+              center={currency === 'sgd'
+                ? <div className='has-text-left'>
+                  <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
+                    <li onClick={this._removePayment.bind(this, 'credit')}><i className='fa fa-close' /> Credit: {paymentList.credit}</li>
+                    <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {paymentList.nets}</li>
+                  </ul>
+                </div>
+                : null
+              }
               right={
                 <h3 className='is-marginless'>
                   {shouldUpdate
                     ? null
                     : <span>{`${currency === 'sgd' ? 'Payment Total: ' : 'ODBO Coins: '}`}
-                      <strong>{`${currency === 'sgd' ? this.sumOfPayments().toFixed(2) : this.sumOfPayments()}`}</strong>
+                      <strong>{`${currency === 'sgd' ? formatCurrency(this.sumOfPayments()) : this.sumOfPayments()}`}</strong>
                     </span>
                   }
                 </h3>
             } />
-            {payments && showPayments
-              ? payments.map(function (payment, key) {
-                return (
-                  <div key={key}>
-                    {payment.type !== 'voucher'
-                      ? <Level key={key} left={
-                        <span style={{color: payment.amount ? 'black' : 'white'}}>{payment.type}</span>
-                        }
-                        center={payment.type === 'credit' || payment.type === 'nets'
-                          ? <p><strong style={{color: payment.amount ? 'black' : 'white'}}>trans#: </strong>{payment.transNumber}</p> : ''}
-                        right={
-                          <strong style={{color: payment.amount ? 'black' : 'white'}}>{Number(payment.amount).toFixed(2) || 0.00}</strong>
-                      } />
-                      : null
-                    }
-                    {payment.type === 'voucher'
-                      ? <Level key={key} left={
-                        <span style={{color: this.vouchers() ? 'black' : 'white'}}>{payment.type}</span>
-                        }
-                        center={
-                          <p>
-                            {this.vouchers() ? `[ ${this.vouchers().voucherToString} ]` : ''}
-                          </p>
-                        }
-                        right={
-                          <strong style={{color: this.vouchers() ? 'black' : 'white'}}>
-                            {this.vouchers() ? Number(this.vouchers().voucherTotal).toFixed(2) || 0.00 : ''}
-                          </strong>
-                      } />
-                      : null
-                    }
-                  </div>
-                )
-              }, this)
-              : null
-            }
           </div>
+
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             <Level right={
               <h3 className='is-marginless'>
                 {`${currency === 'sgd' ? 'Cash Change: ' : 'Remaining Balance: '} `}
                 <strong>
-                  {`${currency === 'sgd' ? this.cashChange().toFixed(2) : this.paymentMinusOrderTotal()}`}
+                  {`${currency === 'sgd' ? formatCurrency(this.cashChange()) : this.paymentMinusOrderTotal()}`}
                 </strong>
               </h3>
               } />
@@ -617,214 +625,26 @@ class PanelCheckout extends Component {
           </div>
         </Panel>
         {cpShouldUpdate
-          ? this.renderModal()
+          ? <PanelCheckoutModals
+            activeModalId={activeModalId}
+            card={card}
+            cashTendered={Number(cashTendered)}
+            cpShouldUpdate={cpShouldUpdate}
+            currency={currency}
+            orderError={orderError}
+            orderNote={orderNote}
+            orderSuccess={orderSuccess}
+            orderTotal={this.orderTotal()}
+            payments={payments}
+            paymentMode={paymentMode}
+            paymentTotal={this.sumOfPayments()}
+            transNumber={transNumber}
+            reprinting={reprinting}
+            closeModal={this._closeModal.bind(this)}
+            reprint={this._clickReprint.bind(this)}
+            processOrder={this._processOrder.bind(this)} />
           : null
         }
-      </div>
-    )
-  }
-
-  renderModal () {
-    const {activeModalId} = this.props
-    switch (activeModalId) {
-      case 'notesModal':
-        return this.renderNoteModal()
-      case 'paymentModal':
-        return this.renderPaymentModal()
-      case 'orderProcessing':
-        return this.renderOrderProcessing()
-      case 'orderProcessed':
-        return this.renderOrderProcessed()
-      case 'printingPreview':
-        return this.renderPrintingPreview()
-      case 'odboUserPincode':
-        return this.renderInputPincode()
-      default:
-    }
-  }
-
-  renderInputPincode () {
-    const { activeModalId } = this.props
-    let modalActive = activeModalId === 'odboUserPincode'
-      ? 'modal is-active'
-      : 'modal'
-    return (
-      <div className={modalActive}>
-        <div className='modal-background' />
-        <div className='modal-card'>
-          <header className='modal-card-head'>
-            <p className='modal-card-title is-marginless has-text-centered'>
-              Odbo User Pincode
-            </p>
-            <button className='delete' onClick={this._closeModal.bind(this)} />
-          </header>
-          <div className='modal-card-body'>
-            <div className='content columns is-mobile is-multiline has-text-centered'>
-              <div className='column is-8 is-offset-2'>
-                <div className='control is-horizontal is-fullwidth'>
-                  <div className='control-label' style={{width: 150}}>
-                    <h3 className='label is-marginless'>Input Pincode</h3>
-                  </div>
-                  <form onSubmit={this._processOrder.bind(this)} >
-                    <input id='userPincode' className='input is-large' type='Password'
-                      onChange={e => this._setOdboUserPincode(e.target.value)} />
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  renderPaymentModal () {
-    const {activeModalId, card, cashTendered, transNumber, payments} = this.props
-    return (
-      <PaymentModal
-        id={activeModalId}
-        card={card}
-        cashTendered={Number(cashTendered)}
-        transNumber={transNumber}
-        orderTotal={this.orderTotal()}
-        paymentTotal={this.sumOfPayments()}
-        paymentMode={this.props.paymentMode}
-        currency={this.props.currency}
-        payments={payments} />
-    )
-  }
-
-  renderPrintingPreview () {
-    const { activeModalId } = this.props
-    let modalActive = activeModalId === 'printingPreview'
-      ? 'modal is-active'
-      : 'modal'
-    return (
-      <div className={modalActive}>
-        <div className='modal-background' />
-        <div className='modal-content'>
-          <div className='box has-text-centered' style={{backgroundColor: 'transparent'}}>
-            <i className='fa fa-spinner fa-pulse fa-5x fa-fw' style={{color: 'white'}} />
-            <h1 className='title is-1' style={{color: 'white'}}>Printing...</h1>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  renderOrderProcessing () {
-    const { activeModalId } = this.props
-    let modalActive = activeModalId === 'orderProcessing'
-      ? 'modal is-active'
-      : 'modal'
-    return (
-      <div className={modalActive}>
-        <div className='modal-background' />
-        <div className='modal-content'>
-          <div className='box has-text-centered' style={{backgroundColor: 'transparent'}}>
-            <i className='fa fa-spinner fa-pulse fa-5x fa-fw' style={{color: 'white'}} />
-            <h1 className='title is-1' style={{color: 'white'}}>Processing Order...</h1>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  renderOrderProcessed () {
-    const { activeModalId, orderError, orderSuccess, reprinting } = this.props
-    let modalActive = activeModalId === 'orderProcessed'
-      ? 'modal is-active'
-      : 'modal'
-    return (
-      <div className={modalActive}>
-        <div className='modal-background' />
-        <div className='modal-card'>
-          <header className='modal-card-head'>
-            <p className='modal-card-title is-marginless has-text-centered'>
-              Order Processed
-            </p>
-            <button className='delete' onClick={this._closeModal.bind(this)} />
-          </header>
-          <div className='modal-card-body'>
-            <div className='content columns is-mobile is-multiline has-text-centered'>
-              <div className='column is-12'>
-                {orderSuccess
-                  ? <h1 className='title is-marginless'>Order Success</h1>
-                  : <h1 className='title is-marginless' style={{color: 'red'}}>{orderError}</h1>
-                }
-              </div>
-              <div className='column is-6 is-offset-3'>
-                {orderSuccess
-                  ? <p className='is-subtitle'>
-                    <FormattedMessage id='app.general.checkPrinter' />
-                    {reprinting
-                      ? <span><br /><i className='fa fa-spinner fa-pulse fa-2x fa-fw' /></span>
-                      : <a className='button is-large is-light is-link' onClick={this._clickReprint.bind(this)}>
-                        <FormattedMessage id='app.general.reprint' />
-                      </a>
-                    }
-                  </p>
-                  : null
-                }
-              </div>
-              <div className='column is-6 is-offset-3'>
-                {orderSuccess
-                  ? <a className='button is-success is-large is-fullwidth' onClick={this._closeModal.bind(this)}>
-                    Confirm
-                  </a>
-                  : <a className='button is-warning is-large is-fullwidth'>
-                    Retry
-                  </a>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  renderNoteModal () {
-    const {dispatch, orderNote, activeModalId, cpShouldUpdate} = this.props
-    const active = activeModalId === 'notesModal' ? 'is-active' : ''
-    return (
-      <div id='notesModal' className={`modal ${active}`}>
-        <div className='modal-background' />
-        <div className='modal-card'>
-          <header className='modal-card-head'>
-            <p className='modal-card-title is-marginless has-text-centered'>
-              <FormattedMessage id='app.general.notes' />
-            </p>
-            <button className='delete' onClick={this._closeModal.bind(this)} />
-          </header>
-          <div className='modal-card-body'>
-            <div className='content'>
-              {!cpShouldUpdate
-                ? <ul>
-                  {!orderNote
-                    ? null
-                    : orderNote.map(function (item, key) {
-                      function remove () {
-                        dispatch(panelCheckoutShouldUpdate(true))
-                        dispatch(removeNote(item.message))
-                      }
-                      return (
-                        <li key={key}>
-                          {`${item.message} `}
-                          <span className='tag is-danger' style={{marginLeft: 10}}>
-                            <FormattedMessage id='app.button.removeNote' />
-                            <button className='delete' onClick={remove} />
-                          </span>
-                        </li>
-                      )
-                    }, this)
-                  }
-                </ul>
-                : null
-              }
-            </div>
-          </div>
-        </div>
       </div>
     )
   }
@@ -854,15 +674,12 @@ class PanelCheckout extends Component {
     / General Info
     */
 
-    let storeAddress = !storeData.storeAddress
-      ? [
-        'The ODBO',
-        '200 Victoria Street',
-        'Bugis Junction #02-22',
-        'SINGAPORE',
-        'Telephone : 6238 1337'
-      ]
-      : [storeData.name, storeData.storeAddress]
+    let addr = storeData.address ? storeData.address.split('\\n') : ['200 Victoria Street']
+    var storeAddress = [
+      'The ODBO',
+      storeData.name,
+      ...addr
+    ]
 
     let staff = `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
 

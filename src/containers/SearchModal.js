@@ -194,12 +194,12 @@ class SearchModal extends Component {
     switch (filter) {
       case 'last name':
         query = {
-          query: { lastName: { $like: `%${customerSearchKey}%` } }
+          query: { lastName: { $like: `%${customerSearchKey.toUpperCase()}%` } }
         }
         break
       case 'first name':
         query = {
-          query: { firstName: { $like: `%${customerSearchKey}%` } }
+          query: { firstName: { $like: `%${customerSearchKey.toUpperCase()}%` } }
         }
         break
       case 'odbo id':
