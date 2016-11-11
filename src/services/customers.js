@@ -9,6 +9,10 @@ export default {
    */
   fetch (query) {
     const params = (query !== undefined) ? query : {}
+
+    if (!params.query) { params.query = {} }
+    params.query.$sort = { firstName: 1, lastName: 1 }
+
     return customers.find(params)
   },
   patch (id, params) {
