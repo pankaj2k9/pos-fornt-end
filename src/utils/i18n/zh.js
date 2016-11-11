@@ -120,6 +120,8 @@ const zh = {
 
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
   'app.ph.searchCust': '搜索 Odbo ID',
+  'app.ph.searchCustFr': '从(ODBO ID)',
+  'app.ph.searchCustTo': '至(Odbo ID)',
   'app.ph.searchCust2': '搜索顾客',
   'app.ph.searchCustErr': '搜索Odbo ID错误',
   'app.ph.saleAddNote': '添加备注到这笔买卖',
@@ -179,6 +181,7 @@ const zh = {
   'app.tabs.ctgEtc': '等等',
 
   'app.page.products.loadingProd': '加载商品...',
+  'app.page.products.loadingCust': '加载客户...',
 
   'app.page.reports.loadingSalesReport': '装载销售报告',
   'app.page.reports.loadingStoreOrders': '装载商店订单',

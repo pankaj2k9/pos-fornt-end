@@ -99,6 +99,8 @@ export function fetchCustomers (query) {
             .catch((error) => {
               dispatch(customersFetchFailure(error))
             })
+        } else {
+          dispatch(customersFetchSuccess(allCust))
         }
       })
       .catch(error => {

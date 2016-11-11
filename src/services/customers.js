@@ -12,7 +12,6 @@ export default {
 
     if (!params.query) { params.query = {} }
     if (!params.query.$sort) { params.query.$sort = { firstName: 1, lastName: 1 } }
-    console.log('PARAMS', params)
 
     return customers.find(params)
   },

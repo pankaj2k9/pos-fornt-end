@@ -128,11 +128,14 @@ class SettingsTab extends Component {
     document.getElementById('firstNameSearch').value = ''
     document.getElementById('lastNameSearch').value = ''
     document.getElementById('phoneNumberSearch').value = ''
+    dispatch(customersSetSearchKey(''))
 
     const searchingOdboId = inputId === 'odboIdSearchFr' || inputId === 'odboIdSearchTo'
     if (searchingOdboId) {
       dispatch(customersSetFilter('odboIdSearch'))
     } else {
+      dispatch(customersSetSearchKeyOIDFR(''))
+      dispatch(customersSetSearchKeyOIDTO(''))
       document.getElementById('odboIdSearchFr').value = ''
       document.getElementById('odboIdSearchTo').value = ''
 
@@ -299,11 +302,31 @@ class SettingsTab extends Component {
     const x = customersById[activeCustomerId]
     let hideDetails = showControl
     var intFrameHeight = window.innerHeight
+
+    let filter
+    switch (customerFilter) {
+      case 'firstNameSearch':
+        filter = `with first name: ${customerSearchKey}.`
+        break
+      case 'lastNameSearch':
+        filter = `with last name: ${customerSearchKey}.`
+        break
+      case 'phoneNumberSearch':
+        filter = `with phone number: ${customerSearchKey}.`
+        break
+      case 'odboIdSearch':
+        filter = 'with ID'
+        if (customerSearchKeyOIDFR) { filter += ` from ${customerSearchKeyOIDFR}` }
+        if (customerSearchKeyOIDTO) { filter += ` to ${customerSearchKeyOIDTO}` }
+        filter += '.'
+        break
+    }
+
     return (
       <div>
         <div className='columns'>
           <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCust'>
+            <LabeledControl label='app.ph.searchCustFr'>
               <SearchBar
                 id='odboIdSearchFr'
                 size='is-medium'
@@ -319,7 +342,7 @@ class SettingsTab extends Component {
           </div>
 
           <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCust'>
+            <LabeledControl label='app.ph.searchCustTo'>
               <SearchBar
                 id='odboIdSearchTo'
                 size='is-medium'
@@ -450,7 +473,7 @@ class SettingsTab extends Component {
                     <strong>
                       {customerFilter === ''
                         ? ` ${customerSearchKey}`
-                        : `" ${customerFilter} ${customerSearchKey} "`
+                        : `${filter}`
                       }
                     </strong>
                   </span>
@@ -460,7 +483,7 @@ class SettingsTab extends Component {
             </div>
           : <LoadingPane
             headerMessage={
-              <FormattedMessage id='app.page.products.loadingProd' />
+              <FormattedMessage id='app.page.products.loadingCust' />
             }
             paneSize='is-medium' />
           }

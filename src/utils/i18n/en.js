@@ -120,6 +120,8 @@ const en = {
 
   'app.ph.searchOrBarcode': 'Scan Barcode',
   'app.ph.searchCust': 'Search Odbo ID',
+  'app.ph.searchCustFr': 'From (Odbo ID)',
+  'app.ph.searchCustTo': 'To (Odbo ID)',
   'app.ph.searchCust2': 'Search Customer',
   'app.ph.searchCustErr': 'Error on searching Odbo ID',
   'app.ph.saleAddNote': 'Add note to this sale',
@@ -179,6 +181,7 @@ const en = {
   'app.tabs.ctgEtc': 'Etc',
 
   'app.page.products.loadingProd': 'Loading Products...',
+  'app.page.products.loadingCust': 'Loading Customers...',
 
   'app.page.reports.loadingSalesReport': 'Loading sales report...',
   'app.page.reports.loadingStoreOrders': 'Loading store orders...',
