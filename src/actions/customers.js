@@ -55,15 +55,56 @@ export function customerFetchFailure (error) {
 export function fetchCustomers (query) {
   return (dispatch) => {
     dispatch(customersFetchRequest())
-    console.log('QUERY', query)
+
     return customerService.fetch(query)
-    .then(customers => {
-      dispatch(customersFetchSuccess(customers.data))
-    })
-    .catch(error => {
-      dispatch(customersFetchFailure())
-      return error.response.json()
-    })
+      .then(customers => {
+        const { total, data, limit } = customers
+
+        // Store first fetch
+        let allCust = [...data]
+
+        const firstResponseCount = data.length
+        const goal = Number(total)
+
+        // If not all customers are fetched, run server queries until complete
+        if (goal > firstResponseCount) {
+          const firstLimit = limit
+          let custFetchArray = []
+          let newSkip = firstResponseCount
+
+          while (newSkip < goal) {
+            const nextParams = query || {}
+
+            nextParams.limit = firstLimit
+            nextParams.skip = newSkip
+            newSkip += firstLimit
+
+            const custFetch = new Promise((resolve, reject) => {
+              return customerService.fetch(nextParams)
+                .then((response) => { resolve(response) })
+                .catch(() => { reject('Failed fetching all customers') })
+            })
+            custFetchArray.push(custFetch)
+          }
+
+          // Run all cust fetch
+          global.Promise.all(custFetchArray)
+            .then((response) => {
+              response.forEach((fetchResponse) => {
+                allCust = [...allCust, ...fetchResponse.data]
+              })
+
+              dispatch(customersFetchSuccess(allCust))
+            })
+            .catch((error) => {
+              dispatch(customersFetchFailure(error))
+            })
+        }
+      })
+      .catch(error => {
+        dispatch(customersFetchFailure(error))
+        // return error.response.json()
+      })
   }
 }
 
