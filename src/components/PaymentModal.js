@@ -185,17 +185,17 @@ class PaymentModal extends Component {
                                 src={require('../assets/card-amex.gif')} />
                             </div>
                             <div className='column is-2'>
-                              <img style={card.provider === 'master'
+                              <img style={card.provider === 'diners'
                                 ? selected
                                 : unselected}
-                                onClick={this._clickCardProvToggle.bind(this, 'master')}
+                                onClick={this._clickCardProvToggle.bind(this, 'diners')}
                                 src={require('../assets/diners.png')} />
                             </div>
                             <div className='column is-2'>
-                              <img style={card.provider === 'amex'
+                              <img style={card.provider === 'union'
                                 ? selected
                                 : unselected}
-                                onClick={this._clickCardProvToggle.bind(this, 'amex')}
+                                onClick={this._clickCardProvToggle.bind(this, 'union')}
                                 src={require('../assets/union.png')} />
                             </div>
                           </div>

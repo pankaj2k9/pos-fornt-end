@@ -244,6 +244,36 @@ class PanelCheckout extends Component {
     return vouchers
   }
 
+  creditsAndNets () {
+    const {payments} = this.props
+    let creditsToString = ''
+    let creditList = []
+    let creditTotal = 0
+    let netsList = []
+    let netsTotal = 0
+    let creditsAndNets
+    payments.forEach(payment => {
+      if (payment.type === 'credit' && payment.amount) {
+        let v1 = `${payment.amount}| `
+        creditList.push(payment)
+        creditTotal += Number(payment.amount)
+        creditsToString = creditsToString.concat(v1)
+      }
+      if (payment.type === 'nets' && payment.amount) {
+        netsList.push(payment)
+        netsTotal += Number(payment.amount)
+      }
+      creditsAndNets = {
+        creditsToString: creditsToString,
+        creditList: creditList,
+        creditTotal: creditTotal,
+        netsTotal: netsTotal,
+        netsList: netsList
+      }
+    })
+    return creditsAndNets
+  }
+
   cashChange () {
     const { payments } = this.props
     let change
@@ -416,14 +446,15 @@ class PanelCheckout extends Component {
     ]
 
     let voucherSum = this.vouchers() ? this.vouchers().voucherTotal : 0
+    let creditSum = this.creditsAndNets() ? this.creditsAndNets().creditTotal : 0
+    let netsSum = this.creditsAndNets() ? this.creditsAndNets().netsTotal : 0
     var paymentList = {
       cash: formatCurrency(payments[0].cash),
-      credit: formatCurrency(payments[1].amount),
-      nets: formatCurrency(payments[2].amount),
+      credit: formatCurrency(creditSum),
+      nets: formatCurrency(netsSum),
       voucher: formatCurrency(voucherSum)
     }
 
-    console.log(paymentList)
     return (
       <div>
         <Panel>
@@ -502,7 +533,7 @@ class PanelCheckout extends Component {
                   <li onClick={this._removePayment.bind(this, 'voucher')}><i className='fa fa-close' /> Voucher: {paymentList.voucher}</li>
                 </ul>
               </div>
-              : null
+              : <div />
             }
               center={currency === 'sgd'
                 ? <div className='has-text-left'>
@@ -511,10 +542,10 @@ class PanelCheckout extends Component {
                     <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {paymentList.nets}</li>
                   </ul>
                 </div>
-                : null
+                : <div />
               }
               right={
-                <h3 className='is-marginless'>
+                <h3 className='is-marginless is-pulled-right'>
                   {shouldUpdate
                     ? null
                     : <span>{`${currency === 'sgd' ? 'Payment Total: ' : 'ODBO Coins: '}`}

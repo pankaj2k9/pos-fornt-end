@@ -26,8 +26,6 @@ function panelCheckout (state = {
   cashTendered: 0,
   payments: [
     { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
-    { type: 'credit', amount: null, transNumber: null, provider: null, remarks: 'Needs more' },
-    { type: 'nets', amount: null, transNumber: null, remarks: 'Needs more' },
     { type: 'voucher', total: 0, vouchers: [] }
   ],
   card: {
@@ -79,12 +77,9 @@ function panelCheckout (state = {
             currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
             currentPayments[key].cash = Number(action.payment.cash).toFixed(2)
           } else if (currentPayments[key].type === 'credit') {
-            currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
-            currentPayments[key].transNumber = action.payment.transNumber
-            currentPayments[key].provider = action.payment.provider
+            currentPayments.push(action.payment)
           } else if (currentPayments[key].type === 'nets') {
-            currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
-            currentPayments[key].transNumber = action.payment.transNumber
+            currentPayments.push(action.payment)
           } else if (currentPayments[key].type === 'voucher') {
             let vouchers = currentPayments[key].vouchers
             vouchers.push(action.payment.voucher)
@@ -175,8 +170,6 @@ function panelCheckout (state = {
         pincode: '',
         payments: [
           { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
-          { type: 'credit', amount: null, transNumber: null, provider: null, remarks: 'Needs more' },
-          { type: 'nets', amount: null, transNumber: null, remarks: 'Needs more' },
           { type: 'voucher', total: 0, vouchers: [] }
         ],
         orderNote: []
