@@ -11,7 +11,8 @@ export default {
     const params = (query !== undefined) ? query : {}
 
     if (!params.query) { params.query = {} }
-    params.query.$sort = { firstName: 1, lastName: 1 }
+    if (!params.query.$sort) { params.query.$sort = { firstName: 1, lastName: 1 } }
+    console.log('PARAMS', params)
 
     return customers.find(params)
   },

@@ -22,6 +22,8 @@ import { fetchCustomers } from '../actions/customers'
 import {
   storeOrdersSetSearchKey,
   customersSetSearchKey,
+  customersSetSearchKeyOIDFR,
+  customersSetSearchKeyOIDTO,
   customersSetFilter,
   customersSetActiveId,
   customersSetContactFilter,
@@ -72,6 +74,16 @@ class SettingsTab extends Component {
     dispatch(customersSetSearchKey(value))
   }
 
+  setCustomerSearchKeyOIDFR (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetSearchKeyOIDFR(value))
+  }
+
+  setCustomerSearchKeyOIDTO (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetSearchKeyOIDTO(value))
+  }
+
   setCustomerFilter (value) {
     const {dispatch} = this.props
     dispatch(customersSetFilter(value))
@@ -84,7 +96,15 @@ class SettingsTab extends Component {
 
   onSubmit (event) {
     event.preventDefault()
-    const {dispatch, customerFilter, customerSearchKey, customerContactFilter} = this.props
+    const {
+      dispatch,
+      customerFilter,
+      customerSearchKey,
+      customerContactFilter,
+      customerSearchKeyOIDFR,
+      customerSearchKeyOIDTO
+    } = this.props
+
     switch (customerFilter) {
       case 'firstNameSearch':
         return dispatch(searchCustomer({ query: { firstName: { $like: `%${customerSearchKey}%` } } }))
@@ -93,19 +113,33 @@ class SettingsTab extends Component {
       case 'phoneNumberSearch':
         return dispatch(searchCustomer({ query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }))
       case 'odboIdSearch':
-        return dispatch(searchCustomer({ query: { odboId: Number(customerSearchKey) } }))
-      default:
+        const query = { odboId: {}, $sort: { odboId: 1 } }
+        if (customerSearchKeyOIDFR) { query.odboId.$gte = Number(customerSearchKeyOIDFR) }
+        if (customerSearchKeyOIDTO) { query.odboId.$lte = Number(customerSearchKeyOIDTO) }
+
+        dispatch(searchCustomer({ query }))
+        break
     }
   }
 
   onFocus (inputId) {
     const {dispatch} = this.props
+
     document.getElementById('firstNameSearch').value = ''
     document.getElementById('lastNameSearch').value = ''
     document.getElementById('phoneNumberSearch').value = ''
-    document.getElementById('odboIdSearch').value = ''
-    dispatch(customersSetFilter(inputId))
-    dispatch(searchCustomer()) // refetch 1st 40 customers
+
+    const searchingOdboId = inputId === 'odboIdSearchFr' || inputId === 'odboIdSearchTo'
+    if (searchingOdboId) {
+      dispatch(customersSetFilter('odboIdSearch'))
+    } else {
+      document.getElementById('odboIdSearchFr').value = ''
+      document.getElementById('odboIdSearchTo').value = ''
+
+      dispatch(customersSetFilter(inputId))
+    }
+
+    // dispatch(searchCustomer()) // refetch 1st 40 customers
   }
 
   renderMainTab () {
@@ -253,19 +287,54 @@ class SettingsTab extends Component {
 
   renderCustomersTab () {
     const {
-          dispatch, isFetching,
-          customers, customersById,
-          customerSearchKey, customerFilter,
-          activeCustomerId, activeModalId,
-          intl, showControl,
-          ucIsProcessing, ucError, customerContactFilter
-          } = this.props
+      dispatch, isFetching,
+      customers, customersById,
+      customerSearchKey, customerFilter,
+      activeCustomerId, activeModalId,
+      intl, showControl,
+      ucIsProcessing, ucError, customerContactFilter,
+      customerSearchKeyOIDFR, customerSearchKeyOIDTO
+    } = this.props
 
     const x = customersById[activeCustomerId]
     let hideDetails = showControl
     var intFrameHeight = window.innerHeight
     return (
       <div>
+        <div className='columns'>
+          <div className='column is-3'>
+            <LabeledControl label='app.ph.searchCust'>
+              <SearchBar
+                id='odboIdSearchFr'
+                size='is-medium'
+                value={customerSearchKeyOIDFR}
+                placeholder={'app.ph.keyword'}
+                confirmButton={<i className='fa fa-search' />}
+                onChange={this.setCustomerSearchKeyOIDFR.bind(this)}
+                onSubmit={this.onSubmit.bind(this)}
+                onFocus={this.onFocus.bind(this)}
+                confirmEvent={this.onSubmit.bind(this)}
+                />
+            </LabeledControl>
+          </div>
+
+          <div className='column is-3'>
+            <LabeledControl label='app.ph.searchCust'>
+              <SearchBar
+                id='odboIdSearchTo'
+                size='is-medium'
+                value={customerSearchKeyOIDTO}
+                placeholder={'app.ph.keyword'}
+                confirmButton={<i className='fa fa-search' />}
+                onChange={this.setCustomerSearchKeyOIDTO.bind(this)}
+                onSubmit={this.onSubmit.bind(this)}
+                onFocus={this.onFocus.bind(this)}
+                confirmEvent={this.onSubmit.bind(this)}
+                />
+            </LabeledControl>
+          </div>
+        </div>
+
         <div className='columns'>
           <div className='column is-3'>
             <LabeledControl label='app.ph.searchFn'>
@@ -306,21 +375,6 @@ class SettingsTab extends Component {
                 placeholder={'app.ph.keyword'}
                 confirmButton={<i className='fa fa-search' />}
                 onChange={this.setCustomerContactFilter.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCust'>
-              <SearchBar
-                id='odboIdSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKey.bind(this)}
                 onSubmit={this.onSubmit.bind(this)}
                 onFocus={this.onFocus.bind(this)}
                 confirmEvent={this.onSubmit.bind(this)}
@@ -655,6 +709,8 @@ function mapStateToProps (state) {
     ucError: state.settings.customer.error,
     errorMessage: state.settings.errorMessage,
     customerSearchKey: state.settings.customerSearchKey,
+    customerSearchKeyOIDFR: state.settings.customerSearchKeyOIDFR,
+    customerSearchKeyOIDTO: state.settings.customerSearchKeyOIDTO,
     customerFilter: state.settings.customerFilter,
     customerContactFilter: state.settings.customerContactFilter,
     activeCustomerId: state.settings.activeCustomerId,

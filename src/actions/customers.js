@@ -55,6 +55,7 @@ export function customerFetchFailure (error) {
 export function fetchCustomers (query) {
   return (dispatch) => {
     dispatch(customersFetchRequest())
+    console.log('QUERY', query)
     return customerService.fetch(query)
     .then(customers => {
       dispatch(customersFetchSuccess(customers.data))
