@@ -7,7 +7,8 @@ const products = {
     return productsService.find({
       query: {
         $limit: 40,
-        $eager: '[stock]'
+        $eager: '[stock]',
+        enabled: true
       }
     })
   },
