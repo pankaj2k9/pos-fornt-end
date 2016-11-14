@@ -16,6 +16,7 @@ const ITEM_QTY_STYLE = 'width: 24px; display: inline-block'
 const ITEM_NAME_STYLE = 'width: 176px; display: inline-block;'
 const ITEM_SUBTOTAL_STYLE = 'width: 36px; display: inline-block; text-align: right;'
 const HEADER_STYLE = `display: flex; flex-direction: column; align-items: center; margin-bottom: ${RECEIPT_MARGIN}px;`
+const COMPANY_NAME = `font-size: ${RECEIPT_FONT_SIZE * 2}px; font-weight: bold;`
 const TOTAL_DIV_STYLE_1 = `display: flex; justify-content: space-between; flex-direction: row; font-size: ${RECEIPT_FONT_SIZE * 1.2}px; font-weight: bold;`
 const TOTAL_DIV_STYLE_2 = 'display: flex; justify-content: space-between; flex-direction: row;'
 const BODY_STYLE = `font-family: ${RECEIPT_FONT};
@@ -37,7 +38,7 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += receipt.headerText ? RECEIPT_DIVIDER : ''
 
   // build extra info
-  receiptHtmlString += buildExtraInfo(receipt.info, receipt.trans.activeCustomer)
+  receiptHtmlString += buildExtraInfo(receipt.info, receipt.trans ? receipt.trans.activeCustomer : null)
   receiptHtmlString += receipt.info ? RECEIPT_DIVIDER : ''
 
   // build item list
@@ -111,13 +112,10 @@ export const buildHeader = (headerText) => {
   let header = ''
   if (headerText) {
     header += `<div style="${HEADER_STYLE}">`
-    if (typeof headerText === 'string') {
-      header += `<div>${headerText}</div>`
-    } else if (typeof headerText === 'object') {
-      headerText.forEach(hdr => {
-        header += `<div>${hdr}</div>`
-      })
-    }
+    header += `<div style="${COMPANY_NAME}">The odbo</div>`
+    headerText.forEach(hdr => {
+      header += `<div>${hdr}</div>`
+    })
     header += '</div>'
   }
   return header

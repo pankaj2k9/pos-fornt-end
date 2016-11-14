@@ -74,14 +74,11 @@ class PaymentModal extends Component {
   }
 
   render () {
-    const {intl, id, card, currency, paymentMode, error, orderTotal, paymentTotal} = this.props
+    const {intl, id, card, currency, paymentMode, error} = this.props
     const active = id === 'paymentModal' ? 'is-active ' : ''
     var inputCash = 6
     var inputCredit = 20
     var inputPin = 4
-
-    var orderMinusPayment = orderTotal - paymentTotal
-
     // style for logo of card Association
     var unselected = {opacity: 0.2}
     var selected = {opacity: 1}
@@ -111,7 +108,7 @@ class PaymentModal extends Component {
                 </div>
                 <div className='control is-expanded'>
                   <input id={paymentMode === 'voucher' ? 'voucherCode' : 'paymentValue'} className='input is-large'
-                    placeholder={orderMinusPayment < 0 ? 0 : orderMinusPayment} />
+                    placeholder={paymentMode === 'voucher' ? 'voucher code' : 'payment amount'} />
                 </div>
               </div>
               <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
