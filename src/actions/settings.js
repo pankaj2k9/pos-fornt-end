@@ -36,6 +36,16 @@ export function customersSetSearchKey (customerKey) {
   return { type: CUSTOMERS_SET_SEARCH_KEY, customerKey }
 }
 
+export const CUSTOMERS_SET_SEARCH_KEY_ODBOID_FR = 'CUSTOMERS_SET_SEARCH_KEY_ODBOID_FR'
+export function customersSetSearchKeyOIDFR (odboId) {
+  return { type: CUSTOMERS_SET_SEARCH_KEY_ODBOID_FR, odboId }
+}
+
+export const CUSTOMERS_SET_SEARCH_KEY_ODBOID_TO = 'CUSTOMERS_SET_SEARCH_KEY_ODBOID_TO'
+export function customersSetSearchKeyOIDTO (odboId) {
+  return { type: CUSTOMERS_SET_SEARCH_KEY_ODBOID_TO, odboId }
+}
+
 export const CUSTOMERS_SET_FILTER = 'CUSTOMERS_SET_FILTER'
 export function customersSetFilter (filter) {
   return { type: CUSTOMERS_SET_FILTER, filter }

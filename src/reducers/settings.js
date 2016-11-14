@@ -4,6 +4,8 @@ import {
   CUSTOMERS_SET_FILTER,
   CUSTOMERS_SET_ACTIVE_ID,
   CUSTOMERS_SET_CONTACT_FILTER,
+  CUSTOMERS_SET_SEARCH_KEY_ODBOID_FR,
+  CUSTOMERS_SET_SEARCH_KEY_ODBOID_TO,
   STOREORDER_SET_SEARCH_KEY,
   STOREORDER_FETCH_REQUEST,
   STOREORDER_FETCH_SUCCESS,
@@ -123,6 +125,8 @@ function settings (state = {
   errorMessage: null,
   orderSearchKey: '',
   customerSearchKey: '',
+  customerSearchKeyOIDFR: '',
+  customerSearchKeyOIDTO: '',
   customerFilter: 'odbo id',
   customerContactFilter: '',
   refundSuccess: false,
@@ -152,6 +156,14 @@ function settings (state = {
     case CUSTOMERS_SET_SEARCH_KEY:
       return Object.assign({}, state, {
         customerSearchKey: action.customerKey
+      })
+    case CUSTOMERS_SET_SEARCH_KEY_ODBOID_FR:
+      return Object.assign({}, state, {
+        customerSearchKeyOIDFR: action.odboId
+      })
+    case CUSTOMERS_SET_SEARCH_KEY_ODBOID_TO:
+      return Object.assign({}, state, {
+        customerSearchKeyOIDTO: action.odboId
       })
     case CUSTOMERS_SET_FILTER:
       return Object.assign({}, state, {
