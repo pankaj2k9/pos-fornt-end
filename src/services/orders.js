@@ -20,6 +20,7 @@ const orders = {
       id,
       idTo,
       idFrom,
+      dateCreated,
       limit,
       skip,
       sort,
@@ -48,10 +49,13 @@ const orders = {
       query.source = { $in: storeIn }
     }
 
-    if (to && from) {
+    if (dateCreated || (to && from)) {
+      const dateFr = dateCreated || from
+      const dateTo = dateCreated || to
+
       query.dateCreated = {
-        $lte: moment(to).endOf('day').toDate(),
-        $gte: moment(from).startOf('day').toDate()
+        $gte: moment(dateFr).startOf('day').toDate(),
+        $lte: moment(dateTo).endOf('day').toDate()
       }
     }
 
@@ -63,6 +67,7 @@ const orders = {
 
     return ordersService.find({ query })
   },
+
   get (orderId) {
     const query = {
       id: orderId,

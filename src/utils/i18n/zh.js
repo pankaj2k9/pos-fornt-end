@@ -124,6 +124,7 @@ const zh = {
   'app.button.changeCashier': '收银员变化',
   'app.button.clickHere': '点击这里',
   'app.button.exportToText': '导出到文本文件',
+  'app.button.generate': '生成',
 
   'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
@@ -209,6 +210,11 @@ const zh = {
   'app.page.reports.date': '日期',
   'app.page.reports.currency': '货币',
   'app.page.reports.noData': '没有记录的数据上选定的日期。',
+  'app.page.reports.tSalesAftTax': '税总销售额后',
+  'app.page.reports.tSalesBefTax': '税总销售额前',
+  'app.page.reports.tTaxCollected': '纳税总额',
+  'app.page.reports.transCount': '交易数',
+  'app.page.reports.salesDate': '销售日期',
 
   'app.page.settings.tabMain': '主要',
   'app.page.settings.tabOrders': '命令',

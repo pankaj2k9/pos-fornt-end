@@ -1,18 +1,95 @@
 import React from 'react'
+import moment from 'moment'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
+import { DatePicker } from 'react-input-enhancements'
+
+import DataList from '../components/DataList'
+import { exportSalesChDate, exportSalesFetch } from '../actions/reports'
 
 class ExportSales extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.fetchTransactions = this.fetchTransactions.bind(this)
+    this.handleChangeDate = this.handleChangeDate.bind(this)
+    this.handleClickGenerate = this.handleClickGenerate.bind(this)
+    this.handleClickExport = this.handleClickExport.bind(this)
+  }
+
+  componentDidMount () { this.fetchTransactions() }
+  handleClickGenerate () { this.fetchTransactions() }
+  fetchTransactions () {
+    const { dispatch, date, storeId } = this.props
+
+    dispatch(exportSalesFetch(date, storeId))
+  }
+
+  handleClickExport () { }
+
+  handleChangeDate (date) {
+    const { dispatch } = this.props
+
+    dispatch(exportSalesChDate(date.toDate()))
+  }
+
   render () {
+    const { isProcessing, salesData, date } = this.props
+    const data = Object.assign({}, salesData, { salesDate: date })
+
     return (
       <div className='tile is-ancestor'>
         <div className='tile is-vertical'>
           <div className='tile is-parent is-vertical'>
-            <div className='tile is-child'>
-              <button className='button is-primary'>
-                <FormattedMessage id='app.button.exportToText' />
-              </button>
+
+            <div id='trans-report-date' className='tile is-child is-primary is-6'>
+              <label className='label'>
+                <FormattedMessage id='app.page.reports.date' />
+              </label>
+              <DatePicker
+                value={moment(date).format('ddd DD/MM/YYYY')}
+                pattern='ddd DD/MM/YYYY'
+                onChange={this.handleChangeDate.bind(this)}
+                onValuePreUpdate={v => parseInt(v, 10) > 1e8
+                  ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
+                }>
+                {(inputProps, { registerInput }) =>
+                  <p className='control'>
+                    <input {...inputProps} className='input' type='text' />
+                  </p>
+                }
+              </DatePicker>
             </div>
+
+            <div className='tile is-child'>
+              <div className='control is-grouped'>
+                <p className='control'>
+                  <button
+                    className={`button is-primary${isProcessing ? ' is-loading' : ''}`}
+                    onClick={this.handleClickGenerate}>
+                    <FormattedMessage id='app.button.generate' />
+                  </button>
+                </p>
+
+                <p className='control'>
+                  <button
+                    className={`button is-success${isProcessing ? ' is-disabled' : ''}`}
+                    onClick={this.handleClickExport}>
+                    <FormattedMessage id='app.button.exportToText' />
+                  </button>
+                </p>
+              </div>
+            </div>
+
+            <div className='tile is-child'>
+              <DataList
+                data={data}
+                listName={'export-sales'}
+                keyStyle={'is-bold'}
+                valStyle={' '}
+              />
+            </div>
+
           </div>
         </div>
       </div>
@@ -20,4 +97,16 @@ class ExportSales extends React.Component {
   }
 }
 
-export default connect()(ExportSales)
+const mapStateToProps = (state) => {
+  const { exportSales: exp } = state.reports
+  console.log(exp)
+
+  return {
+    storeId: state.application.storeId,
+    isProcessing: exp.isProcessing,
+    date: exp.salesDate,
+    salesData: exp.data
+  }
+}
+
+export default connect(mapStateToProps)(ExportSales)

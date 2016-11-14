@@ -124,6 +124,7 @@ const en = {
   'app.button.changeCashier': 'Change Cashier',
   'app.button.clickHere': 'Click Here',
   'app.button.exportToText': 'Export to text file',
+  'app.button.generate': 'Generate',
 
   'app.ph.paymentAmount': 'Input Exact Amount/Custom Amount',
   'app.ph.voucherAmount': 'Input Voucher Amount',
@@ -210,6 +211,11 @@ const en = {
   'app.page.reports.date': 'Date',
   'app.page.reports.currency': 'Currency',
   'app.page.reports.noData': 'There are no recorded data for the selected date.',
+  'app.page.reports.tSalesAftTax': 'Total Sales After Tax',
+  'app.page.reports.tSalesBefTax': 'Total Sales Before Tax',
+  'app.page.reports.tTaxCollected': 'Tax Collected',
+  'app.page.reports.transCount': 'Transaction Count',
+  'app.page.reports.salesDate': 'Sales Date',
 
   'app.page.settings.tabMain': 'Main',
   'app.page.settings.tabOrders': 'Orders',

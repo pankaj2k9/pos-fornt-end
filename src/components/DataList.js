@@ -3,7 +3,7 @@ import { FormattedDate, FormattedTime, FormattedMessage } from 'react-intl'
 import DataListItem from './DataListItem'
 import POSTransList from './POSTransList'
 
-const DataList = ({ data, listName }) => {
+const DataList = ({ data, listName, keyStyle, valStyle }) => {
   return (
     <div className='tile is-ancestor is-vertical'>
       {Object.keys(data).map(key => {
@@ -81,9 +81,39 @@ const DataList = ({ data, listName }) => {
             keyName = <FormattedMessage id='app.modal.shippingDetails' />
             value = keyValue ? 'Can\'t show' : 'N/A'
             break
+          case 'tSalesAftTax':
+            keyName = <FormattedMessage id='app.page.reports.tSalesAftTax' />
+            value = keyValue
+            break
+          case 'tSalesBefTax':
+            keyName = <FormattedMessage id='app.page.reports.tSalesBefTax' />
+            value = keyValue
+            break
+          case 'tTaxCollected':
+            keyName = <FormattedMessage id='app.page.reports.tTaxCollected' />
+            value = keyValue
+            break
+          case 'transCount':
+            keyName = <FormattedMessage id='app.page.reports.tTaxCollected' />
+            value = keyValue
+            break
+          case 'salesDate':
+            keyName = <FormattedMessage id='app.page.reports.salesDate' />
+            value = (
+              <span>
+                <FormattedDate value={keyValue} />
+              </span>
+            )
+            break
         }
 
-        return <DataListItem key={fieldKey} dataName={keyName} dataValue={value} />
+        return <DataListItem
+          key={fieldKey}
+          dataName={keyName}
+          dataValue={value}
+          keyStyle={keyStyle}
+          valStyle={valStyle}
+        />
       })}
     </div>
   )
