@@ -10,6 +10,7 @@ import StoreOrders from './StoreOrders'
 import ViewBills from './ViewBills'
 import StaffSales from './StaffSales'
 import OutletStock from './OutletStock'
+import ExportSales from './ExportSales'
 
 import {
   completeSalesFetch,
@@ -70,6 +71,8 @@ class Reports extends React.Component {
         return <StoreOrders />
       case 'stocks':
         return <OutletStock />
+      case 'exportSales':
+        return <ExportSales />
       default:
         return <SalesReportComplete />
     }
@@ -136,6 +139,10 @@ class Reports extends React.Component {
               <li className={activeTab === 'stocks' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'stocks')}>
                 <a><FormattedMessage id='app.general.outletStock' /></a>
+              </li>
+              <li className={activeTab === 'exportSales' ? 'is-active' : ''}
+                onClick={this._onPressTab.bind(this, 'exportSales')}>
+                <a><FormattedMessage id='app.general.exportSales' /></a>
               </li>
             </ul>
           </div>

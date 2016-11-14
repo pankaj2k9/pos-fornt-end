@@ -77,6 +77,7 @@ const en = {
   'app.general.xzReading': 'X/Z Reading',
   'app.general.viewBills': 'View Bills',
   'app.general.staffSales': 'Staff Sales',
+  'app.general.exportSales': 'Export',
   'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
 
@@ -122,6 +123,7 @@ const en = {
   'app.button.logoutCashier': 'Cashier Logout',
   'app.button.changeCashier': 'Change Cashier',
   'app.button.clickHere': 'Click Here',
+  'app.button.exportToText': 'Export to text file',
 
   'app.ph.paymentAmount': 'Input Exact Amount/Custom Amount',
   'app.ph.voucherAmount': 'Input Voucher Amount',

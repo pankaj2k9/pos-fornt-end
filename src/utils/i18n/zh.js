@@ -77,6 +77,7 @@ const zh = {
   'app.general.xzReading': 'X/Z阅读',
   'app.general.viewBills': '查看帐单',
   'app.general.staffSales': '雇员销售',
+  'app.general.exportSales': '出口',
   'app.general.outletStock': '商店股票',
   'app.general.updateCD': '更新钱箱？',
 
@@ -122,6 +123,7 @@ const zh = {
   'app.button.logoutCashier': '登录收银员',
   'app.button.changeCashier': '收银员变化',
   'app.button.clickHere': '点击这里',
+  'app.button.exportToText': '导出到文本文件',
 
   'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
