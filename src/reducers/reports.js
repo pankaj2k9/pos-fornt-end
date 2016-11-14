@@ -61,7 +61,7 @@ function exportSales (state, action) {
       const { orders } = action
 
       const aftTax = orders.reduce((prev, order) => prev + Number(order.total), 0)
-      const befTax = aftTax - (aftTax * 0.12)
+      const befTax = aftTax
       const taxCol = aftTax - befTax
       const tCount = orders.length
 
