@@ -1,5 +1,4 @@
 import moment from 'moment'
-import { formatCurrency } from '../utils/string'
 
 import {
   REPORTS_SET_TAB,
@@ -69,9 +68,9 @@ function exportSales (state, action) {
       return Object.assign({}, state, {
         isProcessing: false,
         data: Object.assign({}, state.data, {
-          tSalesAftTax: formatCurrency(aftTax),
-          tSalesBefTax: formatCurrency(befTax),
-          tTaxCollected: formatCurrency(taxCol),
+          tSalesAftTax: aftTax,
+          tSalesBefTax: befTax,
+          tTaxCollected: taxCol,
           transCount: tCount
         })
       })

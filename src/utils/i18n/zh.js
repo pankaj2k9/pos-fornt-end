@@ -215,6 +215,7 @@ const zh = {
   'app.page.reports.tTaxCollected': '纳税总额',
   'app.page.reports.transCount': '交易数',
   'app.page.reports.salesDate': '销售日期',
+  'app.page.reports.outputText': '文本输出',
 
   'app.page.settings.tabMain': '主要',
   'app.page.settings.tabOrders': '命令',

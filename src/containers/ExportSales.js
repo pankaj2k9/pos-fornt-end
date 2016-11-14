@@ -35,7 +35,12 @@ class ExportSales extends React.Component {
 
   render () {
     const { isProcessing, salesData, date } = this.props
-    const data = Object.assign({}, salesData, { salesDate: date })
+    let outputText = `${(salesData.tSalesAftTax || 0).toFixed(2)}|`
+    outputText += `${(salesData.tSalesBefTax || 0).toFixed(2)}|`
+    outputText += `${(salesData.tTaxCollected || 0).toFixed(2)}|`
+    outputText += `${salesData.transCount || 0}|`
+    outputText += moment(date).format('DD-MM-YYYY')
+    const data = Object.assign({}, salesData, { salesDate: date, outputText })
 
     return (
       <div className='tile is-ancestor'>
@@ -44,7 +49,7 @@ class ExportSales extends React.Component {
 
             <div id='trans-report-date' className='tile is-child is-primary is-6'>
               <label className='label'>
-                <FormattedMessage id='app.page.reports.date' />
+                <FormattedMessage id='app.page.reports.salesDate' />
               </label>
               <DatePicker
                 value={moment(date).format('ddd DD/MM/YYYY')}
@@ -85,8 +90,8 @@ class ExportSales extends React.Component {
               <DataList
                 data={data}
                 listName={'export-sales'}
-                keyStyle={'is-bold'}
-                valStyle={' '}
+                keyClass={' '}
+                valClass={' '}
               />
             </div>
 

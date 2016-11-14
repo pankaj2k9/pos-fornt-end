@@ -216,6 +216,7 @@ const en = {
   'app.page.reports.tTaxCollected': 'Tax Collected',
   'app.page.reports.transCount': 'Transaction Count',
   'app.page.reports.salesDate': 'Sales Date',
+  'app.page.reports.outputText': 'Output Text',
 
   'app.page.settings.tabMain': 'Main',
   'app.page.settings.tabOrders': 'Orders',
