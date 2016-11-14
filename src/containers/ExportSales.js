@@ -3,6 +3,7 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 import { DatePicker } from 'react-input-enhancements'
+import FileSaver from 'file-saver'
 
 import DataList from '../components/DataList'
 import { exportSalesChDate, exportSalesFetch } from '../actions/reports'
@@ -25,7 +26,14 @@ class ExportSales extends React.Component {
     dispatch(exportSalesFetch(date, storeId))
   }
 
-  handleClickExport () { }
+  handleClickExport () {
+    const { salesData, date } = this.props
+    const outputText = this.buildOutputText(salesData, date)
+    const blob = new global.Blob([outputText], {type: 'text/plain;charset=utf-8'})
+    const filename = 'XXXXXXXX' + moment(date).format('YYYYMMDD')
+
+    FileSaver.saveAs(blob, filename)
+  }
 
   handleChangeDate (date) {
     const { dispatch } = this.props
@@ -33,13 +41,19 @@ class ExportSales extends React.Component {
     dispatch(exportSalesChDate(date.toDate()))
   }
 
-  render () {
-    const { isProcessing, salesData, date } = this.props
+  buildOutputText (salesData, date) {
     let outputText = `${(salesData.tSalesAftTax || 0).toFixed(2)}|`
     outputText += `${(salesData.tSalesBefTax || 0).toFixed(2)}|`
     outputText += `${(salesData.tTaxCollected || 0).toFixed(2)}|`
     outputText += `${salesData.transCount || 0}|`
     outputText += moment(date).format('DD-MM-YYYY')
+
+    return outputText
+  }
+
+  render () {
+    const { isProcessing, salesData, date } = this.props
+    const outputText = this.buildOutputText(salesData, date)
     const data = Object.assign({}, salesData, { salesDate: date, outputText })
 
     return (
