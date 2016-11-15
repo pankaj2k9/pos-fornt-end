@@ -10,7 +10,7 @@ const RECEIPT_DIVIDER = '-------------------------------------------------------
 const LI_NAME_MAX = 24
 
 // styles
-const RECEIPT_STYLE = `width: ${RECEIPT_WIDTH}px; margin: ${RECEIPT_MARGIN}px`
+const RECEIPT_STYLE = `width: ${RECEIPT_WIDTH}px; margin: ${RECEIPT_MARGIN}px; margin-bottom: 10px;`
 const ITEM_LIST_STYLE = 'display: flex; align-items: start; justify-content: start;'
 const ITEM_QTY_STYLE = 'width: 24px; display: inline-block'
 const ITEM_NAME_STYLE = 'width: 176px; display: inline-block;'
@@ -144,14 +144,21 @@ export const buildFooter = (footerText) => {
  * Add staff, date, etc.
  * @param {Object} info of receipt
  */
-export const buildExtraInfo = (info, activeCustomer) => {
+export const buildExtraInfo = (info, customer) => {
   let date = info.date ? new Date(info.date) : new Date()
   let extra = ''
+  let odboId = customer ? String(customer.odboId) : null
+  let zeroes = ''
+  if (odboId) {
+    for (var i = odboId.length; i < 7; i++) {
+      zeroes = zeroes + '0'
+    }
+  }
   let orderId = info.orderId
     ? extra += `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${info.orderId}</div>`
     : null
-  let customer = activeCustomer
-    ? extra += `<div style="${TOTAL_DIV_STYLE_1}">Customer : ${activeCustomer.firstName || ''} ${activeCustomer.lastName || ''}</div>`
+  let customerDetails = customer
+    ? extra += `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[${zeroes + odboId}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>`
     : null
   extra += '<div>'
   if (info.staff) {
@@ -159,7 +166,7 @@ export const buildExtraInfo = (info, activeCustomer) => {
   }
   extra += `<div>${formatDate(date)}</div>`
   orderId
-  customer
+  customerDetails
   extra += '</div>'
 
   return extra
