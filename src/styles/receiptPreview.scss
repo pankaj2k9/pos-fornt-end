@@ -10,10 +10,16 @@
 
     &.spaced { margin-bottom: 5px; }
     &.centered { justify-content: center; }
+    &.is-title { font-size: 2em; font-weight: bold; }
+    &.is-bold { font-weight: bold; }
 
     &.col3 .col:nth-child(1) { width: 125px; }
     &.col3 .col:nth-child(2) { width: 25px; text-align: right; }
-    &.row.col3 .col:nth-child(3) { width: 90px; text-align: right; }
+    &.col3 .col:nth-child(3) { width: 90px; text-align: right; }
+
+    &.col3.qty-name-total .col:nth-child(1) { width: 25px; }
+    &.col3.qty-name-total .col:nth-child(2) { width: 125px; text-align: left; }
+    &.col3.qty-name-total .col:nth-child(3) { width: 90px; text-align: right; }
 
     &.row.col4 > div { width: 55px; text-align: right; }
     &.row.col4 .col:nth-child(1) { width: 60px; text-align: left; }
