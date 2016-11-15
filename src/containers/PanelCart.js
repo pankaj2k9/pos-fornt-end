@@ -56,7 +56,7 @@ import {
 
 const focusProductSearch = 'productsSearch'
 const focusOrderSearch = 'orderSearch'
-const focusOdboUserSearch = 'odboUserSearch'
+const focusOdboUserSearch = 'odboIdSearch1'
 const focusDiscountInput = 'overallDiscountInput'
 
 class PanelCart extends Component {
@@ -605,6 +605,8 @@ class PanelCart extends Component {
       customersArray,
       customerSearchKey,
       customerFilter,
+      customerSearchKeyOIDFR,
+      customerSearchKeyOIDTO,
       fetchingCustomers
     } = this.props
     return (
@@ -614,6 +616,8 @@ class PanelCart extends Component {
         active={activeModalId}
         items={customersArray}
         filter={customerFilter}
+        odboIdFrom={customerSearchKeyOIDFR}
+        odboIdTo={customerSearchKeyOIDTO}
         isFetching={fetchingCustomers}
         search={{id: 'searchEvent',
           value: customerSearchKey,
@@ -646,6 +650,8 @@ function mapStateToProps (state) {
     productsFilter: state.panelProducts.productsFilter,
     fetchingCustomers: state.data.customers.isFetching,
     customerSearchKey: state.settings.customerSearchKey,
+    customerSearchKeyOIDFR: state.settings.customerSearchKeyOIDFR,
+    customerSearchKeyOIDTO: state.settings.customerSearchKeyOIDTO,
     customerFilter: state.settings.customerFilter,
     activeCustomer: state.panelCart.activeCustomer,
     walkinCustomer: state.panelCart.walkinCustomer,

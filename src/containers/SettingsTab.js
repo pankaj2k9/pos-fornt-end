@@ -9,6 +9,7 @@ import BoxItem from '../components/BoxItem'
 import DetailsModal from '../components/DetailsModal'
 import LoadingPane from '../components/LoadingPane'
 import Account from '../containers/Account'
+import Dropdown from '../components/Dropdown'
 
 const focusOrderSearch = 'orderSearch'
 
@@ -95,7 +96,7 @@ class SettingsTab extends Component {
   }
 
   onSubmit (event) {
-    event.preventDefault()
+    if (event) { event.preventDefault() }
     const {
       dispatch,
       customerFilter,
@@ -106,13 +107,13 @@ class SettingsTab extends Component {
     } = this.props
 
     switch (customerFilter) {
-      case 'firstNameSearch':
-        return dispatch(searchCustomer({ query: { firstName: { $like: `%${customerSearchKey}%` } } }))
-      case 'lastNameSearch':
-        return dispatch(searchCustomer({ query: { lastName: { $like: `%${customerSearchKey}%` } } }))
-      case 'phoneNumberSearch':
+      case 'first name':
+        return dispatch(searchCustomer({ query: { firstName: { $like: `%${customerSearchKey.toUpperCase()}%` } } }))
+      case 'last name':
+        return dispatch(searchCustomer({ query: { lastName: { $like: `%${customerSearchKey.toUpperCase()}%` } } }))
+      case 'phone number':
         return dispatch(searchCustomer({ query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }))
-      case 'odboIdSearch':
+      case 'odbo id':
         const query = { odboId: {}, $sort: { odboId: 1 } }
         if (customerSearchKeyOIDFR) { query.odboId.$gte = Number(customerSearchKeyOIDFR) }
         if (customerSearchKeyOIDTO) { query.odboId.$lte = Number(customerSearchKeyOIDTO) }
@@ -129,20 +130,12 @@ class SettingsTab extends Component {
     document.getElementById('lastNameSearch').value = ''
     document.getElementById('phoneNumberSearch').value = ''
     dispatch(customersSetSearchKey(''))
-
-    const searchingOdboId = inputId === 'odboIdSearchFr' || inputId === 'odboIdSearchTo'
-    if (searchingOdboId) {
-      dispatch(customersSetFilter('odboIdSearch'))
-    } else {
-      dispatch(customersSetSearchKeyOIDFR(''))
-      dispatch(customersSetSearchKeyOIDTO(''))
-      document.getElementById('odboIdSearchFr').value = ''
-      document.getElementById('odboIdSearchTo').value = ''
-
-      dispatch(customersSetFilter(inputId))
-    }
-
     // dispatch(searchCustomer()) // refetch 1st 40 customers
+  }
+
+  _setCustomerFilter (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetFilter(value))
   }
 
   renderMainTab () {
@@ -305,16 +298,16 @@ class SettingsTab extends Component {
 
     let filter
     switch (customerFilter) {
-      case 'firstNameSearch':
+      case 'first name':
         filter = `with first name: ${customerSearchKey}.`
         break
-      case 'lastNameSearch':
+      case 'last name':
         filter = `with last name: ${customerSearchKey}.`
         break
-      case 'phoneNumberSearch':
+      case 'phone number':
         filter = `with phone number: ${customerSearchKey}.`
         break
-      case 'odboIdSearch':
+      case 'odbo id':
         filter = 'with ID'
         if (customerSearchKeyOIDFR) { filter += ` from ${customerSearchKeyOIDFR}` }
         if (customerSearchKeyOIDTO) { filter += ` to ${customerSearchKeyOIDTO}` }
@@ -326,84 +319,102 @@ class SettingsTab extends Component {
       <div>
         <div className='columns'>
           <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCustFr'>
-              <SearchBar
-                id='odboIdSearchFr'
+            <LabeledControl labelAlt='Filter'>
+              <Dropdown
+                value={customerFilter}
                 size='is-medium'
-                value={customerSearchKeyOIDFR}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKeyOIDFR.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
+                options={['odbo id', 'phone number', 'first name', 'last name']}
+                onChange={this._setCustomerFilter.bind(this)} />
+            </LabeledControl>
+          </div>
+          {customerFilter === 'odbo id'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchCustFr'>
+                <SearchBar
+                  id='odboIdSearchFr'
+                  size='is-medium'
+                  value={customerSearchKeyOIDFR}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerSearchKeyOIDFR.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'odbo id'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchCustTo'>
+                <SearchBar
+                  id='odboIdSearchTo'
+                  size='is-medium'
+                  value={customerSearchKeyOIDTO}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerSearchKeyOIDTO.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'first name'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchFn'>
+                <SearchBar
+                  id='firstNameSearch'
+                  size='is-medium'
+                  value={customerSearchKey}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerSearchKey.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  onFocus={this.onFocus.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
                 />
-            </LabeledControl>
-          </div>
-
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCustTo'>
-              <SearchBar
-                id='odboIdSearchTo'
-                size='is-medium'
-                value={customerSearchKeyOIDTO}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKeyOIDTO.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-        </div>
-
-        <div className='columns'>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchFn'>
-              <SearchBar
-                id='firstNameSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKey.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-              />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchLn'>
-              <SearchBar
-                id='lastNameSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                onChange={this.setCustomerSearchKey.bind(this)}
-                confirmButton={<i className='fa fa-search' />}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchPhone'>
-              <SearchBar
-                id='phoneNumberSearch'
-                size='is-medium'
-                value={customerContactFilter}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerContactFilter.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'last name'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchLn'>
+                <SearchBar
+                  id='lastNameSearch'
+                  size='is-medium'
+                  value={customerSearchKey}
+                  placeholder={'app.ph.keyword'}
+                  onChange={this.setCustomerSearchKey.bind(this)}
+                  confirmButton={<i className='fa fa-search' />}
+                  onSubmit={this.onSubmit.bind(this)}
+                  onFocus={this.onFocus.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'phone number'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchPhone'>
+                <SearchBar
+                  id='phoneNumberSearch'
+                  size='is-medium'
+                  value={customerContactFilter}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerContactFilter.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  onFocus={this.onFocus.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
         </div>
         <hr style={{margin: 20}} />
         <div

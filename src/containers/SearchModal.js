@@ -9,9 +9,15 @@ import Truncate from '../components/Truncate'
 import Dropdown from '../components/Dropdown'
 
 import {
+  setActiveModal
+} from '../actions/application'
+
+import {
   storeOrderFetch,
   storeOrdersSetSearchKey,
-  customersSetFilter
+  customersSetFilter,
+  customersSetSearchKeyOIDFR,
+  customersSetSearchKeyOIDTO
 } from '../actions/settings'
 
 import {
@@ -41,10 +47,18 @@ const List = (props) => {
           {
             items.map(function (item, key) {
               let data = item
+              let odboId = String(item.odboId)
+              let zeroes = ''
+              if (id === 'searchOdboUser') {
+                let odboId = String(item.odboId)
+                for (var i = odboId.length; i < 7; i++) {
+                  zeroes = zeroes + '0'
+                }
+              }
               return (
                 id === 'searchOdboUser'
                 ? <tr key={key}>
-                  <td>{<div><strong>{item.firstName}</strong><br /><p>[{item.membership}] member</p></div>}</td>
+                  <td>{<div><strong>{`[${zeroes + odboId}] ${item.firstName} ${item.lastName}`}</strong><br /><p>[{item.membership}] member</p></div>}</td>
                   <td><p><strong>{item.odboCoins}</strong><br />coins</p></td>
                   <td className='is-icon'>
                     <a className='button is-medium' onClick={listButton.event(dispatch, data, key)}>
@@ -155,6 +169,12 @@ const Details = (props) => {
 }
 
 class SearchModal extends Component {
+  componentDidMount () {
+    if (this.id === 'searchOdboUser') {
+      document.getElementById('odboIdSearch1').focus()
+    }
+  }
+
   orderSearchKeyInput (value) {
     const {dispatch, search} = this.props
     dispatch(search.onChange(value))
@@ -182,15 +202,27 @@ class SearchModal extends Component {
   }
 
   _setCustomerFilter (value) {
-    const {dispatch} = this.props
+    const {dispatch, id} = this.props
+    dispatch(setActiveModal(id, 'odboIdSearch'))
     dispatch(customersSetFilter(value))
   }
 
+  _setCustomerSearchKeyOIDFR (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetSearchKeyOIDFR(value))
+  }
+
+  _setCustomerSearchKeyOIDTO (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetSearchKeyOIDTO(value))
+  }
+
   _searchCustomer (event) {
-    event.preventDefault()
-    const {dispatch, filter, search} = this.props
+    if (event) { event.preventDefault() }
+    const {dispatch, filter, search, odboIdFrom, odboIdTo} = this.props
     let customerSearchKey = search.value
     let query
+    let queryAlt
     switch (filter) {
       case 'last name':
         query = {
@@ -203,8 +235,12 @@ class SearchModal extends Component {
         }
         break
       case 'odbo id':
-        query = {
-          query: { odboID: Number(customerSearchKey) }
+        if (!odboIdTo || odboIdTo === '') {
+          query = {query: { odboID: Number(odboIdFrom) }}
+        } else {
+          queryAlt = { query: {odboId: {}, $sort: { odboId: 1 }} }
+          queryAlt.query.odboId.$gte = Number(odboIdFrom)
+          queryAlt.query.odboId.$lte = Number(odboIdTo)
         }
         break
       case 'phone number':
@@ -214,7 +250,7 @@ class SearchModal extends Component {
         break
       default:
     }
-    dispatch(searchCustomer(query))
+    dispatch(searchCustomer(query || queryAlt))
   }
 
   onClickOption (event) {
@@ -239,6 +275,8 @@ class SearchModal extends Component {
       details,
       items,
       search,
+      odboIdFrom,
+      odboIdTo,
       closeButton,
       listButton,
       modalStatus,
@@ -246,7 +284,6 @@ class SearchModal extends Component {
       filter,
       isFetching
     } = this.props
-
     const inputRef = id === 'searchOdboUser' ? 'odboUserSearch' : 'orderSearch'
 
     return (
@@ -275,18 +312,42 @@ class SearchModal extends Component {
                   cancelButton={<i className='fa fa-undo' />}
                   confirmEvent={this.buttonConfirm.bind(this)}
                   cancelEvent={this.buttonCancel.bind(this)}
-                  onSubmit={this.onSubmitKey.bind(this)}
-                />
-                : <SearchBar
-                  id={inputRef}
-                  ref={inputRef}
-                  size='is-medium'
-                  value={search.value}
-                  placeholder={search.placeholder}
-                  onChange={this.orderSearchKeyInput.bind(this)}
-                  confirmButton={id === 'searchOdboUser' ? <i className='fa fa-search' /> : undefined}
-                  onSubmit={id === 'searchOdboUser' ? this._searchCustomer.bind(this) : undefined}
-                  confirmEvent={id === 'searchOdboUser' ? this._searchCustomer.bind(this) : undefined}
+                  onSubmit={this.onSubmitKey.bind(this)} />
+                : filter === 'odbo id'
+                  ? <div className='columns'>
+                    <div className='is-4' style={{paddingRight: 10}}>
+                      <SearchBar
+                        id='odboIdSearch1'
+                        size='is-medium'
+                        value={odboIdFrom}
+                        placeholder={'app.ph.searchCustFr'}
+                        onChange={this._setCustomerSearchKeyOIDFR.bind(this)}
+                        onSubmit={this._searchCustomer.bind(this)}
+                      />
+                    </div>
+                    <div className='is-4'>
+                      <SearchBar
+                        id='odboIdSearch2'
+                        size='is-medium'
+                        value={odboIdTo}
+                        placeholder={'app.ph.searchCustTo'}
+                        confirmButton={<i className='fa fa-search' />}
+                        onChange={this._setCustomerSearchKeyOIDTO.bind(this)}
+                        onSubmit={this._searchCustomer.bind(this)}
+                        confirmEvent={this._searchCustomer.bind(this)}
+                        />
+                    </div>
+                  </div>
+                  : <SearchBar
+                    id={inputRef}
+                    ref={inputRef}
+                    size='is-medium'
+                    value={search.value}
+                    placeholder={search.placeholder}
+                    onChange={this.orderSearchKeyInput.bind(this)}
+                    confirmButton={id === 'searchOdboUser' ? <i className='fa fa-search' /> : undefined}
+                    onSubmit={id === 'searchOdboUser' ? this._searchCustomer.bind(this) : undefined}
+                    confirmEvent={id === 'searchOdboUser' ? this._searchCustomer.bind(this) : undefined}
                 />
               }
             </div>
@@ -350,7 +411,11 @@ SearchModal.PropTypes = {
   processing: PropTypes.bool,
   storeDetails: PropTypes.object,
   inputPh: PropTypes.string,
-  isFetching: PropTypes.bool
+  isFetching: PropTypes.bool,
+  odboIdFrom: PropTypes.string,
+  odboIdTo: PropTypes.string,
+  customerFilter: PropTypes.string,
+  focusedInput: PropTypes.string
 }
 
 export default connect()(SearchModal)

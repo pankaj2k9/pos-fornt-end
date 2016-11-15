@@ -694,6 +694,7 @@ class PanelCheckout extends Component {
       payments,
       pincode,
       bonusPoints,
+      activeCashdrawer,
       activeCashier,
       activeCustomer,
       customDiscount,
@@ -836,7 +837,8 @@ class PanelCheckout extends Component {
         previousOdbo: activeCustomer ? Number(activeCustomer.odboCoins) : undefined
       },
       headerText: storeAddress,
-      footerText: !printPreviewTotal ? ['Thank you', 'Have a nice day!'] : ['']
+      footerText: !printPreviewTotal ? ['Thank you', 'Have a nice day!'] : [''],
+      cashDrawerOpenCount: Number(activeCashdrawer.cashDrawerOpenCount + 1)
     }
     if (printPreviewTotal) {
       dispatch(printPreviewTotalReceipt(receipt, activeCustomer))
@@ -864,6 +866,7 @@ function mapStateToProps (state) {
     storeId: state.application.storeId,
     staff: state.application.staff,
     adminToken: state.application.adminToken,
+    activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
     shouldUpdate: state.panelCart.shouldUpdate,
     orderNote: state.panelCheckout.orderNote,

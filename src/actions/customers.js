@@ -55,7 +55,6 @@ export function customerFetchFailure (error) {
 export function fetchCustomers (query) {
   return (dispatch) => {
     dispatch(customersFetchRequest())
-
     return customerService.fetch(query)
       .then(customers => {
         const { total, data, limit } = customers
@@ -93,7 +92,6 @@ export function fetchCustomers (query) {
               response.forEach((fetchResponse) => {
                 allCust = [...allCust, ...fetchResponse.data]
               })
-
               dispatch(customersFetchSuccess(allCust))
             })
             .catch((error) => {
