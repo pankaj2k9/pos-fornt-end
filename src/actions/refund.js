@@ -22,11 +22,11 @@ export function refundFailure () {
   }
 }
 
-export function refund (orderId, refundRemarks) {
+export function refund (orderId, refundRemarks, storeId) {
   return (dispatch) => {
     dispatch(refundRequest())
 
-    return refundService.create({id: orderId, refundRemarks: refundRemarks})
+    return refundService.create({id: orderId, refundRemarks: refundRemarks, storeId: storeId})
       .then(response => {
         dispatch(refundSuccess(response))
       })

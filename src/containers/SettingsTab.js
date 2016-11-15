@@ -586,7 +586,7 @@ class SettingsTab extends Component {
 
   renderOrderSearchModal () {
     const {activeModalId, orderSearchKey, intl,
-           orderDetails, refundSuccess, locale,
+           orderDetails, refundSuccess, locale, storeId,
            isProcessing, storeDetails, reprintSuccess} = this.props
     const modalId = activeModalId === 'refundModal'
                     ? 'refundModal' : 'reprintModal'
@@ -693,6 +693,7 @@ class SettingsTab extends Component {
         inputPh={intl.formatMessage({ id: 'app.ph.enterRefundRemarks' })}
         type={type}
         locale={locale}
+        storeId={storeId}
         storeDetails={storeDetails}
         title='Enter Order ID'
         active={activeModalId}

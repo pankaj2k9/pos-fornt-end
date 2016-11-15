@@ -255,10 +255,10 @@ class SearchModal extends Component {
 
   onClickOption (event) {
     if (event) { event.preventDefault() }
-    const {dispatch, orderSearchKey, type, details, closeButton} = this.props
+    const {dispatch, orderSearchKey, type, details, closeButton, storeId} = this.props
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
-      dispatch(refund(orderSearchKey, refundRemarks))
+      dispatch(refund(orderSearchKey, refundRemarks, storeId))
     } else if (type === 'reprintModal') {
       dispatch(printPreviewTotalReceipt(details))
       closeButton.event(dispatch)
@@ -403,6 +403,7 @@ SearchModal.PropTypes = {
   type: PropTypes.string,
   locale: PropTypes.string,
   activeCustomer: PropTypes.string,
+  storeId: PropTypes.string,
   items: PropTypes.array,
   cancelButton: PropTypes.object,
   listButton: PropTypes.object,
