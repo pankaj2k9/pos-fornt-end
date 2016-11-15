@@ -15,6 +15,7 @@ const en = {
   'app.general.amountToPay': 'Amount to Pay',
   'app.general.voucherCode': 'Voucher Code',
 
+  'app.general.email': 'Email ',
   'app.general.contactNo': 'Phone',
   'app.general.barcode': 'BC# ',
   'app.general.product': 'Product',
@@ -64,7 +65,9 @@ const en = {
   'app.general.bonusPoints': 'Bonus Points',
   'app.general.enabled': ' Enabled',
   'app.general.disabled': ' Disabled',
-  'app.general.updateOdbo': 'Adjust Odbo Points',
+  'app.general.updateOdbo': 'Update Odbo Coins',
+  'app.general.increaseOdbo': 'Add Points',
+  'app.general.decreaseOdbo': 'Decrease Points',
   'app.general.forbidden': 'Forbidden!',
   'app.general.onlyMaster': 'Only a "Master Account" could navigate through this page',
   'app.general.transDetails': 'Transaction details',

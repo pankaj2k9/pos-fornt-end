@@ -15,6 +15,7 @@ const zh = {
   'app.general.amountToPay': '付款金额',
   'app.general.voucherCode': '优惠券代码',
 
+  'app.general.email': 'Email ',
   'app.general.contactNo': '电话',
   'app.general.barcode': '条码: ',
   'app.general.product': '产品',
@@ -65,6 +66,8 @@ const zh = {
   'app.general.enabled': ' 启用 ',
   'app.general.disabled': ' 禁用 ',
   'app.general.updateOdbo': '调整 Odbo 平衡',
+  'app.general.increaseOdbo': '增加平衡',
+  'app.general.decreaseOdbo': '缩减平衡',
   'app.general.forbidden': '被禁止!',
   'app.general.onlyMaster': '只有主人可以打开这个页面...',
   'app.general.transDetails': '交易细节',

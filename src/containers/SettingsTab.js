@@ -275,10 +275,16 @@ class SettingsTab extends Component {
     }
   }
 
-  updateOdboCoins (id) {
+  updateOdboCoins (id, action, odboCoins) {
     const {dispatch} = this.props
-    let newOdbo = document.getElementById('newOdbo').value
-    dispatch(updateCustomer(id, {odboCoins: Number(newOdbo)}))
+    let inputValue = document.getElementById('newOdbo').value
+    if (action === 'plus') {
+      let newOdbo = Number(odboCoins) + Number(inputValue)
+      dispatch(updateCustomer(id, {odboCoins: newOdbo}))
+    } else {
+      let newOdbo = Number(odboCoins) - Number(inputValue)
+      dispatch(updateCustomer(id, {odboCoins: newOdbo < 0 ? 0 : newOdbo}))
+    }
   }
 
   renderCustomersTab () {
@@ -292,7 +298,7 @@ class SettingsTab extends Component {
       customerSearchKeyOIDFR, customerSearchKeyOIDTO
     } = this.props
 
-    const x = customersById[activeCustomerId]
+    const odboUser = customersById[activeCustomerId]
     let hideDetails = showControl
     var intFrameHeight = window.innerHeight
 
@@ -499,23 +505,23 @@ class SettingsTab extends Component {
             paneSize='is-medium' />
           }
         </div>
-        {!x
+        {!odboUser
           ? null
           : <DetailsModal
             title='app.page.settings.customersDet'
             activeModalId={activeModalId}
             id='customerDetails'
             items={[
-              {name: 'app.general.custName', desc: `${x.firstName} ${x.lastName}`},
-              {name: 'app.general.odboId', desc: x.odboId},
+              {name: 'app.general.custName', desc: `${odboUser.firstName} ${odboUser.lastName}`},
+              {name: 'app.general.odboId', desc: odboUser.odboId},
               {name: 'app.general.dateJoined'},
-              {desc: `Date: ${intl.formatDate(x.dateCreated)}`},
-              {desc: `Time: ${intl.formatTime(x.dateCreated)}`},
-              {name: 'app.general.membership', desc: x.membership},
-              {name: 'app.general.memberPoints', desc: x.membershipPoints},
-              {name: 'app.general.ob', desc: x.odboCoins},
-              {name: 'Email', desc: x.emailAddress},
-              {name: 'Phone', desc: x.phoneNumber}
+              {desc: `Date: ${intl.formatDate(odboUser.dateCreated)}`},
+              {desc: `Time: ${intl.formatTime(odboUser.dateCreated)}`},
+              {name: 'app.general.membership', desc: odboUser.membership},
+              {name: 'app.general.memberPoints', desc: odboUser.membershipPoints},
+              {name: 'app.general.ob', desc: odboUser.odboCoins},
+              {name: 'app.general.email', desc: odboUser.emailAddress},
+              {name: 'app.general.contactNo', desc: odboUser.phoneNumber}
             ]}
             hideDetails={hideDetails}
             onClick={this.onClickShowOdboControl.bind(this)}
@@ -539,13 +545,19 @@ class SettingsTab extends Component {
                   <div>
                     {!ucIsProcessing
                       ? <div className='columns'>
-                        <div className='column is-half'>
+                        <div className='column is-4'>
                           <a className='button is-large is-fullwidth is-success'
-                            onClick={this.updateOdboCoins.bind(this, x.id)}>
-                            <FormattedMessage id='app.general.updateOdbo' />
+                            onClick={this.updateOdboCoins.bind(this, odboUser.id, 'plus', odboUser.odboCoins)}>
+                            <FormattedMessage id='app.general.increaseOdbo' />
                           </a>
                         </div>
-                        <div className='column is-half'>
+                        <div className='column is-4'>
+                          <a className='button is-large is-fullwidth is-warning'
+                            onClick={this.updateOdboCoins.bind(this, odboUser.id, 'minus', odboUser.odboCoins)}>
+                            <FormattedMessage id='app.general.decreaseOdbo' />
+                          </a>
+                        </div>
+                        <div className='column is-4'>
                           <a className='button is-large is-fullwidth is-danger'
                             onClick={this.onClickShowOdboControl.bind(this)}>
                             <FormattedMessage id='app.button.cancel' />
