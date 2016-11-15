@@ -156,7 +156,8 @@ function application (state = {
     case CLOSE_ACTIVE_MODAL:
       return Object.assign({}, state, {
         activeModalId: null,
-        focusedInput: action.inputToFocus
+        focusedInput: action.inputToFocus,
+        error: null
       })
     case SET_STAFF_LOGGED_IN:
       return Object.assign({}, state, {

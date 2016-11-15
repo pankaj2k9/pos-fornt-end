@@ -7,6 +7,7 @@ export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 
 import {
   addCashdrawerOpenCount,
+  updateCashDrawer,
   setActiveModal
  } from './application'
 
@@ -78,6 +79,8 @@ export function processOrder (orderInfo, receipt, staff) {
         headerText: receipt.headerText,
         footerText: receipt.footerText
       }
+      let data = { count: receipt.cashDrawerOpenCount }
+      dispatch(updateCashDrawer(staff, data, order))
       dispatch(afterOrderProcessed())
       dispatch(temporaryReceiptData(newReceipt))
       if (order.id) {
