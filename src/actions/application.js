@@ -53,6 +53,14 @@ export function authStaffFailure (error) {
   }
 }
 
+export const SET_ERROR = 'SET_ERROR'
+export function setError (error) {
+  return {
+    type: SET_ERROR,
+    error
+  }
+}
+
 export const CLOSE_ACTIVE_MODAL = 'CLOSE_ACTIVE_MODAL'
 export function closeActiveModal (inputToFocus) {
   return {

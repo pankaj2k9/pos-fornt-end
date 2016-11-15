@@ -410,6 +410,7 @@ class PanelCheckout extends Component {
     const {
       activeCustomer,
       activeModalId,
+      applicationError,
       bonusPoints,
       card,
       cartItemsArray,
@@ -666,6 +667,7 @@ class PanelCheckout extends Component {
             cashTendered={Number(cashTendered)}
             cpShouldUpdate={cpShouldUpdate}
             currency={currency}
+            error={applicationError}
             orderError={orderError}
             orderNote={orderNote}
             orderSuccess={orderSuccess}
@@ -890,6 +892,7 @@ function mapStateToProps (state) {
     printPreviewTotal: state.panelCheckout.printPreviewTotal,
     reprinting: state.orders.reprinting,
     error: state.panelCheckout.error,
+    applicationError: state.application.error,
     locale: state.intl.locale,
     intl: state.intl
   }

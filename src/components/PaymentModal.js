@@ -4,7 +4,8 @@ import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
 import {
-  closeActiveModal
+  closeActiveModal,
+  setError
 } from '../actions/application'
 
 import {
@@ -14,6 +15,10 @@ import {
   setPinCode,
   setCardProvider
 } from '../actions/panelCheckout'
+
+import {
+  panelCartShouldUpdate
+} from '../actions/panelCart'
 
 const focusProductSearch = 'productsSearch'
 
@@ -29,6 +34,7 @@ class PaymentModal extends Component {
   _closeModal () {
     const { dispatch } = this.props
     dispatch(closeActiveModal(focusProductSearch))
+    dispatch(panelCartShouldUpdate(false))
   }
 
   _clickConfirm (event) {
@@ -40,8 +46,8 @@ class PaymentModal extends Component {
     let paymentValue
     let voucherCode
     if (paymentMode === 'voucher') {
-      paymentValue = Number(transNumber)
-      voucherCode = document.getElementById('voucherCode').value
+      paymentValue = Number(document.getElementById('voucherAmount').value)
+      voucherCode = transNumber
     } else {
       paymentValue = Number(document.getElementById('paymentValue').value) || orderMinusPayment
     }
@@ -55,8 +61,34 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'voucher') {
       payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
     }
-    dispatch(addPaymentType(payment))
-    dispatch(closeActiveModal(focusProductSearch))
+    if (paymentMode === 'credit' || paymentMode === 'nets') {
+      let okayToAddCredit = card.provider && transNumber
+      let okayToAddNets = transNumber !== '' || transNumber
+      if (paymentMode === 'credit' && okayToAddCredit) {
+        dispatch(addPaymentType(payment))
+        dispatch(closeActiveModal(focusProductSearch))
+        dispatch(panelCartShouldUpdate(false))
+      } else if (paymentMode === 'nets' && okayToAddNets) {
+        dispatch(addPaymentType(payment))
+        dispatch(closeActiveModal(focusProductSearch))
+        dispatch(panelCartShouldUpdate(false))
+      } else {
+        if (paymentMode === 'credit' && !card.provider) {
+          dispatch(setError('app.error.noCardAssoc'))
+        } else if (!okayToAddNets) {
+          dispatch(setError('app.error.noTransId'))
+        }
+      }
+    } else {
+      let okayToAddCash = cashTendered - paymentValue >= 0
+      if (okayToAddCash) {
+        dispatch(addPaymentType(payment))
+        dispatch(closeActiveModal(focusProductSearch))
+        dispatch(panelCartShouldUpdate(false))
+      } else {
+        dispatch(setError('app.error.cashNotEnough'))
+      }
+    }
   }
 
   _changeInputValue (value) {
@@ -97,25 +129,28 @@ class PaymentModal extends Component {
               {!error
                 ? null
                 : <p className='subtitle'>
-                  {error}
+                  <FormattedMessage id={error} />
                 </p>
               }
               <div className='control is-horizontal'>
                 <div className='control-label' style={{maxWidth: 130}}>
                   <label className='label'>
-                    {paymentMode === 'voucher' ? 'Voucher Code' : 'Amount to Pay'}
+                    {paymentMode === 'voucher' ? 'Voucher Amount' : 'Amount to Pay'}
                   </label>
                 </div>
                 <div className='control is-expanded'>
-                  <input id={paymentMode === 'voucher' ? 'voucherCode' : 'paymentValue'} className='input is-large'
-                    placeholder={paymentMode === 'voucher' ? 'voucher code' : 'payment amount'} />
+                  <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
+                    placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
                 </div>
               </div>
               <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
                 <div className='control is-horizontal'>
                   <div className='control-label' style={{width: 130, maxWidth: 130}}>
                     <label className='label'>
-                      {paymentMode !== 'cash' ? paymentMode !== 'voucher' ? 'Trans No.' : 'VOUCHER' : 'Cash Given'}
+                      {paymentMode !== 'cash'
+                        ? paymentMode !== 'voucher'
+                          ? 'Trans No.' : 'Voucher Code'
+                        : 'Cash Given'}
                     </label>
                   </div>
                   <div className='control is-expanded'>
@@ -134,7 +169,7 @@ class PaymentModal extends Component {
                           ? intl.formatMessage({ id: 'app.ph.enterAmount' })
                           : paymentMode !== 'voucher'
                             ? intl.formatMessage({ id: 'app.ph.enterTransId' })
-                            : 'Voucher Amount'
+                            : intl.formatMessage({ id: 'app.ph.enterVC' })
                         : intl.formatMessage({ id: 'app.ph.enterPin' })}
                       maxLength={
                         currency === 'sgd'
@@ -204,7 +239,7 @@ class PaymentModal extends Component {
                 <p className='column is-6 is-offset-3'>
                   <a className='button is-large is-fullwidth is-success'
                     onClick={this._clickConfirm.bind(this)}>
-                    <FormattedMessage id='app.button.verify' />
+                    <FormattedMessage id='app.button.confirm' />
                   </a>
                 </p>
               </div>
@@ -221,6 +256,7 @@ PaymentModal.propTypes = {
   paymentMode: PropTypes.string,
   card: PropTypes.object,
   currency: PropTypes.string,
+  error: PropTypes.string,
   paymentTotal: PropTypes.number,
   orderTotal: PropTypes.number,
   transNumber: PropTypes.string.isRequired,
