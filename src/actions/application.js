@@ -219,10 +219,10 @@ export function updateCashDrawer (staff, data, order) {
           },
           footerText: ['No sales']
         }
-        dispatch(closeActiveModal())
         dispatch(updateCashDrawerSuccess(data))
         if (!order) {
           print(receipt)
+          dispatch(closeActiveModal())
         }
       })
       .catch(error => {

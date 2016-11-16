@@ -677,6 +677,7 @@ class PanelCheckout extends Component {
             paymentTotal={this.sumOfPayments()}
             transNumber={transNumber}
             reprinting={reprinting}
+            setOdboUserPincode={this._setOdboUserPincode.bind(this)}
             closeModal={this._closeModal.bind(this)}
             reprint={this._clickReprint.bind(this)}
             processOrder={this._processOrder.bind(this)} />
