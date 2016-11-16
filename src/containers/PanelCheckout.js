@@ -410,6 +410,7 @@ class PanelCheckout extends Component {
     const {
       activeCustomer,
       activeModalId,
+      applicationError,
       bonusPoints,
       card,
       cartItemsArray,
@@ -448,6 +449,9 @@ class PanelCheckout extends Component {
     let voucherSum = this.vouchers() ? this.vouchers().voucherTotal : 0
     let creditSum = this.creditsAndNets() ? this.creditsAndNets().creditTotal : 0
     let netsSum = this.creditsAndNets() ? this.creditsAndNets().netsTotal : 0
+    var paymentBalance = this.orderTotal() - this.sumOfPayments() >= 0
+      ? formatCurrency(this.orderTotal() - this.sumOfPayments())
+      : formatCurrency(0)
     var paymentList = {
       cash: formatCurrency(payments[0].cash),
       credit: formatCurrency(creditSum),
@@ -509,7 +513,7 @@ class PanelCheckout extends Component {
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             <Level left={
-              <p>Subtotal: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
+              <p>Product Items: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
               }
               center={<p className='has-text-left'>Discounts: {
                 customDiscount === 0
@@ -525,7 +529,8 @@ class PanelCheckout extends Component {
             } />
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
-            {currency === 'sgd' ? <h3 className='is-marginless'>Payments</h3> : null}
+            <Level left={currency === 'sgd' ? <h3 className='is-marginless'>Payments</h3> : null}
+              right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {paymentBalance}</h5> : null} />
             <Level left={currency === 'sgd'
               ? <div>
                 <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
@@ -537,7 +542,7 @@ class PanelCheckout extends Component {
             }
               center={currency === 'sgd'
                 ? <div className='has-text-left'>
-                  <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
+                  <ul style={{margin: 0, marginLeft: -25, listStyle: 'none'}}>
                     <li onClick={this._removePayment.bind(this, 'credit')}><i className='fa fa-close' /> Credit: {paymentList.credit}</li>
                     <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {paymentList.nets}</li>
                   </ul>
@@ -662,6 +667,7 @@ class PanelCheckout extends Component {
             cashTendered={Number(cashTendered)}
             cpShouldUpdate={cpShouldUpdate}
             currency={currency}
+            error={applicationError}
             orderError={orderError}
             orderNote={orderNote}
             orderSuccess={orderSuccess}
@@ -671,6 +677,7 @@ class PanelCheckout extends Component {
             paymentTotal={this.sumOfPayments()}
             transNumber={transNumber}
             reprinting={reprinting}
+            setOdboUserPincode={this._setOdboUserPincode.bind(this)}
             closeModal={this._closeModal.bind(this)}
             reprint={this._clickReprint.bind(this)}
             processOrder={this._processOrder.bind(this)} />
@@ -690,6 +697,7 @@ class PanelCheckout extends Component {
       payments,
       pincode,
       bonusPoints,
+      activeCashdrawer,
       activeCashier,
       activeCustomer,
       customDiscount,
@@ -707,7 +715,6 @@ class PanelCheckout extends Component {
 
     let addr = storeData.address ? storeData.address.split('\\n') : ['200 Victoria Street']
     var storeAddress = [
-      'The ODBO',
       storeData.name,
       ...addr
     ]
@@ -805,7 +812,7 @@ class PanelCheckout extends Component {
       items.push({
         id: item.id,
         name: `${item.nameEn.substring(0, 18)}...\n
-          #${item.barcodeInfo || ''}\n
+          ${item.barcodeInfo || ''}\n
           ${showDiscount}`,
         qty: itemQty,
         subtotal: currency === 'sgd'
@@ -833,7 +840,8 @@ class PanelCheckout extends Component {
         previousOdbo: activeCustomer ? Number(activeCustomer.odboCoins) : undefined
       },
       headerText: storeAddress,
-      footerText: !printPreviewTotal ? ['Thank you', 'Have a nice day!'] : ['']
+      footerText: !printPreviewTotal ? ['Thank you', 'Have a nice day!'] : [''],
+      cashDrawerOpenCount: Number(activeCashdrawer.cashDrawerOpenCount + 1)
     }
     if (printPreviewTotal) {
       dispatch(printPreviewTotalReceipt(receipt, activeCustomer))
@@ -861,6 +869,7 @@ function mapStateToProps (state) {
     storeId: state.application.storeId,
     staff: state.application.staff,
     adminToken: state.application.adminToken,
+    activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
     shouldUpdate: state.panelCart.shouldUpdate,
     orderNote: state.panelCheckout.orderNote,
@@ -884,6 +893,7 @@ function mapStateToProps (state) {
     printPreviewTotal: state.panelCheckout.printPreviewTotal,
     reprinting: state.orders.reprinting,
     error: state.panelCheckout.error,
+    applicationError: state.application.error,
     locale: state.intl.locale,
     intl: state.intl
   }

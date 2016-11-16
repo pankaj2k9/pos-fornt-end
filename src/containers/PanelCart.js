@@ -13,7 +13,8 @@ import {
   setWalkinCustomer,
   setInputOdboID,
   removeCustomer,
-  setCurrencyType
+  setCurrencyType,
+  panelCartShouldUpdate
 } from '../actions/panelCart'
 
 import {
@@ -56,11 +57,10 @@ import {
 
 const focusProductSearch = 'productsSearch'
 const focusOrderSearch = 'orderSearch'
-const focusOdboUserSearch = 'odboUserSearch'
+const focusOdboUserSearch = 'odboIdSearch1'
 const focusDiscountInput = 'overallDiscountInput'
 
 class PanelCart extends Component {
-
   _clickRemoveCustomer () {
     const {dispatch} = this.props
     dispatch(removeCustomer())
@@ -196,6 +196,7 @@ class PanelCart extends Component {
       }
       document.getElementById('productsSearch').focus()
     } else if (cartItemsArray.length > 0 && mode !== 'use odbo coins' && mode !== 'double points') {
+      dispatch(panelCartShouldUpdate(true))
       dispatch(setActiveModal('paymentModal'))
       dispatch(setPaymentMode(mode))
     } else {
@@ -301,21 +302,23 @@ class PanelCart extends Component {
     let voucherList = []
     let voucherTotal = 0
     let vouchers
-    payments.forEach(payment => {
-      if (payment.type === 'voucher' && payment.vouchers.length > 0) {
-        payment.vouchers.forEach(voucher => {
-          let v1 = `${voucher.deduction}, `
-          voucherList.push(voucher)
-          voucherTotal += Number(voucher.deduction)
-          voucherToString = voucherToString.concat(v1)
-          vouchers = {
-            voucherToString: voucherToString,
-            voucherList: voucherList,
-            voucherTotal: voucherTotal
-          }
-        })
-      }
-    })
+    if (payments) {
+      payments.forEach(payment => {
+        if (payment.type === 'voucher' && payment.vouchers.length > 0) {
+          payment.vouchers.forEach(voucher => {
+            let v1 = `${voucher.deduction}, `
+            voucherList.push(voucher)
+            voucherTotal += Number(voucher.deduction)
+            voucherToString = voucherToString.concat(v1)
+            vouchers = {
+              voucherToString: voucherToString,
+              voucherList: voucherList,
+              voucherTotal: voucherTotal
+            }
+          })
+        }
+      })
+    }
     return vouchers
   }
 
@@ -323,10 +326,18 @@ class PanelCart extends Component {
     const {
       activeCustomer,
       cartItemsArray,
-      ordersOnHold
-      // overallDiscount,
-      // shouldUpdate
+      ordersOnHold,
+      shouldUpdate
     } = this.props
+    let disableAddPayment
+    let disableOtherButtons
+    if (cartItemsArray.length === 0) {
+      disableAddPayment = true
+      disableOtherButtons = true
+    } else if (!shouldUpdate) {
+      disableAddPayment = this.sumOfPayments() - this.orderTotal() >= 0
+      disableOtherButtons = false
+    }
 
     var buttons1 = [
       {name: 'X/Z Reading', icon: 'fa fa-files-o'},
@@ -334,19 +345,19 @@ class PanelCart extends Component {
       {name: 'Staff Sales', icon: 'fa fa-files-o'},
       {name: 'Outlet Stock', icon: 'fa fa-files-o'},
       {name: 'Reprint/ Refund', icon: 'fa fa-cog'},
-      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o', customColor: cartItemsArray.length > 0 ? 'black' : 'grey'},
+      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o', customColor: disableOtherButtons ? 'grey' : 'black'},
       {name: 'Recall Order', icon: 'fa fa-hand-lizard-o', customColor: ordersOnHold.length > 0 ? '#23d160' : 'grey'},
-      {name: 'Hold Order', icon: 'fa fa-hand-rock-o', customColor: cartItemsArray.length > 0 ? 'black' : 'grey'},
-      {name: 'Print Total', icon: 'fa fa-print', customColor: cartItemsArray.length > 0 ? 'black' : 'grey'}
+      {name: 'Hold Order', icon: 'fa fa-hand-rock-o', customColor: disableOtherButtons ? 'grey' : 'black'},
+      {name: 'Print Total', icon: 'fa fa-print', customColor: disableOtherButtons ? 'grey' : 'black'}
     ]
 
     var buttons2 = [
-      {name: 'Cash', icon: 'fa fa-money', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'},
-      {name: 'Credit', icon: 'fa fa-credit-card', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'},
-      {name: 'Nets', icon: 'fa fa-credit-card', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'},
+      {name: 'Cash', icon: 'fa fa-money', customColor: disableAddPayment ? 'grey' : '#4A235A'},
+      {name: 'Credit', icon: 'fa fa-credit-card', customColor: disableAddPayment ? 'grey' : '#4A235A'},
+      {name: 'Nets', icon: 'fa fa-credit-card', customColor: disableAddPayment ? 'grey' : '#4A235A'},
       {name: 'Double Points', icon: 'fa fa-star-o', customColor: activeCustomer ? 'orange' : 'grey'},
       {name: 'Use Odbo Coins', icon: 'fa fa-asterisk', customColor: activeCustomer ? '#23d160' : 'grey'},
-      {name: 'Voucher', icon: 'fa fa-file-excel-o', customColor: cartItemsArray.length > 0 ? '#4A235A' : 'grey'}
+      {name: 'Voucher', icon: 'fa fa-file-excel-o', customColor: disableAddPayment ? 'grey' : '#4A235A'}
     ]
 
     var buttons3 = [
@@ -605,6 +616,8 @@ class PanelCart extends Component {
       customersArray,
       customerSearchKey,
       customerFilter,
+      customerSearchKeyOIDFR,
+      customerSearchKeyOIDTO,
       fetchingCustomers
     } = this.props
     return (
@@ -614,6 +627,8 @@ class PanelCart extends Component {
         active={activeModalId}
         items={customersArray}
         filter={customerFilter}
+        odboIdFrom={customerSearchKeyOIDFR}
+        odboIdTo={customerSearchKeyOIDTO}
         isFetching={fetchingCustomers}
         search={{id: 'searchEvent',
           value: customerSearchKey,
@@ -646,6 +661,8 @@ function mapStateToProps (state) {
     productsFilter: state.panelProducts.productsFilter,
     fetchingCustomers: state.data.customers.isFetching,
     customerSearchKey: state.settings.customerSearchKey,
+    customerSearchKeyOIDFR: state.settings.customerSearchKeyOIDFR,
+    customerSearchKeyOIDTO: state.settings.customerSearchKeyOIDTO,
     customerFilter: state.settings.customerFilter,
     activeCustomer: state.panelCart.activeCustomer,
     walkinCustomer: state.panelCart.walkinCustomer,

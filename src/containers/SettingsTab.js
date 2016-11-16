@@ -9,6 +9,7 @@ import BoxItem from '../components/BoxItem'
 import DetailsModal from '../components/DetailsModal'
 import LoadingPane from '../components/LoadingPane'
 import Account from '../containers/Account'
+import Dropdown from '../components/Dropdown'
 
 const focusOrderSearch = 'orderSearch'
 
@@ -95,7 +96,7 @@ class SettingsTab extends Component {
   }
 
   onSubmit (event) {
-    event.preventDefault()
+    if (event) { event.preventDefault() }
     const {
       dispatch,
       customerFilter,
@@ -106,13 +107,13 @@ class SettingsTab extends Component {
     } = this.props
 
     switch (customerFilter) {
-      case 'firstNameSearch':
-        return dispatch(searchCustomer({ query: { firstName: { $like: `%${customerSearchKey}%` } } }))
-      case 'lastNameSearch':
-        return dispatch(searchCustomer({ query: { lastName: { $like: `%${customerSearchKey}%` } } }))
-      case 'phoneNumberSearch':
+      case 'first name':
+        return dispatch(searchCustomer({ query: { firstName: { $like: `%${customerSearchKey.toUpperCase()}%` } } }))
+      case 'last name':
+        return dispatch(searchCustomer({ query: { lastName: { $like: `%${customerSearchKey.toUpperCase()}%` } } }))
+      case 'phone number':
         return dispatch(searchCustomer({ query: { phoneNumber: { $like: `%${customerContactFilter}%` } } }))
-      case 'odboIdSearch':
+      case 'odbo id':
         const query = { odboId: {}, $sort: { odboId: 1 } }
         if (customerSearchKeyOIDFR) { query.odboId.$gte = Number(customerSearchKeyOIDFR) }
         if (customerSearchKeyOIDTO) { query.odboId.$lte = Number(customerSearchKeyOIDTO) }
@@ -129,20 +130,12 @@ class SettingsTab extends Component {
     document.getElementById('lastNameSearch').value = ''
     document.getElementById('phoneNumberSearch').value = ''
     dispatch(customersSetSearchKey(''))
-
-    const searchingOdboId = inputId === 'odboIdSearchFr' || inputId === 'odboIdSearchTo'
-    if (searchingOdboId) {
-      dispatch(customersSetFilter('odboIdSearch'))
-    } else {
-      dispatch(customersSetSearchKeyOIDFR(''))
-      dispatch(customersSetSearchKeyOIDTO(''))
-      document.getElementById('odboIdSearchFr').value = ''
-      document.getElementById('odboIdSearchTo').value = ''
-
-      dispatch(customersSetFilter(inputId))
-    }
-
     // dispatch(searchCustomer()) // refetch 1st 40 customers
+  }
+
+  _setCustomerFilter (value) {
+    const {dispatch} = this.props
+    dispatch(customersSetFilter(value))
   }
 
   renderMainTab () {
@@ -282,10 +275,16 @@ class SettingsTab extends Component {
     }
   }
 
-  updateOdboCoins (id) {
+  updateOdboCoins (id, action, odboCoins) {
     const {dispatch} = this.props
-    let newOdbo = document.getElementById('newOdbo').value
-    dispatch(updateCustomer(id, {odboCoins: Number(newOdbo)}))
+    let inputValue = document.getElementById('newOdbo').value
+    if (action === 'plus') {
+      let newOdbo = Number(odboCoins) + Number(inputValue)
+      dispatch(updateCustomer(id, {odboCoins: newOdbo}))
+    } else {
+      let newOdbo = Number(odboCoins) - Number(inputValue)
+      dispatch(updateCustomer(id, {odboCoins: newOdbo < 0 ? 0 : newOdbo}))
+    }
   }
 
   renderCustomersTab () {
@@ -299,22 +298,22 @@ class SettingsTab extends Component {
       customerSearchKeyOIDFR, customerSearchKeyOIDTO
     } = this.props
 
-    const x = customersById[activeCustomerId]
+    const odboUser = customersById[activeCustomerId]
     let hideDetails = showControl
     var intFrameHeight = window.innerHeight
 
     let filter
     switch (customerFilter) {
-      case 'firstNameSearch':
+      case 'first name':
         filter = `with first name: ${customerSearchKey}.`
         break
-      case 'lastNameSearch':
+      case 'last name':
         filter = `with last name: ${customerSearchKey}.`
         break
-      case 'phoneNumberSearch':
+      case 'phone number':
         filter = `with phone number: ${customerSearchKey}.`
         break
-      case 'odboIdSearch':
+      case 'odbo id':
         filter = 'with ID'
         if (customerSearchKeyOIDFR) { filter += ` from ${customerSearchKeyOIDFR}` }
         if (customerSearchKeyOIDTO) { filter += ` to ${customerSearchKeyOIDTO}` }
@@ -326,84 +325,102 @@ class SettingsTab extends Component {
       <div>
         <div className='columns'>
           <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCustFr'>
-              <SearchBar
-                id='odboIdSearchFr'
+            <LabeledControl labelAlt='Filter'>
+              <Dropdown
+                value={customerFilter}
                 size='is-medium'
-                value={customerSearchKeyOIDFR}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKeyOIDFR.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
+                options={['odbo id', 'phone number', 'first name', 'last name']}
+                onChange={this._setCustomerFilter.bind(this)} />
+            </LabeledControl>
+          </div>
+          {customerFilter === 'odbo id'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchCustFr'>
+                <SearchBar
+                  id='odboIdSearchFr'
+                  size='is-medium'
+                  value={customerSearchKeyOIDFR}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerSearchKeyOIDFR.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'odbo id'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchCustTo'>
+                <SearchBar
+                  id='odboIdSearchTo'
+                  size='is-medium'
+                  value={customerSearchKeyOIDTO}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerSearchKeyOIDTO.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'first name'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchFn'>
+                <SearchBar
+                  id='firstNameSearch'
+                  size='is-medium'
+                  value={customerSearchKey}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerSearchKey.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  onFocus={this.onFocus.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
                 />
-            </LabeledControl>
-          </div>
-
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchCustTo'>
-              <SearchBar
-                id='odboIdSearchTo'
-                size='is-medium'
-                value={customerSearchKeyOIDTO}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKeyOIDTO.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-        </div>
-
-        <div className='columns'>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchFn'>
-              <SearchBar
-                id='firstNameSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerSearchKey.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-              />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchLn'>
-              <SearchBar
-                id='lastNameSearch'
-                size='is-medium'
-                value={customerSearchKey}
-                placeholder={'app.ph.keyword'}
-                onChange={this.setCustomerSearchKey.bind(this)}
-                confirmButton={<i className='fa fa-search' />}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
-          <div className='column is-3'>
-            <LabeledControl label='app.ph.searchPhone'>
-              <SearchBar
-                id='phoneNumberSearch'
-                size='is-medium'
-                value={customerContactFilter}
-                placeholder={'app.ph.keyword'}
-                confirmButton={<i className='fa fa-search' />}
-                onChange={this.setCustomerContactFilter.bind(this)}
-                onSubmit={this.onSubmit.bind(this)}
-                onFocus={this.onFocus.bind(this)}
-                confirmEvent={this.onSubmit.bind(this)}
-                />
-            </LabeledControl>
-          </div>
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'last name'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchLn'>
+                <SearchBar
+                  id='lastNameSearch'
+                  size='is-medium'
+                  value={customerSearchKey}
+                  placeholder={'app.ph.keyword'}
+                  onChange={this.setCustomerSearchKey.bind(this)}
+                  confirmButton={<i className='fa fa-search' />}
+                  onSubmit={this.onSubmit.bind(this)}
+                  onFocus={this.onFocus.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
+          {customerFilter === 'phone number'
+            ? <div className='column is-3'>
+              <LabeledControl label='app.ph.searchPhone'>
+                <SearchBar
+                  id='phoneNumberSearch'
+                  size='is-medium'
+                  value={customerContactFilter}
+                  placeholder={'app.ph.keyword'}
+                  confirmButton={<i className='fa fa-search' />}
+                  onChange={this.setCustomerContactFilter.bind(this)}
+                  onSubmit={this.onSubmit.bind(this)}
+                  onFocus={this.onFocus.bind(this)}
+                  confirmEvent={this.onSubmit.bind(this)}
+                  />
+              </LabeledControl>
+            </div>
+            : null
+          }
         </div>
         <hr style={{margin: 20}} />
         <div
@@ -488,23 +505,23 @@ class SettingsTab extends Component {
             paneSize='is-medium' />
           }
         </div>
-        {!x
+        {!odboUser
           ? null
           : <DetailsModal
             title='app.page.settings.customersDet'
             activeModalId={activeModalId}
             id='customerDetails'
             items={[
-              {name: 'app.general.custName', desc: `${x.firstName} ${x.lastName}`},
-              {name: 'app.general.odboId', desc: x.odboId},
+              {name: 'app.general.custName', desc: `${odboUser.firstName} ${odboUser.lastName}`},
+              {name: 'app.general.odboId', desc: odboUser.odboId},
               {name: 'app.general.dateJoined'},
-              {desc: `Date: ${intl.formatDate(x.dateCreated)}`},
-              {desc: `Time: ${intl.formatTime(x.dateCreated)}`},
-              {name: 'app.general.membership', desc: x.membership},
-              {name: 'app.general.memberPoints', desc: x.membershipPoints},
-              {name: 'app.general.ob', desc: x.odboCoins},
-              {name: 'Email', desc: x.emailAddress},
-              {name: 'Phone', desc: x.phoneNumber}
+              {desc: `Date: ${intl.formatDate(odboUser.dateCreated)}`},
+              {desc: `Time: ${intl.formatTime(odboUser.dateCreated)}`},
+              {name: 'app.general.membership', desc: odboUser.membership},
+              {name: 'app.general.memberPoints', desc: odboUser.membershipPoints},
+              {name: 'app.general.ob', desc: odboUser.odboCoins},
+              {name: 'app.general.email', desc: odboUser.emailAddress},
+              {name: 'app.general.contactNo', desc: odboUser.phoneNumber}
             ]}
             hideDetails={hideDetails}
             onClick={this.onClickShowOdboControl.bind(this)}
@@ -528,13 +545,19 @@ class SettingsTab extends Component {
                   <div>
                     {!ucIsProcessing
                       ? <div className='columns'>
-                        <div className='column is-half'>
+                        <div className='column is-4'>
                           <a className='button is-large is-fullwidth is-success'
-                            onClick={this.updateOdboCoins.bind(this, x.id)}>
-                            <FormattedMessage id='app.general.updateOdbo' />
+                            onClick={this.updateOdboCoins.bind(this, odboUser.id, 'plus', odboUser.odboCoins)}>
+                            <FormattedMessage id='app.general.increaseOdbo' />
                           </a>
                         </div>
-                        <div className='column is-half'>
+                        <div className='column is-4'>
+                          <a className='button is-large is-fullwidth is-warning'
+                            onClick={this.updateOdboCoins.bind(this, odboUser.id, 'minus', odboUser.odboCoins)}>
+                            <FormattedMessage id='app.general.decreaseOdbo' />
+                          </a>
+                        </div>
+                        <div className='column is-4'>
                           <a className='button is-large is-fullwidth is-danger'
                             onClick={this.onClickShowOdboControl.bind(this)}>
                             <FormattedMessage id='app.button.cancel' />
@@ -563,7 +586,7 @@ class SettingsTab extends Component {
 
   renderOrderSearchModal () {
     const {activeModalId, orderSearchKey, intl,
-           orderDetails, refundSuccess, locale,
+           orderDetails, refundSuccess, locale, storeId,
            isProcessing, storeDetails, reprintSuccess} = this.props
     const modalId = activeModalId === 'refundModal'
                     ? 'refundModal' : 'reprintModal'
@@ -643,24 +666,29 @@ class SettingsTab extends Component {
         },
         items: processedItems,
         trans: {
+          type: undefined,
           payments: processedPayments,
           activeCustomer: users,
           computations: {
             total: total,
             subtotal: subtotal,
             cashChange: cashChange,
-            remainingOdbo: currency === 'odbo' ? Number(users.odboCoins) - Number(total) : null,
+            remainingOdbo: currency === 'odbo' ? Number(users.odboCoins) : null,
             paymentTotal: total
           },
           vouchers: vouchers || [],
           orderNote: remarks,
           currency: currency,
-          previousOdbo: users ? Number(users.odboCoins) - Number(total) : undefined,
+          previousOdbo: users
+            ? currency === 'odbo'
+              ? Number(users.odboCoins) + Number(total)
+              : Number(users.odboCoins) - Number(total)
+            : undefined,
           points: users ? Number(total) : undefined,
           newOdbo: users ? Number(users.odboCoins) + Number(total) : undefined
         },
         headerText: storeAddress,
-        footerText: ['This is a reprinted receipt']
+        footerText: ['']
       }
     }
 
@@ -670,6 +698,7 @@ class SettingsTab extends Component {
         inputPh={intl.formatMessage({ id: 'app.ph.enterRefundRemarks' })}
         type={type}
         locale={locale}
+        storeId={storeId}
         storeDetails={storeDetails}
         title='Enter Order ID'
         active={activeModalId}

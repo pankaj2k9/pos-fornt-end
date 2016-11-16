@@ -12,7 +12,10 @@ const zh = {
   'app.general.membership': '籍',
   'app.general.memberPoints': '会员积分',
   'app.general.dateJoined': '注册日期',
+  'app.general.amountToPay': '付款金额',
+  'app.general.voucherCode': '优惠券代码',
 
+  'app.general.email': 'Email ',
   'app.general.contactNo': '电话',
   'app.general.barcode': '条码: ',
   'app.general.product': '产品',
@@ -63,6 +66,8 @@ const zh = {
   'app.general.enabled': ' 启用 ',
   'app.general.disabled': ' 禁用 ',
   'app.general.updateOdbo': '调整 Odbo 平衡',
+  'app.general.increaseOdbo': '增加平衡',
+  'app.general.decreaseOdbo': '缩减平衡',
   'app.general.forbidden': '被禁止!',
   'app.general.onlyMaster': '只有主人可以打开这个页面...',
   'app.general.transDetails': '交易细节',
@@ -118,6 +123,7 @@ const zh = {
   'app.button.changeCashier': '收银员变化',
   'app.button.clickHere': '点击这里',
 
+  'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
   'app.ph.searchCust': '搜索 Odbo ID',
   'app.ph.searchCustFr': '从(ODBO ID)',
@@ -143,6 +149,9 @@ const zh = {
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noCustResults': '没有客户的搜索结果 ',
   'app.error.noCartItems': '有没有产品... ',
+  'app.error.cashNotEnough': '现金必须准确或大于金额',
+  'app.error.noCardAssoc': '无卡选择',
+  'app.error.noTransId': '检查事务ID',
   'app.ph.enterRefundRemarks': '什么是退款的原因',
 
   'app.modal.order': '订购',

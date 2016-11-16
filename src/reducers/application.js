@@ -14,6 +14,7 @@ import {
   UPDATE_CASHDRAWER_FAILURE,
   SET_ACTIVE_CASHDRAWER,
   SET_CASHIER_LOGGED_IN,
+  SET_ERROR,
   STORE_GET_IDS_REQUEST,
   STORE_GET_IDS_SUCCESS,
   STORE_GET_IDS_FAILURE,
@@ -153,10 +154,15 @@ function application (state = {
         activeModalId: action.activeModalId,
         focusedInput: action.inputToFocus
       })
+    case SET_ERROR:
+      return Object.assign({}, state, {
+        error: action.error
+      })
     case CLOSE_ACTIVE_MODAL:
       return Object.assign({}, state, {
         activeModalId: null,
-        focusedInput: action.inputToFocus
+        focusedInput: action.inputToFocus,
+        error: null
       })
     case SET_STAFF_LOGGED_IN:
       return Object.assign({}, state, {

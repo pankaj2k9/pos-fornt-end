@@ -34,22 +34,6 @@ class App extends React.Component {
     }
   }
 
-  componentDidUpdate () {
-    const { focusedInput, location, activeCashdrawer, activeCashier, isProcessing, activeModalId } = this.props
-    var currentLocation = location.pathname
-    if (!isProcessing && focusedInput) {
-      if (currentLocation !== '/store') {
-        if (activeCashier && activeCashdrawer) {
-          document.getElementById(focusedInput).focus()
-        }
-      } else if (currentLocation !== '/settings') {
-        if (activeModalId) {
-          document.getElementById(focusedInput).focus()
-        }
-      }
-    }
-  }
-
   handleHamburgerToggle () {
     const { dispatch } = this.props
     dispatch(hamburgerToggle())
@@ -108,7 +92,7 @@ class App extends React.Component {
     let data = {
       date: activeCashdrawer.date,
       amount: amountToAdd,
-      count: activeCashdrawer.cashDrawerOpenCount
+      count: Number(activeCashdrawer.cashDrawerOpenCount) + 1
     }
     if (amountToAdd <= 0 || isNaN(amountToAdd)) {
       dispatch(setCashdrawerFailure('You have entered an invalid amount'))
@@ -119,15 +103,16 @@ class App extends React.Component {
 
   onClickVerifyPin (event) {
     event.preventDefault()
-    const {dispatch, storeId, activeCashier, staff} = this.props
+    const {dispatch, storeId, activeCashier, activeCashdrawer, staff} = this.props
     let query = {
       query: {
         store: storeId,
         pinCode: document.getElementById('storePinCode').value
       }
     }
+    let data = {count: Number(activeCashdrawer.cashDrawerOpenCount) + 1}
     let staffName = !activeCashier ? staff : activeCashier
-    dispatch(verifyStorePin(query, staffName))
+    dispatch(verifyStorePin(query, staffName, data))
   }
 
   openCashdrawerModal () {
@@ -358,7 +343,9 @@ function mapStateToProps (state) {
     activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
     adminToken: state.application.adminToken,
-    isLoggingOut: state.login.isLoggingOut
+    isLoggingOut: state.login.isLoggingOut,
+    customerFilter: state.settings.customerFilter
+
   }
 }
 

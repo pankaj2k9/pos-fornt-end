@@ -10,12 +10,13 @@ const RECEIPT_DIVIDER = '-------------------------------------------------------
 const LI_NAME_MAX = 24
 
 // styles
-const RECEIPT_STYLE = `width: ${RECEIPT_WIDTH}px; margin: ${RECEIPT_MARGIN}px`
+const RECEIPT_STYLE = `width: ${RECEIPT_WIDTH}px; margin: ${RECEIPT_MARGIN}px; margin-bottom: 10px;`
 const ITEM_LIST_STYLE = 'display: flex; align-items: start; justify-content: start;'
 const ITEM_QTY_STYLE = 'width: 24px; display: inline-block'
 const ITEM_NAME_STYLE = 'width: 176px; display: inline-block;'
 const ITEM_SUBTOTAL_STYLE = 'width: 36px; display: inline-block; text-align: right;'
 const HEADER_STYLE = `display: flex; flex-direction: column; align-items: center; margin-bottom: ${RECEIPT_MARGIN}px;`
+const COMPANY_NAME = `font-size: ${RECEIPT_FONT_SIZE * 2}px; font-weight: bold;`
 const TOTAL_DIV_STYLE_1 = `display: flex; justify-content: space-between; flex-direction: row; font-size: ${RECEIPT_FONT_SIZE * 1.2}px; font-weight: bold;`
 const TOTAL_DIV_STYLE_2 = 'display: flex; justify-content: space-between; flex-direction: row;'
 const BODY_STYLE = `font-family: ${RECEIPT_FONT};
@@ -37,7 +38,7 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += receipt.headerText ? RECEIPT_DIVIDER : ''
 
   // build extra info
-  receiptHtmlString += buildExtraInfo(receipt.info, receipt.trans.activeCustomer)
+  receiptHtmlString += buildExtraInfo(receipt.info, receipt.trans ? receipt.trans.activeCustomer : null)
   receiptHtmlString += receipt.info ? RECEIPT_DIVIDER : ''
 
   // build item list
@@ -111,13 +112,10 @@ export const buildHeader = (headerText) => {
   let header = ''
   if (headerText) {
     header += `<div style="${HEADER_STYLE}">`
-    if (typeof headerText === 'string') {
-      header += `<div>${headerText}</div>`
-    } else if (typeof headerText === 'object') {
-      headerText.forEach(hdr => {
-        header += `<div>${hdr}</div>`
-      })
-    }
+    header += `<div style="${COMPANY_NAME}">The odbo</div>`
+    headerText.forEach(hdr => {
+      header += `<div>${hdr}</div>`
+    })
     header += '</div>'
   }
   return header
@@ -146,14 +144,21 @@ export const buildFooter = (footerText) => {
  * Add staff, date, etc.
  * @param {Object} info of receipt
  */
-export const buildExtraInfo = (info, activeCustomer) => {
+export const buildExtraInfo = (info, customer) => {
   let date = info.date ? new Date(info.date) : new Date()
   let extra = ''
+  let odboId = customer ? String(customer.odboId) : null
+  let zeroes = ''
+  if (odboId) {
+    for (var i = odboId.length; i < 7; i++) {
+      zeroes = zeroes + '0'
+    }
+  }
   let orderId = info.orderId
     ? extra += `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${info.orderId}</div>`
     : null
-  let customer = activeCustomer
-    ? extra += `<div style="${TOTAL_DIV_STYLE_1}">Customer : ${activeCustomer.firstName || ''} ${activeCustomer.lastName || ''}</div>`
+  let customerDetails = customer
+    ? extra += `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[${zeroes + odboId}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>`
     : null
   extra += '<div>'
   if (info.staff) {
@@ -161,7 +166,7 @@ export const buildExtraInfo = (info, activeCustomer) => {
   }
   extra += `<div>${formatDate(date)}</div>`
   orderId
-  customer
+  customerDetails
   extra += '</div>'
 
   return extra
@@ -192,7 +197,8 @@ export const buildComputation = (trans) => {
       vouchers,
       orderNote,
       currency,
-      points
+      points,
+      type
     } = trans
 
     let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
@@ -213,7 +219,7 @@ export const buildComputation = (trans) => {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>OVERALL DISCOUNT : </div>${currency === 'sgd' ? formatCurrency(computations.customDiscount) : computations.customDiscount}</div>`
     }
 
-    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(computations.total)}</div>`
+    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${currency === 'sgd' ? formatCurrency(computations.total) : computations.total}</div>`
 
     comp += RECEIPT_DIVIDER
 
@@ -259,7 +265,7 @@ export const buildComputation = (trans) => {
     }
 
     if (currency === 'odbo') {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.paymentMinusOrderTotal}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo}</div>`
     } else if (payments.length > 1) {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${formatCurrency(computations.paymentTotal)}</div>`
     }
@@ -270,7 +276,7 @@ export const buildComputation = (trans) => {
         comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
       }
       if (activeCustomer) {
-        if (points !== 0) {
+        if (points !== 0 && type !== 'refund') {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>---- THE ODBO COIN BALANCE ----</div></div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
@@ -288,6 +294,19 @@ export const buildComputation = (trans) => {
         })
       }
     }
+
+    if (type === 'reprint') {
+      console.log('type', type)
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}">REPRINTED RECEIPT: </div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
+    } else if (type === 'refund') {
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(computations.paymentTotal)}</div>`
+    }
+
     comp += '</div>'
   }
 

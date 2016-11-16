@@ -3,8 +3,8 @@ import api from './api'
 const refundService = api.service('/refund')
 
 const refund = {
-  create (id) {
-    return refundService.create(id)
+  create (params) {
+    return refundService.create(params)
   }
 }
 

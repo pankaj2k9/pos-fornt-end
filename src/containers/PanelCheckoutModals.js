@@ -38,7 +38,7 @@ class PanelCheckoutModals extends Component {
   }
 
   renderInputPincode () {
-    const { activeModalId } = this.props
+    const { activeModalId, setOdboUserPincode, closeModal, processOrder } = this.props
     let modalActive = activeModalId === 'odboUserPincode'
       ? 'modal is-active'
       : 'modal'
@@ -50,7 +50,7 @@ class PanelCheckoutModals extends Component {
             <p className='modal-card-title is-marginless has-text-centered'>
               Odbo User Pincode
             </p>
-            <button className='delete' onClick={this._closeModal.bind(this)} />
+            <button className='delete' onClick={closeModal} />
           </header>
           <div className='modal-card-body'>
             <div className='content columns is-mobile is-multiline has-text-centered'>
@@ -59,9 +59,9 @@ class PanelCheckoutModals extends Component {
                   <div className='control-label' style={{width: 150}}>
                     <h3 className='label is-marginless'>Input Pincode</h3>
                   </div>
-                  <form onSubmit={this._processOrder.bind(this)} >
-                    <input id='userPincode' className='input is-large' type='Password'
-                      onChange={e => this._setOdboUserPincode(e.target.value)} />
+                  <form onSubmit={processOrder} >
+                    <input id='userPincode' className='input is-large' type='Password' autoFocus
+                      onChange={e => setOdboUserPincode(e.target.value)} />
                   </form>
                 </div>
               </div>
@@ -73,12 +73,13 @@ class PanelCheckoutModals extends Component {
   }
 
   renderPaymentModal () {
-    const {activeModalId, card, cashTendered, currency, orderTotal, paymentMode, paymentTotal, payments, transNumber} = this.props
+    const {activeModalId, card, cashTendered, currency, error, orderTotal, paymentMode, paymentTotal, payments, transNumber} = this.props
     return (
       <PaymentModal
         id={activeModalId}
         card={card}
         cashTendered={Number(cashTendered)}
+        error={error}
         transNumber={transNumber}
         orderTotal={orderTotal}
         paymentTotal={paymentTotal}
@@ -231,6 +232,7 @@ PanelCheckoutModals.propTypes = {
   cashTendered: PropTypes.number,
   cpShouldUpdate: PropTypes.bool,
   currency: PropTypes.string,
+  error: PropTypes.string,
   orderError: PropTypes.string,
   orderNote: PropTypes.array,
   orderSuccess: PropTypes.bool,
@@ -240,6 +242,7 @@ PanelCheckoutModals.propTypes = {
   paymentTotal: PropTypes.number,
   reprinting: PropTypes.bool,
   transNumber: PropTypes.string,
+  setOdboUserPincode: PropTypes.func,
   closeModal: PropTypes.func,
   reprint: PropTypes.func,
   processOrder: PropTypes.func

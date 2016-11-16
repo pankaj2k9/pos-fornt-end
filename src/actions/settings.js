@@ -5,11 +5,11 @@ import customers from '../services/customers'
 
 import {
   setActiveModal,
-  addCashdrawerOpenCount
- } from './application'
-import { fetchCustomers } from './customers'
+  addCashdrawerOpenCount,
+  updateCashDrawer
+} from './application'
 
-import print from '../utils/printReceipt/print'
+import { fetchCustomers } from './customers'
 
 export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 export function reprintingReceipt (value) {
@@ -125,21 +125,14 @@ export function verifyStorePinFailure (error) {
   return { type: VERIFY_STORE_PIN_FAILURE, error }
 }
 
-export function verifyStorePin (query, staff) {
+export function verifyStorePin (query, staff, data) {
   return (dispatch) => {
     dispatch(verifyStorePinRequest())
     return noSalesService.find(query)
       .then(response => {
-        const receipt = {
-          info: {
-            date: new Date(),
-            staff: `${staff.lastName}, ${staff.firstName}`
-          },
-          footerText: ['No sales']
-        }
-        print(receipt)
         dispatch(setActiveModal(''))
         dispatch(addCashdrawerOpenCount())
+        dispatch(updateCashDrawer(staff, data))
         dispatch(resetSettingsState())
         document.getElementById('storePinCode').value = ''
       })

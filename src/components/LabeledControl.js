@@ -4,14 +4,15 @@ import { FormattedMessage } from 'react-intl'
 
 const LabeledControl = (props) => {
   const {
-    label
+    label,
+    labelAlt
   } = props
 
   return (
     <div className=''>
       <label className='label subtitle'>
-        {label === undefined
-          ? <span style={{color: 'transparent'}}>invisibile label</span>
+        {!label
+          ? labelAlt
           : <FormattedMessage id={label} />
         }
       </label>

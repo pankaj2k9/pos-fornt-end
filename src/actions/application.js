@@ -53,6 +53,14 @@ export function authStaffFailure (error) {
   }
 }
 
+export const SET_ERROR = 'SET_ERROR'
+export function setError (error) {
+  return {
+    type: SET_ERROR,
+    error
+  }
+}
+
 export const CLOSE_ACTIVE_MODAL = 'CLOSE_ACTIVE_MODAL'
 export function closeActiveModal (inputToFocus) {
   return {
@@ -199,7 +207,7 @@ export function updateCashDrawerFailure (error) {
   }
 }
 
-export function updateCashDrawer (staff, data) {
+export function updateCashDrawer (staff, data, order) {
   return (dispatch) => {
     dispatch(updateCashDrawerRequest())
     return dailyDataService.patch(data)
@@ -211,9 +219,11 @@ export function updateCashDrawer (staff, data) {
           },
           footerText: ['No sales']
         }
-        print(receipt)
-        dispatch(closeActiveModal())
         dispatch(updateCashDrawerSuccess(data))
+        if (!order) {
+          print(receipt)
+          dispatch(closeActiveModal())
+        }
       })
       .catch(error => {
         document.getElementById('storePinCode2').value = ''
