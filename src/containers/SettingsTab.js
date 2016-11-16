@@ -666,24 +666,29 @@ class SettingsTab extends Component {
         },
         items: processedItems,
         trans: {
+          type: undefined,
           payments: processedPayments,
           activeCustomer: users,
           computations: {
             total: total,
             subtotal: subtotal,
             cashChange: cashChange,
-            remainingOdbo: currency === 'odbo' ? Number(users.odboCoins) - Number(total) : null,
+            remainingOdbo: currency === 'odbo' ? Number(users.odboCoins) : null,
             paymentTotal: total
           },
           vouchers: vouchers || [],
           orderNote: remarks,
           currency: currency,
-          previousOdbo: users ? Number(users.odboCoins) - Number(total) : undefined,
+          previousOdbo: users
+            ? currency === 'odbo'
+              ? Number(users.odboCoins) + Number(total)
+              : Number(users.odboCoins) - Number(total)
+            : undefined,
           points: users ? Number(total) : undefined,
           newOdbo: users ? Number(users.odboCoins) + Number(total) : undefined
         },
         headerText: storeAddress,
-        footerText: ['This is a reprinted receipt']
+        footerText: ['']
       }
     }
 

@@ -197,7 +197,8 @@ export const buildComputation = (trans) => {
       vouchers,
       orderNote,
       currency,
-      points
+      points,
+      type
     } = trans
 
     let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
@@ -218,7 +219,7 @@ export const buildComputation = (trans) => {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>OVERALL DISCOUNT : </div>${currency === 'sgd' ? formatCurrency(computations.customDiscount) : computations.customDiscount}</div>`
     }
 
-    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(computations.total)}</div>`
+    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${currency === 'sgd' ? formatCurrency(computations.total) : computations.total}</div>`
 
     comp += RECEIPT_DIVIDER
 
@@ -264,7 +265,7 @@ export const buildComputation = (trans) => {
     }
 
     if (currency === 'odbo') {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.paymentMinusOrderTotal}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo}</div>`
     } else if (payments.length > 1) {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${formatCurrency(computations.paymentTotal)}</div>`
     }
@@ -275,7 +276,7 @@ export const buildComputation = (trans) => {
         comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>${customerLbl} : </div>${customer}</div>`
       }
       if (activeCustomer) {
-        if (points !== 0) {
+        if (points !== 0 && type !== 'refund') {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>---- THE ODBO COIN BALANCE ----</div></div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${trans.previousOdbo}</div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${trans.points}</div>`
@@ -293,6 +294,19 @@ export const buildComputation = (trans) => {
         })
       }
     }
+
+    if (type === 'reprint') {
+      console.log('type', type)
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}">REPRINTED RECEIPT: </div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
+    } else if (type === 'refund') {
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(computations.paymentTotal)}</div>`
+    }
+
     comp += '</div>'
   }
 

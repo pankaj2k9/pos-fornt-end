@@ -258,8 +258,11 @@ class SearchModal extends Component {
     const {dispatch, orderSearchKey, type, details, closeButton, storeId} = this.props
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
-      dispatch(refund(orderSearchKey, refundRemarks, storeId))
+      details.trans.type = 'refund'
+      dispatch(refund(orderSearchKey, refundRemarks, storeId, details))
     } else if (type === 'reprintModal') {
+      details.trans.type = 'reprint'
+      console.log('details: ', details)
       dispatch(printPreviewTotalReceipt(details))
       closeButton.event(dispatch)
     }

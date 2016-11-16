@@ -4,6 +4,10 @@ export const REFUND_FAILURE = 'REFUND_FAILURE'
 
 import refundService from '../services/refund'
 
+import {
+  printPreviewTotalReceipt
+} from '../actions/helpers'
+
 export function refundRequest () {
   return {
     type: REFUND_REQUEST
@@ -22,13 +26,14 @@ export function refundFailure () {
   }
 }
 
-export function refund (orderId, refundRemarks, storeId) {
+export function refund (orderId, refundRemarks, storeId, details) {
   return (dispatch) => {
     dispatch(refundRequest())
 
     return refundService.create({id: orderId, refundRemarks: refundRemarks, storeId: storeId})
       .then(response => {
         dispatch(refundSuccess(response))
+        dispatch(printPreviewTotalReceipt(details))
       })
       .catch(error => {
         dispatch(refundFailure(error))
