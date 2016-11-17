@@ -205,9 +205,13 @@ function settings (state = {
         orderSearchKey: action.orderKey
       })
     case STOREORDER_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        isProcessing: true
+      })
     case STOREORDER_FETCH_SUCCESS:
       return Object.assign({}, state, {
-        orderFromGet: action.response
+        orderFromGet: action.response,
+        isProcessing: false
       })
     case STOREORDER_FETCH_FAILURE:
     case RESET_SETTINGS_STATE: {

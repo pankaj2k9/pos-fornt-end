@@ -180,19 +180,13 @@ class SearchModal extends Component {
     dispatch(search.onChange(value))
   }
 
-  buttonConfirm (event) {
-    event.preventDefault()
-    const {dispatch, orderSearchKey} = this.props
-    dispatch(storeOrderFetch(orderSearchKey))
-  }
-
   buttonCancel () {
     const {dispatch} = this.props
     dispatch(storeOrdersSetSearchKey(''))
   }
 
   onSubmitKey (event) {
-    event.preventDefault()
+    if (event) { event.preventDefault() }
     const {dispatch, orderSearchKey, storeDetails} = this.props
     var params = {
       id: orderSearchKey,
@@ -313,7 +307,7 @@ class SearchModal extends Component {
                   onChange={this.orderSearchKeyInput.bind(this)}
                   confirmButton={<i className='fa fa-check' />}
                   cancelButton={<i className='fa fa-undo' />}
-                  confirmEvent={this.buttonConfirm.bind(this)}
+                  confirmEvent={this.onSubmitKey.bind(this)}
                   cancelEvent={this.buttonCancel.bind(this)}
                   onSubmit={this.onSubmitKey.bind(this)} />
                 : filter === 'odbo id'
