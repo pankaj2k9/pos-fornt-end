@@ -93,7 +93,7 @@ const List = (props) => {
 const Details = (props) => {
   const {details, status, processing, type, inputPh, onClickOption} = props
   return (
-    <div className='content'>
+    <div style={{margin: 10}}>
       <Level
         left={
           <h1 className='title is-marginless'>
@@ -259,7 +259,7 @@ class SearchModal extends Component {
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
       details.trans.type = 'refund'
-      dispatch(refund(orderSearchKey, refundRemarks, storeId, details))
+      dispatch(refund(details.info.orderId, refundRemarks, storeId, details))
     } else if (type === 'reprintModal') {
       details.trans.type = 'reprint'
       console.log('details: ', details)
@@ -276,6 +276,7 @@ class SearchModal extends Component {
       displayData,
       active,
       details,
+      error,
       items,
       search,
       odboIdFrom,
@@ -357,8 +358,16 @@ class SearchModal extends Component {
           </header>
           <section className='modal-card-body' style={{padding: 15}}>
             {displayData === 'details'
-              ? <Details type={type} details={details} status={modalStatus}
+              ? <div>
+                <Details type={type} details={details} status={modalStatus}
                 processing={processing} onClickOption={this.onClickOption.bind(this)} />
+                {error
+                  ? <p className='subtitle has-text-centered' style={{color: 'red'}}>
+                    {error}
+                  </p>
+                  : null
+                }
+                </div>
               : <List id={id} items={items} dispatch={dispatch} listButton={listButton} isFetching={isFetching} />
             }
           </section>
@@ -412,6 +421,7 @@ SearchModal.PropTypes = {
   listButton: PropTypes.object,
   ordersSearchKey: PropTypes.string,
   modalStatus: PropTypes.object,
+  error: PropTypes.string,
   processing: PropTypes.bool,
   storeDetails: PropTypes.object,
   inputPh: PropTypes.string,

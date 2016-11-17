@@ -585,7 +585,7 @@ class SettingsTab extends Component {
   }
 
   renderOrderSearchModal () {
-    const {activeModalId, orderSearchKey, intl,
+    const {activeModalId, orderSearchKey, intl, appError,
            orderDetails, refundSuccess, locale, storeId,
            isProcessing, storeDetails, reprintSuccess} = this.props
     const modalId = activeModalId === 'refundModal'
@@ -667,6 +667,7 @@ class SettingsTab extends Component {
         items: processedItems,
         trans: {
           type: undefined,
+          refundId: undefined,
           payments: processedPayments,
           activeCustomer: users,
           computations: {
@@ -702,6 +703,7 @@ class SettingsTab extends Component {
         storeDetails={storeDetails}
         title='Enter Order ID'
         active={activeModalId}
+        error={appError}
         processing={isProcessing}
         displayData='details'
         details={!orderDetails ? undefined : receipt}
@@ -754,7 +756,8 @@ function mapStateToProps (state) {
     customers: state.data.customers.customersArray,
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,
-    error: state.settings.error,
+    appError: state.application.error,
+    settingsError: state.settings.error,
     showControl: state.settings.customer.showControl,
     ucSuccess: state.settings.customer.updateSuccess,
     ucIsProcessing: state.settings.customer.isProcessing,

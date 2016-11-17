@@ -198,7 +198,8 @@ export const buildComputation = (trans) => {
       orderNote,
       currency,
       points,
-      type
+      type,
+      refundId
     } = trans
 
     let customerLbl = trans.customer ? 'ODBO USER' : 'CUST. NAME'
@@ -296,13 +297,13 @@ export const buildComputation = (trans) => {
     }
 
     if (type === 'reprint') {
-      console.log('type', type)
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}">REPRINTED RECEIPT: </div>`
       comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
     } else if (type === 'refund') {
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>`
       comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(computations.paymentTotal)}</div>`
     }

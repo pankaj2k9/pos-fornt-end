@@ -6,7 +6,8 @@ import customers from '../services/customers'
 import {
   setActiveModal,
   addCashdrawerOpenCount,
-  updateCashDrawer
+  updateCashDrawer,
+  setError
 } from './application'
 
 import { fetchCustomers } from './customers'
@@ -102,10 +103,13 @@ export function storeOrderFetch (params) {
           }
         } else {
           dispatch(storeOrderFetchFailure())
+          dispatch(setError('There are no results'))
         }
+        dispatch(setError(null))
       })
       .catch(error => {
         dispatch(storeOrderFetchFailure(error))
+        dispatch(setError(error.message === 'Failed to fetch' ? 'Connection Problem, Try again' : error.message))
       })
   }
 }

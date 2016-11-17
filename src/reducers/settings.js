@@ -191,7 +191,9 @@ function settings (state = {
     case REFUND_SUCCESS:
       return Object.assign({}, state, {
         refundSuccess: true,
-        isProcessing: false
+        isProcessing: false,
+        orderFromGet: null,
+        orderSearchKey: null
       })
     case REFUND_FAILURE:
       return Object.assign({}, state, {
