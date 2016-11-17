@@ -255,14 +255,13 @@ class SearchModal extends Component {
 
   onClickOption (event) {
     if (event) { event.preventDefault() }
-    const {dispatch, orderSearchKey, type, details, closeButton, storeId} = this.props
+    const {dispatch, type, details, closeButton, storeId} = this.props
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
       details.trans.type = 'refund'
       dispatch(refund(details.info.orderId, refundRemarks, storeId, details))
     } else if (type === 'reprintModal') {
       details.trans.type = 'reprint'
-      console.log('details: ', details)
       dispatch(printPreviewTotalReceipt(details))
       closeButton.event(dispatch)
     }
@@ -360,14 +359,14 @@ class SearchModal extends Component {
             {displayData === 'details'
               ? <div>
                 <Details type={type} details={details} status={modalStatus}
-                processing={processing} onClickOption={this.onClickOption.bind(this)} />
+                  processing={processing} onClickOption={this.onClickOption.bind(this)} />
                 {error
                   ? <p className='subtitle has-text-centered' style={{color: 'red'}}>
                     {error}
                   </p>
                   : null
                 }
-                </div>
+              </div>
               : <List id={id} items={items} dispatch={dispatch} listButton={listButton} isFetching={isFetching} />
             }
           </section>
