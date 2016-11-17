@@ -44,7 +44,8 @@ import {
   EXPORT_SALES_CH_DATE,
   EXPORT_SALES_FETCH_REQUEST,
   EXPORT_SALES_FETCH_SUCCESS,
-  EXPORT_SALES_FETCH_FAILURE
+  EXPORT_SALES_FETCH_FAILURE,
+  EXPORT_SALES_SET_ERROR_MSG
 } from '../actions/reports'
 
 function exportSales (state, action) {
@@ -78,6 +79,10 @@ function exportSales (state, action) {
       return Object.assign({}, state, {
         isProcessing: false,
         error: action.error
+      })
+    case EXPORT_SALES_SET_ERROR_MSG:
+      return Object.assign({}, state, {
+        errorId: action.errorId
       })
     default:
       return state
@@ -322,6 +327,7 @@ function report (state = {
   exportSales: {
     isProcessing: false,
     error: undefined,
+    errorId: '',
     salesDate: new Date(),
     data: {
       tSalesAftTax: null,
@@ -415,6 +421,7 @@ function report (state = {
     case EXPORT_SALES_FETCH_REQUEST:
     case EXPORT_SALES_FETCH_SUCCESS:
     case EXPORT_SALES_FETCH_FAILURE:
+    case EXPORT_SALES_SET_ERROR_MSG:
       return Object.assign({}, state, {
         exportSales: exportSales(state.exportSales, action)
       })

@@ -155,6 +155,7 @@ const zh = {
   'app.error.cashNotEnough': '现金必须准确或大于金额',
   'app.error.noCardAssoc': '无卡选择',
   'app.error.noTransId': '检查事务ID',
+  'app.error.noTenantNum': '商店没有租户号码。 如果存在租户号码，请与开发人员联系。如果没有，请先联系商场。',
   'app.ph.enterRefundRemarks': '什么是退款的原因',
 
   'app.modal.order': '订购',

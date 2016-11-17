@@ -322,6 +322,11 @@ export function exportSalesChDate (date) {
   return { type: EXPORT_SALES_CH_DATE, date }
 }
 
+export const EXPORT_SALES_SET_ERROR_MSG = 'EXPORT_SALES_SET_ERROR_MSG'
+export function exportSalesSetErrorMsg (errorId) {
+  return { type: EXPORT_SALES_SET_ERROR_MSG, errorId }
+}
+
 export const EXPORT_SALES_FETCH_REQUEST = 'EXPORT_SALES_FETCH_REQUEST'
 export const EXPORT_SALES_FETCH_SUCCESS = 'EXPORT_SALES_FETCH_SUCCESS'
 export const EXPORT_SALES_FETCH_FAILURE = 'EXPORT_SALES_FETCH_FAILURE'

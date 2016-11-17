@@ -6,7 +6,11 @@ import { DatePicker } from 'react-input-enhancements'
 import FileSaver from 'file-saver'
 
 import DataList from '../components/DataList'
-import { exportSalesChDate, exportSalesFetch } from '../actions/reports'
+import {
+  exportSalesChDate,
+  exportSalesFetch,
+  exportSalesSetErrorMsg
+} from '../actions/reports'
 
 class ExportSales extends React.Component {
   constructor (props) {
@@ -27,12 +31,17 @@ class ExportSales extends React.Component {
   }
 
   handleClickExport () {
-    const { salesData, date } = this.props
-    const outputText = this.buildOutputText(salesData, date)
-    const blob = new global.Blob([outputText], {type: 'text/plain;charset=utf-8'})
-    const filename = 'XXXXXXXX' + moment(date).format('YYYYMMDD')
+    const { dispatch, salesData, date, tenantNumber } = this.props
 
-    FileSaver.saveAs(blob, filename)
+    if (!tenantNumber) {
+      dispatch(exportSalesSetErrorMsg('app.error.noTenantNum'))
+    } else {
+      const outputText = this.buildOutputText(salesData, date)
+      const blob = new global.Blob([outputText], {type: 'text/plain;charset=utf-8'})
+      const filename = tenantNumber + moment(date).format('YYYYMMDD')
+
+      FileSaver.saveAs(blob, filename)
+    }
   }
 
   handleChangeDate (date) {
@@ -52,64 +61,73 @@ class ExportSales extends React.Component {
   }
 
   render () {
-    const { isProcessing, salesData, date } = this.props
+    const { isProcessing, salesData, date, tenantNumber } = this.props
     const outputText = this.buildOutputText(salesData, date)
     const data = Object.assign({}, salesData, { salesDate: date, outputText })
+    const storeHasNoTenantNum = !!tenantNumber
 
     return (
       <div className='tile is-ancestor'>
         <div className='tile is-vertical'>
-          <div className='tile is-parent is-vertical'>
-
-            <div id='trans-report-date' className='tile is-child is-primary is-6'>
-              <label className='label'>
-                <FormattedMessage id='app.page.reports.salesDate' />
-              </label>
-              <DatePicker
-                value={moment(date).format('ddd DD/MM/YYYY')}
-                pattern='ddd DD/MM/YYYY'
-                onChange={this.handleChangeDate.bind(this)}
-                onValuePreUpdate={v => parseInt(v, 10) > 1e8
-                  ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
-                }>
-                {(inputProps, { registerInput }) =>
-                  <p className='control'>
-                    <input {...inputProps} className='input' type='text' />
-                  </p>
-                }
-              </DatePicker>
-            </div>
-
-            <div className='tile is-child'>
-              <div className='control is-grouped'>
-                <p className='control'>
-                  <button
-                    className={`button is-primary${isProcessing ? ' is-loading' : ''}`}
-                    onClick={this.handleClickGenerate}>
-                    <FormattedMessage id='app.button.generate' />
-                  </button>
-                </p>
-
-                <p className='control'>
-                  <button
-                    className={`button is-success${isProcessing ? ' is-disabled' : ''}`}
-                    onClick={this.handleClickExport}>
-                    <FormattedMessage id='app.button.exportToText' />
-                  </button>
-                </p>
+          {storeHasNoTenantNum
+            ? <div className='tile is-parent is-vertical'>
+              <div className='tile is-child'>
+                <span className='help is-danger'>
+                  <FormattedMessage id='app.error.noTenantNum' />
+                </span>
               </div>
             </div>
+            : <div className='tile is-parent is-vertical'>
+              <div id='trans-report-date' className='tile is-child is-primary is-6'>
+                <label className='label'>
+                  <FormattedMessage id='app.page.reports.salesDate' />
+                </label>
 
-            <div className='tile is-child'>
-              <DataList
-                data={data}
-                listName={'export-sales'}
-                keyClass={' '}
-                valClass={' '}
-              />
+                <DatePicker
+                  value={moment(date).format('ddd DD/MM/YYYY')}
+                  pattern='ddd DD/MM/YYYY'
+                  onChange={this.handleChangeDate.bind(this)}
+                  onValuePreUpdate={v => parseInt(v, 10) > 1e8
+                    ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
+                  }>
+                  {(inputProps, { registerInput }) =>
+                    <p className='control'>
+                      <input {...inputProps} className='input' type='text' />
+                    </p>
+                  }
+                </DatePicker>
+              </div>
+
+              <div className='tile is-child'>
+                <div className='control is-grouped'>
+                  <p className='control'>
+                    <button
+                      className={`button is-primary${isProcessing ? ' is-loading' : ''}`}
+                      onClick={this.handleClickGenerate}>
+                      <FormattedMessage id='app.button.generate' />
+                    </button>
+                  </p>
+
+                  <p className='control'>
+                    <button
+                      className={`button is-success${isProcessing ? ' is-disabled' : ''}`}
+                      onClick={this.handleClickExport}>
+                      <FormattedMessage id='app.button.exportToText' />
+                    </button>
+                  </p>
+                </div>
+              </div>
+
+              <div className='tile is-child'>
+                <DataList
+                  data={data}
+                  listName={'export-sales'}
+                  keyClass={' '}
+                  valClass={' '}
+                />
+              </div>
             </div>
-
-          </div>
+          }
         </div>
       </div>
     )
@@ -117,12 +135,18 @@ class ExportSales extends React.Component {
 }
 
 const mapStateToProps = (state) => {
+  const TENANT_NUMBER_DEFAULT = 'XXXXXXX'
   const { exportSales: exp } = state.reports
-  console.log(exp)
+  const stores = state.application.storeIds
+  const storeId = state.application.storeId
+  const store = stores && stores.find((st) => st.source === storeId)
+  const tenantNumber = store && store.tenantNumber || TENANT_NUMBER_DEFAULT
 
   return {
-    storeId: state.application.storeId,
+    storeId,
+    tenantNumber,
     isProcessing: exp.isProcessing,
+    errorId: exp.errorId,
     date: exp.salesDate,
     salesData: exp.data
   }
