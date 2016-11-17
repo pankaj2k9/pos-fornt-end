@@ -424,6 +424,7 @@ class PanelCheckout extends Component {
       orderNote,
       orderSuccess,
       payments,
+      paymentAmount,
       paymentMode,
       productsAreFetching,
       reprinting,
@@ -672,6 +673,7 @@ class PanelCheckout extends Component {
             orderSuccess={orderSuccess}
             orderTotal={this.orderTotal()}
             payments={payments}
+            paymentAmount={Number(paymentAmount)}
             paymentMode={paymentMode}
             paymentBalance={paymentBalance}
             paymentTotal={this.sumOfPayments()}
@@ -882,6 +884,7 @@ function mapStateToProps (state) {
     bonusPoints: state.panelCheckout.bonusPoints,
     pincode: state.panelCheckout.pincode,
     payments: state.panelCheckout.payments,
+    paymentAmount: state.panelCheckout.paymentAmount,
     card: state.panelCheckout.card,
     cashTendered: state.panelCheckout.cashTendered,
     transNumber: state.panelCheckout.transNumber,

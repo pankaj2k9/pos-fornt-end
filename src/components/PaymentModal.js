@@ -13,7 +13,8 @@ import {
   setCashTendered,
   setTransNumber,
   setPinCode,
-  setCardProvider
+  setCardProvider,
+  setPaymentAmount
 } from '../actions/panelCheckout'
 
 import {
@@ -29,6 +30,11 @@ class PaymentModal extends Component {
     if (paymentMode !== 'voucher') {
       document.getElementById('paymentValue').focus()
     }
+  }
+
+  _setPaymentAmount (amount) {
+    const { dispatch } = this.props
+    dispatch(setPaymentAmount(amount))
   }
 
   _closeModal () {
@@ -116,7 +122,7 @@ class PaymentModal extends Component {
   }
 
   render () {
-    const {intl, id, card, currency, paymentMode, error} = this.props
+    const {intl, id, card, currency, paymentAmount, paymentBalance, paymentMode, error} = this.props
     const active = id === 'paymentModal' ? 'is-active ' : ''
     var inputCash = 6
     var inputCredit = 20
@@ -136,11 +142,11 @@ class PaymentModal extends Component {
           </header>
           <section className='modal-card-body'>
             <div className='content has-text-centered'>
-              {!error
-                ? null
-                : <p className='subtitle'>
-                  <FormattedMessage id={error} />
+              {paymentAmount > paymentBalance
+                ? <p className='subtitle' style={{color: 'red'}}>
+                  <FormattedMessage id={error || 'app.error.excessPayment'} />
                 </p>
+                : null
               }
               <div className='control is-horizontal'>
                 <div className='control-label' style={{maxWidth: 130}}>
@@ -150,6 +156,7 @@ class PaymentModal extends Component {
                 </div>
                 <div className='control is-expanded'>
                   <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
+                    onChange={e => this._setPaymentAmount(e.target.value)}
                     placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
                 </div>
               </div>
@@ -264,6 +271,7 @@ class PaymentModal extends Component {
 PaymentModal.propTypes = {
   id: PropTypes.string,
   paymentMode: PropTypes.string,
+  paymentAmount: PropTypes.number,
   card: PropTypes.object,
   currency: PropTypes.string,
   error: PropTypes.string,

@@ -6,6 +6,7 @@ import {
   REMOVE_PAYMENT_TYPE,
   SET_TRANS_NUMBER,
   SET_CARD_TYPE,
+  SET_PAYMENT_AMOUNT,
   SET_CARD_PROVIDER,
   SET_PIN_CODE,
   SET_ORDER_NOTE,
@@ -23,6 +24,7 @@ import {
 
 function panelCheckout (state = {
   paymentMode: null,
+  paymentAmount: null,
   cashTendered: 0,
   payments: [
     { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
@@ -57,6 +59,10 @@ function panelCheckout (state = {
       return Object.assign({}, state, {
         customDiscount: action.discountValue,
         shouldUpdate: false
+      })
+    case SET_PAYMENT_AMOUNT:
+      return Object.assign({}, state, {
+        paymentAmount: action.amount
       })
     case SET_CASH_TENDERED:
       const cash = (action.cash === '') ? 0 : action.cash
