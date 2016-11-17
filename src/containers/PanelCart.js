@@ -6,7 +6,6 @@ import { FormattedMessage } from 'react-intl'
 import Panel from '../components/Panel'
 // import Level from '../components/Level'
 import SearchModal from './SearchModal'
-import Truncate from '../components/Truncate'
 import FunctionButtons from '../components/FunctionButtons'
 
 import {
@@ -454,7 +453,7 @@ class PanelCart extends Component {
           <div className='card' style={{height: 140}}>
             <div className='section' style={{padding: 20, backgroundColor: 'transparent'}}>
               <div className='title is-5'>
-                <Truncate text={productName} maxLength={25} />
+                {productName}
               </div>
 
               {product.stock.length === 0 || Object.keys(productStock).length === 0
