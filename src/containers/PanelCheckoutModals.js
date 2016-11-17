@@ -73,7 +73,7 @@ class PanelCheckoutModals extends Component {
   }
 
   renderPaymentModal () {
-    const {activeModalId, card, cashTendered, currency, error, orderTotal, paymentMode, paymentTotal, payments, transNumber} = this.props
+    const {activeModalId, card, cashTendered, currency, error, orderTotal, paymentBalance, paymentMode, paymentTotal, payments, transNumber} = this.props
     return (
       <PaymentModal
         id={activeModalId}
@@ -82,6 +82,7 @@ class PanelCheckoutModals extends Component {
         error={error}
         transNumber={transNumber}
         orderTotal={orderTotal}
+        paymentBalance={paymentBalance}
         paymentTotal={paymentTotal}
         paymentMode={paymentMode}
         currency={currency}

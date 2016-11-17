@@ -233,6 +233,7 @@ function settings (state = {
     case VERIFY_STORE_PIN_FAILURE:
       return Object.assign({}, state, {
         errorMessage: action.error,
+        orderSearchKey: null,
         isProcessing: false
       })
     case SETTINGS_ERROR:

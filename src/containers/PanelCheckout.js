@@ -450,15 +450,14 @@ class PanelCheckout extends Component {
     let creditSum = this.creditsAndNets() ? this.creditsAndNets().creditTotal : 0
     let netsSum = this.creditsAndNets() ? this.creditsAndNets().netsTotal : 0
     var paymentBalance = this.orderTotal() - this.sumOfPayments() >= 0
-      ? formatCurrency(this.orderTotal() - this.sumOfPayments())
-      : formatCurrency(0)
+      ? this.orderTotal() - this.sumOfPayments()
+      : 0
     var paymentList = {
       cash: formatCurrency(payments[0].cash),
       credit: formatCurrency(creditSum),
       nets: formatCurrency(netsSum),
       voucher: formatCurrency(voucherSum)
     }
-
     return (
       <div>
         <Panel>
@@ -530,7 +529,7 @@ class PanelCheckout extends Component {
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
             <Level left={currency === 'sgd' ? <h3 className='is-marginless'>Payments</h3> : null}
-              right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {paymentBalance}</h5> : null} />
+              right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {formatCurrency(paymentBalance)}</h5> : null} />
             <Level left={currency === 'sgd'
               ? <div>
                 <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
@@ -674,6 +673,7 @@ class PanelCheckout extends Component {
             orderTotal={this.orderTotal()}
             payments={payments}
             paymentMode={paymentMode}
+            paymentBalance={paymentBalance}
             paymentTotal={this.sumOfPayments()}
             transNumber={transNumber}
             reprinting={reprinting}

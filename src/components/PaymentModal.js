@@ -39,7 +39,7 @@ class PaymentModal extends Component {
 
   _clickConfirm (event) {
     if (event) { event.preventDefault() }
-    const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal } = this.props
+    const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal, paymentBalance } = this.props
     var orderMinusPayment = orderTotal - paymentTotal <= 0
       ? null
       : orderTotal - paymentTotal
@@ -61,32 +61,42 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'voucher') {
       payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
     }
-    if (paymentMode === 'credit' || paymentMode === 'nets') {
-      let okayToAddCredit = card.provider && transNumber
-      let okayToAddNets = transNumber !== '' || transNumber
-      if (paymentMode === 'credit' && okayToAddCredit) {
-        dispatch(addPaymentType(payment))
-        dispatch(closeActiveModal(focusProductSearch))
-        dispatch(panelCartShouldUpdate(false))
-      } else if (paymentMode === 'nets' && okayToAddNets) {
-        dispatch(addPaymentType(payment))
-        dispatch(closeActiveModal(focusProductSearch))
-        dispatch(panelCartShouldUpdate(false))
-      } else {
-        if (paymentMode === 'credit' && !card.provider) {
-          dispatch(setError('app.error.noCardAssoc'))
-        } else if (!okayToAddNets) {
-          dispatch(setError('app.error.noTransId'))
-        }
-      }
+    if (paymentMode === 'voucher') {
+      dispatch(addPaymentType(payment))
+      dispatch(closeActiveModal(focusProductSearch))
+      dispatch(panelCartShouldUpdate(false))
     } else {
-      let okayToAddCash = cashTendered - paymentValue >= 0
-      if (okayToAddCash) {
-        dispatch(addPaymentType(payment))
-        dispatch(closeActiveModal(focusProductSearch))
-        dispatch(panelCartShouldUpdate(false))
+      if (paymentValue > paymentBalance) {
+        dispatch(setError('app.error.excessPayment'))
       } else {
-        dispatch(setError('app.error.cashNotEnough'))
+        if (paymentMode === 'credit' || paymentMode === 'nets') {
+          let okayToAddCredit = card.provider && transNumber
+          let okayToAddNets = transNumber !== '' || transNumber
+          if (paymentMode === 'credit' && okayToAddCredit) {
+            dispatch(addPaymentType(payment))
+            dispatch(closeActiveModal(focusProductSearch))
+            dispatch(panelCartShouldUpdate(false))
+          } else if (paymentMode === 'nets' && okayToAddNets) {
+            dispatch(addPaymentType(payment))
+            dispatch(closeActiveModal(focusProductSearch))
+            dispatch(panelCartShouldUpdate(false))
+          } else {
+            if (paymentMode === 'credit' && !card.provider) {
+              dispatch(setError('app.error.noCardAssoc'))
+            } else if (!okayToAddNets) {
+              dispatch(setError('app.error.noTransId'))
+            }
+          }
+        } else if (paymentMode === 'cash') {
+          let okayToAddCash = cashTendered - paymentValue >= 0
+          if (okayToAddCash) {
+            dispatch(addPaymentType(payment))
+            dispatch(closeActiveModal(focusProductSearch))
+            dispatch(panelCartShouldUpdate(false))
+          } else {
+            dispatch(setError('app.error.cashNotEnough'))
+          }
+        }
       }
     }
   }
@@ -257,6 +267,7 @@ PaymentModal.propTypes = {
   card: PropTypes.object,
   currency: PropTypes.string,
   error: PropTypes.string,
+  paymentBalance: PropTypes.number,
   paymentTotal: PropTypes.number,
   orderTotal: PropTypes.number,
   transNumber: PropTypes.string.isRequired,

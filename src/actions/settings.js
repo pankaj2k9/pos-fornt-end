@@ -98,14 +98,17 @@ export function storeOrderFetch (params) {
         if (response) {
           if (!response.data[0]) {
             dispatch(storeOrderFetchFailure())
+          } else if (response.data.length > 1) {
+            dispatch(storeOrderFetchFailure())
+            dispatch(setError('There are no matched results'))
           } else {
             dispatch(storeOrderFetchSuccess(response.data[0]))
+            dispatch(setError(null))
           }
         } else {
           dispatch(storeOrderFetchFailure())
-          dispatch(setError('There are no results'))
+          dispatch(setError('There are no matched results'))
         }
-        dispatch(setError(null))
       })
       .catch(error => {
         dispatch(storeOrderFetchFailure(error))
