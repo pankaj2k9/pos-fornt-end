@@ -77,6 +77,7 @@ const en = {
   'app.general.xzReading': 'X/Z Reading',
   'app.general.viewBills': 'View Bills',
   'app.general.staffSales': 'Staff Sales',
+  'app.general.exportSales': 'Export',
   'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
 
@@ -122,6 +123,8 @@ const en = {
   'app.button.logoutCashier': 'Cashier Logout',
   'app.button.changeCashier': 'Change Cashier',
   'app.button.clickHere': 'Click Here',
+  'app.button.exportToText': 'Export to text file',
+  'app.button.generate': 'Generate',
 
   'app.ph.paymentAmount': 'Input Exact Amount/Custom Amount',
   'app.ph.voucherAmount': 'Input Voucher Amount',
@@ -154,6 +157,7 @@ const en = {
   'app.error.cashNotEnough': 'Cash must be exact or greater than the amount',
   'app.error.noCardAssoc': 'No Card Chosen',
   'app.error.noTransId': 'Check Transaction ID',
+  'app.error.noTenantNum': 'Store has no tenant number. If tenant number exists, contact developer. If it does not, contact the mall first.',
 
   'app.modal.order': 'Order',
   'app.modal.orderId': 'Order ID',
@@ -208,6 +212,12 @@ const en = {
   'app.page.reports.date': 'Date',
   'app.page.reports.currency': 'Currency',
   'app.page.reports.noData': 'There are no recorded data for the selected date.',
+  'app.page.reports.tSalesAftTax': 'Total Sales After Tax',
+  'app.page.reports.tSalesBefTax': 'Total Sales Before Tax',
+  'app.page.reports.tTaxCollected': 'Tax Collected',
+  'app.page.reports.transCount': 'Transaction Count',
+  'app.page.reports.salesDate': 'Sales Date',
+  'app.page.reports.outputText': 'Output Text',
 
   'app.page.settings.tabMain': 'Main',
   'app.page.settings.tabOrders': 'Orders',

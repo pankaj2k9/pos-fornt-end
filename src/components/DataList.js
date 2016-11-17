@@ -1,9 +1,10 @@
 import React from 'react'
 import { FormattedDate, FormattedTime, FormattedMessage } from 'react-intl'
+import { formatCurrency } from '../utils/string'
 import DataListItem from './DataListItem'
 import POSTransList from './POSTransList'
 
-const DataList = ({ data, listName }) => {
+const DataList = ({ data, listName, keyClass, valClass, keyStyle, valStyle }) => {
   return (
     <div className='tile is-ancestor is-vertical'>
       {Object.keys(data).map(key => {
@@ -81,9 +82,46 @@ const DataList = ({ data, listName }) => {
             keyName = <FormattedMessage id='app.modal.shippingDetails' />
             value = keyValue ? 'Can\'t show' : 'N/A'
             break
+          case 'tSalesAftTax':
+            keyName = <FormattedMessage id='app.page.reports.tSalesAftTax' />
+            value = formatCurrency(keyValue)
+            break
+          case 'tSalesBefTax':
+            keyName = <FormattedMessage id='app.page.reports.tSalesBefTax' />
+            value = formatCurrency(keyValue)
+            break
+          case 'tTaxCollected':
+            keyName = <FormattedMessage id='app.page.reports.tTaxCollected' />
+            value = formatCurrency(keyValue)
+            break
+          case 'transCount':
+            keyName = <FormattedMessage id='app.page.reports.transCount' />
+            value = keyValue
+            break
+          case 'salesDate':
+            keyName = <FormattedMessage id='app.page.reports.salesDate' />
+            value = (
+              <span>
+                <FormattedDate value={keyValue} />
+              </span>
+            )
+            break
+          case 'outputText':
+            keyName = <FormattedMessage id='app.page.reports.outputText' />
+            value = keyValue
+            valStyle = { fontFamily: 'Courier New' }
+            break
         }
 
-        return <DataListItem key={fieldKey} dataName={keyName} dataValue={value} />
+        return <DataListItem
+          key={fieldKey}
+          dataName={keyName}
+          dataValue={value}
+          keyClass={keyClass}
+          valClass={valClass}
+          keyStyle={keyStyle}
+          valStyle={valStyle}
+        />
       })}
     </div>
   )

@@ -39,8 +39,55 @@ import {
   STAFF_SALES_STORE_ORDERS,
   STAFF_SALES_FETCH_REQUEST,
   STAFF_SALES_FETCH_SUCCESS,
-  STAFF_SALES_FETCH_FAILURE
+  STAFF_SALES_FETCH_FAILURE,
+
+  EXPORT_SALES_CH_DATE,
+  EXPORT_SALES_FETCH_REQUEST,
+  EXPORT_SALES_FETCH_SUCCESS,
+  EXPORT_SALES_FETCH_FAILURE,
+  EXPORT_SALES_SET_ERROR_MSG
 } from '../actions/reports'
+
+function exportSales (state, action) {
+  switch (action.type) {
+    case EXPORT_SALES_CH_DATE:
+      return Object.assign({}, state, {
+        salesDate: action.date
+      })
+    case EXPORT_SALES_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        isProcessing: true
+      })
+    case EXPORT_SALES_FETCH_SUCCESS:
+      const { orders } = action
+
+      const aftTax = orders.reduce((prev, order) => prev + Number(order.total), 0)
+      const befTax = aftTax
+      const taxCol = aftTax - befTax
+      const tCount = orders.length
+
+      return Object.assign({}, state, {
+        isProcessing: false,
+        data: Object.assign({}, state.data, {
+          tSalesAftTax: aftTax,
+          tSalesBefTax: befTax,
+          tTaxCollected: taxCol,
+          transCount: tCount
+        })
+      })
+    case EXPORT_SALES_FETCH_FAILURE:
+      return Object.assign({}, state, {
+        isProcessing: false,
+        error: action.error
+      })
+    case EXPORT_SALES_SET_ERROR_MSG:
+      return Object.assign({}, state, {
+        errorId: action.errorId
+      })
+    default:
+      return state
+  }
+}
 
 function staffSales (state, action) {
   switch (action.type) {
@@ -276,6 +323,18 @@ function report (state = {
     orders: [],
     from: moment().startOf('day').toDate(), // set `from` to start of day
     to: new Date()
+  },
+  exportSales: {
+    isProcessing: false,
+    error: undefined,
+    errorId: '',
+    salesDate: new Date(),
+    data: {
+      tSalesAftTax: null,
+      tSalesBefTax: null,
+      tTaxCollected: null,
+      transCount: null
+    }
   }
 }, action) {
   switch (action.type) {
@@ -357,6 +416,14 @@ function report (state = {
     case STAFF_SALES_FETCH_FAILURE:
       return Object.assign({}, state, {
         staffSales: staffSales(state.staffSales, action)
+      })
+    case EXPORT_SALES_CH_DATE:
+    case EXPORT_SALES_FETCH_REQUEST:
+    case EXPORT_SALES_FETCH_SUCCESS:
+    case EXPORT_SALES_FETCH_FAILURE:
+    case EXPORT_SALES_SET_ERROR_MSG:
+      return Object.assign({}, state, {
+        exportSales: exportSales(state.exportSales, action)
       })
     default:
       return state

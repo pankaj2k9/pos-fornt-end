@@ -77,6 +77,7 @@ const zh = {
   'app.general.xzReading': 'X/Z阅读',
   'app.general.viewBills': '查看帐单',
   'app.general.staffSales': '雇员销售',
+  'app.general.exportSales': '出口',
   'app.general.outletStock': '商店股票',
   'app.general.updateCD': '更新钱箱？',
 
@@ -122,6 +123,8 @@ const zh = {
   'app.button.logoutCashier': '登录收银员',
   'app.button.changeCashier': '收银员变化',
   'app.button.clickHere': '点击这里',
+  'app.button.exportToText': '导出到文本文件',
+  'app.button.generate': '生成',
 
   'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
@@ -152,6 +155,7 @@ const zh = {
   'app.error.cashNotEnough': '现金必须准确或大于金额',
   'app.error.noCardAssoc': '无卡选择',
   'app.error.noTransId': '检查事务ID',
+  'app.error.noTenantNum': '商店没有租户号码。 如果存在租户号码，请与开发人员联系。如果没有，请先联系商场。',
   'app.ph.enterRefundRemarks': '什么是退款的原因',
 
   'app.modal.order': '订购',
@@ -207,6 +211,12 @@ const zh = {
   'app.page.reports.date': '日期',
   'app.page.reports.currency': '货币',
   'app.page.reports.noData': '没有记录的数据上选定的日期。',
+  'app.page.reports.tSalesAftTax': '税总销售额后',
+  'app.page.reports.tSalesBefTax': '税总销售额前',
+  'app.page.reports.tTaxCollected': '纳税总额',
+  'app.page.reports.transCount': '交易数',
+  'app.page.reports.salesDate': '销售日期',
+  'app.page.reports.outputText': '文本输出',
 
   'app.page.settings.tabMain': '主要',
   'app.page.settings.tabOrders': '命令',

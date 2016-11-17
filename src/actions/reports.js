@@ -316,3 +316,98 @@ export function staffSalesFetch (staffId, dateFrom, dateTo) {
       })
   }
 }
+
+export const EXPORT_SALES_CH_DATE = 'EXPORT_SALES_CH_DATE'
+export function exportSalesChDate (date) {
+  return { type: EXPORT_SALES_CH_DATE, date }
+}
+
+export const EXPORT_SALES_SET_ERROR_MSG = 'EXPORT_SALES_SET_ERROR_MSG'
+export function exportSalesSetErrorMsg (errorId) {
+  return { type: EXPORT_SALES_SET_ERROR_MSG, errorId }
+}
+
+export const EXPORT_SALES_FETCH_REQUEST = 'EXPORT_SALES_FETCH_REQUEST'
+export const EXPORT_SALES_FETCH_SUCCESS = 'EXPORT_SALES_FETCH_SUCCESS'
+export const EXPORT_SALES_FETCH_FAILURE = 'EXPORT_SALES_FETCH_FAILURE'
+export function exportSalesFetchRequest () {
+  return { type: EXPORT_SALES_FETCH_REQUEST }
+}
+export function exportSalesFetchSuccess (orders) {
+  return { type: EXPORT_SALES_FETCH_SUCCESS, orders }
+}
+export function exportSalesFetchFailure (error) {
+  return { type: EXPORT_SALES_FETCH_FAILURE, error }
+}
+export function exportSalesFetch (date, storeId) {
+  return (dispatch) => {
+    const params = {
+      dateCreated: date,
+      storeId
+    }
+
+    const cbSuccess = (orders, response) => {
+      dispatch(exportSalesFetchSuccess(orders))
+    }
+
+    const cbFailure = (error) => {
+      dispatch(exportSalesFetchFailure(error))
+    }
+
+    dispatch(exportSalesFetchRequest())
+    return allOrdersFetch(params, cbSuccess, cbFailure)
+  }
+}
+
+const allOrdersFetch = (params, cbSuccess, cbFailure) => {
+  return ordersService.find(params)
+    .then(response => {
+      // Store first fetch
+      let allOrders = [...response.data]
+
+      const { total, data, limit } = response
+      const firstResponseCount = data.length
+      const goal = Number(total)
+
+      // If not all orders are fetched, run server queries until complete
+      if (goal > firstResponseCount) {
+        const firstLimit = limit
+        let ordersFetchArray = []
+        let newSkip = firstResponseCount
+
+        while (newSkip < goal) {
+          const nextParams = params
+
+          nextParams.limit = firstLimit
+          nextParams.skip = newSkip
+          newSkip += firstLimit
+
+          const ordersFetch = new Promise((resolve, reject) => {
+            return ordersService.find(nextParams)
+              .then((response) => { resolve(response) })
+              .catch(() => { reject('Failed fetching order') })
+          })
+          ordersFetchArray.push(ordersFetch)
+        }
+
+        // Run all order fetch
+        global.Promise.all(ordersFetchArray)
+          .then((response) => {
+            response.forEach((fetchResponse) => {
+              allOrders = [...allOrders, ...fetchResponse.data]
+            })
+
+            cbSuccess(allOrders, response)
+          })
+          .catch((error) => {
+            cbFailure(error)
+          })
+      } else {
+        // End if all orders are fetched
+        cbSuccess(allOrders, response)
+      }
+    })
+    .catch(error => {
+      cbFailure(error)
+    })
+}
