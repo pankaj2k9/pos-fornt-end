@@ -191,7 +191,9 @@ function settings (state = {
     case REFUND_SUCCESS:
       return Object.assign({}, state, {
         refundSuccess: true,
-        isProcessing: false
+        isProcessing: false,
+        orderFromGet: null,
+        orderSearchKey: null
       })
     case REFUND_FAILURE:
       return Object.assign({}, state, {
@@ -203,9 +205,13 @@ function settings (state = {
         orderSearchKey: action.orderKey
       })
     case STOREORDER_FETCH_REQUEST:
+      return Object.assign({}, state, {
+        isProcessing: true
+      })
     case STOREORDER_FETCH_SUCCESS:
       return Object.assign({}, state, {
-        orderFromGet: action.response
+        orderFromGet: action.response,
+        isProcessing: false
       })
     case STOREORDER_FETCH_FAILURE:
     case RESET_SETTINGS_STATE: {
@@ -231,6 +237,7 @@ function settings (state = {
     case VERIFY_STORE_PIN_FAILURE:
       return Object.assign({}, state, {
         errorMessage: action.error,
+        orderSearchKey: null,
         isProcessing: false
       })
     case SETTINGS_ERROR:

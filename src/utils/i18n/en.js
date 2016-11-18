@@ -157,6 +157,7 @@ const en = {
   'app.error.cashNotEnough': 'Cash must be exact or greater than the amount',
   'app.error.noCardAssoc': 'No Card Chosen',
   'app.error.noTransId': 'Check Transaction ID',
+  'app.error.excessPayment': 'Excess Custom Payment, should not be greater than order total',
   'app.error.noTenantNum': 'Store has no tenant number. If tenant number exists, contact developer. If it does not, contact the mall first.',
 
   'app.modal.order': 'Order',

@@ -13,7 +13,8 @@ import {
   setCashTendered,
   setTransNumber,
   setPinCode,
-  setCardProvider
+  setCardProvider,
+  setPaymentAmount
 } from '../actions/panelCheckout'
 
 import {
@@ -31,6 +32,11 @@ class PaymentModal extends Component {
     }
   }
 
+  _setPaymentAmount (amount) {
+    const { dispatch } = this.props
+    dispatch(setPaymentAmount(amount))
+  }
+
   _closeModal () {
     const { dispatch } = this.props
     dispatch(closeActiveModal(focusProductSearch))
@@ -39,7 +45,7 @@ class PaymentModal extends Component {
 
   _clickConfirm (event) {
     if (event) { event.preventDefault() }
-    const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal } = this.props
+    const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal, paymentBalance } = this.props
     var orderMinusPayment = orderTotal - paymentTotal <= 0
       ? null
       : orderTotal - paymentTotal
@@ -61,32 +67,42 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'voucher') {
       payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
     }
-    if (paymentMode === 'credit' || paymentMode === 'nets') {
-      let okayToAddCredit = card.provider && transNumber
-      let okayToAddNets = transNumber !== '' || transNumber
-      if (paymentMode === 'credit' && okayToAddCredit) {
-        dispatch(addPaymentType(payment))
-        dispatch(closeActiveModal(focusProductSearch))
-        dispatch(panelCartShouldUpdate(false))
-      } else if (paymentMode === 'nets' && okayToAddNets) {
-        dispatch(addPaymentType(payment))
-        dispatch(closeActiveModal(focusProductSearch))
-        dispatch(panelCartShouldUpdate(false))
-      } else {
-        if (paymentMode === 'credit' && !card.provider) {
-          dispatch(setError('app.error.noCardAssoc'))
-        } else if (!okayToAddNets) {
-          dispatch(setError('app.error.noTransId'))
-        }
-      }
+    if (paymentMode === 'voucher') {
+      dispatch(addPaymentType(payment))
+      dispatch(closeActiveModal(focusProductSearch))
+      dispatch(panelCartShouldUpdate(false))
     } else {
-      let okayToAddCash = cashTendered - paymentValue >= 0
-      if (okayToAddCash) {
-        dispatch(addPaymentType(payment))
-        dispatch(closeActiveModal(focusProductSearch))
-        dispatch(panelCartShouldUpdate(false))
+      if (paymentValue > paymentBalance) {
+        dispatch(setError('app.error.excessPayment'))
       } else {
-        dispatch(setError('app.error.cashNotEnough'))
+        if (paymentMode === 'credit' || paymentMode === 'nets') {
+          let okayToAddCredit = card.provider && transNumber
+          let okayToAddNets = transNumber !== '' || transNumber
+          if (paymentMode === 'credit' && okayToAddCredit) {
+            dispatch(addPaymentType(payment))
+            dispatch(closeActiveModal(focusProductSearch))
+            dispatch(panelCartShouldUpdate(false))
+          } else if (paymentMode === 'nets' && okayToAddNets) {
+            dispatch(addPaymentType(payment))
+            dispatch(closeActiveModal(focusProductSearch))
+            dispatch(panelCartShouldUpdate(false))
+          } else {
+            if (paymentMode === 'credit' && !card.provider) {
+              dispatch(setError('app.error.noCardAssoc'))
+            } else if (!okayToAddNets) {
+              dispatch(setError('app.error.noTransId'))
+            }
+          }
+        } else if (paymentMode === 'cash') {
+          let okayToAddCash = cashTendered - paymentValue >= 0
+          if (okayToAddCash) {
+            dispatch(addPaymentType(payment))
+            dispatch(closeActiveModal(focusProductSearch))
+            dispatch(panelCartShouldUpdate(false))
+          } else {
+            dispatch(setError('app.error.cashNotEnough'))
+          }
+        }
       }
     }
   }
@@ -106,7 +122,7 @@ class PaymentModal extends Component {
   }
 
   render () {
-    const {intl, id, card, currency, paymentMode, error} = this.props
+    const {intl, id, card, currency, paymentAmount, paymentBalance, paymentMode, error} = this.props
     const active = id === 'paymentModal' ? 'is-active ' : ''
     var inputCash = 6
     var inputCredit = 20
@@ -126,11 +142,11 @@ class PaymentModal extends Component {
           </header>
           <section className='modal-card-body'>
             <div className='content has-text-centered'>
-              {!error
-                ? null
-                : <p className='subtitle'>
-                  <FormattedMessage id={error} />
+              {paymentAmount > paymentBalance
+                ? <p className='subtitle' style={{color: 'red'}}>
+                  <FormattedMessage id={error || 'app.error.excessPayment'} />
                 </p>
+                : null
               }
               <div className='control is-horizontal'>
                 <div className='control-label' style={{maxWidth: 130}}>
@@ -140,6 +156,7 @@ class PaymentModal extends Component {
                 </div>
                 <div className='control is-expanded'>
                   <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
+                    onChange={e => this._setPaymentAmount(e.target.value)}
                     placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
                 </div>
               </div>
@@ -254,9 +271,11 @@ class PaymentModal extends Component {
 PaymentModal.propTypes = {
   id: PropTypes.string,
   paymentMode: PropTypes.string,
+  paymentAmount: PropTypes.number,
   card: PropTypes.object,
   currency: PropTypes.string,
   error: PropTypes.string,
+  paymentBalance: PropTypes.number,
   paymentTotal: PropTypes.number,
   orderTotal: PropTypes.number,
   transNumber: PropTypes.string.isRequired,

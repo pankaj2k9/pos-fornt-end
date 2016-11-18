@@ -7,6 +7,7 @@ export const SET_TRANS_NUMBER = 'SET_TRANS_NUMBER'
 export const SET_ORDER_NOTE = 'SET_ORDER_NOTE'
 export const SET_PIN_CODE = 'SET_PIN_CODE'
 export const SET_CARD_TYPE = 'SET_CARD_TYPE'
+export const SET_PAYMENT_AMOUNT = 'SET_PAYMENT_AMOUNT'
 export const SET_CARD_PROVIDER = 'SET_CARD_PROVIDER'
 export const REMOVE_NOTE = 'REMOVE_NOTE'
 export const PANEL_CHECKOUT_SHOULD_UPDATE = ' PANEL_CHECKOUT_SHOULD_UPDATE'
@@ -42,6 +43,13 @@ export function removeNote (message) {
   return {
     type: REMOVE_NOTE,
     message
+  }
+}
+
+export function setPaymentAmount (amount) {
+  return {
+    type: SET_PAYMENT_AMOUNT,
+    amount
   }
 }
 

@@ -32,7 +32,8 @@ import {
   closeActiveModal,
   setActiveModal,
   addCashdrawerOpenCount,
-  resetAppState
+  resetAppState,
+  setError
 } from './application'
 
 import {
@@ -71,6 +72,7 @@ export function printPreviewTotalReceipt (receipt, activeCustomer) {
       let print = false
       let shouldUpdate = false
       dispatch(printPreviewTotal(print, shouldUpdate))
+      dispatch(setError(null))
       dispatch(closeActiveModal())
     }, 2000)
   }
@@ -189,6 +191,7 @@ export function closeAndResetUtilitytModal (dispatch) {
   return () => {
     dispatch(closeActiveModal())
     dispatch(resetSettingsState())
+    dispatch(setError(null))
     document.getElementById('orderSearch').value = ''
   }
 }

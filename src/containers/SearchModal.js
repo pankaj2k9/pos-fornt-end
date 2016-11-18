@@ -93,7 +93,7 @@ const List = (props) => {
 const Details = (props) => {
   const {details, status, processing, type, inputPh, onClickOption} = props
   return (
-    <div className='content'>
+    <div style={{margin: 10}}>
       <Level
         left={
           <h1 className='title is-marginless'>
@@ -180,19 +180,13 @@ class SearchModal extends Component {
     dispatch(search.onChange(value))
   }
 
-  buttonConfirm (event) {
-    event.preventDefault()
-    const {dispatch, orderSearchKey} = this.props
-    dispatch(storeOrderFetch(orderSearchKey))
-  }
-
   buttonCancel () {
     const {dispatch} = this.props
     dispatch(storeOrdersSetSearchKey(''))
   }
 
   onSubmitKey (event) {
-    event.preventDefault()
+    if (event) { event.preventDefault() }
     const {dispatch, orderSearchKey, storeDetails} = this.props
     var params = {
       id: orderSearchKey,
@@ -255,14 +249,13 @@ class SearchModal extends Component {
 
   onClickOption (event) {
     if (event) { event.preventDefault() }
-    const {dispatch, orderSearchKey, type, details, closeButton, storeId} = this.props
+    const {dispatch, type, details, closeButton, storeId} = this.props
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
       details.trans.type = 'refund'
-      dispatch(refund(orderSearchKey, refundRemarks, storeId, details))
+      dispatch(refund(details.info.orderId, refundRemarks, storeId, details))
     } else if (type === 'reprintModal') {
       details.trans.type = 'reprint'
-      console.log('details: ', details)
       dispatch(printPreviewTotalReceipt(details))
       closeButton.event(dispatch)
     }
@@ -276,6 +269,7 @@ class SearchModal extends Component {
       displayData,
       active,
       details,
+      error,
       items,
       search,
       odboIdFrom,
@@ -313,7 +307,7 @@ class SearchModal extends Component {
                   onChange={this.orderSearchKeyInput.bind(this)}
                   confirmButton={<i className='fa fa-check' />}
                   cancelButton={<i className='fa fa-undo' />}
-                  confirmEvent={this.buttonConfirm.bind(this)}
+                  confirmEvent={this.onSubmitKey.bind(this)}
                   cancelEvent={this.buttonCancel.bind(this)}
                   onSubmit={this.onSubmitKey.bind(this)} />
                 : filter === 'odbo id'
@@ -357,8 +351,16 @@ class SearchModal extends Component {
           </header>
           <section className='modal-card-body' style={{padding: 15}}>
             {displayData === 'details'
-              ? <Details type={type} details={details} status={modalStatus}
-                processing={processing} onClickOption={this.onClickOption.bind(this)} />
+              ? <div>
+                <Details type={type} details={details} status={modalStatus}
+                  processing={processing} onClickOption={this.onClickOption.bind(this)} />
+                {error
+                  ? <p className='subtitle has-text-centered' style={{color: 'red'}}>
+                    {error}
+                  </p>
+                  : null
+                }
+              </div>
               : <List id={id} items={items} dispatch={dispatch} listButton={listButton} isFetching={isFetching} />
             }
           </section>
@@ -412,6 +414,7 @@ SearchModal.PropTypes = {
   listButton: PropTypes.object,
   ordersSearchKey: PropTypes.string,
   modalStatus: PropTypes.object,
+  error: PropTypes.string,
   processing: PropTypes.bool,
   storeDetails: PropTypes.object,
   inputPh: PropTypes.string,
