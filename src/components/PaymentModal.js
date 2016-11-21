@@ -14,7 +14,8 @@ import {
   setTransNumber,
   setPinCode,
   setCardProvider,
-  setPaymentAmount
+  setPaymentAmount,
+  removePaymentType
 } from '../actions/panelCheckout'
 
 import {
@@ -29,6 +30,8 @@ class PaymentModal extends Component {
     const {paymentMode} = this.props
     if (paymentMode !== 'voucher') {
       document.getElementById('paymentValue').focus()
+    } else {
+      document.getElementById('voucherAmount').focus()
     }
   }
 
@@ -46,6 +49,7 @@ class PaymentModal extends Component {
   _clickConfirm (event) {
     if (event) { event.preventDefault() }
     const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal, paymentBalance } = this.props
+    var editCashPayment = this.paymentInfo() && paymentMode === 'cash'
     var orderMinusPayment = orderTotal - paymentTotal <= 0
       ? null
       : orderTotal - paymentTotal
@@ -67,7 +71,11 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'voucher') {
       payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
     }
-    if (paymentMode === 'voucher') {
+    if (editCashPayment) {
+      dispatch(removePaymentType('cash'))
+      dispatch(addPaymentType(payment))
+      dispatch(panelCartShouldUpdate(false))
+    } else if (paymentMode === 'voucher') {
       dispatch(addPaymentType(payment))
       dispatch(closeActiveModal(focusProductSearch))
       dispatch(panelCartShouldUpdate(false))
@@ -121,8 +129,30 @@ class PaymentModal extends Component {
     dispatch(setCardProvider(provider))
   }
 
+  _focus2ndInput (event) {
+    event.preventDefault()
+    document.getElementById('inputValue').focus()
+  }
+
+  paymentInfo () {
+    const { payments, paymentMode } = this.props
+    var paymentInfo
+    payments.filter(function (payment) {
+      if (paymentMode === payment.type && payment.amount && payment.amount !== 0) {
+        if (payment.type === 'credit' || payment.type === 'nets') {
+          paymentInfo = []
+          paymentInfo.push(payment)
+        } else {
+          paymentInfo = {}
+          paymentInfo = payment
+        }
+      }
+    })
+    return paymentInfo
+  }
+
   render () {
-    const {intl, id, card, currency, paymentAmount, paymentBalance, paymentMode, error} = this.props
+    const {intl, id, card, currency, orderTotal, paymentAmount, paymentBalance, paymentMode, error} = this.props
     const active = id === 'paymentModal' ? 'is-active ' : ''
     var inputCash = 6
     var inputCredit = 20
@@ -130,6 +160,7 @@ class PaymentModal extends Component {
     // style for logo of card Association
     var unselected = {opacity: 0.2}
     var selected = {opacity: 1}
+    var editCashPayment = this.paymentInfo() && paymentMode === 'cash'
     return (
       <div id='paymentModal' className={`modal ${active}`}>
         <div className='modal-background' />
@@ -142,26 +173,34 @@ class PaymentModal extends Component {
           </header>
           <section className='modal-card-body'>
             <div className='content has-text-centered'>
-              {paymentAmount > paymentBalance
-                ? <p className='subtitle' style={{color: 'red'}}>
-                  <FormattedMessage id={error || 'app.error.excessPayment'} />
-                </p>
-                : null
+              {editCashPayment
+                ? paymentAmount > orderTotal
+                  ? <p className='subtitle' style={{color: 'red'}}>
+                    <FormattedMessage id={error || 'app.error.excessPayment'} />
+                  </p>
+                  : null
+                : paymentAmount > paymentBalance
+                  ? <p className='subtitle' style={{color: 'red'}}>
+                    <FormattedMessage id={error || 'app.error.excessPayment'} />
+                  </p>
+                  : null
               }
-              <div className='control is-horizontal'>
-                <div className='control-label' style={{maxWidth: 130}}>
-                  <label className='label'>
-                    {paymentMode === 'voucher' ? 'Voucher Amount' : 'Amount to Pay'}
-                  </label>
-                </div>
-                <div className='control is-expanded'>
-                  <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
-                    onChange={e => this._setPaymentAmount(e.target.value)}
-                    placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
-                </div>
-              </div>
-              <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
+              <form autoComplete={false} onSubmit={this._focus2ndInput.bind(this)}>
                 <div className='control is-horizontal'>
+                  <div className='control-label' style={{maxWidth: 130}}>
+                    <label className='label'>
+                      {paymentMode === 'voucher' ? 'Voucher Amount' : 'Amount to Pay'}
+                    </label>
+                  </div>
+                  <div className='control is-expanded'>
+                    <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
+                      onChange={e => this._setPaymentAmount(e.target.value)}
+                      placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
+                  </div>
+                </div>
+              </form>
+              <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
+                <div className='control is-horizontal' style={{marginTop: 10}}>
                   <div className='control-label' style={{width: 130, maxWidth: 130}}>
                     <label className='label'>
                       {paymentMode !== 'cash'
@@ -254,9 +293,12 @@ class PaymentModal extends Component {
               }
               <div className='columns'>
                 <p className='column is-6 is-offset-3'>
-                  <a className='button is-large is-fullwidth is-success'
+                  <a className={`button is-large is-fullwidth ${editCashPayment ? 'is-danger' : 'is-success'}`}
                     onClick={this._clickConfirm.bind(this)}>
-                    <FormattedMessage id='app.button.confirm' />
+                    {editCashPayment
+                      ? 'Edit Cash Payment'
+                      : <FormattedMessage id='app.button.confirm' />
+                    }
                   </a>
                 </p>
               </div>

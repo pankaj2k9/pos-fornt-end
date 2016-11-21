@@ -155,7 +155,7 @@ const zh = {
   'app.error.cashNotEnough': '现金必须准确或大于金额',
   'app.error.noCardAssoc': '无卡选择',
   'app.error.noTransId': '检查事务ID',
-  'app.error.excessPayment': '超量自定义付款，不应大于订单总额',
+  'app.error.excessPayment': '超量自定义付款，不应超过付款余额',
   'app.error.noTenantNum': '商店没有租户号码。 如果存在租户号码，请与开发人员联系。如果没有，请先联系商场。',
   'app.ph.enterRefundRemarks': '什么是退款的原因',
 

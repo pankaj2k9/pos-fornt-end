@@ -97,10 +97,13 @@ function panelCheckout (state = {
       })
       return Object.assign({}, state, {
         payments: state.payments,
-        shouldUpdate: false
+        shouldUpdate: false,
+        cashTendered: null,
+        transNumber: '',
+        paymentAmount: null
       })
     case REMOVE_PAYMENT_TYPE:
-      state.payments.forEach(function (payment) {
+      state.payments.filter(function (payment) {
         if (payment.type === action.paymentType) {
           if (payment.type === 'cash') {
             payment.amount = null
@@ -109,13 +112,9 @@ function panelCheckout (state = {
             payment.total = 0
             payment.vouchers = []
           } else if (payment.type === 'credit') {
-            payment.amount = null
-            payment.transNumber = null
-            payment.provider = null
+            state.payments.splice(state.payments.indexOf(payment), 1)
           } else if (payment.type === 'nets') {
-            payment.amount = null
-            payment.transNumber = null
-            payment.provider = null
+            state.payments.splice(state.payments.indexOf(payment), 1)
           }
         }
       })
