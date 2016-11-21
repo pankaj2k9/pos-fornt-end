@@ -69,7 +69,7 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'nets') {
       payment = { type: 'nets', amount: paymentValue, transNumber: transNumber, remarks: 'Needs more' }
     } else if (paymentMode === 'voucher') {
-      payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
+      payment = { deduction: paymentValue, remarks: voucherCode }
     }
     if (editCashPayment) {
       dispatch(removePaymentType('cash'))
@@ -139,10 +139,10 @@ class PaymentModal extends Component {
     var paymentInfo
     payments.filter(function (payment) {
       if (paymentMode === payment.type && payment.amount && payment.amount !== 0) {
-        if (payment.type === 'credit' || payment.type === 'nets') {
+        if (payment.type === 'credit' || payment.type === 'nets' || payment.deduction) {
           paymentInfo = []
           paymentInfo.push(payment)
-        } else {
+        } else if (payment.type === 'cash') {
           paymentInfo = {}
           paymentInfo = payment
         }

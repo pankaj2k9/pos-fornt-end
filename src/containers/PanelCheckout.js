@@ -227,18 +227,16 @@ class PanelCheckout extends Component {
     let voucherTotal = 0
     let vouchers
     payments.forEach(payment => {
-      if (payment.type === 'voucher' && payment.vouchers.length > 0) {
-        payment.vouchers.forEach(voucher => {
-          let v1 = `${voucher.deduction}, `
-          voucherList.push(voucher)
-          voucherTotal += Number(voucher.deduction)
-          voucherToString = voucherToString.concat(v1)
-          vouchers = {
-            voucherToString: voucherToString,
-            voucherList: voucherList,
-            voucherTotal: voucherTotal
-          }
-        })
+      if (payment.deduction) {
+        let v1 = `${payment.deduction}, `
+        voucherList.push(payment)
+        voucherTotal += Number(payment.deduction)
+        voucherToString = voucherToString.concat(v1)
+        vouchers = {
+          voucherToString: voucherToString,
+          voucherList: voucherList,
+          voucherTotal: voucherTotal
+        }
       }
     })
     return vouchers
@@ -446,7 +444,9 @@ class PanelCheckout extends Component {
       {name: 'Checkout Order', icon: 'fa fa-check', customColor: okForCheckout ? 'green' : 'grey'},
       {name: 'Open Drawer', icon: 'fa fa-upload', customColor: '#3273dc'}
     ]
-
+    let cash = payments.filter(function (payment) {
+      if (payment.type === 'cash') { return payment }
+    })
     let voucherSum = this.vouchers() ? this.vouchers().voucherTotal : 0
     let creditSum = this.creditsAndNets() ? this.creditsAndNets().creditTotal : 0
     let netsSum = this.creditsAndNets() ? this.creditsAndNets().netsTotal : 0
@@ -454,7 +454,7 @@ class PanelCheckout extends Component {
       ? this.orderTotal() - this.sumOfPayments()
       : 0
     var paymentList = {
-      cash: formatCurrency(payments[0].cash),
+      cash: formatCurrency(Number(cash.amount || 0)),
       credit: formatCurrency(creditSum),
       nets: formatCurrency(netsSum),
       voucher: formatCurrency(voucherSum)
