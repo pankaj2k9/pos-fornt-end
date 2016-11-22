@@ -47,7 +47,6 @@ class PaymentModal extends Component {
   _clickConfirm (event) {
     if (event) { event.preventDefault() }
     const { dispatch, paymentMode, cashTendered, card, transNumber, orderTotal, paymentTotal, paymentBalance } = this.props
-    var editCashPayment = this.paymentInfo() && paymentMode === 'cash'
     var orderMinusPayment = orderTotal - paymentTotal <= 0
       ? null
       : orderTotal - paymentTotal
@@ -69,11 +68,7 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'voucher') {
       payment = { deduction: paymentValue, remarks: voucherCode }
     }
-    if (editCashPayment) {
-      dispatch(removePaymentType('cash'))
-      dispatch(addPaymentType(payment))
-      dispatch(panelCartShouldUpdate(false))
-    } else if (paymentMode === 'voucher') {
+    if (paymentMode === 'voucher') {
       dispatch(addPaymentType(payment))
       dispatch(closeActiveModal(focusProductSearch))
       dispatch(panelCartShouldUpdate(false))
@@ -137,21 +132,15 @@ class PaymentModal extends Component {
     document.getElementById('inputValue').focus()
   }
 
-  paymentInfo () {
-    const { payments, paymentMode } = this.props
-    var paymentInfo
-    payments.filter(function (payment) {
-      if (paymentMode === payment.type && payment.amount && payment.amount !== 0) {
-        if (payment.type === 'credit' || payment.type === 'nets' || payment.deduction) {
-          paymentInfo = []
-          paymentInfo.push(payment)
-        } else if (payment.type === 'cash') {
-          paymentInfo
-          paymentInfo = payment
-        }
+  paymentInfo (type) {
+    const {payments} = this.props
+    var info
+    payments.forEach(payment => {
+      if (type === payment.type) {
+        info = payment
       }
     })
-    return paymentInfo
+    return info
   }
 
   render () {
@@ -163,7 +152,7 @@ class PaymentModal extends Component {
     // style for logo of card Association
     var unselected = {opacity: 0.2}
     var selected = {opacity: 1}
-    var editCashPayment = this.paymentInfo() && paymentMode === 'cash'
+    var editCashPayment = this.paymentInfo('cash') && paymentMode === 'cash'
     return (
       <div id='paymentModal' className={`modal ${active}`}>
         <div className='modal-background' />
@@ -190,7 +179,7 @@ class PaymentModal extends Component {
               }
               {editCashPayment
                 ? <div className='box has-text-centered'>
-                  <h1 className='title is-1'><strong>{formatCurrency(this.paymentInfo().amount)}</strong></h1>
+                  <h1 className='title is-1'><strong>{formatCurrency(this.paymentInfo('cash').amount)}</strong></h1>
                   <a id='paymentValue' className='button is-danger is-outlined' onClick={this._removePayment.bind(this, 'cash')}>Edit Cash Payment</a>
                 </div>
                 : <div>
