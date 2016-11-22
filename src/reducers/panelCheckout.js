@@ -76,14 +76,13 @@ function panelCheckout (state = {
         paymentAmount: null
       })
     case REMOVE_PAYMENT_TYPE:
-      var filteredPayments = []
-      state.payments.filter(function (payment) {
-        if (action.key && state.payments.indexOf(payment) !== action.key) {
-          filteredPayments.push(payment)
-        } else if (action.paymentType !== 'voucher' && payment.type !== action.paymentType) {
-          filteredPayments.push(payment)
-        } else if (action.paymentType === 'voucher' && !payment.deduction) {
-          filteredPayments.push(payment)
+      var filteredPayments = state.payments.filter(payment => {
+        if (action.key) {
+          return state.payments.indexOf(payment) !== action.key
+        } else if (action.paymentType !== 'voucher') {
+          return payment.type !== action.paymentType
+        } else if (action.paymentType === 'voucher') {
+          return !payment.deduction
         }
       })
       return Object.assign({}, state, {
