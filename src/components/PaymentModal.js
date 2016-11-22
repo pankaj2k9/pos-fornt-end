@@ -143,7 +143,7 @@ class PaymentModal extends Component {
           paymentInfo = []
           paymentInfo.push(payment)
         } else if (payment.type === 'cash') {
-          paymentInfo = {}
+          paymentInfo
           paymentInfo = payment
         }
       }

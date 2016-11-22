@@ -82,6 +82,13 @@ class PanelCheckout extends Component {
   _clickViewNotes () {
     const { dispatch } = this.props
     dispatch(setActiveModal('notesModal'))
+    dispatch(panelCheckoutShouldUpdate(true))
+  }
+
+  _clickViewPayments () {
+    const { dispatch } = this.props
+    dispatch(setActiveModal('paymentListModal'))
+    dispatch(panelCheckoutShouldUpdate(true))
   }
 
   _closeModal () {
@@ -122,10 +129,10 @@ class PanelCheckout extends Component {
     dispatch(setPinCode(value))
   }
 
-  _removePayment (value) {
+  _removePayment (type) {
     const { dispatch } = this.props
     dispatch(panelCheckoutShouldUpdate(true))
-    dispatch(removePaymentType(value))
+    dispatch(removePaymentType(type))
   }
 
   /*
@@ -444,8 +451,9 @@ class PanelCheckout extends Component {
       {name: 'Checkout Order', icon: 'fa fa-check', customColor: okForCheckout ? 'green' : 'grey'},
       {name: 'Open Drawer', icon: 'fa fa-upload', customColor: '#3273dc'}
     ]
-    let cash = payments.filter(function (payment) {
-      if (payment.type === 'cash') { return payment }
+    let cash
+    payments.filter(function (payment) {
+      if (payment.type === 'cash') { cash = payment.amount || 0 }
     })
     let voucherSum = this.vouchers() ? this.vouchers().voucherTotal : 0
     let creditSum = this.creditsAndNets() ? this.creditsAndNets().creditTotal : 0
@@ -454,7 +462,7 @@ class PanelCheckout extends Component {
       ? this.orderTotal() - this.sumOfPayments()
       : 0
     var paymentList = {
-      cash: formatCurrency(Number(cash.amount || 0)),
+      cash: formatCurrency(Number(cash || 0)),
       credit: formatCurrency(creditSum),
       nets: formatCurrency(netsSum),
       voucher: formatCurrency(voucherSum)
@@ -529,7 +537,9 @@ class PanelCheckout extends Component {
             } />
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
-            <Level left={currency === 'sgd' ? <h3 className='is-marginless'>Payments</h3> : null}
+            <Level left={currency === 'sgd'
+              ? <div><h3 className='is-marginless'>Payments <a onClick={this._clickViewPayments.bind(this)}><i className='fa fa-edit' /></a></h3></div>
+              : null}
               right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {formatCurrency(paymentBalance)}</h5> : null} />
             <Level left={currency === 'sgd'
               ? <div>
@@ -660,31 +670,29 @@ class PanelCheckout extends Component {
             <FunctionButtons buttons={buttons3} onClickButton={this._clickCheckoutButtons.bind(this)} />
           </div>
         </Panel>
-        {cpShouldUpdate
-          ? <PanelCheckoutModals
-            activeModalId={activeModalId}
-            card={card}
-            cashTendered={Number(cashTendered)}
-            cpShouldUpdate={cpShouldUpdate}
-            currency={currency}
-            error={applicationError}
-            orderError={orderError}
-            orderNote={orderNote}
-            orderSuccess={orderSuccess}
-            orderTotal={this.orderTotal()}
-            payments={payments}
-            paymentAmount={Number(paymentAmount)}
-            paymentMode={paymentMode}
-            paymentBalance={paymentBalance}
-            paymentTotal={this.sumOfPayments()}
-            transNumber={transNumber}
-            reprinting={reprinting}
-            setOdboUserPincode={this._setOdboUserPincode.bind(this)}
-            closeModal={this._closeModal.bind(this)}
-            reprint={this._clickReprint.bind(this)}
-            processOrder={this._processOrder.bind(this)} />
-          : null
-        }
+        <PanelCheckoutModals
+          activeModalId={activeModalId}
+          card={card}
+          cashTendered={Number(cashTendered)}
+          cpShouldUpdate={cpShouldUpdate}
+          currency={currency}
+          error={applicationError}
+          orderError={orderError}
+          orderNote={orderNote}
+          orderSuccess={orderSuccess}
+          orderTotal={this.orderTotal()}
+          payments={payments}
+          paymentAmount={Number(paymentAmount)}
+          paymentMode={paymentMode}
+          paymentBalance={paymentBalance}
+          paymentTotal={this.sumOfPayments()}
+          transNumber={transNumber}
+          reprinting={reprinting}
+          setOdboUserPincode={this._setOdboUserPincode.bind(this)}
+          shouldUpdate={shouldUpdate}
+          closeModal={this._closeModal.bind(this)}
+          reprint={this._clickReprint.bind(this)}
+          processOrder={this._processOrder.bind(this)} />
       </div>
     )
   }
