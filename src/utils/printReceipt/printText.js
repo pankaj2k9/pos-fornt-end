@@ -70,7 +70,7 @@ const buildItemList = (items) => {
       itemList += `<div style="${ITEM_LIST_STYLE}">`
       itemList += stringifyItemQty(item.qty)
       itemList += stringifyItemName(item.name)
-      itemList += stringifyItemSubtotal(item.subtotal)
+      itemList += stringifyItemSubtotal(item.currency === 'sgd' ? formatCurrency(item.subtotal) : item.subtotal)
       itemList += '</div>'
     })
   }
@@ -101,7 +101,7 @@ const stringifyItemName = (name) => {
 }
 
 const stringifyItemSubtotal = (subtotal) => {
-  return `<div style="${ITEM_SUBTOTAL_STYLE}">${formatCurrency(subtotal)}</div>`
+  return `<div style="${ITEM_SUBTOTAL_STYLE}">${subtotal}</div>`
 }
 
 /**
@@ -266,7 +266,7 @@ export const buildComputation = (trans) => {
     }
 
     if (currency === 'odbo') {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo || computations.paymentMinusOrderTotal}</div>`
     } else if (payments.length > 1) {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${formatCurrency(computations.paymentTotal)}</div>`
     }

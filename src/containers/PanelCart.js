@@ -196,7 +196,11 @@ class PanelCart extends Component {
       document.getElementById('productsSearch').focus()
     } else if (cartItemsArray.length > 0 && mode !== 'use odbo coins' && mode !== 'double points') {
       dispatch(panelCartShouldUpdate(true))
-      dispatch(setActiveModal('paymentModal'))
+      if (mode !== 'voucher') {
+        dispatch(setActiveModal('paymentModal', 'paymentValue'))
+      } else {
+        dispatch(setActiveModal('paymentModal', 'voucherAmount'))
+      }
       dispatch(setPaymentMode(mode))
     } else {
       document.getElementById('productsSearch').focus()
