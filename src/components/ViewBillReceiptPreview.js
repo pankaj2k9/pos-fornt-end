@@ -278,7 +278,25 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 keyPrefix={`${keyPref}total`}
                 cols={['TOTAL:', order.currency === 'sgd' ? formatCurrency(order.total) : order.total]} />
               <ReceiptRowDivider />
-
+              {/* VOUCHERS */}
+              {order.vouchers.length > 0
+                ? <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}vouchers`}
+                  rowType='is-bold'
+                  cols={['VOUCHERS']} />
+                : null
+              }
+              {order.vouchers.map((voucher, i) => {
+                const key = `${keyPref}voucher-${voucher.id || i}`
+                const voucherRemarks = `voucher[${voucher.remarks}]`
+                return (
+                  <ReceiptPreviewRow
+                    key={`${key}-amount`}
+                    keyPrefix={`${key}-amount`}
+                    cols={[voucherRemarks, formatCurrency(Number(voucher.deduction))]} />
+                )
+              })
+              }
               {/* Payments */}
               {order.payments.map((payment, i) => {
                 let type = ''

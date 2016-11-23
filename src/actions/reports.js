@@ -158,7 +158,7 @@ export function viewBillsFetch (source, dateFrom, dateTo, idFrom, idTo, stores) 
       idTo,
       storeId: source,
       stores,
-      eager: '[payments, staff, users, items, items.product]'
+      eager: '[payments, staff, users, vouchers, items, items.product]'
     }
 
     return ordersService.find(params)
