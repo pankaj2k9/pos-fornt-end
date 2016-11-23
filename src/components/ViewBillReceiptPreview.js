@@ -115,7 +115,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                     <ReceiptPreviewRow cols={[
                       item.product.barcodeInfo,
                       `${item.quantity}x`,
-                      formatCurrency(item.totalCost)
+                      order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
                     ]} />
                   </span>
                 )
@@ -132,7 +132,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               {/* Totals */}
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}subtotal`}
-                cols={['Sub-TOTAL S$', formatCurrency(order.subtotal)]} />
+                cols={['Sub-TOTAL S$', order.currency === 'sgd' ? formatCurrency(order.subtotal) : order.subtotal]} />
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}total`}
                 cols={['TOTAL S$', formatCurrency(order.total)]} />
@@ -158,7 +158,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 return <ReceiptPreviewRow
                   key={key}
                   keyPrefix={key}
-                  cols={[type, formatCurrency(payment.amount)]} />
+                  cols={[type, order.currency === 'sgd' ? formatCurrency(payment.amount) : payment.amount]} />
               })}
 
               <ReceiptRowDividerDbl />
@@ -254,7 +254,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                       cols={[
                         `${item.quantity}x`,
                         item.product.nameEn,
-                        formatCurrency(item.totalCost)
+                        order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
                       ]} />
 
                     <ReceiptPreviewRow
@@ -272,11 +272,11 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 cols={['GST:', formatCurrency(0)]} />
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}subtotal`}
-                cols={['SUBTOTAL:', formatCurrency(order.subtotal)]} />
+                cols={['SUBTOTAL:', order.currency === 'sgd' ? formatCurrency(order.subtotal) : order.subtotal]} />
               <ReceiptRowDivider />
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}total`}
-                cols={['TOTAL:', formatCurrency(order.total)]} />
+                cols={['TOTAL:', order.currency === 'sgd' ? formatCurrency(order.total) : order.total]} />
               <ReceiptRowDivider />
 
               {/* Payments */}
@@ -285,48 +285,73 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 const key = `${keyPref}payment-${payment.id || i}`
 
                 // Figure out the type of payment
-                if (payment.provider && payment.type === 'debit') {
-                  type = 'NETS'
-                  return (
-                    <span key={`${key}-cont`}>
-                      <ReceiptPreviewRow
-                        key={`${key}-type-${type}`}
-                        keyPrefix={`${key}-type-${type}`}
-                        rowType='is-bold'
-                        cols={[type]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-amount`}
-                        keyPrefix={`${key}-amount`}
-                        cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-cardtype`}
-                        keyPrefix={`${key}-cardtype`}
-                        cols={['CARD TYPE:', payment.provider]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-transnum`}
-                        keyPrefix={`${key}-transnum`}
-                        cols={['TRANS#:', payment.transNumber]} />
-                    </span>
-                  )
-                } else if (payment.provider && payment.type === 'credit') {
-                  type = payment.provider.toUpperCase()
-                  return (
-                    <span key={`${key}-cont`}>
-                      <ReceiptPreviewRow
-                        key={`${key}-type-${type}`}
-                        keyPrefix={`${key}-type-${type}`}
-                        rowType='is-bold'
-                        cols={[type]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-amount`}
-                        keyPrefix={`${key}-amount`}
-                        cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-transnum`}
-                        keyPrefix={`${key}-transnum`}
-                        cols={['TRANS#:', payment.transNumber]} />
-                    </span>
-                  )
+                if (order.currency === 'sgd') {
+                  if (payment.provider && payment.type === 'debit') {
+                    type = 'NETS'
+                    return (
+                      <span key={`${key}-cont`}>
+                        <ReceiptPreviewRow
+                          key={`${key}-type-${type}`}
+                          keyPrefix={`${key}-type-${type}`}
+                          rowType='is-bold'
+                          cols={[type]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-amount`}
+                          keyPrefix={`${key}-amount`}
+                          cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-cardtype`}
+                          keyPrefix={`${key}-cardtype`}
+                          cols={['CARD TYPE:', payment.provider]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-transnum`}
+                          keyPrefix={`${key}-transnum`}
+                          cols={['TRANS#:', payment.transNumber]} />
+                      </span>
+                    )
+                  } else if (payment.provider && payment.type === 'credit') {
+                    type = payment.provider.toUpperCase()
+                    return (
+                      <span key={`${key}-cont`}>
+                        <ReceiptPreviewRow
+                          key={`${key}-type-${type}`}
+                          keyPrefix={`${key}-type-${type}`}
+                          rowType='is-bold'
+                          cols={[type]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-amount`}
+                          keyPrefix={`${key}-amount`}
+                          cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-transnum`}
+                          keyPrefix={`${key}-transnum`}
+                          cols={['TRANS#:', payment.transNumber]} />
+                      </span>
+                    )
+                  } else {
+                    type = payment.type && payment.type.toUpperCase()
+                    return (
+                      <span key={`${key}-cont`}>
+                        <ReceiptPreviewRow
+                          key={`${key}-type-${type}`}
+                          keyPrefix={`${key}-type-${type}`}
+                          rowType='is-bold'
+                          cols={[type]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-cash`}
+                          keyPrefix={`${key}-cash`}
+                          cols={['CASH GIVEN:', formatCurrency(payment.cash)]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-amount`}
+                          keyPrefix={`${key}-amount`}
+                          cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                        <ReceiptPreviewRow
+                          key={`${key}-change`}
+                          keyPrefix={`${key}-change`}
+                          cols={['CASH CHANGE:', formatCurrency(payment.change)]} />
+                      </span>
+                    )
+                  }
                 } else {
                   type = payment.type && payment.type.toUpperCase()
                   return (
@@ -339,15 +364,15 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                       <ReceiptPreviewRow
                         key={`${key}-cash`}
                         keyPrefix={`${key}-cash`}
-                        cols={['CASH GIVEN:', formatCurrency(payment.cash)]} />
+                        cols={['ODBO COINS:', order.users.odboCoins + Number(payment.amount)]} />
                       <ReceiptPreviewRow
                         key={`${key}-amount`}
                         keyPrefix={`${key}-amount`}
-                        cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                        cols={['AMOUNT PAID:', Number(payment.amount).toFixed(0)]} />
                       <ReceiptPreviewRow
                         key={`${key}-change`}
                         keyPrefix={`${key}-change`}
-                        cols={['CASH CHANGE:', formatCurrency(payment.change)]} />
+                        cols={['REMAINING BALANCE:', order.users.odboCoins]} />
                     </span>
                   )
                 }
