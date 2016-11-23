@@ -12,8 +12,11 @@ import PaymentModal from '../components/PaymentModal'
 
 import {
   removeNote,
+  removePaymentType,
   panelCheckoutShouldUpdate
 } from '../actions/panelCheckout'
+
+import { formatCurrency } from '../utils/string'
 
 class PanelCheckoutModals extends Component {
 
@@ -22,6 +25,8 @@ class PanelCheckoutModals extends Component {
     switch (activeModalId) {
       case 'notesModal':
         return this.renderNoteModal()
+      case 'paymentListModal':
+        return this.renderPaymentListModal()
       case 'paymentModal':
         return this.renderPaymentModal()
       case 'orderProcessing':
@@ -181,6 +186,59 @@ class PanelCheckoutModals extends Component {
     )
   }
 
+  renderPaymentListModal () {
+    const {dispatch, payments, activeModalId, cpShouldUpdate, closeModal} = this.props
+    const active = activeModalId === 'paymentListModal' ? 'is-active' : ''
+    return (
+      <div id='paymentListModal' className={`modal ${active}`}>
+        <div className='modal-background' />
+        <div className='modal-card'>
+          <header className='modal-card-head'>
+            <p className='modal-card-title is-marginless has-text-centered'>
+              Payments
+            </p>
+            <button className='delete' onClick={closeModal} />
+          </header>
+          <div className='modal-card-body'>
+            <div className='content'>
+              {cpShouldUpdate
+                ? <div>
+                  {!payments
+                    ? null
+                    : payments.map(function (item, key) {
+                      function remove () {
+                        dispatch(panelCheckoutShouldUpdate(true))
+                        dispatch(removePaymentType(item.type, key))
+                      }
+                      return (
+                        <div className='content' key={key}>
+                          <p className='title is-marginless'>{`${item.deduction ? 'voucher' : item.type} - `}
+                            <a className='button is-danger is-outlined' onClick={remove}>Remove Payment</a>
+                          </p>
+                          <ul>
+                            <li>{`payment amount: ${formatCurrency(item.deduction || item.amount)} `}</li>
+                            {item.deduction
+                              ? <li>voucher code: {item.remarks}</li>
+                              : item.type === 'cash'
+                                ? <li>cash given: {formatCurrency(item.cash)}</li>
+                                : <li>transaction id: {item.transNumber}</li>
+                            }
+                            {item.provider ? <li>card: {item.provider}</li> : null}
+                          </ul>
+                        </div>
+                      )
+                    }, this)
+                  }
+                </div>
+                : null
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   renderNoteModal () {
     const {dispatch, orderNote, activeModalId, cpShouldUpdate, closeModal} = this.props
     const active = activeModalId === 'notesModal' ? 'is-active' : ''
@@ -196,7 +254,7 @@ class PanelCheckoutModals extends Component {
           </header>
           <div className='modal-card-body'>
             <div className='content'>
-              {!cpShouldUpdate
+              {cpShouldUpdate
                 ? <ul>
                   {!orderNote
                     ? null

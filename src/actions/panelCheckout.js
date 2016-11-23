@@ -67,10 +67,11 @@ export function addPaymentType (payment) {
   }
 }
 
-export function removePaymentType (paymentType) {
+export function removePaymentType (paymentType, key) {
   return {
     type: REMOVE_PAYMENT_TYPE,
-    paymentType
+    paymentType,
+    key
   }
 }
 

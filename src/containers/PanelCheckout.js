@@ -82,6 +82,13 @@ class PanelCheckout extends Component {
   _clickViewNotes () {
     const { dispatch } = this.props
     dispatch(setActiveModal('notesModal'))
+    dispatch(panelCheckoutShouldUpdate(true))
+  }
+
+  _clickViewPayments () {
+    const { dispatch } = this.props
+    dispatch(setActiveModal('paymentListModal'))
+    dispatch(panelCheckoutShouldUpdate(true))
   }
 
   _closeModal () {
@@ -122,10 +129,10 @@ class PanelCheckout extends Component {
     dispatch(setPinCode(value))
   }
 
-  _removePayment (value) {
+  _removePayment (type) {
     const { dispatch } = this.props
     dispatch(panelCheckoutShouldUpdate(true))
-    dispatch(removePaymentType(value))
+    dispatch(removePaymentType(type))
   }
 
   /*
@@ -184,7 +191,7 @@ class PanelCheckout extends Component {
   sumOfPayments () {
     const { payments, currency, activeCustomer } = this.props
     let x = payments
-    let voucherTotal = this.vouchers() ? this.vouchers().voucherTotal : 0
+    let voucherTotal = this.paymentTypeTotal('voucher')
     let sumOfPayments = 0
     if (x) {
       for (var i = 0; i < x.length; i++) {
@@ -220,58 +227,33 @@ class PanelCheckout extends Component {
     return this.sumOfPayments() - this.orderTotal()
   }
 
-  vouchers () {
+  paymentTypeList (type) {
     const {payments} = this.props
-    let voucherToString = ''
-    let voucherList = []
-    let voucherTotal = 0
-    let vouchers
-    payments.forEach(payment => {
-      if (payment.type === 'voucher' && payment.vouchers.length > 0) {
-        payment.vouchers.forEach(voucher => {
-          let v1 = `${voucher.deduction}, `
-          voucherList.push(voucher)
-          voucherTotal += Number(voucher.deduction)
-          voucherToString = voucherToString.concat(v1)
-          vouchers = {
-            voucherToString: voucherToString,
-            voucherList: voucherList,
-            voucherTotal: voucherTotal
-          }
-        })
+    var list = payments.filter(payment => {
+      if (type !== 'voucher') {
+        return (payment.type === type)
+      } else if (type === 'voucher') {
+        return (payment.deduction)
       }
     })
-    return vouchers
+    return list
   }
 
-  creditsAndNets () {
+  paymentTypeTotal (type, format) {
     const {payments} = this.props
-    let creditsToString = ''
-    let creditList = []
-    let creditTotal = 0
-    let netsList = []
-    let netsTotal = 0
-    let creditsAndNets
+    var total = 0
     payments.forEach(payment => {
-      if (payment.type === 'credit' && payment.amount) {
-        let v1 = `${payment.amount}| `
-        creditList.push(payment)
-        creditTotal += Number(payment.amount)
-        creditsToString = creditsToString.concat(v1)
-      }
-      if (payment.type === 'nets' && payment.amount) {
-        netsList.push(payment)
-        netsTotal += Number(payment.amount)
-      }
-      creditsAndNets = {
-        creditsToString: creditsToString,
-        creditList: creditList,
-        creditTotal: creditTotal,
-        netsTotal: netsTotal,
-        netsList: netsList
+      if (type === 'voucher') {
+        total += payment.deduction || 0
+      } else if (payment.type === type) {
+        total += payment.amount
       }
     })
-    return creditsAndNets
+    if (format) {
+      return formatCurrency(total)
+    } else {
+      return total
+    }
   }
 
   cashChange () {
@@ -434,10 +416,8 @@ class PanelCheckout extends Component {
       storeId,
       transNumber
     } = this.props
-
     const orderNoteCount = orderNote.length === 0 ? 0 : orderNote.length
     const empty = (cartItemsArray.length === 0) || (cartItemsArray === null || undefined)
-
     const okForClear = cartItemsArray.length !== 0
     const okForCheckout = cartItemsArray.length !== 0 && this.paymentMinusOrderTotal() >= 0
 
@@ -446,19 +426,9 @@ class PanelCheckout extends Component {
       {name: 'Checkout Order', icon: 'fa fa-check', customColor: okForCheckout ? 'green' : 'grey'},
       {name: 'Open Drawer', icon: 'fa fa-upload', customColor: '#3273dc'}
     ]
-
-    let voucherSum = this.vouchers() ? this.vouchers().voucherTotal : 0
-    let creditSum = this.creditsAndNets() ? this.creditsAndNets().creditTotal : 0
-    let netsSum = this.creditsAndNets() ? this.creditsAndNets().netsTotal : 0
     var paymentBalance = this.orderTotal() - this.sumOfPayments() >= 0
       ? this.orderTotal() - this.sumOfPayments()
       : 0
-    var paymentList = {
-      cash: formatCurrency(payments[0].cash),
-      credit: formatCurrency(creditSum),
-      nets: formatCurrency(netsSum),
-      voucher: formatCurrency(voucherSum)
-    }
     return (
       <div>
         <Panel>
@@ -529,13 +499,15 @@ class PanelCheckout extends Component {
             } />
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
-            <Level left={currency === 'sgd' ? <h3 className='is-marginless'>Payments</h3> : null}
+            <Level left={currency === 'sgd'
+              ? <div><h3 className='is-marginless'>Payments <a onClick={this._clickViewPayments.bind(this)}><i className='fa fa-edit' /></a></h3></div>
+              : null}
               right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {formatCurrency(paymentBalance)}</h5> : null} />
             <Level left={currency === 'sgd'
               ? <div>
                 <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
-                  <li onClick={this._removePayment.bind(this, 'cash')}><i className='fa fa-close' /> Cash: {paymentList.cash}</li>
-                  <li onClick={this._removePayment.bind(this, 'voucher')}><i className='fa fa-close' /> Voucher: {paymentList.voucher}</li>
+                  <li onClick={this._removePayment.bind(this, 'cash')}><i className='fa fa-close' /> Cash: {this.paymentTypeTotal('cash', 'format')}</li>
+                  <li onClick={this._removePayment.bind(this, 'voucher')}><i className='fa fa-close' /> Voucher: {this.paymentTypeTotal('voucher', 'format')}</li>
                 </ul>
               </div>
               : <div />
@@ -543,8 +515,8 @@ class PanelCheckout extends Component {
               center={currency === 'sgd'
                 ? <div className='has-text-left'>
                   <ul style={{margin: 0, marginLeft: -25, listStyle: 'none'}}>
-                    <li onClick={this._removePayment.bind(this, 'credit')}><i className='fa fa-close' /> Credit: {paymentList.credit}</li>
-                    <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {paymentList.nets}</li>
+                    <li onClick={this._removePayment.bind(this, 'credit')}><i className='fa fa-close' /> Credit: {this.paymentTypeTotal('credit', 'format')}</li>
+                    <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {this.paymentTypeTotal('nets', 'format')}</li>
                   </ul>
                 </div>
                 : <div />
@@ -612,8 +584,8 @@ class PanelCheckout extends Component {
                     {currency === 'sgd'
                     ? <strong style={{color: 'green'}}>{activeCustomer
                       ? bonusPoints
-                        ? Number(this.sumOfCartItems().toFixed(0)) * 2
-                        : Number(this.sumOfCartItems().toFixed(0))
+                        ? (this.sumOfCartItems() * 2).toFixed(0)
+                        : this.sumOfCartItems().toFixed(0)
                       : '0.00'
                     } Points
                     </strong>
@@ -660,31 +632,29 @@ class PanelCheckout extends Component {
             <FunctionButtons buttons={buttons3} onClickButton={this._clickCheckoutButtons.bind(this)} />
           </div>
         </Panel>
-        {cpShouldUpdate
-          ? <PanelCheckoutModals
-            activeModalId={activeModalId}
-            card={card}
-            cashTendered={Number(cashTendered)}
-            cpShouldUpdate={cpShouldUpdate}
-            currency={currency}
-            error={applicationError}
-            orderError={orderError}
-            orderNote={orderNote}
-            orderSuccess={orderSuccess}
-            orderTotal={this.orderTotal()}
-            payments={payments}
-            paymentAmount={Number(paymentAmount)}
-            paymentMode={paymentMode}
-            paymentBalance={paymentBalance}
-            paymentTotal={this.sumOfPayments()}
-            transNumber={transNumber}
-            reprinting={reprinting}
-            setOdboUserPincode={this._setOdboUserPincode.bind(this)}
-            closeModal={this._closeModal.bind(this)}
-            reprint={this._clickReprint.bind(this)}
-            processOrder={this._processOrder.bind(this)} />
-          : null
-        }
+        <PanelCheckoutModals
+          activeModalId={activeModalId}
+          card={card}
+          cashTendered={Number(cashTendered)}
+          cpShouldUpdate={cpShouldUpdate}
+          currency={currency}
+          error={applicationError}
+          orderError={orderError}
+          orderNote={orderNote}
+          orderSuccess={orderSuccess}
+          orderTotal={this.orderTotal()}
+          payments={payments}
+          paymentAmount={Number(paymentAmount)}
+          paymentMode={paymentMode}
+          paymentBalance={paymentBalance}
+          paymentTotal={this.sumOfPayments()}
+          transNumber={transNumber}
+          reprinting={reprinting}
+          setOdboUserPincode={this._setOdboUserPincode.bind(this)}
+          shouldUpdate={shouldUpdate}
+          closeModal={this._closeModal.bind(this)}
+          reprint={this._clickReprint.bind(this)}
+          processOrder={this._processOrder.bind(this)} />
       </div>
     )
   }
@@ -771,7 +741,7 @@ class PanelCheckout extends Component {
       payments: processedPayments,
       pinCode: pincode,
       adminId: activeCashier.id,
-      vouchers: this.vouchers() ? this.vouchers().voucherList : undefined,
+      vouchers: this.paymentTypeList('voucher'),
       odboId: activeCustomer ? String(activeCustomer.odboId) : undefined
     }
 
@@ -836,7 +806,7 @@ class PanelCheckout extends Component {
           paymentMinusOrderTotal: Number(this.paymentMinusOrderTotal()),
           paymentTotal: Number(this.sumOfPayments())
         },
-        vouchers: this.vouchers() ? this.vouchers().voucherList : [],
+        vouchers: this.paymentTypeList('voucher'),
         orderNote: orderNote,
         currency: currency,
         previousOdbo: activeCustomer ? Number(activeCustomer.odboCoins) : undefined

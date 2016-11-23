@@ -26,10 +26,7 @@ function panelCheckout (state = {
   paymentMode: null,
   paymentAmount: null,
   cashTendered: 0,
-  payments: [
-    { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
-    { type: 'voucher', total: 0, vouchers: [] }
-  ],
+  payments: [],
   card: {
     type: 'credit',
     provider: null
@@ -70,58 +67,26 @@ function panelCheckout (state = {
         cashTendered: cash
       })
     case ADD_PAYMENT_TYPE:
-      state.shouldUpdate = true
-      const paymentToCompare = [action.payment]
-      const currentPayments = state.payments
-      paymentToCompare.forEach(function (payment) {
-        var existing = currentPayments.filter(function (prev, i) {
-          return prev.type === payment.type
-        })
-        if (existing.length) {
-          var key = currentPayments.indexOf(existing[0])
-          if (currentPayments[key].type === 'cash') {
-            currentPayments[key].amount = Number(action.payment.amount).toFixed(2)
-            currentPayments[key].cash = Number(action.payment.cash).toFixed(2)
-          } else if (currentPayments[key].type === 'credit') {
-            currentPayments.push(action.payment)
-          } else if (currentPayments[key].type === 'nets') {
-            currentPayments.push(action.payment)
-          } else if (currentPayments[key].type === 'voucher') {
-            let vouchers = currentPayments[key].vouchers
-            vouchers.push(action.payment.voucher)
-            currentPayments[key].total = Number(currentPayments[key].total) + Number(action.payment.voucher.deduction)
-          }
-        } else {
-          currentPayments.push(action.payment)
-        }
-      })
+      state.payments.push(action.payment)
       return Object.assign({}, state, {
         payments: state.payments,
-        shouldUpdate: false
+        shouldUpdate: false,
+        cashTendered: null,
+        transNumber: '',
+        paymentAmount: null
       })
     case REMOVE_PAYMENT_TYPE:
-      state.payments.forEach(function (payment) {
-        if (payment.type === action.paymentType) {
-          if (payment.type === 'cash') {
-            payment.amount = null
-            payment.cash = 0
-          } else if (payment.type === 'voucher') {
-            payment.total = 0
-            payment.vouchers = []
-          } else if (payment.type === 'credit') {
-            payment.amount = null
-            payment.transNumber = null
-            payment.provider = null
-          } else if (payment.type === 'nets') {
-            payment.amount = null
-            payment.transNumber = null
-            payment.provider = null
-          }
+      var filteredPayments = state.payments.filter(payment => {
+        if (action.key) {
+          return state.payments.indexOf(payment) !== action.key
+        } else if (action.paymentType !== 'voucher') {
+          return payment.type !== action.paymentType
+        } else if (action.paymentType === 'voucher') {
+          return !payment.deduction
         }
       })
       return Object.assign({}, state, {
-        payment: state.payments,
-        shouldUpdate: false
+        payments: filteredPayments
       })
     case SET_CARD_TYPE:
       return Object.assign({}, state, {
@@ -174,10 +139,7 @@ function panelCheckout (state = {
         customDiscount: 0,
         transNumber: '',
         pincode: '',
-        payments: [
-          { type: 'cash', amount: null, cash: 0, remarks: 'Without change' },
-          { type: 'voucher', total: 0, vouchers: [] }
-        ],
+        payments: [],
         orderNote: []
       })
     case CHECKOUT_FIELDS_RESET:

@@ -14,22 +14,23 @@ import {
   setTransNumber,
   setPinCode,
   setCardProvider,
-  setPaymentAmount
+  setPaymentAmount,
+  removePaymentType
 } from '../actions/panelCheckout'
 
 import {
   panelCartShouldUpdate
 } from '../actions/panelCart'
 
+import { formatCurrency } from '../utils/string'
+
 const focusProductSearch = 'productsSearch'
 
 class PaymentModal extends Component {
 
   componentDidMount () {
-    const {paymentMode} = this.props
-    if (paymentMode !== 'voucher') {
-      document.getElementById('paymentValue').focus()
-    }
+    const {focusedInput} = this.props
+    document.getElementById(focusedInput).focus()
   }
 
   _setPaymentAmount (amount) {
@@ -65,7 +66,7 @@ class PaymentModal extends Component {
     } else if (paymentMode === 'nets') {
       payment = { type: 'nets', amount: paymentValue, transNumber: transNumber, remarks: 'Needs more' }
     } else if (paymentMode === 'voucher') {
-      payment = { type: 'voucher', voucher: {deduction: paymentValue, remarks: voucherCode} }
+      payment = { deduction: paymentValue, remarks: voucherCode }
     }
     if (paymentMode === 'voucher') {
       dispatch(addPaymentType(payment))
@@ -107,6 +108,11 @@ class PaymentModal extends Component {
     }
   }
 
+  _removePayment (type) {
+    const { dispatch } = this.props
+    dispatch(removePaymentType(type))
+  }
+
   _changeInputValue (value) {
     const {dispatch, currency, paymentMode} = this.props
     currency === 'sgd'
@@ -121,8 +127,19 @@ class PaymentModal extends Component {
     dispatch(setCardProvider(provider))
   }
 
+  _focus2ndInput (event) {
+    event.preventDefault()
+    document.getElementById('inputValue').focus()
+  }
+
+  paymentInfo (type) {
+    const {payments} = this.props
+    const info = payments.find(payment => type === payment.type)
+    return info
+  }
+
   render () {
-    const {intl, id, card, currency, paymentAmount, paymentBalance, paymentMode, error} = this.props
+    const {intl, id, card, currency, orderTotal, paymentAmount, paymentBalance, paymentMode, error} = this.props
     const active = id === 'paymentModal' ? 'is-active ' : ''
     var inputCash = 6
     var inputCredit = 20
@@ -130,6 +147,7 @@ class PaymentModal extends Component {
     // style for logo of card Association
     var unselected = {opacity: 0.2}
     var selected = {opacity: 1}
+    var editCashPayment = this.paymentInfo('cash') && paymentMode === 'cash'
     return (
       <div id='paymentModal' className={`modal ${active}`}>
         <div className='modal-background' />
@@ -142,61 +160,76 @@ class PaymentModal extends Component {
           </header>
           <section className='modal-card-body'>
             <div className='content has-text-centered'>
-              {paymentAmount > paymentBalance
-                ? <p className='subtitle' style={{color: 'red'}}>
-                  <FormattedMessage id={error || 'app.error.excessPayment'} />
-                </p>
-                : null
+              {editCashPayment
+                ? paymentAmount > orderTotal
+                  ? <p className='subtitle' style={{color: 'red'}}>
+                    <FormattedMessage id={error || 'app.error.excessPayment'} />
+                  </p>
+                  : null
+                : paymentAmount > paymentBalance
+                  ? <p className='subtitle' style={{color: 'red'}}>
+                    <FormattedMessage id={error || 'app.error.excessPayment'} />
+                  </p>
+                  : null
               }
-              <div className='control is-horizontal'>
-                <div className='control-label' style={{maxWidth: 130}}>
-                  <label className='label'>
-                    {paymentMode === 'voucher' ? 'Voucher Amount' : 'Amount to Pay'}
-                  </label>
+              {editCashPayment
+                ? <div className='box has-text-centered'>
+                  <h1 className='title is-1'><strong>{formatCurrency(this.paymentInfo('cash').amount)}</strong></h1>
+                  <a id='paymentValue' className='button is-danger is-outlined' onClick={this._removePayment.bind(this, 'cash')}>Edit Cash Payment</a>
                 </div>
-                <div className='control is-expanded'>
-                  <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
-                    onChange={e => this._setPaymentAmount(e.target.value)}
-                    placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
+                : <div>
+                  <form autoComplete={false} onSubmit={this._focus2ndInput.bind(this)}>
+                    <div className='control is-horizontal'>
+                      <div className='control-label' style={{maxWidth: 130}}>
+                        <label className='label'>
+                          {paymentMode === 'voucher' ? 'Voucher Amount' : 'Amount to Pay'}
+                        </label>
+                      </div>
+                      <div className='control is-expanded'>
+                        <input id={paymentMode === 'voucher' ? 'voucherAmount' : 'paymentValue'} className='input is-large'
+                          onChange={e => this._setPaymentAmount(e.target.value)}
+                          placeholder={paymentMode === 'voucher' ? intl.formatMessage({ id: 'app.ph.voucherAmount' }) : intl.formatMessage({ id: 'app.ph.paymentAmount' })} />
+                      </div>
+                    </div>
+                  </form>
+                  <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
+                    <div className='control is-horizontal' style={{marginTop: 10}}>
+                      <div className='control-label' style={{width: 130, maxWidth: 130}}>
+                        <label className='label'>
+                          {paymentMode !== 'cash'
+                            ? paymentMode !== 'voucher'
+                              ? 'Trans No.' : 'Voucher Code'
+                            : 'Cash Given'}
+                        </label>
+                      </div>
+                      <div className='control is-expanded'>
+                        <input
+                          id={'inputValue'}
+                          className='input is-large'
+                          type={
+                            currency === 'sgd'
+                            ? paymentMode === 'cash' ? 'number' : 'text'
+                            : 'password'
+                          }
+                          placeholder={
+                            currency === 'sgd'
+                            ? paymentMode === 'cash'
+                              ? intl.formatMessage({ id: 'app.ph.enterAmount' })
+                              : paymentMode !== 'voucher'
+                                ? intl.formatMessage({ id: 'app.ph.enterTransId' })
+                                : intl.formatMessage({ id: 'app.ph.enterVC' })
+                            : intl.formatMessage({ id: 'app.ph.enterPin' })}
+                          maxLength={
+                            currency === 'sgd'
+                              ? paymentMode === 'cash' ? inputCash : inputCredit
+                              : inputPin
+                          }
+                          onChange={e => this._changeInputValue(e.target.value)} />
+                      </div>
+                    </div>
+                  </form>
                 </div>
-              </div>
-              <form autoComplete={false} onSubmit={this._clickConfirm.bind(this)}>
-                <div className='control is-horizontal'>
-                  <div className='control-label' style={{width: 130, maxWidth: 130}}>
-                    <label className='label'>
-                      {paymentMode !== 'cash'
-                        ? paymentMode !== 'voucher'
-                          ? 'Trans No.' : 'Voucher Code'
-                        : 'Cash Given'}
-                    </label>
-                  </div>
-                  <div className='control is-expanded'>
-                    <input
-                      id={'inputValue'}
-                      autoFocus
-                      className='input is-large'
-                      type={
-                        currency === 'sgd'
-                        ? paymentMode === 'cash' ? 'number' : 'text'
-                        : 'password'
-                      }
-                      placeholder={
-                        currency === 'sgd'
-                        ? paymentMode === 'cash'
-                          ? intl.formatMessage({ id: 'app.ph.enterAmount' })
-                          : paymentMode !== 'voucher'
-                            ? intl.formatMessage({ id: 'app.ph.enterTransId' })
-                            : intl.formatMessage({ id: 'app.ph.enterVC' })
-                        : intl.formatMessage({ id: 'app.ph.enterPin' })}
-                      maxLength={
-                        currency === 'sgd'
-                          ? paymentMode === 'cash' ? inputCash : inputCredit
-                          : inputPin
-                      }
-                      onChange={e => this._changeInputValue(e.target.value)} />
-                  </div>
-                </div>
-              </form>
+              }
               <hr />
               {currency === 'odbo'
                 ? null
@@ -252,14 +285,17 @@ class PaymentModal extends Component {
                     }
                   </div>
               }
-              <div className='columns'>
-                <p className='column is-6 is-offset-3'>
-                  <a className='button is-large is-fullwidth is-success'
-                    onClick={this._clickConfirm.bind(this)}>
-                    <FormattedMessage id='app.button.confirm' />
-                  </a>
-                </p>
-              </div>
+              {!editCashPayment
+                ? <div className='columns'>
+                  <p className='column is-6 is-offset-3'>
+                    <a className='button is-large is-fullwidth is-success'
+                      onClick={this._clickConfirm.bind(this)}>
+                      <FormattedMessage id='app.button.confirm' />
+                    </a>
+                  </p>
+                </div>
+                : null
+              }
             </div>
           </section>
         </div>
@@ -268,8 +304,15 @@ class PaymentModal extends Component {
   }
 }
 
+function mapStateToProps (state) {
+  return {
+    focusedInput: state.application.focusedInput
+  }
+}
+
 PaymentModal.propTypes = {
   id: PropTypes.string,
+  focusedInput: PropTypes.string,
   paymentMode: PropTypes.string,
   paymentAmount: PropTypes.number,
   card: PropTypes.object,
@@ -283,4 +326,4 @@ PaymentModal.propTypes = {
   payments: PropTypes.array
 }
 
-export default connect()(injectIntl(PaymentModal))
+export default connect(mapStateToProps)(injectIntl(PaymentModal))
