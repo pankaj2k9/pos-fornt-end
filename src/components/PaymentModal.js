@@ -134,7 +134,7 @@ class PaymentModal extends Component {
 
   paymentInfo (type) {
     const {payments} = this.props
-    var info = payments.find(payment => { return type === payment.type })
+    const info = payments.find(payment => type === payment.type)
     return info
   }
 
@@ -147,7 +147,6 @@ class PaymentModal extends Component {
     // style for logo of card Association
     var unselected = {opacity: 0.2}
     var selected = {opacity: 1}
-    console.log('asdfasdfasdfasd: ', this.paymentInfo('cash'))
     var editCashPayment = this.paymentInfo('cash') && paymentMode === 'cash'
     return (
       <div id='paymentModal' className={`modal ${active}`}>
