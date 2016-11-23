@@ -245,7 +245,11 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               {/* Items list */}
               {order.items.map((item, i) => {
                 const key = `${keyPref}item-${item.id || i}`
-
+                const discountLabel = item.product.isDiscounted
+                  ? order.currency === 'sgd'
+                    ? item.product.priceDiscount !== 0 ? `[less %${item.product.priceDiscount}]` : ''
+                    : item.product.odboPriceDiscount !== 0 ? `[less %${item.product.odboPriceDiscount}]` : ''
+                  : ''
                 return (
                   <span key={key} className='item'>
                     <ReceiptPreviewRow
@@ -253,7 +257,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                       rowType='qty-name-total'
                       cols={[
                         `${item.quantity}x`,
-                        item.product.nameEn,
+                        `${item.product.nameEn} ${discountLabel}`,
                         order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
                       ]} />
 
