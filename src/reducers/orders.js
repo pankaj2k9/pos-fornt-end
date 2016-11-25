@@ -10,7 +10,7 @@ import {
 function orders (state = {
   isProcessing: false,
   orderSuccess: false,
-  orderError: '',
+  orderError: null,
   receipt: null,
   reprinting: false
 }, action) {
@@ -41,7 +41,7 @@ function orders (state = {
     case ORDER_STATE_RESET:
       return Object.assign({}, state, {
         isProcessing: false,
-        orderError: '',
+        orderError: null,
         orderSuccess: false,
         receipt: null
       })

@@ -41,7 +41,10 @@ import {
   printPreviewTotalReceipt
 } from '../actions/helpers'
 
-import {processOrder} from '../actions/orders'
+import {
+  processOrder,
+  orderStateReset
+} from '../actions/orders'
 import { formatCurrency } from '../utils/string'
 
 const focusProductSearch = 'productsSearch'
@@ -96,6 +99,7 @@ class PanelCheckout extends Component {
     if (activeModalId === 'orderProcessed') {
       if (orderSuccess) {
         dispatch(resetStore())
+        dispatch(orderStateReset())
       }
     }
     dispatch(closeActiveModal(focusProductSearch))
