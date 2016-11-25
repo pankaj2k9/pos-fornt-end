@@ -270,24 +270,18 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               })}
               <ReceiptRowDivider />
 
-              {/* Totals */}
+              {/* Product Subtotal */}
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}gst`}
                 cols={['GST:', formatCurrency(0)]} />
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}subtotal`}
                 cols={['SUBTOTAL:', order.currency === 'sgd' ? formatCurrency(order.subtotal) : order.subtotal]} />
-              <ReceiptRowDivider />
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}total`}
-                cols={['TOTAL:', order.currency === 'sgd' ? formatCurrency(order.total) : order.total]} />
-              <ReceiptRowDivider />
-              {/* VOUCHERS */}
+              {/* Vouchers */}
               {order.vouchers.length > 0
                 ? <ReceiptPreviewRow
                   keyPrefix={`${keyPref}vouchers`}
-                  rowType='is-bold'
-                  cols={['VOUCHERS']} />
+                  cols={['VOUCHERS:']} />
                 : null
               }
               {order.vouchers.map((voucher, i) => {
@@ -297,10 +291,16 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                   <ReceiptPreviewRow
                     key={`${key}-amount`}
                     keyPrefix={`${key}-amount`}
-                    cols={[voucherRemarks, formatCurrency(Number(voucher.deduction))]} />
+                    cols={[voucherRemarks, '-' + formatCurrency(Number(voucher.deduction))]} />
                 )
               })
               }
+              <ReceiptRowDivider />
+              {/* Order Total */}
+              <ReceiptPreviewRow
+                keyPrefix={`${keyPref}total`}
+                cols={['TOTAL:', order.currency === 'sgd' ? formatCurrency(order.total) : order.total]} />
+              <ReceiptRowDivider />
               {/* Payments */}
               {order.payments.map((payment, i) => {
                 let type = ''

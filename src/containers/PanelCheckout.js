@@ -191,7 +191,6 @@ class PanelCheckout extends Component {
   sumOfPayments () {
     const { payments, currency, activeCustomer } = this.props
     let x = payments
-    let voucherTotal = this.paymentTypeTotal('voucher')
     let sumOfPayments = 0
     if (x) {
       for (var i = 0; i < x.length; i++) {
@@ -199,7 +198,7 @@ class PanelCheckout extends Component {
       }
     }
     if (currency === 'sgd') {
-      return (sumOfPayments || 0) + voucherTotal || 0
+      return (sumOfPayments || 0)
     } else if (currency === 'odbo') {
       return Number(activeCustomer.odboCoins)
     }
@@ -217,10 +216,11 @@ class PanelCheckout extends Component {
 
   orderTotal () {
     const { customDiscount } = this.props
+    let voucherTotal = this.paymentTypeTotal('voucher')
     let subtotal = !customDiscount || customDiscount === 0
       ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts())
       : this.sumOfCartItems() - this.overAllDeduct()
-    return Number(subtotal)
+    return Number(subtotal - voucherTotal)
   }
 
   paymentMinusOrderTotal () {
@@ -483,13 +483,14 @@ class PanelCheckout extends Component {
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             <Level left={
-              <p>Product Items: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
+              <p>Products: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
               }
-              center={<p className='has-text-left'>Discounts: {
+              center={<div>
+                <p className='has-text-left'>Discounts: {
                 customDiscount === 0
                 ? currency === 'sgd' ? formatCurrency(this.sumOfCartDiscounts()) : this.sumOfCartDiscounts()
                 : currency === 'sgd' ? formatCurrency(this.overAllDeduct()) : this.overAllDeduct()
-              }</p>}
+              }</p></div>}
               right={
                 <h3 className='is-marginless'>
                   Order Total: <strong>
@@ -500,7 +501,7 @@ class PanelCheckout extends Component {
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
             <Level left={currency === 'sgd'
-              ? <div><h3 className='is-marginless'>Payments <a onClick={this._clickViewPayments.bind(this)}><i className='fa fa-edit' /></a></h3></div>
+              ? <div><p className='is-marginless'><a onClick={this._clickViewPayments.bind(this)}>Payments & Vouchers <i className='fa fa-edit' /></a></p></div>
               : null}
               right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {formatCurrency(paymentBalance)}</h5> : null} />
             <Level left={currency === 'sgd'
@@ -783,7 +784,7 @@ class PanelCheckout extends Component {
         : Number(item.odboPrice) - Math.round(discount)
       items.push({
         id: item.id,
-        name: `${item.nameEn.substring(0, 18)}...\n
+        name: `${item.nameEn}\n
           ${item.barcodeInfo || ''}\n
           ${showDiscount}`,
         qty: itemQty,
