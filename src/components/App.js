@@ -14,7 +14,8 @@ import {
   resetStaffState,
   validateAndUpdateCashdrawer,
   setCashdrawerFailure,
-  setCashierLoggedIn
+  setCashierLoggedIn,
+  toggleNetworkStatus
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
@@ -24,6 +25,11 @@ import { onLogout } from '../actions/helpers'
 import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
+  componentDidMount () {
+    const {dispatch} = this.props
+    window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus()) })
+    window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus()) })
+  }
 
   componentWillMount () {
     const { dispatch, location } = this.props
@@ -296,11 +302,11 @@ class App extends React.Component {
   }
 
   render () {
-    const { isHamburgerOpen, location, isLoggingOut,
+    const { isHamburgerOpen, location, isLoggingOut, networkStatus,
             staff, activeCashier, adminToken, activeModalId } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.data
-
+    const hideNetStat = networkStatus ? 'is-hidden-widescreen is-hidden-tablet' : ''
     return (
       <div>
         <NavBar isHamburgerOpen={isHamburgerOpen}
@@ -313,8 +319,20 @@ class App extends React.Component {
           adminToken={adminToken}
           isLoggingOut={isLoggingOut}
           openChooseUser={this.openChooseUserModal.bind(this)} />
+        <div id='netStat' className={`notification is-warning ${hideNetStat}`} style={{height: 30, padding: 3, margin: 0}}>
+          <article className='media is-marginless'>
+            <div className='media-left' />
+            <div className='media-content'>
+              <div className='content has-text-centered'>
+                <p><span className='icon'><i className='fa fa-exclamation-circle' /></span>
+                  No Internet Connection.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
         <section id='appSection' className='section' style={{padding: 10}}>
-          <div style={{paddingLeft: 15, paddingRight: 15}}>
+          <div className='is-clearfix' style={{paddingLeft: 15, paddingRight: 15}}>
             {this.props.children}
           </div>
         </section>
@@ -334,6 +352,7 @@ function mapStateToProps (state) {
   return {
     intl: state.intl,
     isHamburgerOpen: state.application.isHamburgerOpen,
+    networkStatus: state.application.networkStatus,
     staff: state.application.staff,
     storeId: state.application.storeId,
     shouldUpdate: state.application.shouldUpdate,
