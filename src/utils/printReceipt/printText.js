@@ -209,12 +209,16 @@ export const buildComputation = (trans) => {
     if (currency === 'sgd') {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>`
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(computations.subtotal)}</div>`
-      comp += RECEIPT_DIVIDER
     }
 
-    if (computations.customDiscount) {
-      // comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>OVERALL DISCOUNT : $${total}`
+    if (vouchers.length > 0) {
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHERS</div></div>`
+      vouchers.map(voucher => {
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>voucher [${voucher.remarks || '###'}] : </div>-${formatCurrency(voucher.deduction)}</div>`
+      })
     }
+
+    comp += RECEIPT_DIVIDER
 
     if (computations.customDiscount && computations.customDiscount > 0) {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>OVERALL DISCOUNT : </div>${currency === 'sgd' ? formatCurrency(computations.customDiscount) : computations.customDiscount}</div>`
@@ -257,13 +261,6 @@ export const buildComputation = (trans) => {
         }
       }
     })
-
-    if (vouchers.length > 0) {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>VOUCHERS</div></div>`
-      vouchers.map(voucher => {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>voucher [${voucher.remarks || '###'}] : </div>${formatCurrency(voucher.deduction)}</div>`
-      })
-    }
 
     if (currency === 'odbo') {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo || computations.paymentMinusOrderTotal}</div>`

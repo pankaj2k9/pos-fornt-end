@@ -31,7 +31,8 @@ import {
   DAILYDATA_CREATE_FAILURE,
   RESET_STAFF_STATE,
   RESET_ERROR_STATE,
-  RESET_APP_STATE
+  RESET_APP_STATE,
+  TOGGLE_NETWORK_STATUS
 } from '../actions/application'
 
 function application (state = {
@@ -42,6 +43,7 @@ function application (state = {
   isHamburgerOpen: false,
   isProcessing: false,
   isFetchingStoreIds: false,
+  networkStatus: true,
   store: null,
   storeIds: [],
   storeIdsError: null,
@@ -87,6 +89,10 @@ function application (state = {
         activeCashdrawer: updatedCount,
         shouldUpdate: false,
         error: null
+      })
+    case TOGGLE_NETWORK_STATUS:
+      return Object.assign({}, state, {
+        networkStatus: !state.networkStatus
       })
     case VALIDATE_STOREPIN_REQUEST:
       return Object.assign({}, state, {

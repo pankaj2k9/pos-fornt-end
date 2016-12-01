@@ -133,7 +133,7 @@ class PanelCheckoutModals extends Component {
   }
 
   renderOrderProcessed () {
-    const { activeModalId, orderError, orderSuccess, reprinting, closeModal, reprint } = this.props
+    const { activeModalId, orderError, orderSuccess, reprinting, closeModal, processOrder, reprint } = this.props
     let modalActive = activeModalId === 'orderProcessed'
       ? 'modal is-active'
       : 'modal'
@@ -152,7 +152,7 @@ class PanelCheckoutModals extends Component {
               <div className='column is-12'>
                 {orderSuccess
                   ? <h1 className='title is-marginless'>Order Success</h1>
-                  : <h1 className='title is-marginless' style={{color: 'red'}}>{orderError}</h1>
+                  : <h1 className='title is-marginless' style={{color: 'red'}}>{orderError === 'Failed to fetch' ? 'Order Failed! failed to connect' : 'Order Failed'}</h1>
                 }
               </div>
               <div className='column is-6 is-offset-3'>
@@ -174,7 +174,7 @@ class PanelCheckoutModals extends Component {
                   ? <a className='button is-success is-large is-fullwidth' onClick={closeModal}>
                     Confirm
                   </a>
-                  : <a className='button is-warning is-large is-fullwidth'>
+                  : <a className='button is-warning is-large is-fullwidth' onClick={processOrder}>
                     Retry
                   </a>
                 }

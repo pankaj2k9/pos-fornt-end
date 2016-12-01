@@ -100,7 +100,7 @@ export function processOrder (orderInfo, receipt, staff) {
       }, 1000)
     })
     .catch(error => {
-      dispatch(orderFailure(error))
+      dispatch(orderFailure(error.message))
       dispatch(afterOrderProcessed())
     })
   }
