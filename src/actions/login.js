@@ -30,6 +30,7 @@ export function loginRequest () {
   return { type: LOGIN_REQUEST }
 }
 export function loginSuccess (userData) {
+  console.log('userData: ', userData)
   return { type: LOGIN_SUCCESS, userData }
 }
 export function loginError (error) {
@@ -40,17 +41,14 @@ export function login (details, browserHistory, store, cashdrawer) {
   return (dispatch) => {
     dispatch(loginRequest())
     return loginService.login(details)
-      .then(response => {
-        dispatch(loginSuccess(response))
-        dispatch(setStaffLoggedIn(response))
-        if (response.data.role !== 'master') {
-          browserHistory.push('settings')
-        } else {
-          browserHistory.push('store')
-        }
+      .then(result => {
+        dispatch(loginSuccess(result))
+        dispatch(setStaffLoggedIn(result))
+        browserHistory.push('store')
       })
       .catch(error => {
         if (error) {
+          console.log('error: ', error.message)
           dispatch(loginError('Invalid login. Try again'))
         }
       })

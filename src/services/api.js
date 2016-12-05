@@ -1,4 +1,6 @@
 import feathers from 'feathers-client'
+import authentication from 'feathers-authentication-client'
+
 import 'whatwg-fetch'
 
 if (!global.fetch) {
@@ -13,7 +15,7 @@ const api = (function () {
     const app = feathers()
       .configure(feathers.rest(host).fetch(global.fetch))
       .configure(feathers.hooks())
-      .configure(feathers.authentication({ storage: window.localStorage }))
+      .configure(authentication({ storage: window.localStorage }))
 
     return app
   }
