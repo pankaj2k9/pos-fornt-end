@@ -180,7 +180,7 @@ const mapStateToProps = (state) => {
     selectedStaffId: staffSales.staffId,
     from: staffSales.from,
     to: staffSales.to,
-    staffs: state.application.staff.data.staffs,
+    staffs: state.application.staff.user.staffs,
     orders: staffSales.orders
   }
 }

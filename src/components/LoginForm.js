@@ -34,8 +34,8 @@ class LoginForm extends Component {
   onPressLogin (event) {
     event.preventDefault()
 
-    const { onLogin, cashdrawer } = this.props
-    const { username, password, storeId } = this.state
+    const { onLogin, cashdrawer, storeId } = this.props
+    const { username, password } = this.state
     onLogin(username.toLowerCase(), password, storeId, cashdrawer)
   }
 

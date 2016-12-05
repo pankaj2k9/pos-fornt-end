@@ -118,7 +118,7 @@ function mapStateToProps (state) {
     store: state.application.store,
     cashier: state.application.activeCashier &&
       state.application.activeCashier.firstName ||
-      state.application.staff.data.username,
+      state.application.staff.user.username,
     from: state.reports.completeSales.date,
     cashdrawers: state.application.cashdrawer,
     openCount: state.application.activeCashdrawer.openCount,

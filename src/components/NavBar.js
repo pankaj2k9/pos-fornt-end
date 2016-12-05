@@ -49,7 +49,6 @@ const NavBar = ({
     })
   }
   const staffColor = `st-clr-${STAFF_COLORS[colorIndex] || 0}`
-
   return (
     <div className='hero is-black'>
       <div className='hero-head'>

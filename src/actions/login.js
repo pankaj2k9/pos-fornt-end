@@ -30,7 +30,6 @@ export function loginRequest () {
   return { type: LOGIN_REQUEST }
 }
 export function loginSuccess (userData) {
-  console.log('userData: ', userData)
   return { type: LOGIN_SUCCESS, userData }
 }
 export function loginError (error) {
@@ -48,7 +47,6 @@ export function login (details, browserHistory, store, cashdrawer) {
       })
       .catch(error => {
         if (error) {
-          console.log('error: ', error.message)
           dispatch(loginError('Invalid login. Try again'))
         }
       })
