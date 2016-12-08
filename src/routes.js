@@ -16,7 +16,10 @@ import Reports from './containers/Reports'
  */
 function requireAuth (nextState, replace, callback) {
   if (!api.get('token')) {
-    api.authenticate().then(response => {
+    api.passport.verifyJWT(window.localStorage.getItem('feathers-jwt'))
+    .then(token => {
+      return api.authenticate({ strategy: 'jwt', store: token.storeId })
+    }).then(response => {
       callback()
     }).catch(error => {
       let noTokenError = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'

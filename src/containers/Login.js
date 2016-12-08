@@ -51,12 +51,13 @@ const mapStateToProps = (state) => {
   }
 }
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch, storeId) => {
   return {
     handleLogin: (username, password, storeId, cashdrawer) => {
       const loginDetails = {
         username,
-        password
+        password,
+        store: storeId
       }
       dispatch(login(loginDetails, browserHistory, storeId, cashdrawer))
     },

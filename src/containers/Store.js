@@ -120,7 +120,7 @@ function mapStateToProps (state) {
     productsShouldUpdate: state.data.products.shouldUpdate,
     items: state.ordersOnHold.items, // ordersOnHold
     cartItemsArray: state.panelCart.items,
-    staff: state.application.staff.data,
+    staff: state.application.staff.user,
     storeId: state.application.storeId,
     store: state.application.store,
     intl: state.intl

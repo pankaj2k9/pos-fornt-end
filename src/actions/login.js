@@ -40,14 +40,10 @@ export function login (details, browserHistory, store, cashdrawer) {
   return (dispatch) => {
     dispatch(loginRequest())
     return loginService.login(details)
-      .then(response => {
-        dispatch(loginSuccess(response))
-        dispatch(setStaffLoggedIn(response))
-        if (response.data.role !== 'master') {
-          browserHistory.push('settings')
-        } else {
-          browserHistory.push('store')
-        }
+      .then(result => {
+        dispatch(loginSuccess(result))
+        dispatch(setStaffLoggedIn(result))
+        browserHistory.push('store')
       })
       .catch(error => {
         if (error) {

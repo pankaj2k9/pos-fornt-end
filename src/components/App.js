@@ -63,7 +63,7 @@ class App extends React.Component {
 
   onChange (staffId) {
     const {dispatch, staff} = this.props
-    let staffs = staff.data.staffs
+    let staffs = staff.user.staffs
     for (var i = 0; i < staffs.length; i++) {
       if (staffs[i].id === staffId) {
         dispatch(setCashierLoggedIn(staffs[i]))
@@ -227,7 +227,7 @@ class App extends React.Component {
                       value={this.activeCashier()}
                       style={{backgroundColor: 'rgba(255,255,255,0.0)'}}>
                       <option>{this.activeCashier()}</option>
-                      {staff.data.staffs.map(function (cashier, key) {
+                      {staff.user.staffs.map(function (cashier, key) {
                         return (
                           <option key={key} value={cashier.id}>
                             {cashier.username}
@@ -305,7 +305,7 @@ class App extends React.Component {
     const { isHamburgerOpen, location, isLoggingOut, networkStatus,
             staff, activeCashier, adminToken, activeModalId } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
-    const userLogedIn = staff === null ? 'Please Login' : staff.data
+    const userLogedIn = staff === null ? 'Please Login' : staff.user
     const hideNetStat = networkStatus ? 'is-hidden-widescreen is-hidden-tablet' : ''
     return (
       <div>

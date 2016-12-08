@@ -749,7 +749,7 @@ function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
     activeModalId: state.application.activeModalId,
-    staff: state.application.staff.data,
+    staff: state.application.staff.user,
     activeCashier: state.application.activeCashier,
     storeDetails: state.application.store,
     storeId: state.application.storeId,
