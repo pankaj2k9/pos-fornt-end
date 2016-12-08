@@ -8,6 +8,8 @@ completed and checked these requirements where applicable.
   reference, e.g. Closes #{issue number})
 - [ ] No debugging codes committed
 - [ ] No non-essential commits (e.g. "This is test only. ignore")
+- [ ] If the PR is work in progress, indicate/enumerate/describe the tasks that
+are work in progress in the PR description.
 - [ ] ! Removed lines starting with "!" (including this line)
 
 ## Description
