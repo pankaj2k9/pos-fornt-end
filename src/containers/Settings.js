@@ -7,7 +7,8 @@ import SettingsTab from './SettingsTab'
 
 import {
   closeActiveModal,
-  setActiveModal
+  setActiveModal,
+  storeGetDailyData
 } from '../actions/application'
 
 import { setSettingsActiveTab } from '../actions/settings'
@@ -15,6 +16,10 @@ import { setSettingsActiveTab } from '../actions/settings'
 import { fetchCustomers } from '../actions/customers'
 
 class Settings extends Component {
+  componentDidMount () {
+    const {dispatch, storeId, cashdrawer} = this.props
+    dispatch(storeGetDailyData(storeId, cashdrawer))
+  }
 
   onClickTab (tabName) {
     const {dispatch} = this.props
@@ -68,6 +73,7 @@ function mapStateToProps (state) {
     orderDetails: state.settings.orderFromGet,
     orderSearchKey: state.settings.orderSearchKey,
     refundSuccess: state.settings.refundSuccess,
+    cashdrawer: state.application.cashdrawer,
     reprintSuccess: state.settings.reprintSuccess
   }
 }

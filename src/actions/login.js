@@ -41,9 +41,14 @@ export function login (details, browserHistory, store, cashdrawer) {
     dispatch(loginRequest())
     return loginService.login(details)
       .then(result => {
+        const role = result.user.role
         dispatch(loginSuccess(result))
         dispatch(setStaffLoggedIn(result))
-        browserHistory.push('store')
+        if (role === 'admin' || role === 'super-admin' || role === 'staff') {
+          browserHistory.push('settings')
+        } else {
+          browserHistory.push('store')
+        }
       })
       .catch(error => {
         if (error) {
