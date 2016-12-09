@@ -79,7 +79,8 @@ class Reports extends React.Component {
   }
 
   render () {
-    const { activeTab, csDate } = this.props
+    const { activeTab, csDate, staff } = this.props
+    const hasStaffs = staff.staffs.length > 0
 
     return (
       <section className='section is-fullheight'>
@@ -124,10 +125,14 @@ class Reports extends React.Component {
                 onClick={this._onPressTab.bind(this, 'bills')}>
                 <a><FormattedMessage id='app.general.viewBills' /></a>
               </li>
-              <li className={activeTab === 'staffSales' ? 'is-active' : ''}
-                onClick={this._onPressTab.bind(this, 'staffSales')}>
-                <a><FormattedMessage id='app.general.staffSales' /></a>
-              </li>
+              {
+                hasStaffs
+                ? <li className={activeTab === 'staffSales' ? 'is-active' : ''}
+                  onClick={this._onPressTab.bind(this, 'staffSales')}>
+                  <a><FormattedMessage id='app.general.staffSales' /></a>
+                </li>
+                : ''
+              }
               <li className={activeTab === 'sales' ? 'is-active' : ''}
                 onClick={this._onPressTab.bind(this, 'sales')}>
                 <a><FormattedMessage id='app.page.reports.salesReport' /></a>
@@ -160,6 +165,7 @@ function mapStateToProps (state) {
     csDate: state.reports.completeSales.date,
     activeTab: state.reports.activeTab,
     store: state.application.store,
+    staff: state.application.staff.user,
     page: state.reports.storeOrders.page,
     limit: state.reports.storeOrders.limit,
     skip: state.reports.storeOrders.skip,
