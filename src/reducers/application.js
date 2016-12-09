@@ -123,7 +123,7 @@ function application (state = {
       let newData = [{
         storeId: state.activeCashdrawer.storeId,
         date: state.activeCashdrawer.date,
-        cashDrawerOpenCount: state.activeCashdrawer.cashDrawerOpenCount + 1,
+        cashDrawerOpenCount: state.activeCashdrawer.cashDrawerOpenCount,
         float: action.data.amount
       }]
       let newActiveCD
