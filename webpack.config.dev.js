@@ -36,7 +36,17 @@ export default {
       },
       inject: true
     }),
-    new OfflinePlugin()
+    new OfflinePlugin({
+      relativePaths: false,
+      publicPath: '/',
+      AppCache: false,
+      cacheMaps: [
+        {
+          match: /\/.*/,
+          to: '/'
+        }
+      ]
+    })
   ],
   module: {
     loaders: [
