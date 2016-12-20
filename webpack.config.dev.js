@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import OfflinePlugin from 'offline-plugin'
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('development'),
@@ -34,7 +35,8 @@ export default {
         collapseWhitespace: true
       },
       inject: true
-    })
+    }),
+    new OfflinePlugin()
   ],
   module: {
     loaders: [
