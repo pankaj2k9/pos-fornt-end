@@ -5,6 +5,7 @@ import path from 'path'
 import ExtractTextPlugin from 'extract-text-webpack-plugin'
 import WebpackMd5Hash from 'webpack-md5-hash'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import OfflinePlugin from 'offline-plugin'
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production'),
@@ -61,7 +62,20 @@ export default {
     new webpack.optimize.DedupePlugin(),
 
     // Minify JS
-    new webpack.optimize.UglifyJsPlugin()
+    new webpack.optimize.UglifyJsPlugin(),
+    new OfflinePlugin({
+      relativePaths: false,
+      publicPath: '/',
+      AppCache: false,
+      // To make other routes work during offline.
+      // See also :https://github.com/NekR/offline-plugin/blob/master/docs/cache-maps.md
+      cacheMaps: [
+        {
+          match: /\/.*/,
+          to: '/'
+        }
+      ]
+    })
   ],
   module: {
     loaders: [

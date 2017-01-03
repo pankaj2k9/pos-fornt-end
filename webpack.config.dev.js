@@ -40,6 +40,8 @@ export default {
       relativePaths: false,
       publicPath: '/',
       AppCache: false,
+      // To make other routes work during offline.
+      // See also :https://github.com/NekR/offline-plugin/blob/master/docs/cache-maps.md
       cacheMaps: [
         {
           match: /\/.*/,
