@@ -7,9 +7,13 @@ export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 
 import {
   addCashdrawerOpenCount,
-  updateCashDrawer,
+  // updateCashDrawer,
   setActiveModal
  } from './application'
+
+import {
+  lastOrderidSuccess
+} from './offlineOrders'
 
 import {
   afterOrderProcessed
@@ -56,35 +60,20 @@ export function orderStateReset () {
   }
 }
 
-export function processOrder (orderInfo, receipt, staff) {
+export function processOrder (orderInfo, receipt, lastId) {
   return (dispatch) => {
     dispatch(setActiveModal('orderProcessing'))
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(orderSuccess())
-      let newPoints = {
-        points: order.redemptionPoints,
-        newOdbo: Number(receipt.trans.previousOdbo) + Number(order.redemptionPoints)
-      }
-      const newReceipt = {
-        items: receipt.items,
-        info: {
-          date: new Date(),
-          staff,
-          orderId: order.id
-        },
-        // trans: Object.assign(receipt.trans),
-        trans: Object.assign(receipt.trans, newPoints),
-        headerText: receipt.headerText,
-        footerText: receipt.footerText
-      }
-      let data = { count: receipt.cashDrawerOpenCount }
-      dispatch(updateCashDrawer(staff, data, order))
+      dispatch(lastOrderidSuccess(lastId))
+      // let data = { count: receipt.cashDrawerOpenCount }
+      // dispatch(updateCashDrawer(staff, data, order))
       dispatch(afterOrderProcessed())
-      dispatch(temporaryReceiptData(newReceipt))
+      dispatch(temporaryReceiptData(receipt))
       if (order.id) {
-        print(newReceipt)
+        print(receipt)
         dispatch(addCashdrawerOpenCount())
       }
       /**

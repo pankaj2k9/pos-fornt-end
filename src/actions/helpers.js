@@ -96,14 +96,16 @@ export function reprintReceipt (receiptData) {
   }
 }
 
-export function resetStore (locale) {
+export function resetStore (locale, posMode) {
   return (dispatch) => {
+    if (posMode === 'online') {
+      dispatch(fetchAllProducts(locale))
+      dispatch(fetchCustomers())
+    }
     dispatch(panelCheckoutReset())
     dispatch(panelCartReset())
     dispatch(closeActiveModal(focusProductSearch))
     dispatch(orderStateReset())
-    dispatch(fetchAllProducts(locale))
-    dispatch(fetchCustomers())
   }
 }
 
