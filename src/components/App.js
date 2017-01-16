@@ -12,10 +12,11 @@ import {
   setActiveModal,
   closeActiveModal,
   resetStaffState,
-  validateAndUpdateCashdrawer,
+  updateCashDrawer,
   setCashdrawerFailure,
   setCashierLoggedIn,
-  toggleNetworkStatus
+  toggleNetworkStatus,
+  togglePosMode
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
@@ -27,22 +28,28 @@ import '../assets/logo-horizontal.png' // navbar logo
 class App extends React.Component {
   componentDidMount () {
     const {dispatch} = this.props
-    window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus()) })
-    window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus()) })
+    window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus('offline')) })
+    window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus('online')) })
   }
 
-  componentWillMount () {
-    const { dispatch, location } = this.props
-    var currentLocation = location.pathname
-    if (currentLocation === '/') {
-      dispatch(logout(browserHistory))
-      dispatch(onLogout())
-    }
-  }
+  // componentWillMount () {
+  //   const { dispatch, location } = this.props
+  //   var currentLocation = location.pathname
+  //   if (currentLocation === '/') {
+  //     dispatch(logout(browserHistory))
+  //     dispatch(onLogout())
+  //   }
+  // }
 
   handleHamburgerToggle () {
     const { dispatch } = this.props
     dispatch(hamburgerToggle())
+  }
+
+  changePosMode () {
+    const { dispatch, posMode } = this.props
+    const mode = posMode === 'online' ? 'offline' : 'online'
+    dispatch(togglePosMode(mode))
   }
 
   handleLogout () {
@@ -85,16 +92,32 @@ class App extends React.Component {
     dispatch(setActiveModal('verifyStaff'))
   }
 
+  // updateCashdrawer (event) {
+  //   event.preventDefault()
+  //   const {dispatch, staff, storeId, activeCashdrawer} = this.props
+  //   var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
+  //   let query = {
+  //     query: {
+  //       store: storeId,
+  //       pinCode: document.getElementById('storePinCode2').value
+  //     }
+  //   }
+  //   let data = {
+  //     date: activeCashdrawer.date,
+  //     amount: amountToAdd,
+  //     count: Number(activeCashdrawer.cashDrawerOpenCount) + 1
+  //   }
+  //   if (amountToAdd <= 0 || isNaN(amountToAdd)) {
+  //     dispatch(setCashdrawerFailure('You have entered an invalid amount'))
+  //   } else {
+  //     dispatch(validateAndUpdateCashdrawer(query, staff, data))
+  //   }
+  // }
+
   updateCashdrawer (event) {
     event.preventDefault()
-    const {dispatch, staff, storeId, activeCashdrawer} = this.props
+    const {dispatch, staff, activeCashdrawer} = this.props
     var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
-    let query = {
-      query: {
-        store: storeId,
-        pinCode: document.getElementById('storePinCode2').value
-      }
-    }
     let data = {
       date: activeCashdrawer.date,
       amount: amountToAdd,
@@ -103,7 +126,7 @@ class App extends React.Component {
     if (amountToAdd <= 0 || isNaN(amountToAdd)) {
       dispatch(setCashdrawerFailure('You have entered an invalid amount'))
     } else {
-      dispatch(validateAndUpdateCashdrawer(query, staff, data))
+      dispatch(updateCashDrawer(staff, data))
     }
   }
 
@@ -302,11 +325,14 @@ class App extends React.Component {
   }
 
   render () {
-    const { isHamburgerOpen, location, isLoggingOut, networkStatus,
+    const { isHamburgerOpen, location, isLoggingOut, networkStatus, posMode,
             staff, activeCashier, adminToken, activeModalId } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.user
-    const hideNetStat = networkStatus ? 'is-hidden-widescreen is-hidden-tablet' : ''
+    const hideNetStat = networkStatus === 'online'
+      ? 'is-hidden-widescreen is-hidden-tablet'
+      : posMode === 'offline' ? 'is-hidden-widescreen is-hidden-tablet' : ''
+    console.log('posMode: ', posMode)
     return (
       <div>
         <NavBar isHamburgerOpen={isHamburgerOpen}
@@ -325,7 +351,7 @@ class App extends React.Component {
             <div className='media-content'>
               <div className='content has-text-centered'>
                 <p><span className='icon'><i className='fa fa-exclamation-circle' /></span>
-                  No Internet Connection.
+                  <FormattedMessage id='app.error.noNetwork' /> <a onClick={this.changePosMode.bind(this)}><FormattedMessage id='app.button.switchToOffline' /></a>
                 </p>
               </div>
             </div>
@@ -353,6 +379,7 @@ function mapStateToProps (state) {
     intl: state.intl,
     isHamburgerOpen: state.application.isHamburgerOpen,
     networkStatus: state.application.networkStatus,
+    posMode: state.application.posMode,
     staff: state.application.staff,
     storeId: state.application.storeId,
     shouldUpdate: state.application.shouldUpdate,
@@ -364,7 +391,6 @@ function mapStateToProps (state) {
     adminToken: state.application.adminToken,
     isLoggingOut: state.login.isLoggingOut,
     customerFilter: state.settings.customerFilter
-
   }
 }
 

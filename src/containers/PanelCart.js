@@ -33,6 +33,10 @@ import {
 } from '../actions/ordersOnHold'
 
 import {
+  syncOfflineOrders
+} from '../actions/offlineOrders'
+
+import {
   customersSetSearchKey,
   setSettingsActiveTab
 } from '../actions/settings'
@@ -51,7 +55,8 @@ import {
 
 import {
   closeActiveModal,
-  setActiveModal
+  setActiveModal,
+  togglePosMode
 } from '../actions/application'
 
 const focusProductSearch = 'productsSearch'
@@ -116,12 +121,15 @@ class PanelCart extends Component {
   }
 
   _clickButtons (buttonName) {
-    const {dispatch, cartItemsArray} = this.props
+    const {dispatch, cartItemsArray, posMode, processedOfflineOrders} = this.props
     const button = buttonName.toLowerCase()
     if (cartItemsArray.length > 0) {
       switch (button) {
         case 'hold order':
           this._clickHoldOrder()
+          break
+        case 'recall order':
+          this._openModal('recallOrder', focusOrderSearch)
           break
         case 'add overall discount':
           this._openModal('addCustomDiscount', focusDiscountInput)
@@ -139,31 +147,43 @@ class PanelCart extends Component {
     } else {
       document.getElementById('productsSearch').focus()
     }
-    switch (button) {
-      case 'x/z reading':
-        dispatch(reportsSetTab('completeSales'))
-        browserHistory.push('reports')
-        break
-      case 'view bill':
-        dispatch(reportsSetTab('bills'))
-        browserHistory.push('reports')
-        break
-      case 'staff sales':
-        dispatch(reportsSetTab('staffSales'))
-        browserHistory.push('reports')
-        break
-      case 'outlet stock':
-        dispatch(reportsSetTab('stocks'))
-        browserHistory.push('reports')
-        break
-      case 'reprint/ refund':
-        dispatch(setSettingsActiveTab('orders'))
-        browserHistory.push('settings')
-        break
-      case 'recall order':
-        this._openModal('recallOrder', focusOrderSearch)
-        break
-      default:
+    if (posMode === 'online') {
+      switch (button) {
+        case 'switch to offline':
+          dispatch(togglePosMode('offline'))
+          break
+        case 'x/z reading':
+          dispatch(reportsSetTab('completeSales'))
+          browserHistory.push('reports')
+          break
+        case 'view bill':
+          dispatch(reportsSetTab('bills'))
+          browserHistory.push('reports')
+          break
+        case 'staff sales':
+          dispatch(reportsSetTab('staffSales'))
+          browserHistory.push('reports')
+          break
+        case 'outlet stock':
+          dispatch(reportsSetTab('stocks'))
+          browserHistory.push('reports')
+          break
+        case 'reprint/ refund':
+          dispatch(setSettingsActiveTab('orders'))
+          browserHistory.push('settings')
+          break
+        case 'sync data':
+          dispatch(syncOfflineOrders(processedOfflineOrders))
+          break
+        default:
+      }
+    } else {
+      switch (button) {
+        case 'switch to online':
+          dispatch(togglePosMode('online'))
+          break
+        default:
+      }
     }
   }
 
@@ -330,7 +350,8 @@ class PanelCart extends Component {
       activeCustomer,
       cartItemsArray,
       ordersOnHold,
-      shouldUpdate
+      shouldUpdate,
+      posMode
     } = this.props
     let disableAddPayment
     let disableOtherButtons
@@ -342,32 +363,41 @@ class PanelCart extends Component {
       disableOtherButtons = false
     }
 
+    const disabled = posMode === 'offline'
+    // console.log('disabled: ', disabled)
+
+    const toggleMode = posMode === 'offline'
+      ? {name: 'Switch to Online', label: 'app.button.switchOnline', icon: 'fa fa-window-minimize', customColor: 'blue', size: 'is-3'}
+      : {name: 'Switch to Offline', label: 'app.button.switchOffline', icon: 'fa fa-wifi', customColor: 'green', size: 'is-3'}
+
     var buttons1 = [
-      {name: 'X/Z Reading', icon: 'fa fa-files-o'},
-      {name: 'View Bill', icon: 'fa fa-files-o'},
-      {name: 'Staff Sales', icon: 'fa fa-files-o'},
-      {name: 'Outlet Stock', icon: 'fa fa-files-o'},
-      {name: 'Reprint/ Refund', icon: 'fa fa-cog'},
-      {name: 'Add Overall Discount', icon: 'fa fa-calendar-minus-o', customColor: disableOtherButtons ? 'grey' : 'black'},
-      {name: 'Recall Order', icon: 'fa fa-hand-lizard-o', customColor: ordersOnHold.length > 0 ? '#23d160' : 'grey'},
-      {name: 'Hold Order', icon: 'fa fa-hand-rock-o', customColor: disableOtherButtons ? 'grey' : 'black'},
-      {name: 'Print Total', icon: 'fa fa-print', customColor: disableOtherButtons ? 'grey' : 'black'}
+      toggleMode,
+      {name: 'Recall Order', label: 'app.button.recallOrder', icon: 'fa fa-hand-lizard-o', customColor: ordersOnHold.length > 0 ? '#23d160' : 'grey', size: 'is-3'},
+      {name: 'Hold Order', label: 'app.button.holdOrder', icon: 'fa fa-hand-rock-o', customColor: disableOtherButtons ? 'grey' : 'black', size: 'is-3'},
+      {name: 'Print Total', label: 'app.button.printTotal', icon: 'fa fa-print', customColor: disableOtherButtons ? 'grey' : 'black', size: 'is-3'},
+      {name: 'Sync Data', disabled, label: 'app.button.syncData', icon: 'fa fa-refresh', size: 'is-3'},
+      {name: 'X/Z Reading', disabled, label: 'app.button.xzReading', icon: 'fa fa-files-o', size: 'is-3'},
+      {name: 'View Bill', disabled, label: 'app.button.viewBill', icon: 'fa fa-files-o', size: 'is-3'},
+      {name: 'Staff Sales', disabled, label: 'app.button.staffSales', icon: 'fa fa-files-o', size: 'is-3'},
+      {name: 'Outlet Stock', disabled, label: 'app.button.outletStock', icon: 'fa fa-files-o'},
+      {name: 'Reprint/ Refund', disabled, label: 'app.button.repRef', icon: 'fa fa-cog'},
+      {name: 'Add Overall Discount', label: 'app.button.addOD', icon: 'fa fa-calendar-minus-o', customColor: disableOtherButtons ? 'grey' : 'black'}
     ]
 
     var buttons2 = [
-      {name: 'Cash', icon: 'fa fa-money', customColor: disableAddPayment ? 'grey' : '#4A235A'},
-      {name: 'Credit', icon: 'fa fa-credit-card', customColor: disableAddPayment ? 'grey' : '#4A235A'},
-      {name: 'Nets', icon: 'fa fa-credit-card', customColor: disableAddPayment ? 'grey' : '#4A235A'},
-      {name: 'Double Points', icon: 'fa fa-star-o', customColor: activeCustomer ? 'orange' : 'grey'},
-      {name: 'Use Odbo Coins', icon: 'fa fa-asterisk', customColor: activeCustomer ? '#23d160' : 'grey'},
-      {name: 'Voucher', icon: 'fa fa-file-excel-o', customColor: disableAddPayment ? 'grey' : '#4A235A'}
+      {name: 'Cash', label: 'app.button.cash', icon: 'fa fa-money', customColor: disableAddPayment ? 'grey' : '#4A235A'},
+      {name: 'Credit', label: 'app.button.credit', icon: 'fa fa-credit-card', customColor: disableAddPayment ? 'grey' : '#4A235A'},
+      {name: 'Nets', label: 'app.button.nets', icon: 'fa fa-credit-card', customColor: disableAddPayment ? 'grey' : '#4A235A'},
+      {name: 'Double Points', disabled, label: 'app.button.doublePoints', icon: 'fa fa-star-o', customColor: activeCustomer ? 'orange' : 'grey'},
+      {name: 'Use Odbo Coins', disabled, label: 'app.button.useOC', icon: 'fa fa-asterisk', customColor: activeCustomer ? '#23d160' : 'grey'},
+      {name: 'Voucher', label: 'app.button.voucher', icon: 'fa fa-file-excel-o', customColor: disableAddPayment ? 'grey' : '#4A235A'}
     ]
 
     var buttons3 = [
-      {name: 'Admin', icon: 'fa fa-user-secret fa-lg', size: 'is-3'},
-      {name: 'Product List', icon: 'fa fa-shopping-bag fa-lg', size: 'is-3'},
-      {name: 'Search Customer', icon: 'fa fa-search fa-lg', size: 'is-3'},
-      {name: 'Adjust Points', icon: 'fa fa-arrows-v fa-lg', size: 'is-3'}
+      {name: 'Admin', disabled, label: 'app.button.admin', icon: 'fa fa-user-secret fa-lg', size: 'is-3'},
+      {name: 'Product List', label: 'app.button.prodList', icon: 'fa fa-shopping-bag fa-lg', size: 'is-3'},
+      {name: 'Search Customer', disabled, label: 'app.button.cust', icon: 'fa fa-search fa-lg', size: 'is-3'},
+      {name: 'Adjust Points', disabled, label: 'app.button.adjustPts', icon: 'fa fa-arrows-v fa-lg', size: 'is-3'}
     ]
 
     return (
@@ -658,10 +688,12 @@ PanelCart.propTypes = {
 function mapStateToProps (state) {
   return {
     storeId: state.application.storeId,
+    posMode: state.application.posMode,
     productsArray: state.data.products.productsArray,
     productsById: state.data.products.productsById,
     productsSearchKey: state.panelProducts.productsSearchKey,
     productsFilter: state.panelProducts.productsFilter,
+    processedOfflineOrders: state.offlineOrders.processedOfflineOrders,
     fetchingCustomers: state.data.customers.isFetching,
     customerSearchKey: state.settings.customerSearchKey,
     customerSearchKeyOIDFR: state.settings.customerSearchKeyOIDFR,
