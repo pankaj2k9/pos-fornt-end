@@ -4,8 +4,10 @@ import {
   LAST_ORDERID_FAILURE,
   PROCESS_OFFLINE_ORDER,
   SYNC_ORDERS_REQUEST,
-  SYNC_ORDERS_SUCCESS,
-  SYNC_ORDERS_FAILURE
+  SYNC_ORDER_SUCCESS,
+  SYNC_ORDER_FAILED,
+  SYNC_ORDERS_DONE,
+  CLEAR_MESSAGES
 } from '../actions/offlineOrders'
 
 function offlineOrders (state = {
@@ -13,6 +15,7 @@ function offlineOrders (state = {
   processedOfflineOrders: [],
   failedOrders: [],
   successOrders: [],
+  syncSuccess: undefined,
   isProcessing: false,
   error: undefined
 }, action) {
@@ -40,19 +43,29 @@ function offlineOrders (state = {
       return Object.assign({}, state, {
         isProcessing: true
       })
-    case SYNC_ORDERS_SUCCESS:
+    case SYNC_ORDER_SUCCESS:
       state.successOrders.push(action.successOrder)
+      return Object.assign({}, state, {
+        successOrders: state.successOrders
+      })
+    case SYNC_ORDER_FAILED:
+      state.failedOrders.push(action.failedOrder)
+      return Object.assign({}, state, {
+        error: action.error,
+        failedOrders: state.failedOrders
+      })
+    case SYNC_ORDERS_DONE:
+      const noFailedOrders = state.failedOrders.length === 0
       return Object.assign({}, state, {
         isProcessing: false,
         processedOfflineOrders: [],
-        successOrders: state.successOrders
+        syncSuccess: noFailedOrders
       })
-    case SYNC_ORDERS_FAILURE:
-      state.failedOrders.push(action.failedOrder)
+    case CLEAR_MESSAGES:
       return Object.assign({}, state, {
         isProcessing: false,
-        error: action.error,
-        failedOrders: state.failedOrders
+        error: undefined,
+        syncSuccess: undefined
       })
     default:
       return state

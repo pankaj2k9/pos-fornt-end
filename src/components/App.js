@@ -7,6 +7,8 @@ import { injectIntl, FormattedMessage } from 'react-intl'
 
 import NavBar from './NavBar'
 
+import SyncModal from '../components/SyncModal'
+
 import {
   hamburgerToggle,
   setActiveModal,
@@ -20,6 +22,11 @@ import {
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
+
+import {
+  syncOfflineOrders,
+  clearMessages
+} from '../actions/offlineOrders'
 
 import { logout } from '../actions/login'
 import { onLogout } from '../actions/helpers'
@@ -64,8 +71,19 @@ class App extends React.Component {
   }
 
   close () {
-    const {dispatch} = this.props
-    dispatch(setActiveModal(''))
+    const {dispatch, activeModalId} = this.props
+    dispatch(closeActiveModal())
+    if (activeModalId === 'syncModal') {
+      dispatch(clearMessages())
+    }
+  }
+
+  syncOrders () {
+    const {dispatch, processedOfflineOrders, failedOrders} = this.props
+    const allOfflineOrders = failedOrders.length > 0
+      ? processedOfflineOrders.concat(failedOrders)
+      : processedOfflineOrders
+    dispatch(syncOfflineOrders(allOfflineOrders))
   }
 
   onChange (staffId) {
@@ -324,19 +342,50 @@ class App extends React.Component {
     )
   }
 
+  renderSyncModal () {
+    const { failedOrders, processedOfflineOrders, successOrders, syncIsProcessing, syncSuccess } = this.props
+    return (
+      <SyncModal
+        isProcessing={syncIsProcessing}
+        syncSuccess={syncSuccess}
+        failedOrders={failedOrders}
+        offlineOrders={processedOfflineOrders}
+        successOrders={successOrders}
+        onSync={this.syncOrders.bind(this)}
+        onClose={this.close.bind(this)} />
+    )
+  }
+
+  renderModal () {
+    const { activeModalId, staff } = this.props
+    switch (activeModalId) {
+      case 'updateCashDrawer':
+        return this.renderCashDrawerModal()
+      case 'verifyStaff':
+        if (staff) { return this.chooseUserModal() }
+        break
+      case 'verifyStorePin':
+        return this.renderVerifyStorePinCode()
+      case 'syncModal':
+        return this.renderSyncModal()
+      default:
+        return null
+    }
+  }
+
   render () {
     const { isHamburgerOpen, location, isLoggingOut, networkStatus, posMode,
-            staff, activeCashier, adminToken, activeModalId } = this.props
+            staff, activeCashier, adminToken } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.user
     const hideNetStat = networkStatus === 'online'
       ? 'is-hidden-widescreen is-hidden-tablet'
       : posMode === 'offline' ? 'is-hidden-widescreen is-hidden-tablet' : ''
-    console.log('posMode: ', posMode)
     return (
       <div>
         <NavBar isHamburgerOpen={isHamburgerOpen}
           shouldShowControls={shouldShowNavCtrl}
+          posMode={posMode}
           onLogout={this.handleLogout.bind(this)}
           onLogoutCashier={this.handleLogoutCashier.bind(this)}
           onHamburgerToggle={this.handleHamburgerToggle.bind(this)}
@@ -362,13 +411,7 @@ class App extends React.Component {
             {this.props.children}
           </div>
         </section>
-        {this.renderCashDrawerModal()}
-        {
-          staff && activeModalId === 'verifyStaff'
-          ? this.chooseUserModal()
-          : null
-        }
-        {this.renderVerifyStorePinCode()}
+        {this.renderModal()}
       </div>
     )
   }
@@ -389,6 +432,11 @@ function mapStateToProps (state) {
     activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
     adminToken: state.application.adminToken,
+    failedOrders: state.offlineOrders.failedOrders,
+    successOrders: state.offlineOrders.successOrders,
+    processedOfflineOrders: state.offlineOrders.processedOfflineOrders,
+    syncIsProcessing: state.offlineOrders.isProcessing,
+    syncSuccess: state.offlineOrders.syncSuccess,
     isLoggingOut: state.login.isLoggingOut,
     customerFilter: state.settings.customerFilter
   }

@@ -47,8 +47,6 @@ export function fetchLastOrderid (params) {
       .then(response => {
         const lastOrder = response.data[0].id
         const lastId = Number(lastOrder.replace(/^\D+/g, ''))
-        console.log('response', response.data[0].id)
-        console.log('last id: ', Number(lastOrder.replace(/^\D+/g, '')))
         dispatch(lastOrderidSuccess(lastId))
       })
       .catch(error => {
@@ -96,33 +94,53 @@ export function syncOrdersRequest () {
   }
 }
 
-export const SYNC_ORDERS_SUCCESS = 'SYNC_ORDERS_SUCCESS'
-export function syncOrdersSuccess (successOrder) {
+export const SYNC_ORDER_SUCCESS = 'SYNC_ORDER_SUCCESS'
+export function syncOrderSuccess () {
   return {
-    type: SYNC_ORDERS_SUCCESS,
-    successOrder
+    type: SYNC_ORDER_SUCCESS
   }
 }
 
-export const SYNC_ORDERS_FAILURE = 'SYNC_ORDERS_FAILURE'
-export function syncOrdersFailure (error, failedOrder) {
+export const SYNC_ORDERS_DONE = 'SYNC_ORDERS_DONE'
+export function syncOrdersDone () {
   return {
-    type: SYNC_ORDERS_FAILURE,
+    type: SYNC_ORDERS_DONE
+  }
+}
+
+export const SYNC_ORDER_FAILED = 'SYNC_ORDER_FAILED'
+export function syncOrderFailed (error, failedOrder) {
+  return {
+    type: SYNC_ORDER_FAILED,
     error,
     failedOrder
+  }
+}
+
+export const CLEAR_MESSAGES = 'CLEAR_MESSAGES'
+export function clearMessages () {
+  return {
+    type: CLEAR_MESSAGES
   }
 }
 
 export function syncOfflineOrders (offlineOrders) {
   return (dispatch) => {
     dispatch(syncOrdersRequest())
+    let processCount = 0
     offlineOrders.forEach(offlineOrder => {
       return ordersService.create(offlineOrder)
       .then(response => {
-        dispatch(syncOrdersSuccess(offlineOrder))
+        processCount++
+        dispatch(syncOrderSuccess(offlineOrder))
+        if (processCount === offlineOrders.length) {
+          setTimeout(function () {
+            dispatch(syncOrdersDone())
+          }, 2000)
+        }
       })
       .catch(error => {
-        dispatch(syncOrdersFailure(error.message, offlineOrder))
+        dispatch(syncOrderFailed(error.message, offlineOrder))
       })
     })
   }
