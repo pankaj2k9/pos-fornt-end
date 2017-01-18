@@ -137,7 +137,6 @@ class PanelCheckoutModals extends Component {
     let modalActive = activeModalId === 'orderProcessed'
       ? 'modal is-active'
       : 'modal'
-    console.log('closeModal', closeModal)
     return (
       <div className={modalActive}>
         <div className='modal-background' />

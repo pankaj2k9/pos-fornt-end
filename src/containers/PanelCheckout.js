@@ -712,7 +712,9 @@ class PanelCheckout extends Component {
     / Process Order Info
     */
 
+    let productCount = 0
     let products = cartItemsArray.map(item => {
+      productCount = productCount + item.qty
       return {
         productId: Number(item.id),
         quantity: item.qty,
@@ -757,7 +759,7 @@ class PanelCheckout extends Component {
       dateOrdered: new Date(),
       source: storeData.source,
       subtotal: Number(this.sumOfCartItems()),
-      totalQuantity: 1,
+      totalQuantity: productCount,
       currency,
       total: Number(this.orderTotal()),
       redemptionPoints: Number(this.sumOfCartItems()),
@@ -857,7 +859,6 @@ class PanelCheckout extends Component {
         dispatch(processOrder(orderInfo, receipt, lastId))
       }
     } else if (posMode === 'offline') {
-      console.log('receipt: ', receipt)
       dispatch(makeOfflineOrder(orderInfo, receipt, lastId))
     }
   }

@@ -33,10 +33,6 @@ import {
 } from '../actions/ordersOnHold'
 
 import {
-  syncOfflineOrders
-} from '../actions/offlineOrders'
-
-import {
   customersSetSearchKey,
   setSettingsActiveTab
 } from '../actions/settings'
@@ -121,7 +117,7 @@ class PanelCart extends Component {
   }
 
   _clickButtons (buttonName) {
-    const {dispatch, cartItemsArray, posMode, processedOfflineOrders} = this.props
+    const {dispatch, cartItemsArray, posMode} = this.props
     const button = buttonName.toLowerCase()
     if (cartItemsArray.length > 0) {
       switch (button) {
@@ -173,7 +169,7 @@ class PanelCart extends Component {
           browserHistory.push('settings')
           break
         case 'sync data':
-          dispatch(syncOfflineOrders(processedOfflineOrders))
+          dispatch(setActiveModal('syncModal'))
           break
         default:
       }
@@ -364,7 +360,6 @@ class PanelCart extends Component {
     }
 
     const disabled = posMode === 'offline'
-    // console.log('disabled: ', disabled)
 
     const toggleMode = posMode === 'offline'
       ? {name: 'Switch to Online', label: 'app.button.switchOnline', icon: 'fa fa-window-minimize', customColor: 'blue', size: 'is-3'}

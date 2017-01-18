@@ -50,7 +50,6 @@ class LoginForm extends Component {
     const storeIdSelectClass = `select is-fullwidth ${formIsDisabled}`
 
     const containerHeight = intFrameHeight - 80
-    console.log('networkStatus', networkStatus)
     return (
       <div style={{height: containerHeight}}>
         <div>

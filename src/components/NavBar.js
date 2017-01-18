@@ -16,6 +16,7 @@ const NavBar = ({
   activeModalId,
   activeCashier,
   adminToken,
+  posMode,
   onLogout,
   onLogoutCashier,
   isLoggingOut,
@@ -122,24 +123,33 @@ const NavBar = ({
             <span />
           </span>
 
-          <div className={`nav-right nav-menu ${toggleClass}`}>
-            {staff.role === 'master'
-              ? <NavLink to='/store'>
-                <FormattedMessage id='app.navBar.store.title' />
+          {posMode === 'online'
+            ? <div className={`nav-right nav-menu ${toggleClass}`}>
+              {staff.role === 'master'
+                ? <NavLink to='/store'>
+                  <FormattedMessage id='app.navBar.store.title' />
+                </NavLink>
+                : null
+              }
+              <NavLink to='/settings'>
+                <FormattedMessage id='app.navBar.settings.title' />
               </NavLink>
-              : null
-            }
-            <NavLink to='/settings'>
-              <FormattedMessage id='app.navBar.settings.title' />
-            </NavLink>
-            <NavLink to='/reports'>
-              <FormattedMessage id='app.navBar.reports.title' />
-            </NavLink>
-            <div className='nav-item'>
-              <LanguageToggle />
+              <NavLink to='/reports'>
+                <FormattedMessage id='app.navBar.reports.title' />
+              </NavLink>
+              <div className='nav-item'>
+                <LanguageToggle />
+              </div>
             </div>
-          </div>
-
+            : <div className={`nav-right nav-menu ${toggleClass}`}>
+              <NavLink to='/store'>
+                <FormattedMessage id='app.navBar.offlineStore' />
+              </NavLink>
+              <div className='nav-item'>
+                <LanguageToggle />
+              </div>
+            </div>
+          }
         </nav>
         : <nav className='nav dark'>
           <div className='nav-left'>
