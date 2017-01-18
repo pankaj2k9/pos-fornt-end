@@ -2,6 +2,7 @@ const zh = {
   'app.navBar.store.title': '商店',
   'app.navBar.settings.title': '建立',
   'app.navBar.reports.title': '报告',
+  'app.navBar.offlineStore': '离线商店',
 
   'app.general.previous': '以前',
   'app.general.nextPage': '下一页',
@@ -151,6 +152,7 @@ const zh = {
   'app.button.clear': '清',
   'app.button.checkout': '推出订单',
   'app.button.openDrawer': '打开钱箱',
+  'app.button.syncOrders': '同步订单',
 
   'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
@@ -174,6 +176,9 @@ const zh = {
   'app.ph.youChoose': '您选用',
   'app.ph.storePin': '商店 PIN',
   'app.ph.enterNewVal': '输入一个新值',
+  'app.ph.noDataToSync': '无数据要同步',
+  'app.ph.offlineOrders': '离线订单',
+  'app.ph.cashdrawerData': '现金抽屉数据',
 
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noNetwork': '没有网络连接',
@@ -186,6 +191,10 @@ const zh = {
   'app.error.excessPayment': '超量自定义付款，不应超过付款余额',
   'app.error.noTenantNum': '商店没有租户号码。 如果存在租户号码，请与开发人员联系。如果没有，请先联系商场。',
   'app.ph.enterRefundRemarks': '什么是退款的原因',
+  'app.ph.syncSuccess': '已成功同步',
+  'app.ph.syncFailed': '无法同步',
+  'app.ph.notSynced': '不同步',
+  'app.ph.syncing': '当前正在同步. . .',
 
   'app.modal.order': '订购',
   'app.modal.orderId': '订购 ID',

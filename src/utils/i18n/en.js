@@ -2,6 +2,7 @@ const en = {
   'app.navBar.store.title': 'Store',
   'app.navBar.settings.title': 'Settings',
   'app.navBar.reports.title': 'Reports',
+  'app.navBar.offlineStore': 'Offline Store',
 
   'app.general.previous': 'Previous',
   'app.general.nextPage': 'Next page',
@@ -151,6 +152,7 @@ const en = {
   'app.button.clear': 'Clear',
   'app.button.checkout': 'Checkout',
   'app.button.openDrawer': 'Open Drawer',
+  'app.button.syncOrders': 'Synchronize Orders',
 
   'app.ph.paymentAmount': 'Input Exact Amount/Custom Amount',
   'app.ph.voucherAmount': 'Input Voucher Amount',
@@ -176,6 +178,13 @@ const en = {
   'app.ph.storePin': 'enter PIN',
   'app.ph.enterNewVal': 'enter new value',
   'app.ph.enterRefundRemarks': 'What is the reason of refund',
+  'app.ph.noDataToSync': 'No Data to Synchronize.',
+  'app.ph.offlineOrders': 'Offline Orders',
+  'app.ph.cashdrawerData': 'Cashdrawer Data',
+  'app.ph.syncSuccess': 'Successfully Synced',
+  'app.ph.syncFailed': 'Failed to Sync',
+  'app.ph.notSynced': 'Not Synced',
+  'app.ph.syncing': 'Syncing. . .',
 
   'app.error.update.stock': 'Update stocks on admin app',
   'app.error.noNetwork': 'No Internet Connection',
