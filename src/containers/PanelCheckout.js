@@ -42,8 +42,11 @@ import {
 } from '../actions/helpers'
 
 import {
-  processOrder,
-  orderStateReset
+  makeOfflineOrder
+} from '../actions/offlineOrders'
+
+import {
+  processOrder
 } from '../actions/orders'
 import { formatCurrency } from '../utils/string'
 
@@ -95,11 +98,10 @@ class PanelCheckout extends Component {
   }
 
   _closeModal () {
-    const { dispatch, activeModalId, orderSuccess } = this.props
+    const { dispatch, activeModalId, locale, orderError, posMode } = this.props
     if (activeModalId === 'orderProcessed') {
-      if (orderSuccess) {
-        dispatch(resetStore())
-        dispatch(orderStateReset())
+      if (!orderError) {
+        dispatch(resetStore(locale, posMode))
       }
     }
     dispatch(closeActiveModal(focusProductSearch))
@@ -112,10 +114,10 @@ class PanelCheckout extends Component {
   }
 
   _clickCheckoutButtons (buttonName) {
-    const { dispatch, cartItemsArray } = this.props
+    const { dispatch, cartItemsArray, locale, posMode } = this.props
     let mode = buttonName.toLowerCase()
     if (mode === 'clear') {
-      dispatch(resetStore())
+      dispatch(resetStore(locale, posMode))
     } else if (mode === 'checkout order') {
       const okForCheckout = cartItemsArray.length !== 0 && this.paymentMinusOrderTotal() >= 0
       if (okForCheckout) {
@@ -426,9 +428,9 @@ class PanelCheckout extends Component {
     const okForCheckout = cartItemsArray.length !== 0 && this.paymentMinusOrderTotal() >= 0
 
     var buttons3 = [
-      {name: 'Clear', icon: 'fa fa-times', customColor: okForClear ? 'red' : 'grey'},
-      {name: 'Checkout Order', icon: 'fa fa-check', customColor: okForCheckout ? 'green' : 'grey'},
-      {name: 'Open Drawer', icon: 'fa fa-upload', customColor: '#3273dc'}
+      {name: 'Clear', label: 'app.button.clear', icon: 'fa fa-times', customColor: okForClear ? 'red' : 'grey'},
+      {name: 'Checkout Order', label: 'app.button.checkout', icon: 'fa fa-check', customColor: okForCheckout ? 'green' : 'grey'},
+      {name: 'Open Drawer', label: 'app.button.openDrawer', icon: 'fa fa-upload', customColor: '#3273dc'}
     ]
     var paymentBalance = this.orderTotal() - this.sumOfPayments() >= 0
       ? this.orderTotal() - this.sumOfPayments()
@@ -673,6 +675,8 @@ class PanelCheckout extends Component {
       orderNote,
       payments,
       pincode,
+      posMode,
+      lastOrderId,
       bonusPoints,
       activeCashdrawer,
       activeCashier,
@@ -681,6 +685,12 @@ class PanelCheckout extends Component {
       cartItemsArray,
       printPreviewTotal
     } = this.props
+
+    let zeroes = ''
+    for (var i = lastOrderId.toString().length; i < 7; i++) {
+      zeroes = zeroes + '0'
+    }
+    const lastId = lastOrderId + 1
 
     if (currency === 'odbo' && pincode && event) {
       event.preventDefault()
@@ -702,10 +712,14 @@ class PanelCheckout extends Component {
     / Process Order Info
     */
 
+    let productCount = 0
     let products = cartItemsArray.map(item => {
+      productCount = productCount + item.qty
       return {
-        id: Number(item.id),
+        productId: Number(item.id),
         quantity: item.qty,
+        itemCost: currency === 'sgd' ? Number(item.price) : Number(item.odboPrice),
+        totalCost: currency === 'sgd' ? Number(item.price) * item.qty : Number(item.odboPrice) * item.qty,
         discount: Number(customDiscount) === 0
           ? Number(item.customDiscount) === 0 // Check if zero custom discount
             ? item.isDiscounted // if true then check for default discount
@@ -739,13 +753,19 @@ class PanelCheckout extends Component {
     })
 
     const orderInfo = {
-      products,
-      currency,
+      items: products,
+      id: `${storeData.code}${zeroes}${lastId}`,
+      adminId: activeCashier.id,
+      dateOrdered: new Date(),
       source: storeData.source,
+      subtotal: Number(this.sumOfCartItems()),
+      totalQuantity: productCount,
+      currency,
+      total: Number(this.orderTotal()),
+      redemptionPoints: Number(this.sumOfCartItems()),
       bonusPoints: bonusPoints ? 100 : 0,
       payments: processedPayments,
       pinCode: pincode,
-      adminId: activeCashier.id,
       vouchers: this.paymentTypeList('voucher'),
       odboId: activeCustomer ? String(activeCustomer.odboId) : undefined
     }
@@ -778,7 +798,7 @@ class PanelCheckout extends Component {
         ? item.isDiscounted
           ? currency === 'sgd'
             ? (Number(item.priceDiscount) / 100) * item.price
-            : (parseInt(item.odboPriceDiscount) / 100) * item.odboPrice
+            : (Number(item.odboPriceDiscount) / 100) * item.odboPrice
           : 0.00
         : currency === 'sgd'
           ? (itemCD / 100) * item.price
@@ -800,6 +820,11 @@ class PanelCheckout extends Component {
 
     const receipt = {
       items,
+      info: {
+        date: new Date(),
+        staff,
+        orderId: `${storeData.code}${zeroes}${lastId}`
+      },
       trans: {
         payments: processedPayments,
         activeCustomer,
@@ -814,7 +839,9 @@ class PanelCheckout extends Component {
         vouchers: this.paymentTypeList('voucher'),
         orderNote: orderNote,
         currency: currency,
-        previousOdbo: activeCustomer ? Number(activeCustomer.odboCoins) : undefined
+        previousOdbo: activeCustomer ? Number(activeCustomer.odboCoins) : undefined,
+        points: Number(this.sumOfCartItems()),
+        newOdbo: activeCustomer ? Number(activeCustomer.odboCoins) + Number(this.sumOfCartItems()) : undefined
       },
       headerText: storeAddress,
       footerText: !printPreviewTotal ? ['Thank you', 'Have a nice day!'] : [''],
@@ -822,15 +849,17 @@ class PanelCheckout extends Component {
     }
     if (printPreviewTotal) {
       dispatch(printPreviewTotalReceipt(receipt, activeCustomer))
-    } else {
+    } else if (posMode === 'online') {
       if (currency === 'odbo' && !pincode) {
         var odboPayment = {type: 'odbo', amount: this.orderTotal(), remarks: 'odbo payment'}
         dispatch(addPaymentType(odboPayment))
         dispatch(setActiveModal('odboUserPincode', 'userPincode'))
       } else {
         dispatch(closeActiveModal())
-        dispatch(processOrder(orderInfo, receipt, staff))
+        dispatch(processOrder(orderInfo, receipt, lastId))
       }
+    } else if (posMode === 'offline') {
+      dispatch(makeOfflineOrder(orderInfo, receipt, lastId))
     }
   }
 }
@@ -848,6 +877,8 @@ function mapStateToProps (state) {
     adminToken: state.application.adminToken,
     activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
+    posMode: state.application.posMode,
+    lastOrderId: state.offlineOrders.lastOrderId,
     shouldUpdate: state.panelCart.shouldUpdate,
     orderNote: state.panelCheckout.orderNote,
     walkinCustomer: state.panelCart.walkinCustomer,

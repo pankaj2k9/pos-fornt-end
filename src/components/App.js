@@ -7,18 +7,26 @@ import { injectIntl, FormattedMessage } from 'react-intl'
 
 import NavBar from './NavBar'
 
+import SyncModal from '../components/SyncModal'
+
 import {
   hamburgerToggle,
   setActiveModal,
   closeActiveModal,
   resetStaffState,
-  validateAndUpdateCashdrawer,
+  updateCashDrawer,
   setCashdrawerFailure,
   setCashierLoggedIn,
-  toggleNetworkStatus
+  toggleNetworkStatus,
+  togglePosMode
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
+
+import {
+  syncOfflineOrders,
+  clearMessages
+} from '../actions/offlineOrders'
 
 import { logout } from '../actions/login'
 import { onLogout } from '../actions/helpers'
@@ -27,22 +35,28 @@ import '../assets/logo-horizontal.png' // navbar logo
 class App extends React.Component {
   componentDidMount () {
     const {dispatch} = this.props
-    window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus()) })
-    window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus()) })
+    window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus('offline')) })
+    window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus('online')) })
   }
 
-  componentWillMount () {
-    const { dispatch, location } = this.props
-    var currentLocation = location.pathname
-    if (currentLocation === '/') {
-      dispatch(logout(browserHistory))
-      dispatch(onLogout())
-    }
-  }
+  // componentWillMount () {
+  //   const { dispatch, location } = this.props
+  //   var currentLocation = location.pathname
+  //   if (currentLocation === '/') {
+  //     dispatch(logout(browserHistory))
+  //     dispatch(onLogout())
+  //   }
+  // }
 
   handleHamburgerToggle () {
     const { dispatch } = this.props
     dispatch(hamburgerToggle())
+  }
+
+  changePosMode () {
+    const { dispatch, posMode } = this.props
+    const mode = posMode === 'online' ? 'offline' : 'online'
+    dispatch(togglePosMode(mode))
   }
 
   handleLogout () {
@@ -57,8 +71,19 @@ class App extends React.Component {
   }
 
   close () {
-    const {dispatch} = this.props
-    dispatch(setActiveModal(''))
+    const {dispatch, activeModalId} = this.props
+    dispatch(closeActiveModal())
+    if (activeModalId === 'syncModal') {
+      dispatch(clearMessages())
+    }
+  }
+
+  syncOrders () {
+    const {dispatch, processedOfflineOrders, failedOrders} = this.props
+    const allOfflineOrders = failedOrders.length > 0
+      ? processedOfflineOrders.concat(failedOrders)
+      : processedOfflineOrders
+    dispatch(syncOfflineOrders(allOfflineOrders))
   }
 
   onChange (staffId) {
@@ -85,16 +110,32 @@ class App extends React.Component {
     dispatch(setActiveModal('verifyStaff'))
   }
 
+  // updateCashdrawer (event) {
+  //   event.preventDefault()
+  //   const {dispatch, staff, storeId, activeCashdrawer} = this.props
+  //   var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
+  //   let query = {
+  //     query: {
+  //       store: storeId,
+  //       pinCode: document.getElementById('storePinCode2').value
+  //     }
+  //   }
+  //   let data = {
+  //     date: activeCashdrawer.date,
+  //     amount: amountToAdd,
+  //     count: Number(activeCashdrawer.cashDrawerOpenCount) + 1
+  //   }
+  //   if (amountToAdd <= 0 || isNaN(amountToAdd)) {
+  //     dispatch(setCashdrawerFailure('You have entered an invalid amount'))
+  //   } else {
+  //     dispatch(validateAndUpdateCashdrawer(query, staff, data))
+  //   }
+  // }
+
   updateCashdrawer (event) {
     event.preventDefault()
-    const {dispatch, staff, storeId, activeCashdrawer} = this.props
+    const {dispatch, staff, activeCashdrawer} = this.props
     var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
-    let query = {
-      query: {
-        store: storeId,
-        pinCode: document.getElementById('storePinCode2').value
-      }
-    }
     let data = {
       date: activeCashdrawer.date,
       amount: amountToAdd,
@@ -103,7 +144,7 @@ class App extends React.Component {
     if (amountToAdd <= 0 || isNaN(amountToAdd)) {
       dispatch(setCashdrawerFailure('You have entered an invalid amount'))
     } else {
-      dispatch(validateAndUpdateCashdrawer(query, staff, data))
+      dispatch(updateCashDrawer(staff, data))
     }
   }
 
@@ -301,16 +342,50 @@ class App extends React.Component {
     )
   }
 
+  renderSyncModal () {
+    const { failedOrders, processedOfflineOrders, successOrders, syncIsProcessing, syncSuccess } = this.props
+    return (
+      <SyncModal
+        isProcessing={syncIsProcessing}
+        syncSuccess={syncSuccess}
+        failedOrders={failedOrders}
+        offlineOrders={processedOfflineOrders}
+        successOrders={successOrders}
+        onSync={this.syncOrders.bind(this)}
+        onClose={this.close.bind(this)} />
+    )
+  }
+
+  renderModal () {
+    const { activeModalId, staff } = this.props
+    switch (activeModalId) {
+      case 'updateCashDrawer':
+        return this.renderCashDrawerModal()
+      case 'verifyStaff':
+        if (staff) { return this.chooseUserModal() }
+        break
+      case 'verifyStorePin':
+        return this.renderVerifyStorePinCode()
+      case 'syncModal':
+        return this.renderSyncModal()
+      default:
+        return null
+    }
+  }
+
   render () {
-    const { isHamburgerOpen, location, isLoggingOut, networkStatus,
-            staff, activeCashier, adminToken, activeModalId } = this.props
+    const { isHamburgerOpen, location, isLoggingOut, networkStatus, posMode,
+            staff, activeCashier, adminToken } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.user
-    const hideNetStat = networkStatus ? 'is-hidden-widescreen is-hidden-tablet' : ''
+    const hideNetStat = networkStatus === 'online'
+      ? 'is-hidden-widescreen is-hidden-tablet'
+      : posMode === 'offline' ? 'is-hidden-widescreen is-hidden-tablet' : ''
     return (
       <div>
         <NavBar isHamburgerOpen={isHamburgerOpen}
           shouldShowControls={shouldShowNavCtrl}
+          posMode={posMode}
           onLogout={this.handleLogout.bind(this)}
           onLogoutCashier={this.handleLogoutCashier.bind(this)}
           onHamburgerToggle={this.handleHamburgerToggle.bind(this)}
@@ -325,7 +400,7 @@ class App extends React.Component {
             <div className='media-content'>
               <div className='content has-text-centered'>
                 <p><span className='icon'><i className='fa fa-exclamation-circle' /></span>
-                  No Internet Connection.
+                  <FormattedMessage id='app.error.noNetwork' /> <a onClick={this.changePosMode.bind(this)}><FormattedMessage id='app.button.switchToOffline' /></a>
                 </p>
               </div>
             </div>
@@ -336,13 +411,7 @@ class App extends React.Component {
             {this.props.children}
           </div>
         </section>
-        {this.renderCashDrawerModal()}
-        {
-          staff && activeModalId === 'verifyStaff'
-          ? this.chooseUserModal()
-          : null
-        }
-        {this.renderVerifyStorePinCode()}
+        {this.renderModal()}
       </div>
     )
   }
@@ -353,6 +422,7 @@ function mapStateToProps (state) {
     intl: state.intl,
     isHamburgerOpen: state.application.isHamburgerOpen,
     networkStatus: state.application.networkStatus,
+    posMode: state.application.posMode,
     staff: state.application.staff,
     storeId: state.application.storeId,
     shouldUpdate: state.application.shouldUpdate,
@@ -362,9 +432,13 @@ function mapStateToProps (state) {
     activeCashdrawer: state.application.activeCashdrawer,
     activeCashier: state.application.activeCashier,
     adminToken: state.application.adminToken,
+    failedOrders: state.offlineOrders.failedOrders,
+    successOrders: state.offlineOrders.successOrders,
+    processedOfflineOrders: state.offlineOrders.processedOfflineOrders,
+    syncIsProcessing: state.offlineOrders.isProcessing,
+    syncSuccess: state.offlineOrders.syncSuccess,
     isLoggingOut: state.login.isLoggingOut,
     customerFilter: state.settings.customerFilter
-
   }
 }
 

@@ -45,12 +45,11 @@ class LoginForm extends Component {
   }
 
   render () {
-    const { errorMessage, isLoggingIn, isFetchingStoreIds, storeIds } = this.props
+    const { errorMessage, isLoggingIn, isFetchingStoreIds, storeIds, networkStatus } = this.props
     const formIsDisabled = isFetchingStoreIds || isLoggingIn ? 'is-disabled' : ''
     const storeIdSelectClass = `select is-fullwidth ${formIsDisabled}`
 
     const containerHeight = intFrameHeight - 80
-
     return (
       <div style={{height: containerHeight}}>
         <div>
@@ -107,10 +106,14 @@ class LoginForm extends Component {
                           <i className='fa fa-lock' />
                         </p>
                         <div className='control'>
-                          {isLoggingIn || isFetchingStoreIds
-                            ? <p className='has-text-centered'><i className='fa fa-spinner fa-pulse fa-2x fa-fw' /></p>
-                            : <button className='button is-success is-fullwidth' type='submit'>
-                              <FormattedMessage id='app.button.login' />
+                          {networkStatus === 'online'
+                            ? isLoggingIn || isFetchingStoreIds
+                              ? <p className='has-text-centered'><i className='fa fa-spinner fa-pulse fa-2x fa-fw' /></p>
+                              : <button className='button is-success is-fullwidth' type='submit'>
+                                <FormattedMessage id='app.button.login' />
+                              </button>
+                            : <button className='button is-danger is-outlined is-fullwidth'>
+                              <p><FormattedMessage id='app.error.needNetwork' /></p>
                             </button>
                           }
                         </div>

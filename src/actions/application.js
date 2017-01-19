@@ -5,7 +5,7 @@ import dailyDataService from '../services/dailyData'
 import authStaffService from '../services/authStaff'
 import noSalesService from '../services/noSales'
 
-import print from '../utils/printReceipt/print'
+// import print from '../utils/printReceipt/print'
 
 export const HAMBURGER_TOGGLE = 'HAMBURGER_TOGGLE'
 export function hamburgerToggle () {
@@ -54,10 +54,18 @@ export function authStaffFailure (error) {
 }
 
 export const TOGGLE_NETWORK_STATUS = 'TOGGLE_NETWORK_STATUS'
-export function toggleNetworkStatus (error) {
+export function toggleNetworkStatus (netStat) {
   return {
     type: TOGGLE_NETWORK_STATUS,
-    error
+    netStat
+  }
+}
+
+export const TOGGLE_POS_MODE = 'TOGGLE_POS_MODE'
+export function togglePosMode (mode) {
+  return {
+    type: TOGGLE_POS_MODE,
+    mode
   }
 }
 
@@ -215,28 +223,30 @@ export function updateCashDrawerFailure (error) {
   }
 }
 
-export function updateCashDrawer (staff, data, order) {
+export function updateCashDrawer (posMode, data, order) {
   return (dispatch) => {
     dispatch(updateCashDrawerRequest())
-    return dailyDataService.patch(data)
-      .then(response => {
-        const receipt = {
-          info: {
-            date: new Date(),
-            staff: `${staff.lastName || ''}, ${staff.firstName || ''}`
-          },
-          footerText: ['No sales']
-        }
-        dispatch(updateCashDrawerSuccess(data))
-        if (!order) {
-          print(receipt)
-          dispatch(closeActiveModal())
-        }
-      })
-      .catch(error => {
-        document.getElementById('storePinCode2').value = ''
-        dispatch(updateCashDrawerFailure(error.message))
-      })
+    if (posMode === 'online') {
+      return dailyDataService.patch(data)
+        .then(response => {
+          // const receipt = {
+          //   info: {
+          //     date: new Date(),
+          //     staff: `${staff.lastName || ''}, ${staff.firstName || ''}`
+          //   },
+          //   footerText: ['No sales']
+          // }
+          dispatch(updateCashDrawerSuccess(data))
+          if (!order) {
+            // print(receipt)
+            dispatch(closeActiveModal())
+          }
+        })
+        .catch(error => {
+          document.getElementById('storePinCode2').value = ''
+          dispatch(updateCashDrawerFailure(error.message))
+        })
+    } else if (posMode === 'offline') {}
   }
 }
 

@@ -6,12 +6,14 @@ import PanelCart from './PanelCart'
 import PanelCheckout from './PanelCheckout'
 
 import { storeGetDailyData } from '../actions/application'
+import { fetchLastOrderid } from '../actions/offlineOrders'
 
 class Store extends Component {
 
   componentDidMount () {
     const {dispatch, storeId, cashdrawer} = this.props
     dispatch(storeGetDailyData(storeId, cashdrawer))
+    dispatch(fetchLastOrderid({storeId}))
   }
 
   renderDisabledStore () {

@@ -19,7 +19,8 @@ const Login = (props) => {
     storeIds,
     storeId,
     cashdrawer,
-    handleSetStoreId
+    handleSetStoreId,
+    networkStatus
   } = props
   return (
     <LoginForm
@@ -32,6 +33,7 @@ const Login = (props) => {
       isLoggingIn={isLoggingIn}
       storeId={storeId}
       cashdrawer={cashdrawer}
+      networkStatus={networkStatus}
     />
   )
 }
@@ -47,6 +49,7 @@ const mapStateToProps = (state) => {
     isFetchingStoreIds: state.application.isFetchingStoreIds,
     storeId: state.application.storeId,
     cashdrawer: state.application.cashdrawer,
+    networkStatus: state.application.networkStatus,
     storeIds
   }
 }

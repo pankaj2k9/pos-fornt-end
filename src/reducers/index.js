@@ -15,6 +15,7 @@ import panelCheckout from './panelCheckout'
 import orders from './orders'
 import reports from './reports'
 import ordersOnHold from './ordersOnHold'
+import offlineOrders from './offlineOrders'
 import settings from './settings'
 
 addLocaleData([
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
   panelCart,
   panelProducts,
   panelCheckout,
+  offlineOrders,
   orders,
   ordersOnHold,
   reports,

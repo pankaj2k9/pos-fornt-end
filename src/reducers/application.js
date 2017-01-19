@@ -32,7 +32,8 @@ import {
   RESET_STAFF_STATE,
   RESET_ERROR_STATE,
   RESET_APP_STATE,
-  TOGGLE_NETWORK_STATUS
+  TOGGLE_NETWORK_STATUS,
+  TOGGLE_POS_MODE
 } from '../actions/application'
 
 function application (state = {
@@ -43,7 +44,7 @@ function application (state = {
   isHamburgerOpen: false,
   isProcessing: false,
   isFetchingStoreIds: false,
-  networkStatus: true,
+  networkStatus: 'online',
   store: null,
   storeIds: [],
   storeIdsError: null,
@@ -51,6 +52,7 @@ function application (state = {
   staff: null,
   activeCashier: null,
   adminToken: null,
+  posMode: 'online',
   shouldUpdate: false,
   error: null
 }, action) {
@@ -92,7 +94,11 @@ function application (state = {
       })
     case TOGGLE_NETWORK_STATUS:
       return Object.assign({}, state, {
-        networkStatus: !state.networkStatus
+        networkStatus: action.netStat
+      })
+    case TOGGLE_POS_MODE:
+      return Object.assign({}, state, {
+        posMode: action.mode
       })
     case VALIDATE_STOREPIN_REQUEST:
       return Object.assign({}, state, {

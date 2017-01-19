@@ -150,7 +150,7 @@ class PanelCheckoutModals extends Component {
           <div className='modal-card-body'>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-12'>
-                {orderSuccess
+                {!orderError
                   ? <h1 className='title is-marginless'>Order Success</h1>
                   : <h1 className='title is-marginless' style={{color: 'red'}}>{orderError === 'Failed to fetch' ? 'Order Failed! failed to connect' : 'Order Failed'}</h1>
                 }
@@ -170,7 +170,7 @@ class PanelCheckoutModals extends Component {
                 }
               </div>
               <div className='column is-6 is-offset-3'>
-                {orderSuccess
+                {!orderError
                   ? <a className='button is-success is-large is-fullwidth' onClick={closeModal}>
                     Confirm
                   </a>
