@@ -15,7 +15,11 @@ import Reports from './containers/Reports'
  * Is called right before a route is entered.
  */
 function requireAuth (nextState, replace, callback) {
-  if (!api.get('token')) {
+  let appState = JSON.parse(window.localStorage.getItem('state'))
+  const posMode = appState.application.posMode
+  if (window.localStorage.getItem('feathers-jwt') && posMode === 'offline') {
+    callback()
+  } else if (!api.get('token')) {
     api.passport.verifyJWT(window.localStorage.getItem('feathers-jwt'))
     .then(token => {
       return api.authenticate({ strategy: 'jwt', store: token.storeId })

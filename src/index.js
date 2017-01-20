@@ -34,7 +34,8 @@ const store = configureStore(
 store.subscribe(() => {
   saveState({
     ordersOnHold: store.getState().ordersOnHold,
-    application: store.getState().application
+    application: store.getState().application,
+    offlineOrders: store.getState().offlineOrders
   })
 })
 
