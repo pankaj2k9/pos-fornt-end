@@ -5,7 +5,7 @@ import dailyDataService from '../services/dailyData'
 import authStaffService from '../services/authStaff'
 import noSalesService from '../services/noSales'
 
-// import print from '../utils/printReceipt/print'
+import print from '../utils/printReceipt/print'
 
 export const HAMBURGER_TOGGLE = 'HAMBURGER_TOGGLE'
 export function hamburgerToggle () {
@@ -171,10 +171,11 @@ export function validateStorepinRequest () {
   }
 }
 
-export function validateStorepinSuccess (data) {
+export function validateStorepinSuccess (data, posMode) {
   return {
     type: VALIDATE_STOREPIN_SUCCESS,
-    data
+    data,
+    posMode
   }
 }
 
@@ -223,30 +224,28 @@ export function updateCashDrawerFailure (error) {
   }
 }
 
-export function updateCashDrawer (posMode, data, order) {
+export function updateCashDrawer (data, receipt) {
   return (dispatch) => {
     dispatch(updateCashDrawerRequest())
-    if (posMode === 'online') {
+    if (data.posMode === 'online') {
       return dailyDataService.patch(data)
         .then(response => {
-          // const receipt = {
-          //   info: {
-          //     date: new Date(),
-          //     staff: `${staff.lastName || ''}, ${staff.firstName || ''}`
-          //   },
-          //   footerText: ['No sales']
-          // }
-          dispatch(updateCashDrawerSuccess(data))
-          if (!order) {
-            // print(receipt)
+          dispatch(updateCashDrawerSuccess(data, data.posMode))
+          if (receipt) {
+            print(receipt)
             dispatch(closeActiveModal())
           }
         })
         .catch(error => {
-          document.getElementById('storePinCode2').value = ''
           dispatch(updateCashDrawerFailure(error.message))
         })
-    } else if (posMode === 'offline') {}
+    } else if (data.posMode === 'offline') {
+      dispatch(updateCashDrawerSuccess(data, data.posMode))
+      if (receipt) {
+        print(receipt)
+        dispatch(closeActiveModal())
+      }
+    }
   }
 }
 
@@ -290,14 +289,14 @@ export const DAILYDATA_CREATE_FAILURE = 'DAILYDATA_CREATE_FAILURE'
 export function dailyDataCreateRequest () {
   return { type: DAILYDATA_CREATE_REQUEST }
 }
-export function dailyDataCreateSuccess (data) {
-  return { type: DAILYDATA_CREATE_SUCCESS, data }
+export function dailyDataCreateSuccess (data, mode) {
+  return { type: DAILYDATA_CREATE_SUCCESS, data, mode }
 }
 export function dailyDataCreateFailure (error) {
   return { type: DAILYDATA_CREATE_FAILURE, error }
 }
 
-export function createDailyData (storeId, dailyData) {
+export function createDailyData (storeId, posMode) {
   return (dispatch) => {
     dispatch(dailyDataCreateRequest())
     let initial = {
@@ -306,14 +305,18 @@ export function createDailyData (storeId, dailyData) {
       cashDrawerOpenCount: 0,
       float: 0
     }
-    return dailyDataService.create(dailyData || initial)
-      .then(response => {
-        dispatch(dailyDataCreateSuccess(response))
-        dispatch(setActiveCashdrawer(response))
-      })
-      .catch(error => {
-        dispatch(dailyDataCreateFailure(error))
-      })
+    if (posMode === 'online') {
+      return dailyDataService.create(initial)
+        .then(response => {
+          dispatch(dailyDataCreateSuccess(response, 'online'))
+          dispatch(setActiveCashdrawer(response))
+        })
+        .catch(error => {
+          dispatch(dailyDataCreateFailure(error))
+        })
+    } else {
+      dispatch(dailyDataCreateSuccess(initial, 'offline'))
+    }
   }
 }
 
@@ -332,12 +335,9 @@ export function dailyDataFetchDataFailure (error) {
   return { type: DAILYDATA_FETCH_FAILURE, error }
 }
 
-export function storeGetDailyData (storeId, cashdrawer) {
+export function storeGetDailyData (storeId, cashdrawer, staff, posMode) {
   return (dispatch) => {
     dispatch(dailyDataFetchDataRequest())
-    let query = {
-      query: { storeId: storeId }
-    }
     function validateCashdrawer (data) {
       let matchedDrawer
       data.find(function (drawer) {
@@ -348,28 +348,32 @@ export function storeGetDailyData (storeId, cashdrawer) {
         }
       })
       if (!matchedDrawer) {
-        dispatch(createDailyData(storeId))
+        dispatch(createDailyData(storeId, posMode))
         dispatch(setActiveModal('updateCashDrawer'))
       } else {
         dispatch(setActiveCashdrawer(matchedDrawer))
-        if (matchedDrawer.initialAmount === 0) {
+        if (Number(matchedDrawer.float) === 0) {
           dispatch(setActiveModal('updateCashDrawer'))
         }
       }
     }
-    return dailyDataService.find(query)
-      .then(response => {
-        // set store id with the first item
-        if (response.data.length > 0) {
-          validateCashdrawer(response.data)
-          dispatch(dailyDataFetchDataSuccess(response.data))
-        } else if (response.data.length === 0) {
-          validateCashdrawer(cashdrawer)
-        }
-      })
-      .catch(error => {
-        dispatch(dailyDataFetchDataFailure(error))
-      })
+    if (posMode === 'online') {
+      return dailyDataService.find({query: { storeId: storeId }})
+        .then(response => {
+          // set store id with the first item
+          if (response.data.length > 0) {
+            validateCashdrawer(response.data)
+            dispatch(dailyDataFetchDataSuccess(response.data))
+          } else if (response.data.length === 0) {
+            validateCashdrawer(cashdrawer)
+          }
+        })
+        .catch(error => {
+          dispatch(dailyDataFetchDataFailure(error))
+        })
+    } else {
+      validateCashdrawer(cashdrawer)
+    }
   }
 }
 

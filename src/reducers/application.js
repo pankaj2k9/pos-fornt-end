@@ -39,6 +39,7 @@ import {
 function application (state = {
   cashdrawer: [],
   activeCashdrawer: null,
+  activeOfflineCD: null,
   activeModalId: null,
   focusedInput: null,
   isHamburgerOpen: false,
@@ -129,25 +130,29 @@ function application (state = {
       let newData = [{
         storeId: state.activeCashdrawer.storeId,
         date: state.activeCashdrawer.date,
-        cashDrawerOpenCount: state.activeCashdrawer.cashDrawerOpenCount,
-        float: action.data.amount
+        cashDrawerOpenCount: action.data.cashDrawerOpenCount || state.activeCashdrawer.cashDrawerOpenCount,
+        float: action.data.float || state.activeCashdrawer.float
       }]
+      let dataToMerge = action.mode === 'online' ? newData : state.activeOfflineCD || newData
       let newActiveCD
-      newData.forEach(function (newData) {
-        var existing = output.filter(function (oldData, i) {
-          return oldData.date === newData.date
+      if (action.data.posMode === 'online') {
+        dataToMerge.forEach(function (newData) {
+          var existing = output.filter(function (oldData, i) {
+            return oldData.date === newData.date
+          })
+          if (existing.length) {
+            var key = output.indexOf(existing[0])
+            output[key].cashDrawerOpenCount = newData.cashDrawerOpenCount
+            output[key].float = newData.float
+            newActiveCD = output[key]
+          }
         })
-        if (existing.length) {
-          var key = output.indexOf(existing[0])
-          output[key].cashDrawerOpenCount = newData.cashDrawerOpenCount
-          output[key].float = newData.float
-          newActiveCD = output[key]
-        }
-      })
+      }
       return Object.assign({}, state, {
         isProcessing: false,
         cashdrawer: output,
-        activeCashdrawer: newActiveCD,
+        activeCashdrawer: newActiveCD || newData,
+        activeOfflineCD: action.data.posMode === 'offline' ? newData : null,
         shouldUpdate: false,
         error: null
       })

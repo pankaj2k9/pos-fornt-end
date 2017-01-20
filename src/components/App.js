@@ -134,17 +134,25 @@ class App extends React.Component {
 
   updateCashdrawer (event) {
     event.preventDefault()
-    const {dispatch, staff, activeCashdrawer} = this.props
+    const {dispatch, staff, activeCashdrawer, posMode} = this.props
     var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
+    const receipt = {
+      info: {
+        date: new Date(),
+        staff: `${staff.lastName || ''}, ${staff.firstName || ''}`
+      },
+      footerText: ['No sales']
+    }
     let data = {
+      posMode: posMode,
       date: activeCashdrawer.date,
-      amount: amountToAdd,
+      float: amountToAdd,
       count: Number(activeCashdrawer.cashDrawerOpenCount) + 1
     }
     if (amountToAdd <= 0 || isNaN(amountToAdd)) {
       dispatch(setCashdrawerFailure('You have entered an invalid amount'))
     } else {
-      dispatch(updateCashDrawer(staff, data))
+      dispatch(updateCashDrawer(data, receipt))
     }
   }
 
@@ -204,15 +212,9 @@ class App extends React.Component {
               }
               <div>
                 <div className='control is-expanded'>
-                  <form autoComplete='off'>
+                  <form autoComplete='off' onSubmit={this.updateCashdrawer.bind(this)}>
                     <input id='cashdrawerAmount' className='input is-large' type='number'
                       placeholder={intl.formatMessage({ id: 'app.general.setCashAmount' })} />
-                  </form>
-                </div>
-                <div className='control'>
-                  <form autoComplete='off' onSubmit={this.updateCashdrawer.bind(this)}>
-                    <input id='storePinCode2' className='input is-large' type='password'
-                      placeholder={intl.formatMessage({ id: 'app.ph.storePin' })} />
                   </form>
                 </div>
               </div>

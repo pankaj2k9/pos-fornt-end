@@ -9,8 +9,8 @@ const dailyData = {
 
   patch (data) {
     let params = {}
-    if (data.amount) {
-      params.float = data.amount
+    if (data.float) {
+      params.float = data.float
     }
     if (data.count) {
       params.cashDrawerOpenCount = data.count

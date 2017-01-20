@@ -1,8 +1,7 @@
 import ordersService from '../services/orders'
 
 import {
-  addCashdrawerOpenCount
-  // updateCashDrawer
+  updateCashDrawer
   // setActiveModal
  } from './application'
 
@@ -67,11 +66,10 @@ export function makeOfflineOrder (orderInfo, receipt, lastId) {
   return (dispatch) => {
     dispatch(processOfflineOrder(orderInfo))
     print(receipt)
-    // let data = { count: receipt.cashDrawerOpenCount }
-    // dispatch(updateCashDrawer(null, data, true))
+    let data = { count: receipt.cashDrawerOpenCount, posMode: 'offline' }
+    dispatch(updateCashDrawer(data))
     dispatch(afterOrderProcessed())
     dispatch(temporaryReceiptData(receipt))
-    dispatch(addCashdrawerOpenCount())
     dispatch(lastOrderidSuccess(lastId))
     /**
      * reprintingReceipt sets reprinting state

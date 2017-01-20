@@ -36,7 +36,7 @@ export function loginError (error) {
   return { type: LOGIN_ERROR, error }
 }
 
-export function login (details, browserHistory, store, cashdrawer) {
+export function login (details, browserHistory, store) {
   return (dispatch) => {
     dispatch(loginRequest())
     return loginService.login(details)
