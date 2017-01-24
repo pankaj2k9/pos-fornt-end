@@ -13,7 +13,9 @@ class Store extends Component {
   componentDidMount () {
     const {dispatch, storeId, cashdrawer, staff, posMode} = this.props
     dispatch(storeGetDailyData(storeId, cashdrawer, staff, posMode))
-    dispatch(fetchLastOrderid({storeId}))
+    if (posMode === 'online') {
+      dispatch(fetchLastOrderid({storeId}))
+    }
   }
 
   renderDisabledStore () {

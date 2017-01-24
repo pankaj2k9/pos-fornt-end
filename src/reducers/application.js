@@ -125,16 +125,17 @@ function application (state = {
         shouldUpdate: true,
         error: null
       })
+    // let data = { count: receipt.cashDrawerOpenCount, posMode: 'offline' }
     case UPDATE_CASHDRAWER_SUCCESS:
       let output = state.cashdrawer
       let newData = [{
         storeId: state.activeCashdrawer.storeId,
         date: state.activeCashdrawer.date,
-        cashDrawerOpenCount: action.data.cashDrawerOpenCount || state.activeCashdrawer.cashDrawerOpenCount,
+        cashDrawerOpenCount: action.data.count || state.activeCashdrawer.cashDrawerOpenCount,
         float: action.data.float || state.activeCashdrawer.float
       }]
-      let dataToMerge = action.mode === 'online' ? newData : state.activeOfflineCD || newData
-      let newActiveCD
+      let dataToMerge = action.mode === 'online' && state.activeOfflineCD ? newData : state.activeOfflineCD || newData
+      let newActiveCD = {}
       if (action.data.posMode === 'online') {
         dataToMerge.forEach(function (newData) {
           var existing = output.filter(function (oldData, i) {
@@ -151,7 +152,7 @@ function application (state = {
       return Object.assign({}, state, {
         isProcessing: false,
         cashdrawer: output,
-        activeCashdrawer: newActiveCD || newData,
+        activeCashdrawer: Object.keys(newActiveCD).length === 0 ? newData[0] : newActiveCD,
         activeOfflineCD: action.data.posMode === 'offline' ? newData : null,
         shouldUpdate: false,
         error: null

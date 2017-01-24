@@ -196,6 +196,7 @@ class PanelCheckout extends Component {
 
   sumOfPayments () {
     const { payments, currency, activeCustomer } = this.props
+    let voucherTotal = this.paymentTypeTotal('voucher')
     let x = payments
     let sumOfPayments = 0
     if (x) {
@@ -204,7 +205,7 @@ class PanelCheckout extends Component {
       }
     }
     if (currency === 'sgd') {
-      return (sumOfPayments || 0)
+      return (sumOfPayments + voucherTotal || 0)
     } else if (currency === 'odbo') {
       return Number(activeCustomer.odboCoins)
     }
@@ -222,11 +223,10 @@ class PanelCheckout extends Component {
 
   orderTotal () {
     const { customDiscount } = this.props
-    let voucherTotal = this.paymentTypeTotal('voucher')
     let subtotal = !customDiscount || customDiscount === 0
       ? Number(this.sumOfCartItems() - this.sumOfCartDiscounts())
       : this.sumOfCartItems() - this.overAllDeduct()
-    return Number(subtotal - voucherTotal)
+    return Number(subtotal)
   }
 
   paymentMinusOrderTotal () {
