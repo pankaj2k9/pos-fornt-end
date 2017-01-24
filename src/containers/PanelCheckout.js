@@ -8,7 +8,6 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
-import Panel from '../components/Panel'
 import PanelProducts from './PanelProducts'
 import PanelCheckoutModals from './PanelCheckoutModals'
 import Level from '../components/Level'
@@ -437,7 +436,7 @@ class PanelCheckout extends Component {
       : 0
     return (
       <div>
-        <Panel>
+        <div className='panel'>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             {!shouldUpdate
               ? <div className='is-clearfix'>
@@ -623,7 +622,7 @@ class PanelCheckout extends Component {
                 <p className='control has-icon is-expanded'>
                   <input id='noteInput' className='input'
                     placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
-                  <i className='fa fa-plus' />
+                  <span className='icon is-small'><i className='fa fa-plus' /></span>
                 </p>
               </form>
             </div>
@@ -633,12 +632,12 @@ class PanelCheckout extends Component {
               </a>
             </p>
           </div>
-        </Panel>
-        <Panel>
+        </div>
+        <div className='panel'>
           <div className='panel-block'>
             <FunctionButtons buttons={buttons3} onClickButton={this._clickCheckoutButtons.bind(this)} />
           </div>
-        </Panel>
+        </div>
         <PanelCheckoutModals
           activeModalId={activeModalId}
           card={card}
