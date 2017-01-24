@@ -16,8 +16,15 @@ import Reports from './containers/Reports'
  */
 function requireAuth (nextState, replace, callback) {
   let appState = JSON.parse(window.localStorage.getItem('state'))
-  const posMode = appState.application.posMode
-  if (window.localStorage.getItem('feathers-jwt') && posMode === 'offline') {
+  let nextRoute = nextState.location.pathname
+  let notStore = nextRoute !== 'store' ? nextRoute : null
+  const posMode = appState ? appState.application.posMode : undefined
+  const netStat = appState ? appState.application.networkStatus : undefined
+  if (window.localStorage.getItem('feathers-jwt') && appState && netStat === 'offline' && notStore) {
+    replace({ pathname: 'store' })
+    callback()
+  } else if (window.localStorage.getItem('feathers-jwt') && appState && posMode === 'offline' && notStore) {
+    replace({ pathname: 'store' })
     callback()
   } else if (!api.get('token')) {
     api.passport.verifyJWT(window.localStorage.getItem('feathers-jwt'))
@@ -26,11 +33,22 @@ function requireAuth (nextState, replace, callback) {
     }).then(response => {
       callback()
     }).catch(error => {
-      let noTokenError = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
-      if (noTokenError === String(error)) {
+      let errorMsg = error.message
+      let error1 = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
+      let error2 = 'Token provided to verifyJWT is missing or not a string'
+      let error3 = 'Failed to fetch'
+      if (window.localStorage.getItem('feathers-jwt') && notStore) {
+        replace({ pathname: 'store' })
+        callback()
+      } else if (errorMsg === error1) {
         replace({ pathname: '/' })
         callback()
-      } // add fallback if needed
+      } else if (errorMsg === error2) {
+        replace({ pathname: '/' })
+        callback()
+      } else if (errorMsg === error3) {
+        callback()
+      }// add fallback if needed
     })
   } else {
     callback()
