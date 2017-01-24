@@ -586,8 +586,8 @@ class SettingsTab extends Component {
 
   renderOrderSearchModal () {
     const {activeModalId, orderSearchKey, intl, appError,
-           orderDetails, refundSuccess, locale, storeId,
-           isProcessing, storeDetails, reprintSuccess} = this.props
+           orderDetails, refundSuccess, locale, storeId, storeData,
+           isProcessing, storeDetails, reprintSuccess, lastOrderId} = this.props
     const modalId = activeModalId === 'refundModal'
                     ? 'refundModal' : 'reprintModal'
     const type = activeModalId
@@ -642,7 +642,7 @@ class SettingsTab extends Component {
         let discount = item.product.isDiscounted
           ? currency === 'sgd'
             ? (Number(item.product.priceDiscount) / 100) * item.product.price
-            : (parseInt(item.product.odboPriceDiscount) / 100) * item.product.odboPrice
+            : (Number(item.product.odboPriceDiscount) / 100) * item.product.odboPrice
           : 0.00
         let computedDiscount = currency === 'sgd'
           ? Number(item.product.price) - discount
@@ -659,9 +659,17 @@ class SettingsTab extends Component {
         })
       })
 
+      let zeroes = ''
+      for (var i = lastOrderId.toString().length; i < 7; i++) {
+        zeroes = zeroes + '0'
+      }
+      const lastId = lastOrderId + 1
+
       var receipt = {
         info: {
           orderId: id,
+          lastOrderId: `${storeData.code}${zeroes}${lastId}`,
+          lasrOrderNum: lastId,
           date: dateOrdered
         },
         items: processedItems,
@@ -753,6 +761,8 @@ function mapStateToProps (state) {
     activeCashier: state.application.activeCashier,
     storeDetails: state.application.store,
     storeId: state.application.storeId,
+    storeData: state.application.store,
+    lastOrderId: state.offlineOrders.lastOrderId,
     customers: state.data.customers.customersArray,
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,

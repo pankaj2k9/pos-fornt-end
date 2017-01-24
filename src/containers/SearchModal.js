@@ -249,11 +249,12 @@ class SearchModal extends Component {
 
   onClickOption (event) {
     if (event) { event.preventDefault() }
-    const {dispatch, type, details, closeButton, storeId} = this.props
+    const {dispatch, type, details, closeButton} = this.props
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
       details.trans.type = 'refund'
-      dispatch(refund(details.info.orderId, refundRemarks, storeId, details))
+      console.log('details', details)
+      dispatch(refund(details.info.orderId, refundRemarks, details.info.lastOrderId, details))
     } else if (type === 'reprintModal') {
       details.trans.type = 'reprint'
       dispatch(printPreviewTotalReceipt(details))
