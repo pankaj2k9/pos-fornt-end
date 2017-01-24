@@ -211,13 +211,6 @@ export const buildComputation = (trans) => {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(computations.subtotal)}</div>`
     }
 
-    if (vouchers.length > 0) {
-      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>VOUCHERS</div></div>`
-      vouchers.map(voucher => {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>voucher [${voucher.remarks || '###'}] : </div>-${formatCurrency(voucher.deduction)}</div>`
-      })
-    }
-
     comp += RECEIPT_DIVIDER
 
     if (computations.customDiscount && computations.customDiscount > 0) {
@@ -232,7 +225,7 @@ export const buildComputation = (trans) => {
       if (currency === 'sgd') {
         if (payment.type === 'credit') {
           if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CREDIT</div></div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CREDIT PAYMENT</div></div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CARD TYPE : </div>${payment.provider}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
@@ -240,14 +233,14 @@ export const buildComputation = (trans) => {
         }
         if (payment.type === 'nets') {
           if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS</div></div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS PAYMENT</div></div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
         }
         if (payment.type === 'cash') {
           if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH</div></div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH PAYMENT</div></div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${formatCurrency(payment.cash)}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${formatCurrency(payment.amount)}</div>`
             comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${formatCurrency(computations.cashChange)}</div>`
@@ -255,12 +248,19 @@ export const buildComputation = (trans) => {
         }
       } else if (currency === 'odbo') {
         if (payment.amount) {
-          comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO</div></div>`
+          comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${trans.previousOdbo}</div>`
           comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${payment.amount}</div>`
         }
       }
     })
+
+    if (vouchers.length > 0) {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>VOUCHER PAYMENT</div></div>`
+      vouchers.map(voucher => {
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>voucher [${voucher.remarks || '###'}] : </div>${formatCurrency(voucher.deduction)}</div>`
+      })
+    }
 
     if (currency === 'odbo') {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo || computations.paymentMinusOrderTotal}</div>`

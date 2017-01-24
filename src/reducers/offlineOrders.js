@@ -17,7 +17,8 @@ function offlineOrders (state = {
   successOrders: [],
   syncSuccess: undefined,
   isProcessing: false,
-  error: undefined
+  syncError: undefined,
+  lastIdError: undefined
 }, action) {
   switch (action.type) {
     case LAST_ORDERID_REQUEST:
@@ -27,12 +28,13 @@ function offlineOrders (state = {
     case LAST_ORDERID_SUCCESS:
       return Object.assign({}, state, {
         isProcessing: false,
-        lastOrderId: action.lastId
+        lastOrderId: action.lastId,
+        lastIdError: undefined
       })
     case LAST_ORDERID_FAILURE:
       return Object.assign({}, state, {
         isProcessing: false,
-        error: action.error
+        lastIdError: action.error
       })
     case PROCESS_OFFLINE_ORDER:
       state.processedOfflineOrders.push(action.orderInfo)
@@ -51,7 +53,7 @@ function offlineOrders (state = {
     case SYNC_ORDER_FAILED:
       state.failedOrders.push(action.failedOrder)
       return Object.assign({}, state, {
-        error: action.error,
+        syncError: action.error,
         failedOrders: state.failedOrders
       })
     case SYNC_ORDERS_DONE:
@@ -59,12 +61,13 @@ function offlineOrders (state = {
       return Object.assign({}, state, {
         isProcessing: false,
         processedOfflineOrders: [],
+        syncError: !noFailedOrders ? 'syncError' : undefined,
         syncSuccess: noFailedOrders
       })
     case CLEAR_MESSAGES:
       return Object.assign({}, state, {
         isProcessing: false,
-        error: undefined,
+        syncError: undefined,
         syncSuccess: undefined
       })
     default:

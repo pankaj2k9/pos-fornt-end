@@ -11,9 +11,11 @@ import { fetchLastOrderid } from '../actions/offlineOrders'
 class Store extends Component {
 
   componentDidMount () {
-    const {dispatch, storeId, cashdrawer} = this.props
-    dispatch(storeGetDailyData(storeId, cashdrawer))
-    dispatch(fetchLastOrderid({storeId}))
+    const {dispatch, storeId, cashdrawer, staff, posMode} = this.props
+    dispatch(storeGetDailyData(storeId, cashdrawer, staff, posMode))
+    if (posMode === 'online') {
+      dispatch(fetchLastOrderid({storeId}))
+    }
   }
 
   renderDisabledStore () {
@@ -120,6 +122,7 @@ function mapStateToProps (state) {
     productsArray: state.data.products.productsArray,
     productsById: state.data.products.productsById,
     productsShouldUpdate: state.data.products.shouldUpdate,
+    posMode: state.application.posMode,
     items: state.ordersOnHold.items, // ordersOnHold
     cartItemsArray: state.panelCart.items,
     staff: state.application.staff.user,

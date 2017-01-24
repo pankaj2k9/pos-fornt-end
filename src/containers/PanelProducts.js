@@ -18,11 +18,14 @@ class PanelProducts extends Component {
       dispatch,
       locale,
       productsById,
-      productsFilter
+      productsFilter,
+      posMode
     } = this.props
     if (!productsById) {
-      dispatch(fetchAllProducts(locale, productsFilter))
-      dispatch(fetchCustomers())
+      if (posMode === 'online') {
+        dispatch(fetchAllProducts(locale, productsFilter))
+        dispatch(fetchCustomers())
+      }
     }
   }
 
@@ -81,6 +84,7 @@ PanelProducts.propTypes = {
 function mapStateToProps (state) {
   const focusedInput = state.application.focusedInput || state.panelCart.focusedInput
   return {
+    posMode: state.application.posMode,
     activeProductId: state.panelProducts.activeProductId,
     activeProduct: state.panelProducts.activeProduct,
     filters: state.panelProducts.filters,

@@ -18,7 +18,6 @@ const Login = (props) => {
     isFetchingStoreIds,
     storeIds,
     storeId,
-    cashdrawer,
     handleSetStoreId,
     networkStatus
   } = props
@@ -32,7 +31,6 @@ const Login = (props) => {
       errorMessage={errorMessage}
       isLoggingIn={isLoggingIn}
       storeId={storeId}
-      cashdrawer={cashdrawer}
       networkStatus={networkStatus}
     />
   )
