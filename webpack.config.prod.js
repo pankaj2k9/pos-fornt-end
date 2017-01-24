@@ -74,6 +74,9 @@ export default {
           match: /^(?!api(|\/)).*/,
           to: '/'
         }
+      ],
+      exludes: [
+        'api/**'
       ]
     })
   ],
