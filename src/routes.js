@@ -20,7 +20,10 @@ function requireAuth (nextState, replace, callback) {
   let notStore = nextRoute !== 'store' ? nextRoute : null
   const posMode = appState ? appState.application.posMode : undefined
   const netStat = appState ? appState.application.networkStatus : undefined
-  if (window.localStorage.getItem('feathers-jwt') && appState && netStat === 'offline' && notStore) {
+  if (window.localStorage.getItem('feathers-jwt') && nextRoute === '/') {
+    replace({ pathname: 'store' })
+    callback()
+  } else if (window.localStorage.getItem('feathers-jwt') && appState && netStat === 'offline' && notStore) {
     replace({ pathname: 'store' })
     callback()
   } else if (window.localStorage.getItem('feathers-jwt') && appState && posMode === 'offline' && notStore) {
@@ -57,7 +60,7 @@ function requireAuth (nextState, replace, callback) {
 
 export default (
   <Route path='/' component={App}>
-    <IndexRoute component={Login} />
+    <IndexRoute component={Login} onEnter={requireAuth} />
     <Route path='store' component={Store} onEnter={requireAuth} />
     <Route path='settings' component={Settings} onEnter={requireAuth} />
     <Route path='reports' component={Reports} onEnter={requireAuth} />
