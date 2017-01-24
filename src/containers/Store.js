@@ -61,28 +61,26 @@ class Store extends Component {
     return (
       <div className='hero'>
         <div className='hero-body' style={{padding: 0}}>
-          <div className='content'>
-            <div className='tile is-ancestor is-fullwidth'>
-              <div className='tile is-parent is-6 is-vertical'>
+          <div className='tile is-ancestor is-fullwidth'>
+            <div className='tile is-parent is-6 is-vertical'>
+              <div className='tile is-child'>
+                <PanelCart
+                  locale={locale}
+                  activeModalId={activeModalId}
+                  cartItemsArray={cartItemsArray}
+                  customersArefetching={customersArefetching}
+                  customersArray={customersArray}
+                  customersById={customersById}
+                  ordersOnHold={items} />
+              </div>
+            </div>
+            <div className='tile is-parent is-vertical'>
+              <div>
                 <div className='tile is-child'>
-                  <PanelCart
-                    locale={locale}
+                  <PanelCheckout
                     activeModalId={activeModalId}
                     cartItemsArray={cartItemsArray}
-                    customersArefetching={customersArefetching}
-                    customersArray={customersArray}
-                    customersById={customersById}
-                    ordersOnHold={items} />
-                </div>
-              </div>
-              <div className='tile is-parent is-vertical'>
-                <div>
-                  <div className='tile is-child'>
-                    <PanelCheckout
-                      activeModalId={activeModalId}
-                      cartItemsArray={cartItemsArray}
-                    />
-                  </div>
+                  />
                 </div>
               </div>
             </div>
