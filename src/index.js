@@ -35,7 +35,8 @@ store.subscribe(() => {
   saveState({
     ordersOnHold: store.getState().ordersOnHold,
     application: store.getState().application,
-    offlineOrders: store.getState().offlineOrders
+    offlineOrders: store.getState().offlineOrders,
+    data: store.getState().data
   })
 })
 
