@@ -20,17 +20,21 @@ function requireAuth (nextState, replace, callback) {
   let notStore = nextRoute !== 'store' ? nextRoute : null
   const posMode = appState ? appState.application.posMode : undefined
   const netStat = appState ? appState.application.networkStatus : undefined
-  if (window.localStorage.getItem('feathers-jwt') && nextRoute === '/') {
+  const token = window.localStorage.getItem('feathers-jwt')
+  if (token && nextRoute === '/') {
     replace({ pathname: 'store' })
     callback()
-  } else if (window.localStorage.getItem('feathers-jwt') && appState && netStat === 'offline' && notStore) {
+  } else if (token && appState && netStat === 'offline' && notStore) {
     replace({ pathname: 'store' })
     callback()
-  } else if (window.localStorage.getItem('feathers-jwt') && appState && posMode === 'offline' && notStore) {
+  } else if (token && appState && posMode === 'offline' && notStore) {
     replace({ pathname: 'store' })
+    callback()
+  } else if (!token) {
+    console.log(1)
     callback()
   } else if (!api.get('token')) {
-    api.passport.verifyJWT(window.localStorage.getItem('feathers-jwt'))
+    api.passport.verifyJWT(token)
     .then(token => {
       return api.authenticate({ strategy: 'jwt', store: token.storeId })
     }).then(response => {
@@ -40,7 +44,7 @@ function requireAuth (nextState, replace, callback) {
       let error1 = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
       let error2 = 'Token provided to verifyJWT is missing or not a string'
       let error3 = 'Failed to fetch'
-      if (window.localStorage.getItem('feathers-jwt') && notStore) {
+      if (token && notStore) {
         replace({ pathname: 'store' })
         callback()
       } else if (errorMsg === error1) {
