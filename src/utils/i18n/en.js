@@ -9,7 +9,7 @@ const en = {
 
   'app.general.active': 'Active',
   'app.general.notActive': 'Not Active',
-  'app.general.odboId': 'The The odbo ID',
+  'app.general.odboId': 'The odbo ID',
   'app.general.membership': 'Membership',
   'app.general.memberPoints': 'Member Points',
   'app.general.dateJoined': 'Date Joined',

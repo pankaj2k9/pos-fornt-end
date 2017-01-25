@@ -762,7 +762,7 @@ class PanelCheckout extends Component {
       totalQuantity: productCount,
       currency,
       total: Number(this.orderTotal()),
-      userPrevCoins: activeCustomer ? Number(activeCustomer.odboCoins) : null,
+      userPrevCoins: activeCustomer ? Number(activeCustomer.odboCoins) : undefined,
       redemptionPoints: Number(this.sumOfCartItems()),
       bonusPoints: bonusPoints ? 100 : 0,
       payments: processedPayments,

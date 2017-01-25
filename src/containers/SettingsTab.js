@@ -321,6 +321,14 @@ class SettingsTab extends Component {
         break
     }
 
+    function appendZeroes (odboId) {
+      let zeroes = ''
+      for (var i = odboId.length; i < 7; i++) {
+        zeroes = zeroes + '0'
+      }
+      return zeroes
+    }
+
     return (
       <div>
         <div className='columns'>
@@ -436,10 +444,6 @@ class SettingsTab extends Component {
                   dispatch(customersSetActiveId(customer.odboId))
                 }
                 let odboId = String(customer.odboId)
-                let zeroes = ''
-                for (var i = odboId.length; i < 7; i++) {
-                  zeroes = zeroes + '0'
-                }
                 let stat = customer.status === 'active'
                   ? <span style={{color: 'green'}}><FormattedMessage id={'app.general.active'} /></span>
                   : <span style={{color: 'red'}}><FormattedMessage id={'app.general.notActive'} /></span>
@@ -457,7 +461,7 @@ class SettingsTab extends Component {
                           <ul className='is-marginless'>
                             <li>
                               <strong>ODBO ID: </strong>
-                              {`${zeroes}${customer.odboId}`}
+                              {`${appendZeroes(odboId)}${customer.odboId}`}
                             </li>
                             <li>
                               <strong><FormattedMessage id={'app.general.contactNo'} />: </strong>
@@ -512,8 +516,8 @@ class SettingsTab extends Component {
             activeModalId={activeModalId}
             id='customerDetails'
             items={[
-              {name: 'app.general.custName', desc: `${odboUser.firstName} ${odboUser.lastName}`},
-              {name: 'app.general.odboId', desc: odboUser.odboId},
+              {name: 'app.general.custName', desc: `${odboUser.firstName} ${odboUser.lastName || ''}`},
+              {name: 'app.general.odboId', desc: `${appendZeroes(String(odboUser.odboId))}${odboUser.odboId}`},
               {name: 'app.general.dateJoined'},
               {desc: `Date: ${intl.formatDate(odboUser.dateCreated)}`},
               {desc: `Time: ${intl.formatTime(odboUser.dateCreated)}`},
