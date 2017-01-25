@@ -51,10 +51,10 @@ const NavBar = ({
   }
   const staffColor = `st-clr-${STAFF_COLORS[colorIndex] || 0}`
   return (
-    <div className='hero is-black'>
-      <div className='hero-head'>
+    <div className='is-paddingless'>
+      <div className='hero' style={{ backgroundColor: 'black' }}>
         {shouldShowControls
-        ? <nav className='nav dark'>
+        ? <nav className='nav'>
           <div className='nav-left'>
             <div className='nav-item' style={{padding: 5}}>
               <span style={{margin: 5}}>
