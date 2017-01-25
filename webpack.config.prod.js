@@ -71,12 +71,10 @@ export default {
       // See also :https://github.com/NekR/offline-plugin/blob/master/docs/cache-maps.md
       cacheMaps: [
         {
-          match: /^(?!api(|\/)).*/,
-          to: '/'
+          match: /\/.*/,
+          to: '/',
+          requestTypes: ['navigate']
         }
-      ],
-      exludes: [
-        'api/**'
       ]
     })
   ],
