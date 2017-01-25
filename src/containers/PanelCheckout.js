@@ -8,7 +8,6 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
-import Panel from '../components/Panel'
 import PanelProducts from './PanelProducts'
 import PanelCheckoutModals from './PanelCheckoutModals'
 import Level from '../components/Level'
@@ -384,7 +383,7 @@ class PanelCheckout extends Component {
               className='button is-inverted is-danger is-small'
               style={{padding: 0}}
               onClick={remove}>
-              <span className='icon fa fa-times is-marginless' />
+              <span className='icon'><i className='fa fa-times' /></span>
             </a>
           </td>
         </tr>
@@ -428,22 +427,22 @@ class PanelCheckout extends Component {
     const okForCheckout = cartItemsArray.length !== 0 && this.paymentMinusOrderTotal() >= 0
 
     var buttons3 = [
-      {name: 'Clear', label: 'app.button.clear', icon: 'fa fa-times', customColor: okForClear ? 'red' : 'grey'},
-      {name: 'Checkout Order', label: 'app.button.checkout', icon: 'fa fa-check', customColor: okForCheckout ? 'green' : 'grey'},
-      {name: 'Open Drawer', label: 'app.button.openDrawer', icon: 'fa fa-upload', customColor: '#3273dc'}
+      {name: 'Clear', label: 'app.button.clear', icon: 'fa fa-times fa-2x', customColor: okForClear ? 'red' : 'grey', size: 'is-4'},
+      {name: 'Checkout Order', label: 'app.button.checkout', icon: 'fa fa-check fa-2x', customColor: okForCheckout ? 'green' : 'grey', size: 'is-4'},
+      {name: 'Open Drawer', label: 'app.button.openDrawer', icon: 'fa fa-upload fa-2x', customColor: '#3273dc', size: 'is-4'}
     ]
     var paymentBalance = this.orderTotal() - this.sumOfPayments() >= 0
       ? this.orderTotal() - this.sumOfPayments()
       : 0
     return (
       <div>
-        <Panel>
+        <nav className='panel'>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
             {!shouldUpdate
-              ? <div className='is-clearfix'>
-                <h4 className='title is-4 is-marginless is-pulled-left' style={{width: 150}}>
+              ? <div className='content is-clearfix' style={{width: '100%'}}>
+                <h1 className='title is-marginless is-pulled-left' style={{width: 150}}>
                 Order Items
-                </h4>
+                </h1>
                 <div className='is-pulled-right'>
                   <PanelProducts
                     locale={locale}
@@ -452,14 +451,14 @@ class PanelCheckout extends Component {
                     storeId={storeId} />
                 </div>
               </div>
-              : <div className='has-text-centered'>
+              : <div className='content has-text-centered'>
                 <i className='fa fa-spinner fa-pulse fa-fw' />
               </div>
             }
           </div>
           <div className='panel-block' style={{padding: 0}}>
             <div className='content'
-              style={{height: intFrameHeight / 3, overflowY: 'scroll'}}>
+              style={{height: intFrameHeight / 3, overflowY: 'scroll', width: '100%'}}>
               {!empty
                 ? <table className='table'>
                   <thead>
@@ -488,157 +487,158 @@ class PanelCheckout extends Component {
             </div>
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
-            <Level left={
-              <p>Products: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
-              }
-              center={<div>
-                <p className='has-text-left'>Discounts: {
-                customDiscount === 0
-                ? currency === 'sgd' ? formatCurrency(this.sumOfCartDiscounts()) : this.sumOfCartDiscounts()
-                : currency === 'sgd' ? formatCurrency(this.overAllDeduct()) : this.overAllDeduct()
-              }</p></div>}
-              right={
-                <h3 className='is-marginless'>
-                  Order Total: <strong>
-                    {`${currency === 'sgd' ? formatCurrency(this.orderTotal()) : this.orderTotal().toFixed()}`}
-                  </strong>
-                </h3>
-            } />
+            <div className='content' style={{width: '100%'}}>
+              <Level left={
+                <p>Products: {currency === 'sgd' ? formatCurrency(this.sumOfCartItems()) : this.sumOfCartItems()}</p>
+                }
+                center={<div>
+                  <p className='has-text-left'>Discounts: {
+                  customDiscount === 0
+                  ? currency === 'sgd' ? formatCurrency(this.sumOfCartDiscounts()) : this.sumOfCartDiscounts()
+                  : currency === 'sgd' ? formatCurrency(this.overAllDeduct()) : this.overAllDeduct()
+                }</p></div>}
+                right={
+                  <h3 className='is-marginless'>
+                    Order Total: <strong>
+                      {`${currency === 'sgd' ? formatCurrency(this.orderTotal()) : this.orderTotal().toFixed()}`}
+                    </strong>
+                  </h3>
+              } />
+            </div>
           </div>
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5, height: showPayments ? 187 : 'auto'}}>
-            <Level left={currency === 'sgd'
-              ? <div><p className='is-marginless'><a onClick={this._clickViewPayments.bind(this)}>Payments & Vouchers <i className='fa fa-edit' /></a></p></div>
-              : null}
-              right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {formatCurrency(paymentBalance)}</h5> : null} />
-            <Level left={currency === 'sgd'
-              ? <div>
-                <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
-                  <li onClick={this._removePayment.bind(this, 'cash')}><i className='fa fa-close' /> Cash: {this.paymentTypeTotal('cash', 'format')}</li>
-                  <li onClick={this._removePayment.bind(this, 'voucher')}><i className='fa fa-close' /> Voucher: {this.paymentTypeTotal('voucher', 'format')}</li>
-                </ul>
-              </div>
-              : <div />
-            }
-              center={currency === 'sgd'
-                ? <div className='has-text-left'>
-                  <ul style={{margin: 0, marginLeft: -25, listStyle: 'none'}}>
-                    <li onClick={this._removePayment.bind(this, 'credit')}><i className='fa fa-close' /> Credit: {this.paymentTypeTotal('credit', 'format')}</li>
-                    <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {this.paymentTypeTotal('nets', 'format')}</li>
+            <div className='content is-clearfix' style={{width: '100%'}}>
+              <Level left={currency === 'sgd'
+                ? <div><p className='is-marginless'><a onClick={this._clickViewPayments.bind(this)}>Payments & Vouchers <i className='fa fa-edit' /></a></p></div>
+                : null}
+                right={currency === 'sgd' ? <h5 className='is-marginless'>Payment Balance: {formatCurrency(paymentBalance)}</h5> : null} />
+              <Level left={currency === 'sgd'
+                ? <div>
+                  <ul style={{margin: 0, marginLeft: 15, listStyle: 'none'}}>
+                    <li onClick={this._removePayment.bind(this, 'cash')}><i className='fa fa-close' /> Cash: {this.paymentTypeTotal('cash', 'format')}</li>
+                    <li onClick={this._removePayment.bind(this, 'voucher')}><i className='fa fa-close' /> Voucher: {this.paymentTypeTotal('voucher', 'format')}</li>
                   </ul>
                 </div>
                 : <div />
               }
-              right={
-                <h3 className='is-marginless is-pulled-right'>
-                  {shouldUpdate
-                    ? null
-                    : <span>{`${currency === 'sgd' ? 'Payment Total: ' : 'ODBO Coins: '}`}
-                      <strong>{`${currency === 'sgd' ? formatCurrency(this.sumOfPayments()) : this.sumOfPayments()}`}</strong>
-                    </span>
-                  }
-                </h3>
-            } />
+                center={currency === 'sgd'
+                  ? <div className='has-text-left'>
+                    <ul style={{margin: 0, marginLeft: -25, listStyle: 'none'}}>
+                      <li onClick={this._removePayment.bind(this, 'credit')}><i className='fa fa-close' /> Credit: {this.paymentTypeTotal('credit', 'format')}</li>
+                      <li onClick={this._removePayment.bind(this, 'nets')}><i className='fa fa-close' /> Nets: {this.paymentTypeTotal('nets', 'format')}</li>
+                    </ul>
+                  </div>
+                  : <div />
+                }
+                right={
+                  <h3 className='is-marginless is-pulled-right'>
+                    {shouldUpdate
+                      ? null
+                      : <span>{`${currency === 'sgd' ? 'Payment Total: ' : 'ODBO Coins: '}`}
+                        <strong>{`${currency === 'sgd' ? formatCurrency(this.sumOfPayments()) : this.sumOfPayments()}`}</strong>
+                      </span>
+                    }
+                  </h3>
+              } />
+            </div>
           </div>
 
           <div className='panel-block' style={{paddingTop: 5, paddingBottom: 5}}>
-            <Level right={
-              <h3 className='is-marginless'>
-                {`${currency === 'sgd' ? 'Cash Change: ' : 'Remaining Balance: '} `}
-                <strong>
-                  {`${currency === 'sgd' ? formatCurrency(this.cashChange()) : this.paymentMinusOrderTotal()}`}
-                </strong>
-              </h3>
-              } />
+            <div className='content' style={{width: '100%'}}>
+              <Level right={
+                <h3 className='is-marginless'>
+                  {`${currency === 'sgd' ? 'Cash Change: ' : 'Remaining Balance: '} `}
+                  <strong>
+                    {`${currency === 'sgd' ? formatCurrency(this.cashChange()) : this.paymentMinusOrderTotal()}`}
+                  </strong>
+                </h3>
+                } />
+            </div>
           </div>
           <div className='panel-block'>
-            {/*
-                @operator: !activeCustomer
-                    - validates if the prop object 'activeCustomer' is null,
-                      it will display nothing else validate currency
-                @operator: !currency
-                    - validates if the prop string 'currency' is 'odbo',
-                      it will display nothing else display bonusPoints control
-              */
-              !activeCustomer
-                ? <Level left={<h3 />} />
-                : <Level left={
-                  <div>
-                    <p className='is-marginless'>
-                      <FormattedMessage id='app.general.cust' />:
-                      <strong>{` ${activeCustomer.firstName}`}</strong>
-                    </p>
-                    <a style={{color: 'orange'}}
-                      onClick={this._clickRemoveCustomer.bind(this)}>
-                      <i className='fa fa-times' />
-                      <FormattedMessage id='app.button.remove' />
-                    </a>
-                  </div>
-                  }
-                  center={
-                    <p>
+            <div className='content'>
+              {/*
+                  @operator: !activeCustomer
+                      - validates if the prop object 'activeCustomer' is null,
+                        it will display nothing else validate currency
+                  @operator: !currency
+                      - validates if the prop string 'currency' is 'odbo',
+                        it will display nothing else display bonusPoints control
+                */
+                !activeCustomer
+                  ? <Level left={<h3 />} />
+                  : <Level left={
+                    <div>
+                      <p className='is-marginless'>
+                        <FormattedMessage id='app.general.cust' />:
+                        <strong>{` ${activeCustomer.firstName}`}</strong>
+                      </p>
+                      <a style={{color: 'orange'}}
+                        onClick={this._clickRemoveCustomer.bind(this)}>
+                        <i className='fa fa-times' />
+                        <FormattedMessage id='app.button.remove' />
+                      </a>
+                    </div>
+                    }
+                    center={
+                      <p>
+                        {currency === 'sgd'
+                          ? <strong style={{color: bonusPoints ? 'green' : 'grey'}}>
+                            [ x2 {bonusPoints
+                            ? <FormattedMessage id='app.general.enabled' />
+                            : <FormattedMessage id='app.general.disabled' />
+                          } ]
+                          </strong>
+                          : null
+                        }
+                      </p>
+                    }
+                    right={<h3 className='is-marginless'>
                       {currency === 'sgd'
-                        ? <strong style={{color: bonusPoints ? 'green' : 'grey'}}>
-                          [ x2 {bonusPoints
-                          ? <FormattedMessage id='app.general.enabled' />
-                          : <FormattedMessage id='app.general.disabled' />
-                        } ]
-                        </strong>
-                        : null
-                      }
-                    </p>
-                  }
-                  right={<h3 className='is-marginless'>
-                    {currency === 'sgd'
-                    ? <strong style={{color: 'green'}}>{activeCustomer
-                      ? bonusPoints
-                        ? (this.sumOfCartItems() * 2).toFixed(0)
-                        : this.sumOfCartItems().toFixed(0)
-                      : '0.00'
-                    } Points
-                    </strong>
-                    : null}
-                  </h3>}
-                   />
-            }
+                      ? <strong style={{color: 'green'}}>{activeCustomer
+                        ? bonusPoints
+                          ? (this.sumOfCartItems() * 2).toFixed(0)
+                          : this.sumOfCartItems().toFixed(0)
+                        : '0.00'
+                      } Points
+                      </strong>
+                      : null}
+                    </h3>}
+                     />
+              }
+            </div>
           </div>
-          <div className='panel-block control is-grouped is-marginless'>
-            {/*
-                @operator: !orderNoteCount
-                    - validates the variable 'orderNoteCount' is zero,
-                      it will display nothing, else, display a button showing
-                      the note count and when clicked, display the notes modal
-              */
-              orderNoteCount === 0
-              ? null
-              : <p className='control'>
-                <a className='button' onClick={this._clickViewNotes.bind(this)}>
-                  <span>View
-                    <strong style={{color: 'red'}}> {orderNoteCount} </strong>
-                  </span>
+          <div className='panel-block'>
+            <form autoComplete='off' onSubmit={this._clickAddNote.bind(this)} style={{width: '100%'}}>
+              <p className='control has-addons has-addons-centered'>
+                {/*
+                    @operator: !orderNoteCount
+                        - validates the variable 'orderNoteCount' is zero,
+                          it will display nothing, else, display a button showing
+                          the note count and when clicked, display the notes modal
+                  */
+                  orderNoteCount === 0
+                  ? null
+                  : <a className='button' onClick={this._clickViewNotes.bind(this)}>
+                    <span>View
+                      <strong style={{color: 'red'}}> {orderNoteCount} </strong>
+                    </span>
+                  </a>
+                }
+                <input id='noteInput' className='input is-expanded'
+                  placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
+                <a className='button' onClick={this._clickAddNote.bind(this)}>
+                  <strong><FormattedMessage id='app.button.addNote' /></strong>
                 </a>
               </p>
-            }
-            <div className='control is-expanded'>
-              <form autoComplete='off' onSubmit={this._clickAddNote.bind(this)}>
-                <p className='control has-icon is-expanded'>
-                  <input id='noteInput' className='input'
-                    placeholder={intl.formatMessage({ id: 'app.ph.saleAddNote' })} />
-                  <i className='fa fa-plus' />
-                </p>
-              </form>
-            </div>
-            <p className='control'>
-              <a className='button' onClick={this._clickAddNote.bind(this)}>
-                <strong><FormattedMessage id='app.button.addNote' /></strong>
-              </a>
-            </p>
+            </form>
           </div>
-        </Panel>
-        <Panel>
+        </nav>
+        <nav className='panel'>
           <div className='panel-block'>
             <FunctionButtons buttons={buttons3} onClickButton={this._clickCheckoutButtons.bind(this)} />
           </div>
-        </Panel>
+        </nav>
         <PanelCheckoutModals
           activeModalId={activeModalId}
           card={card}
@@ -762,6 +762,7 @@ class PanelCheckout extends Component {
       totalQuantity: productCount,
       currency,
       total: Number(this.orderTotal()),
+      userPrevCoins: activeCustomer ? Number(activeCustomer.odboCoins) : null,
       redemptionPoints: Number(this.sumOfCartItems()),
       bonusPoints: bonusPoints ? 100 : 0,
       payments: processedPayments,

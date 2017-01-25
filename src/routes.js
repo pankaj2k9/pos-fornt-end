@@ -16,21 +16,46 @@ import Reports from './containers/Reports'
  */
 function requireAuth (nextState, replace, callback) {
   let appState = JSON.parse(window.localStorage.getItem('state'))
-  const posMode = appState.application.posMode
-  if (window.localStorage.getItem('feathers-jwt') && posMode === 'offline') {
+  let nextRoute = nextState.location.pathname
+  let notStore = nextRoute !== 'store' ? nextRoute : null
+  const posMode = appState ? appState.application.posMode : undefined
+  const netStat = appState ? appState.application.networkStatus : undefined
+  const token = window.localStorage.getItem('feathers-jwt')
+  if (token && nextRoute === '/') {
+    replace({ pathname: 'store' })
+    callback()
+  } else if (token && appState && netStat === 'offline' && notStore) {
+    replace({ pathname: 'store' })
+    callback()
+  } else if (token && appState && posMode === 'offline' && notStore) {
+    replace({ pathname: 'store' })
+    callback()
+  } else if (!token) {
+    console.log(1)
     callback()
   } else if (!api.get('token')) {
-    api.passport.verifyJWT(window.localStorage.getItem('feathers-jwt'))
+    api.passport.verifyJWT(token)
     .then(token => {
       return api.authenticate({ strategy: 'jwt', store: token.storeId })
     }).then(response => {
       callback()
     }).catch(error => {
-      let noTokenError = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
-      if (noTokenError === String(error)) {
+      let errorMsg = error.message
+      let error1 = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
+      let error2 = 'Token provided to verifyJWT is missing or not a string'
+      let error3 = 'Failed to fetch'
+      if (token && notStore) {
+        replace({ pathname: 'store' })
+        callback()
+      } else if (errorMsg === error1) {
         replace({ pathname: '/' })
         callback()
-      } // add fallback if needed
+      } else if (errorMsg === error2) {
+        replace({ pathname: '/' })
+        callback()
+      } else if (errorMsg === error3) {
+        callback()
+      }// add fallback if needed
     })
   } else {
     callback()
@@ -39,7 +64,7 @@ function requireAuth (nextState, replace, callback) {
 
 export default (
   <Route path='/' component={App}>
-    <IndexRoute component={Login} />
+    <IndexRoute component={Login} onEnter={requireAuth} />
     <Route path='store' component={Store} onEnter={requireAuth} />
     <Route path='settings' component={Settings} onEnter={requireAuth} />
     <Route path='reports' component={Reports} onEnter={requireAuth} />

@@ -10,10 +10,10 @@ const Level = (props) => {
     buttonIcon
   } = props
   return (
-    <div className='level is-marginless is-mobile'>
+    <nav className='level is-marginless'>
       {left !== null || undefined
-        ? <div className={'level-left is-marginless'} style={{width: 180}}>
-          {left}
+        ? <div className={'level-left'} style={{width: 180}}>
+          <div className='level-item'>{left}</div>
         </div>
         : null
       }
@@ -35,12 +35,12 @@ const Level = (props) => {
             : null
           }
           <div style={{padding: 5}}>
-            {right}
+            <div className='level-item has-text-right'>{right}</div>
           </div>
         </div>
         : null
       }
-    </div>
+    </nav>
   )
 }
 

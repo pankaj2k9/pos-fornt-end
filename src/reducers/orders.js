@@ -22,7 +22,8 @@ function orders (state = {
     case ORDER_SUCCESS:
       return Object.assign({}, state, {
         isProcessing: false,
-        orderSuccess: true
+        orderSuccess: true,
+        orderError: null
       })
     case ORDER_FAILURE:
       return Object.assign({}, state, {

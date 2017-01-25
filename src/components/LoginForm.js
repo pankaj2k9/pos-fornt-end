@@ -91,11 +91,10 @@ class LoginForm extends Component {
                         </div>
                         <p className='control has-icon'>
                           <input className='input'
-                            type='username'
                             placeholder='Username'
                             onChange={this.handleUserChange.bind(this)}
                             />
-                          <i className='fa fa-user' />
+                          <span className='icon is-small'><i className='fa fa-user' /></span>
                         </p>
                         <p className='control has-icon'>
                           <input className='input'
@@ -103,7 +102,7 @@ class LoginForm extends Component {
                             placeholder='Password'
                             onChange={this.handlePasswordChange.bind(this)}
                             />
-                          <i className='fa fa-lock' />
+                          <span className='icon is-small'><i className='fa fa-lock' /></span>
                         </p>
                         <div className='control'>
                           {networkStatus === 'online'

@@ -11,7 +11,7 @@ const FunctionButtons = (props) => {
   const container = {height: 70, padding: 15, paddingLeft: 5, paddingRight: 5}
 
   return (
-    <div style={{padding: 5}}>
+    <div style={{padding: 5, width: '100%'}}>
       <div className='columns is-multiline is-mobile is-fullwidth'>
         {
           buttons.map(function (button, key) {
@@ -30,7 +30,9 @@ const FunctionButtons = (props) => {
                       }
                     </div>
                     <div className='media-content' style={{color: button.customColor}}>
-                      <h4 className='title is-marginless'><FormattedMessage id={String(button.label)} /></h4>
+                      <div className='content'>
+                        <h4 className='title is-marginless'><FormattedMessage id={String(button.label)} /></h4>
+                      </div>
                     </div>
                   </div>
                 </div>

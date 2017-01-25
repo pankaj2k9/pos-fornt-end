@@ -3,7 +3,6 @@ import { browserHistory } from 'react-router'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 
-import Panel from '../components/Panel'
 // import Level from '../components/Level'
 import SearchModal from './SearchModal'
 import FunctionButtons from '../components/FunctionButtons'
@@ -397,21 +396,21 @@ class PanelCart extends Component {
 
     return (
       <div>
-        <Panel>
+        <div className='panel'>
           <div className='panel-block' style={{padding: 5}}>
             <FunctionButtons buttons={buttons3} onClickButton={this._clickOtherButtons.bind(this)} />
           </div>
-        </Panel>
-        <Panel>
+        </div>
+        <div className='panel'>
           <div className='panel-block' style={{padding: 5}}>
             <FunctionButtons buttons={buttons1} onClickButton={this._clickButtons.bind(this)} />
           </div>
-        </Panel>
-        <Panel>
+        </div>
+        <div className='panel'>
           <div className='panel-block' style={{padding: 5}}>
             <FunctionButtons buttons={buttons2} onClickButton={this._clickPaymentButtons.bind(this)} />
           </div>
-        </Panel>
+        </div>
         {this.renderModal()}
       </div>
     )

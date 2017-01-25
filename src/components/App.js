@@ -144,6 +144,7 @@ class App extends React.Component {
       footerText: ['No sales']
     }
     let data = {
+      id: activeCashdrawer.id,
       posMode: posMode,
       date: activeCashdrawer.date,
       float: amountToAdd,

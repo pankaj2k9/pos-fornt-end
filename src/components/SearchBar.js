@@ -52,7 +52,7 @@ const SearchBar = (props) => {
                 onFocus={() => onFocus(id)}
                 placeholder={intl.formatMessage({ id: placeholder })} />
             }
-            <i className={icon} />
+            <span className='icon is-small'><i className={icon} /></span>
           </p>
           {confirmButton !== undefined
             ? <a className='button control is-medium is-success' onClick={confirmEvent}>
