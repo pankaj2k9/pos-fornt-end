@@ -86,7 +86,9 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
           let orderType = payment.type || 'N/A'
           const orderAmount = Number(payment.amount)
           const orderID = order.id
-          paymentDetailsTotal += orderAmount
+          if (order.currency !== 'odbo' && order.vouchers.length < 1) {
+            paymentDetailsTotal += orderAmount
+          }
 
           updatePaymentDetails(orderType, orderAmount, orderID)
         })
@@ -98,6 +100,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
       paymentDetailsTotal
     }
   }
+
   getRefundSummary (refundSummary) {
     const processedRefundSummary = {}
     refundSummary.forEach(item => {
@@ -164,9 +167,15 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
   render () {
     const { data } = this.props
 
+    let summaryData = []
     let netSales = 0
+    let netSalesOdbo = 0
     data.orders.forEach(order => {
-      netSales += Number(order.total || 0)
+      if (order.currency === 'sgd' && order.payments.length > 0) {
+        netSales += Number(order.total || 0)
+      } else if (order.currency === 'odbo') {
+        netSalesOdbo += Number(order.total || 0)
+      }
     })
     data.info.cashInfo.value = netSales
 
@@ -182,15 +191,15 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
     const refundCount = Number(data.refundCount.count)
 
     // remove ODBO transactions
-    data.summary = data.summary.filter(item => {
+    summaryData = data.summary.filter(item => {
       return item.type !== 'odbo'
     })
 
     // get subtotal and count of cash orders
     let cashOrderAmount = 0
     let cashOrderCount = 0
-    if (data.summary.length > 0) {
-      data.summary.forEach(function (item) {
+    if (summaryData.length > 0) {
+      summaryData.forEach(function (item) {
         if (item.type === 'cash') {
           cashOrderCount += Number(item.count || 0)
           cashOrderAmount += Number(item.subtotal || 0)
@@ -214,7 +223,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
     let totalRefund = 0
     let totalCollected = 0
     const processedRefundSummary = this.getRefundSummary(data.refundSummary)
-    const processedSummary = this.getSummary(data.summary)
+    const processedSummary = this.getSummary(summaryData)
 
     // Payment details
     const pDetails = this.getPaymentDetails(data.orders)
@@ -222,6 +231,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
     const paymentDetailsTotal = pDetails.paymentDetailsTotal
 
     const keyPref = 'rcptprev-xz'
+    let voucherSubtotal = 0
     return (
       <ReceiptPreview>
         {this.renderPrintBtn()}
@@ -254,6 +264,12 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
             key={`${keyPref}-netsales`}
             keyPrefix={`${keyPref}-netsales`}
             cols={['NET SALES :', formatCurrency(netSales)]} />
+          <ReceiptRowNewLine />
+
+          <ReceiptPreviewRow
+            key={`${keyPref}-netsalesOdbo`}
+            keyPrefix={`${keyPref}-netsalesOdbo`}
+            cols={['NET SALES[The odbo coins]:', netSalesOdbo]} />
           <ReceiptRowNewLine />
 
           {Object.keys(processedSummary).map((item, i) => {
@@ -391,10 +407,50 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
             ]}
           />
 
-          {/* Payment transactions */}
+          {/* Voucher transactions */}
+          <span key={`${keyPref}-payment-voucher`}>
+            <ReceiptRowNewLine />
+            <ReceiptPreviewRow
+              key={`${keyPref}-payment-voucher`}
+              keyPrefix={`${keyPref}-payment-voucher`}
+              cols={['VOUCHERS']} />
+            {
+              data.orders.map(order => {
+                let vouchers = order.vouchers
+                if (vouchers.length > 0) {
+                  let voucherSumInOrder = 0
+                  vouchers.forEach(voucher => {
+                    voucherSumInOrder += Number(voucher.deduction)
+                  })
+                  voucherSubtotal += Number(voucherSumInOrder)
+                  const keyTrans = `${keyPref}-payment-voucher-${order.id}`
+                  return (
+                    <ReceiptPreviewRow
+                      key={keyTrans}
+                      keyPrefix={keyTrans}
+                      cols={[
+                        order.id,
+                        formatCurrency(voucherSumInOrder)
+                      ]} />
+                  )
+                }
+              })
+            }
+            {/* All orders for current type */}
+            <ReceiptRowDivider />
+            <ReceiptPreviewRow
+              key={`${keyPref}-payment-voucher-subtotal`}
+              keyPrefix={`${keyPref}-payment-voucher-subtotal`}
+              cols={[
+                '** SUBTOTAL **',
+                formatCurrency(voucherSubtotal)
+              ]} />
+            <ReceiptRowDivider />
+          </span>
+
+          {/* Other Payment transactions */}
           {Object.keys(paymentDetails).map((type, i) => {
             const payment = paymentDetails[type]
-
             const keyParent = `${keyPref}-payment-${type}`
 
             return (
@@ -415,7 +471,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
                       keyPrefix={keyTrans}
                       cols={[
                         trans.id,
-                        formatCurrency(trans.total)
+                        type !== 'odbo' ? formatCurrency(trans.total) : trans.total
                       ]} />
                   )
                 })}
@@ -427,7 +483,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
                   keyPrefix={`${keyParent}-subtotal`}
                   cols={[
                     '** SUBTOTAL **',
-                    formatCurrency(payment.subtotal)
+                    type !== 'odbo' ? formatCurrency(payment.subtotal) : payment.subtotal
                   ]} />
                 <ReceiptRowDivider />
               </span>
@@ -439,8 +495,31 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
             key={`${keyPref}-ptotal`}
             keyPrefix={`${keyPref}-ptotal`}
             cols={[
-              '** TOTAL **',
+              '** TOTAL **'
+            ]}
+          />
+          <ReceiptPreviewRow
+            key={`${keyPref}-ptotalSgd`}
+            keyPrefix={`${keyPref}-ptotalSgd`}
+            cols={[
+              'SGD',
               formatCurrency(paymentDetailsTotal)
+            ]}
+          />
+          <ReceiptPreviewRow
+            key={`${keyPref}-ptotalVoucher`}
+            keyPrefix={`${keyPref}-ptotalVoucher`}
+            cols={[
+              'VOUCHERS',
+              formatCurrency(data.voucherSummary[0].subtotal)
+            ]}
+          />
+          <ReceiptPreviewRow
+            key={`${keyPref}-ptotalOdbo`}
+            keyPrefix={`${keyPref}-ptotalodbo`}
+            cols={[
+              'The odbo coins',
+              netSalesOdbo
             ]}
           />
           <ReceiptRowDivider />
