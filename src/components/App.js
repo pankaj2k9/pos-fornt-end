@@ -17,8 +17,7 @@ import {
   updateCashDrawer,
   setCashdrawerFailure,
   setCashierLoggedIn,
-  toggleNetworkStatus,
-  togglePosMode
+  toggleNetworkStatus
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
@@ -53,10 +52,9 @@ class App extends React.Component {
     dispatch(hamburgerToggle())
   }
 
-  changePosMode () {
-    const { dispatch, posMode } = this.props
-    const mode = posMode === 'online' ? 'offline' : 'online'
-    dispatch(togglePosMode(mode))
+  hideNetStat () {
+    var d = document.getElementById('netStat')
+    d.className += ' is-hidden-widescreen is-hidden-tablet'
   }
 
   handleLogout () {
@@ -375,15 +373,24 @@ class App extends React.Component {
         return null
     }
   }
-
+  // <a onClick={this.changePosMode.bind(this)}><FormattedMessage id='app.button.switchToOffline' /></a>
   render () {
     const { isHamburgerOpen, location, isLoggingOut, networkStatus, posMode,
             staff, activeCashier, adminToken } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.user
-    const hideNetStat = networkStatus === 'online'
-      ? 'is-hidden-widescreen is-hidden-tablet'
-      : posMode === 'offline' ? 'is-hidden-widescreen is-hidden-tablet' : ''
+    let hideNetStat
+    if (networkStatus === 'online' && posMode === 'online') {
+      hideNetStat = 'is-hidden-widescreen is-hidden-tablet'
+    } else if (networkStatus === 'online' && posMode === 'offline') {
+      hideNetStat = 'is-success'
+    } else if (networkStatus === 'offline' && posMode === 'online') {
+      hideNetStat = 'is-warning'
+    } else if (networkStatus === 'online' && posMode === 'offline') {
+      hideNetStat = 'is-hidden-widescreen is-hidden-tablet'
+    } else if (networkStatus === 'offline' && posMode === 'offline') {
+      hideNetStat = 'is-hidden-widescreen is-hidden-tablet'
+    }
     return (
       <div>
         <NavBar isHamburgerOpen={isHamburgerOpen}
@@ -397,13 +404,19 @@ class App extends React.Component {
           adminToken={adminToken}
           isLoggingOut={isLoggingOut}
           openChooseUser={this.openChooseUserModal.bind(this)} />
-        <div id='netStat' className={`notification is-warning ${hideNetStat}`} style={{height: 30, padding: 3, margin: 0}}>
+        <div id='netStat' className={`notification ${hideNetStat}`} style={{height: 30, padding: 3, margin: 0}}>
           <article className='media is-marginless'>
             <div className='media-left' />
             <div className='media-content'>
               <div className='content has-text-centered'>
-                <p><span className='icon'><i className='fa fa-exclamation-circle' /></span>
-                  <FormattedMessage id='app.error.noNetwork' /> <a onClick={this.changePosMode.bind(this)}><FormattedMessage id='app.button.switchToOffline' /></a>
+                <p><span className='icon'><i className={`fa fa-${networkStatus === 'online' ? 'check' : 'exclamation'}-circle`} /></span>
+                  {networkStatus === 'offline'
+                    ? <FormattedMessage id='app.error.noNetwork' />
+                    : <FormattedMessage id='app.ph.connected' />
+                  }
+                  <a className onClick={this.hideNetStat.bind(this)}>
+                    <strong style={{color: 'black', textDecoration: 'underline'}}><FormattedMessage id='app.button.hideBar' /></strong>
+                  </a>
                 </p>
               </div>
             </div>
