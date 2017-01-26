@@ -8,7 +8,7 @@ const FunctionButtons = (props) => {
   } = props
   // var intFrameHeight = window.innerHeight
 
-  const container = {height: 70, padding: 15, paddingLeft: 5, paddingRight: 5}
+  const container = {height: 70, padding: 10, paddingLeft: 5, paddingRight: 8}
 
   return (
     <div style={{padding: 5, width: '100%'}}>
@@ -21,7 +21,7 @@ const FunctionButtons = (props) => {
               <div key={key} className={`column ${button.size || 'is-one-third'}`} onClick={boundItemClick}>
                 <div className={`box has-text-centered notification ${button.color || ''}`} style={container}>
                   <div className='media' style={{color: buttonColor}}>
-                    <div className='media-left'>
+                    <div className='media-left' style={{margin: 0, marginRight: 5}}>
                       {button.icon
                         ? <span className={!button.size ? 'icon is-medium' : ''}>
                           <i className={button.icon} />
@@ -30,8 +30,8 @@ const FunctionButtons = (props) => {
                       }
                     </div>
                     <div className='media-content' style={{color: button.customColor}}>
-                      <div className='content'>
-                        <h4 className='title is-marginless'><FormattedMessage id={String(button.label)} /></h4>
+                      <div className='content has-text-right'>
+                        <h5 className='title is-marginless'><FormattedMessage id={String(button.label)} /></h5>
                       </div>
                     </div>
                   </div>

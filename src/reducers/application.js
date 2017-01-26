@@ -94,8 +94,15 @@ function application (state = {
         error: null
       })
     case TOGGLE_NETWORK_STATUS:
+      let newMode
+      if (action.netStat === 'offline' && state.posMode === 'online') {
+        newMode = 'offline'
+      } else {
+        newMode = 'offline'
+      }
       return Object.assign({}, state, {
-        networkStatus: action.netStat
+        networkStatus: action.netStat,
+        posMode: newMode
       })
     case TOGGLE_POS_MODE:
       return Object.assign({}, state, {

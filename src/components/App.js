@@ -34,29 +34,36 @@ import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
   componentDidMount () {
-    const {dispatch} = this.props
+    const { dispatch } = this.props
     window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus('offline')) })
     window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus('online')) })
   }
 
-  // componentWillMount () {
-  //   const { dispatch, location } = this.props
-  //   var currentLocation = location.pathname
-  //   if (currentLocation === '/') {
-  //     dispatch(logout(browserHistory))
-  //     dispatch(onLogout())
-  //   }
-  // }
+  componentDidUpdate () {
+    const { dispatch, location, networkStatus } = this.props
+    var currentLocation = location.pathname
+    if (currentLocation !== '/') {
+      if (networkStatus === 'offline' && currentLocation !== '/store') {
+        window.addEventListener('offline', (e) => {
+          dispatch(toggleNetworkStatus('offline'))
+          browserHistory.push('store')
+        })
+      }
+    }
+  }
 
   handleHamburgerToggle () {
     const { dispatch } = this.props
     dispatch(hamburgerToggle())
   }
 
-  changePosMode () {
-    const { dispatch, posMode } = this.props
-    const mode = posMode === 'online' ? 'offline' : 'online'
-    dispatch(togglePosMode(mode))
+  hideNetStat () {
+    const { dispatch, networkStatus, posMode } = this.props
+    var d = document.getElementById('netStat')
+    d.className += ' is-hidden-widescreen is-hidden-tablet'
+    if (posMode === 'online' && networkStatus === 'offline') {
+      dispatch(togglePosMode('offline'))
+    }
   }
 
   handleLogout () {
@@ -375,15 +382,24 @@ class App extends React.Component {
         return null
     }
   }
-
+  // <a onClick={this.changePosMode.bind(this)}><FormattedMessage id='app.button.switchToOffline' /></a>
   render () {
     const { isHamburgerOpen, location, isLoggingOut, networkStatus, posMode,
             staff, activeCashier, adminToken } = this.props
     const shouldShowNavCtrl = location.pathname !== '/'
     const userLogedIn = staff === null ? 'Please Login' : staff.user
-    const hideNetStat = networkStatus === 'online'
-      ? 'is-hidden-widescreen is-hidden-tablet'
-      : posMode === 'offline' ? 'is-hidden-widescreen is-hidden-tablet' : ''
+    let hideNetStat
+    if (networkStatus === 'online' && posMode === 'online') {
+      hideNetStat = 'is-hidden-widescreen is-hidden-tablet'
+    } else if (networkStatus === 'online' && posMode === 'offline') {
+      hideNetStat = 'is-success'
+    } else if (networkStatus === 'offline' && posMode === 'online') {
+      hideNetStat = 'is-warning'
+    } else if (networkStatus === 'online' && posMode === 'offline') {
+      hideNetStat = 'is-hidden-widescreen is-hidden-tablet'
+    } else if (networkStatus === 'offline' && posMode === 'offline') {
+      hideNetStat = 'is-hidden-widescreen is-hidden-tablet'
+    }
     return (
       <div>
         <NavBar isHamburgerOpen={isHamburgerOpen}
@@ -397,13 +413,24 @@ class App extends React.Component {
           adminToken={adminToken}
           isLoggingOut={isLoggingOut}
           openChooseUser={this.openChooseUserModal.bind(this)} />
-        <div id='netStat' className={`notification is-warning ${hideNetStat}`} style={{height: 30, padding: 3, margin: 0}}>
+        <div id='netStat' className={`notification ${hideNetStat}`} style={{height: 30, padding: 3, margin: 0}}>
           <article className='media is-marginless'>
             <div className='media-left' />
             <div className='media-content'>
               <div className='content has-text-centered'>
-                <p><span className='icon'><i className='fa fa-exclamation-circle' /></span>
-                  <FormattedMessage id='app.error.noNetwork' /> <a onClick={this.changePosMode.bind(this)}><FormattedMessage id='app.button.switchToOffline' /></a>
+                <p><span className='icon'><i className={`fa fa-${networkStatus === 'online' ? 'check' : 'exclamation'}-circle`} /></span>
+                  {networkStatus === 'offline'
+                    ? <FormattedMessage id='app.error.noNetwork' />
+                    : <FormattedMessage id='app.ph.connected' />
+                  }
+                  <a className onClick={this.hideNetStat.bind(this)}>
+                    <strong style={{color: 'black', textDecoration: 'underline'}}>
+                      {posMode === 'online' && networkStatus === 'offline'
+                        ? <FormattedMessage id='app.button.switchToOffline' />
+                        : <FormattedMessage id='app.button.hideBar' />
+                      }
+                    </strong>
+                  </a>
                 </p>
               </div>
             </div>

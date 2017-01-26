@@ -116,7 +116,7 @@ class PanelCart extends Component {
   }
 
   _clickButtons (buttonName) {
-    const {dispatch, cartItemsArray, posMode} = this.props
+    const {dispatch, cartItemsArray, posMode, networkStatus} = this.props
     const button = buttonName.toLowerCase()
     if (cartItemsArray.length > 0) {
       switch (button) {
@@ -146,6 +146,12 @@ class PanelCart extends Component {
       switch (button) {
         case 'switch to offline':
           dispatch(togglePosMode('offline'))
+          if (networkStatus === 'online') {
+            var d = document.getElementById('netStat')
+            setTimeout(function () {
+              d.className += ' is-hidden-widescreen is-hidden-tablet'
+            }, 1)
+          }
           break
         case 'x/z reading':
           dispatch(reportsSetTab('completeSales'))
@@ -683,6 +689,7 @@ function mapStateToProps (state) {
   return {
     storeId: state.application.storeId,
     posMode: state.application.posMode,
+    networkStatus: state.application.networkStatus,
     productsArray: state.data.products.productsArray,
     productsById: state.data.products.productsById,
     productsSearchKey: state.panelProducts.productsSearchKey,

@@ -30,8 +30,10 @@ function requireAuth (nextState, replace, callback) {
   } else if (token && appState && posMode === 'offline' && notStore) {
     replace({ pathname: 'store' })
     callback()
+  } else if (!token && nextRoute !== '/') {
+    replace({ pathname: '/' })
+    callback()
   } else if (!token) {
-    console.log(1)
     callback()
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
