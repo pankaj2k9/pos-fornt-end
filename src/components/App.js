@@ -17,7 +17,8 @@ import {
   updateCashDrawer,
   setCashdrawerFailure,
   setCashierLoggedIn,
-  toggleNetworkStatus
+  toggleNetworkStatus,
+  togglePosMode
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
@@ -33,19 +34,23 @@ import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
   componentDidMount () {
-    const {dispatch} = this.props
+    const { dispatch } = this.props
     window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus('offline')) })
     window.addEventListener('online', (e) => { dispatch(toggleNetworkStatus('online')) })
   }
 
-  // componentWillMount () {
-  //   const { dispatch, location } = this.props
-  //   var currentLocation = location.pathname
-  //   if (currentLocation === '/') {
-  //     dispatch(logout(browserHistory))
-  //     dispatch(onLogout())
-  //   }
-  // }
+  componentDidUpdate () {
+    const { dispatch, location, networkStatus } = this.props
+    var currentLocation = location.pathname
+    if (currentLocation !== '/') {
+      if (networkStatus === 'offline' && currentLocation !== '/store') {
+        window.addEventListener('offline', (e) => {
+          dispatch(toggleNetworkStatus('offline'))
+          browserHistory.push('store')
+        })
+      }
+    }
+  }
 
   handleHamburgerToggle () {
     const { dispatch } = this.props
@@ -53,8 +58,12 @@ class App extends React.Component {
   }
 
   hideNetStat () {
+    const { dispatch, networkStatus, posMode } = this.props
     var d = document.getElementById('netStat')
     d.className += ' is-hidden-widescreen is-hidden-tablet'
+    if (posMode === 'online' && networkStatus === 'offline') {
+      dispatch(togglePosMode('offline'))
+    }
   }
 
   handleLogout () {
@@ -415,7 +424,12 @@ class App extends React.Component {
                     : <FormattedMessage id='app.ph.connected' />
                   }
                   <a className onClick={this.hideNetStat.bind(this)}>
-                    <strong style={{color: 'black', textDecoration: 'underline'}}><FormattedMessage id='app.button.hideBar' /></strong>
+                    <strong style={{color: 'black', textDecoration: 'underline'}}>
+                      {posMode === 'online' && networkStatus === 'offline'
+                        ? <FormattedMessage id='app.button.switchToOffline' />
+                        : <FormattedMessage id='app.button.hideBar' />
+                      }
+                    </strong>
                   </a>
                 </p>
               </div>
