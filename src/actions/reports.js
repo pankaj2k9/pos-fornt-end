@@ -62,7 +62,7 @@ export function completeSalesFetch (source, date) {
   return (dispatch) => {
     dispatch(completeSalesFetchRequest())
     return reportsService.findCompleteSales(source, date)
-      .then(response => {
+      .then(function (response) {
         dispatch(completeSalesFetchSuccess(response, date))
       })
       .catch(error => {
