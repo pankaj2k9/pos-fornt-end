@@ -153,6 +153,7 @@ const zh = {
   'app.button.checkout': '推出订单',
   'app.button.openDrawer': '打开钱箱',
   'app.button.syncOrders': '同步订单',
+  'app.button.hideBar': ' 隐藏此通知',
 
   'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
@@ -179,9 +180,10 @@ const zh = {
   'app.ph.noDataToSync': '无数据要同步',
   'app.ph.offlineOrders': '离线订单',
   'app.ph.cashdrawerData': '现金抽屉数据',
+  'app.ph.connected': '你有互联网. . . ',
 
   'app.error.update.stock': '更新股票在管理员',
-  'app.error.noNetwork': '没有网络连接',
+  'app.error.noNetwork': '没有网络连接. . . ',
   'app.error.needNetwork': '需要网络连接',
   'app.error.noCustResults': '没有客户的搜索结果 ',
   'app.error.noCartItems': '有没有产品... ',

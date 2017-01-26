@@ -153,6 +153,7 @@ const en = {
   'app.button.checkout': 'Checkout Order',
   'app.button.openDrawer': 'Open Drawer',
   'app.button.syncOrders': 'Synchronize Orders',
+  'app.button.hideBar': ' Hide this notification',
 
   'app.ph.paymentAmount': 'Input Exact Amount/Custom Amount',
   'app.ph.voucherAmount': 'Input Voucher Amount',
@@ -185,10 +186,11 @@ const en = {
   'app.ph.syncFailed': 'Failed to Sync',
   'app.ph.notSynced': 'Not Synced',
   'app.ph.syncing': 'Syncing. . .',
+  'app.ph.connected': 'Connected to the Internet. . . ',
 
   'app.error.update.stock': 'Update stocks on admin app',
-  'app.error.noNetwork': 'No Internet Connection',
-  'app.error.needNetwork': 'Internet Connection is needed to Login.',
+  'app.error.noNetwork': 'No Internet Connection. . . ',
+  'app.error.needNetwork': 'Internet Connection is needed to Login. ',
   'app.error.noCustResults': 'No search results for customer ',
   'app.error.noCartItems': 'There are no current items... ',
   'app.error.cashNotEnough': 'Cash must be exact or greater than the amount',
