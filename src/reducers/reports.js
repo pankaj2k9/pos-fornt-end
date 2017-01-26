@@ -214,19 +214,10 @@ function completeSales (state, action) {
         isLoading: true
       })
     case COMPLETESALES_FETCH_SUCCESS:
-      // Work-around. 'odbo' type is missing when merging with `completeSales`
-      // state.
-      // No idea what's going on.
-      let tempState = Object.assign({}, state, {
+      return Object.assign({}, state, {
         isLoading: false,
         completeSales: action.completeSales,
         date: action.date || new Date()
-      })
-      const tempSum = Object.assign({}, tempState.completeSales.summary)
-      return Object.assign({}, tempState, {
-        completeSales2: {
-          summary: tempSum
-        }
       })
     case COMPLETESALES_FETCH_FAILURE:
       return Object.assign({}, state, {
