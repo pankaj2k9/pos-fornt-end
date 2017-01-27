@@ -227,7 +227,12 @@ export function updateCashDrawerFailure (error) {
 export function updateCashDrawer (data, receipt) {
   return (dispatch) => {
     dispatch(updateCashDrawerRequest())
-    if (data.posMode === 'online') {
+    let mode = data.posMode
+    let stat = data.networkStatus
+    const case1 = mode === 'offline' && stat === 'online'
+    const case2 = mode === 'online' && stat === 'online'
+    const case3 = mode === 'offline'
+    if (case1 || case2) {
       return dailyDataService.patch(data)
         .then(response => {
           dispatch(updateCashDrawerSuccess(data, data.posMode))
@@ -239,7 +244,7 @@ export function updateCashDrawer (data, receipt) {
         .catch(error => {
           dispatch(updateCashDrawerFailure(error.message))
         })
-    } else if (data.posMode === 'offline') {
+    } else if (case3) {
       dispatch(updateCashDrawerSuccess(data, data.posMode))
       if (receipt) {
         print(receipt)
