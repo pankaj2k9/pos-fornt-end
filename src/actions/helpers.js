@@ -1,3 +1,5 @@
+import { browserHistory } from 'react-router'
+
 import {
   panelCheckoutReset,
   checkoutFieldsReset,
@@ -106,6 +108,7 @@ export function resetStore (locale, posMode) {
     dispatch(panelCartReset())
     dispatch(closeActiveModal(focusProductSearch))
     dispatch(orderStateReset())
+    browserHistory.push('store')
   }
 }
 
