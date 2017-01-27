@@ -40,8 +40,9 @@ class LoginForm extends Component {
   }
 
   componentDidMount () {
-    const { onGetStoreIds } = this.props
+    const { onGetStoreIds, closeModal } = this.props
     onGetStoreIds()
+    closeModal()
   }
 
   render () {

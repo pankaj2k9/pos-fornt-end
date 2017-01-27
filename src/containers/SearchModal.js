@@ -253,7 +253,6 @@ class SearchModal extends Component {
     if (type === 'refundModal') {
       var refundRemarks = document.getElementById('refundRemarks').value
       details.trans.type = 'refund'
-      console.log('details', details)
       dispatch(refund(details.info.orderId, refundRemarks, details.info.lastOrderId, details))
     } else if (type === 'reprintModal') {
       details.trans.type = 'reprint'

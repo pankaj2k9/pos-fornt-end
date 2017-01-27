@@ -18,7 +18,8 @@ import {
   setCashdrawerFailure,
   setCashierLoggedIn,
   toggleNetworkStatus,
-  togglePosMode
+  togglePosMode,
+  resetErrorState
 } from '../actions/application'
 
 import { verifyStorePin } from '../actions/settings'
@@ -33,6 +34,11 @@ import { onLogout } from '../actions/helpers'
 import '../assets/logo-horizontal.png' // navbar logo
 
 class App extends React.Component {
+  componentWillMount () {
+    const { dispatch } = this.props
+    dispatch(resetErrorState())
+  }
+
   componentDidMount () {
     const { dispatch } = this.props
     window.addEventListener('offline', (e) => { dispatch(toggleNetworkStatus('offline')) })
@@ -117,31 +123,9 @@ class App extends React.Component {
     dispatch(setActiveModal('verifyStaff'))
   }
 
-  // updateCashdrawer (event) {
-  //   event.preventDefault()
-  //   const {dispatch, staff, storeId, activeCashdrawer} = this.props
-  //   var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
-  //   let query = {
-  //     query: {
-  //       store: storeId,
-  //       pinCode: document.getElementById('storePinCode2').value
-  //     }
-  //   }
-  //   let data = {
-  //     date: activeCashdrawer.date,
-  //     amount: amountToAdd,
-  //     count: Number(activeCashdrawer.cashDrawerOpenCount) + 1
-  //   }
-  //   if (amountToAdd <= 0 || isNaN(amountToAdd)) {
-  //     dispatch(setCashdrawerFailure('You have entered an invalid amount'))
-  //   } else {
-  //     dispatch(validateAndUpdateCashdrawer(query, staff, data))
-  //   }
-  // }
-
   updateCashdrawer (event) {
     event.preventDefault()
-    const {dispatch, staff, activeCashdrawer, posMode} = this.props
+    const {dispatch, staff, activeCashdrawer, posMode, networkStatus} = this.props
     var amountToAdd = Number(document.getElementById('cashdrawerAmount').value)
     const receipt = {
       info: {
@@ -153,6 +137,7 @@ class App extends React.Component {
     let data = {
       id: activeCashdrawer.id,
       posMode: posMode,
+      networkStatus: networkStatus,
       date: activeCashdrawer.date,
       float: amountToAdd,
       count: Number(activeCashdrawer.cashDrawerOpenCount) + 1

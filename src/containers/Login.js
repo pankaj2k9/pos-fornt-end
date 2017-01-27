@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { browserHistory } from 'react-router'
-import { storeGetIds, storeSetId, storeSetActive } from '../actions/application'
+import { storeGetIds, storeSetId, storeSetActive, closeActiveModal } from '../actions/application'
 
 // components/containers
 import LoginForm from '../components/LoginForm'
@@ -11,6 +11,7 @@ import { login } from '../actions/login.js'
 
 const Login = (props) => {
   const {
+    closeModal,
     handleLogin,
     handleGetStoreIds,
     errorMessage,
@@ -23,6 +24,7 @@ const Login = (props) => {
   } = props
   return (
     <LoginForm
+      closeModal={closeModal}
       onLogin={handleLogin}
       onGetStoreIds={handleGetStoreIds}
       isFetchingStoreIds={isFetchingStoreIds}
@@ -65,6 +67,10 @@ const mapDispatchToProps = (dispatch, storeId) => {
 
     handleGetStoreIds: () => {
       dispatch(storeGetIds())
+    },
+
+    closeModal: () => {
+      dispatch(closeActiveModal())
     },
 
     handleSetStoreId: (storeId, storeIds) => {
