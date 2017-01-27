@@ -69,7 +69,6 @@ function changeInRoute (nextState) {
   let appState = JSON.parse(window.localStorage.getItem('state'))
   const focusedInput = appState.application.focusedInput
   if (nextRoute === '/store') {
-    console.log('111')
     document.getElementById(focusedInput).focus()
   }
 }
