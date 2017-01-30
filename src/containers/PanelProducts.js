@@ -19,14 +19,22 @@ class PanelProducts extends Component {
       locale,
       productsById,
       productsFilter,
-      posMode
+      posMode,
+      networkStatus
     } = this.props
+    const case1 = posMode === 'offline' && networkStatus === 'online'
+    const case2 = posMode === 'online' && networkStatus === 'online'
     if (!productsById) {
-      if (posMode === 'online') {
+      if (case1 || case2) {
         dispatch(fetchAllProducts(locale, productsFilter))
         dispatch(fetchCustomers())
       }
     }
+  }
+
+  componentDidMount () {
+    const {focusedInput} = this.props
+    document.getElementById(focusedInput).focus()
   }
 
   searchKeyInput (productsSearchKey) {
@@ -55,21 +63,17 @@ class PanelProducts extends Component {
 
   render () {
     const {
-      autofocusSearchInput, isFetching,
-      productsSearchKey, shouldUpdate
+      autofocusSearchInput,
+      productsSearchKey
     } = this.props
     return (
-      !shouldUpdate && !isFetching
-      ? <div>
-        <SearchBar
-          id='productsSearch'
-          autoFocus={autofocusSearchInput}
-          value={productsSearchKey}
-          placeholder='app.ph.searchOrBarcode'
-          onChange={this.searchKeyInput.bind(this)}
-          onSubmit={this.barcodeInput.bind(this)} />
-      </div>
-      : null
+      <SearchBar
+        id='productsSearch'
+        autoFocus={autofocusSearchInput}
+        value={productsSearchKey}
+        placeholder='app.ph.searchOrBarcode'
+        onChange={this.searchKeyInput.bind(this)}
+        onSubmit={this.barcodeInput.bind(this)} />
     )
   }
 }
@@ -85,6 +89,7 @@ function mapStateToProps (state) {
   const focusedInput = state.application.focusedInput || state.panelCart.focusedInput
   return {
     posMode: state.application.posMode,
+    networkStatus: state.application.networkStatus,
     activeProductId: state.panelProducts.activeProductId,
     activeProduct: state.panelProducts.activeProduct,
     filters: state.panelProducts.filters,

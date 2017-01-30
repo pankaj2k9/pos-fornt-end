@@ -143,7 +143,13 @@ function application (state = {
       }]
       let dataToMerge = action.mode === 'online' && state.activeOfflineCD ? newData : state.activeOfflineCD || newData
       let newActiveCD = {}
-      if (action.data.posMode === 'online') {
+      let mode = state.posMode
+      let stat = state.networkStatus
+      let case1 = mode === 'offline' && stat === 'online'
+      let case2 = mode === 'online' && stat === 'online'
+      let case3 = mode === 'offline'
+
+      if (case1 || case2) {
         dataToMerge.forEach(function (newData) {
           var existing = output.filter(function (oldData, i) {
             return oldData.date === newData.date
@@ -160,7 +166,7 @@ function application (state = {
         isProcessing: false,
         cashdrawer: output,
         activeCashdrawer: Object.keys(newActiveCD).length === 0 ? newData[0] : newActiveCD,
-        activeOfflineCD: action.data.posMode === 'offline' ? newData : null,
+        activeOfflineCD: case1 || case3 ? newData : null,
         shouldUpdate: false,
         error: null
       })

@@ -49,8 +49,6 @@ import {
 } from '../actions/orders'
 import { formatCurrency } from '../utils/string'
 
-const focusProductSearch = 'productsSearch'
-
 class PanelCheckout extends Component {
   componentDidUpdate () {
     const {printPreviewTotal} = this.props
@@ -103,7 +101,6 @@ class PanelCheckout extends Component {
         dispatch(resetStore(locale, posMode))
       }
     }
-    dispatch(closeActiveModal(focusProductSearch))
     dispatch(panelCheckoutShouldUpdate(false))
   }
 

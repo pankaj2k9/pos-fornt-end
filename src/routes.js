@@ -64,10 +64,19 @@ function requireAuth (nextState, replace, callback) {
   }
 }
 
+function changeInRoute (nextState) {
+  let nextRoute = nextState.location.pathname
+  let appState = JSON.parse(window.localStorage.getItem('state'))
+  const focusedInput = appState.application.focusedInput
+  if (nextRoute === '/store') {
+    document.getElementById(focusedInput).focus()
+  }
+}
+
 export default (
   <Route path='/' component={App}>
     <IndexRoute component={Login} onEnter={requireAuth} />
-    <Route path='store' component={Store} onEnter={requireAuth} />
+    <Route path='store' component={Store} onEnter={requireAuth} onChange={changeInRoute} />
     <Route path='settings' component={Settings} onEnter={requireAuth} />
     <Route path='reports' component={Reports} onEnter={requireAuth} />
     <Route path='*' component={NotFound} />
