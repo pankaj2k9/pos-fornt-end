@@ -6,12 +6,9 @@ import { addLocaleData } from 'react-intl'
 import enLocaleData from 'react-intl/locale-data/en'
 import zhLocaleData from 'react-intl/locale-data/zh'
 
-import application from './application'
+import app from './app'
 import login from './login'
 import data from './data'
-import panelProducts from './panelProducts'
-import panelCart from './panelCart'
-import panelCheckout from './panelCheckout'
 import orders from './orders'
 import reports from './reports'
 import ordersOnHold from './ordersOnHold'
@@ -24,13 +21,10 @@ addLocaleData([
 ])
 
 const rootReducer = combineReducers({
-  application,
+  app,
   login,
   data,
   intl: intlReducer,
-  panelCart,
-  panelProducts,
-  panelCheckout,
   offlineOrders,
   orders,
   ordersOnHold,

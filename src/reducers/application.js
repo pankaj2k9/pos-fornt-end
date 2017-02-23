@@ -34,7 +34,7 @@ import {
   RESET_APP_STATE,
   TOGGLE_NETWORK_STATUS,
   TOGGLE_POS_MODE
-} from '../actions/application'
+} from '../actions/appMainUI'
 
 function application (state = {
   cashdrawer: [],

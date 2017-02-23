@@ -1,9 +1,15 @@
 import { combineReducers } from 'redux'
 
-import products from './products'
-import customers from './customers'
+import dataCUST from './dataCUST'
+// import dataDWR from './dataDWR'
+import dataPROD from './dataPROD'
+import dataSTRInfo from './dataSTRInfo'
+import dataORDinfo from './dataORDinfo'
 
 export default combineReducers({
-  products,
-  customers
+  dataCUST,
+  // dataDWR,
+  dataPROD,
+  dataSTRInfo,
+  dataORDinfo
 })

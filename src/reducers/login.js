@@ -10,8 +10,7 @@ import {
 } from '../actions/login.js'
 
 function login (state = {
-  isLoggingIn: false,
-  isLoggingOut: false,
+  isProcessing: false,
   errorMessage: null,
   username: null,
   usernameError: null,
@@ -21,28 +20,28 @@ function login (state = {
   switch (action.type) {
     case LOGIN_REQUEST:
       return Object.assign({}, state, {
-        isLoggingIn: true
+        isProcessing: true
       })
     case LOGIN_SUCCESS:
       return Object.assign({}, state, {
-        isLoggingIn: false
+        isProcessing: false
       })
     case LOGIN_ERROR:
       return Object.assign({}, state, {
-        isLoggingIn: false,
+        isProcessing: false,
         errorMessage: action.error
       })
     case LOGOUT_REQUEST:
       return Object.assign({}, state, {
-        isLoggingOut: true
+        isProcessing: true
       })
     case LOGOUT_SUCCESS:
       return Object.assign({}, state, {
-        isLoggingOut: false
+        isProcessing: false
       })
     case LOGOUT_FAILURE:
       return Object.assign({}, state, {
-        isLoggingOut: false,
+        isProcessing: false,
         errorMessage: action.error
       })
     case LOGIN_FIELD_SET_VALUE: {
