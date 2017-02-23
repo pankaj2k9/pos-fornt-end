@@ -43,7 +43,7 @@ export function productsSetData (productsArray, locale, productsFilter, products
   }
 }
 
-export function fetchAllProducts (locale, productsFilter, storeId) {
+export function fetchAllProducts (locale, productsFilter) {
   return (dispatch) => {
     dispatch(productsFetchRequest())
     return productsService.fetchAllProducts()

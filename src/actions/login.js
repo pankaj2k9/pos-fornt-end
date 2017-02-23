@@ -1,8 +1,10 @@
+import { browserHistory } from 'react-router'
+
 import loginService from '../services/login'
 
 import {
   setStaffLoggedIn
-} from './application'
+} from './appMainUI'
 
 export const LOGIN_FIELD_SET_VALUE = 'LOGIN_FIELD_SET_VALUE'
 export const LOGIN_FIELD_SET_ERROR = 'LOGIN_FIELD_SET_ERROR'
@@ -29,29 +31,34 @@ export const LOGIN_ERROR = 'LOGIN_ERROR'
 export function loginRequest () {
   return { type: LOGIN_REQUEST }
 }
-export function loginSuccess (userData) {
-  return { type: LOGIN_SUCCESS, userData }
+export function loginSuccess () {
+  return { type: LOGIN_SUCCESS }
 }
 export function loginError (error) {
   return { type: LOGIN_ERROR, error }
 }
 
-export function login (details, browserHistory, store) {
+export function login (details) {
+  console.log(12345, details)
   return (dispatch) => {
     dispatch(loginRequest())
     return loginService.login(details)
       .then(result => {
         const role = result.user.role
-        dispatch(loginSuccess(result))
+        dispatch(loginSuccess())
         dispatch(setStaffLoggedIn(result))
+        console.log(78768, role)
         if (role === 'admin' || role === 'super-admin' || role === 'staff') {
+          console.log(998798)
           browserHistory.push('settings')
         } else {
+          console.log(123)
           browserHistory.push('store')
         }
       })
       .catch(error => {
         if (error) {
+          console.log(error)
           dispatch(loginError('Invalid login. Try again'))
         }
       })
@@ -72,11 +79,11 @@ export function logoutFailure (error) {
   return { type: LOGOUT_FAILURE, error }
 }
 
-export function logout (browserHistory) {
+export function logout () {
   return (dispatch) => {
     dispatch(logoutRequest())
 
-    return loginService.logout(browserHistory)
+    return loginService.logout()
       .then(() => {
         dispatch(logoutSuccess())
         browserHistory.push('/')

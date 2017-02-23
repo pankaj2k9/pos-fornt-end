@@ -22,7 +22,7 @@ export const VERIFY_VOUCHER_FAILURE = 'VERIFY_VOUCHER_FAILURE'
 
 import voucherService from '../services/voucher'
 import {setVoucherDiscount} from './panelCart'
-import {setActiveModal} from './application'
+import {setActiveModal} from './appMainUI'
 
 export function printPreviewTotal (print, shouldUpdate) {
   return {

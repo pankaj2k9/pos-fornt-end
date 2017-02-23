@@ -4,7 +4,7 @@ export const REFUND_FAILURE = 'REFUND_FAILURE'
 
 import refundService from '../services/refund'
 import { lastOrderidSuccess } from './offlineOrders'
-import { setError } from './application'
+import { setError } from './appMainUI'
 
 import {
   printPreviewTotalReceipt

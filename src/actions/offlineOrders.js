@@ -3,7 +3,7 @@ import ordersService from '../services/orders'
 import {
   updateCashDrawer
   // setActiveModal
- } from './application'
+ } from './appMainUI'
 
 import {
   temporaryReceiptData,

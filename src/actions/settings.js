@@ -8,9 +8,9 @@ import {
   addCashdrawerOpenCount,
   updateCashDrawer,
   setError
-} from './application'
+} from './appMainUI'
 
-import { fetchCustomers } from './customers'
+import { fetchCustomers } from './dataCUST'
 
 export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 export function reprintingReceipt (value) {

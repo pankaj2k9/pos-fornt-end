@@ -13,6 +13,10 @@ import {
 } from './panelCart'
 
 import {
+  resetOrderInfo
+} from './dataORDinfo'
+
+import {
   reportsStateReset
 } from './reports'
 
@@ -24,11 +28,11 @@ import {
 
 import {
   fetchCustomers
-} from './customers'
+} from './dataCUST'
 
 import {
   fetchAllProducts
-} from './products'
+} from './dataPROD'
 
 import {
   closeActiveModal,
@@ -36,7 +40,7 @@ import {
   addCashdrawerOpenCount,
   resetAppState,
   setError
-} from './application'
+} from './appMainUI'
 
 import {
   reprintingReceipt,
@@ -129,10 +133,7 @@ export function afterOrderProcessed () {
 export function holdOrderAndReset (orderData) {
   return (dispatch) => {
     dispatch(holdOrder(orderData))
-    dispatch(panelCartReset())
-    dispatch(panelCheckoutReset())
-    dispatch(orderStateReset())
-    dispatch(closeActiveModal(focusProductSearch))
+    dispatch(resetOrderInfo())
   }
 }
 

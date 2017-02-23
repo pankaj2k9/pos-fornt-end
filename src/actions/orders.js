@@ -9,7 +9,7 @@ import {
   addCashdrawerOpenCount,
   // updateCashDrawer,
   setActiveModal
- } from './application'
+ } from './appMainUI'
 
 import {
   lastOrderidSuccess
