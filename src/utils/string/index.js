@@ -5,11 +5,23 @@
  *
  * @returns {array} of strings split from str that is below
  */
-export const formatCurrency = (number) => {
-  return `$${Number(number).toLocaleString('en', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`
+export const formatCurrency = (number, currency) => {
+  if (currency === 'odbo') {
+    return `The odbo: ${number}`
+  } else if (currency === 'sgd' || !currency) {
+    return `$${Number(number).toLocaleString('en', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`
+  }
+}
+
+export const formatNumber = (string) => {
+  // let newValue = Number(`${newValue}`.replace(/\D/g, ''))
+  console.log(123412342134, string)
+  let value = String(string)
+  let newValue = Number(value.replace(/[^\d.]/g, ''))
+  return newValue
 }
 
 /**
