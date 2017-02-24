@@ -37,19 +37,18 @@ const POSButtons = (props) => {
             inverted,
             isActive,
             label,
+            altLbl,
             name,
             size
           } = button
           let invertColor = {borderWidth: 5, borderColor: String(colors[color || 'blue']), borderStyle: 'double'}
           let normalColor = {backgroundColor: String(colors[color])}
           let imgBtnSLC = imgUrl ? inverted ? {opacity: 1} : {} : {}
-          let btnColor = isActive
-            ? color
-              ? inverted ? invertColor : normalColor
-              : {}
+          let btnColor = color
+            ? inverted ? invertColor : normalColor
             : {}
           let lblColor = inverted ? {textShadow: `1px 1px 5px ${colors[color]}`} : {}
-          let bountItemClick = isActive ? onClickButton.bind(this, name) : (name) => { console.log('name', name) }
+          let bountItemClick = isActive ? onClickButton.bind(this, name) : (name) => {}
           let btnLbl = !imgUrl
             ? label.match('app') ? <FormattedMessage id={label} /> : label
             : imgUrl
@@ -61,11 +60,12 @@ const POSButtons = (props) => {
               <div className={!blank ? !imgUrl ? 'box' : '' : ''} style={finalBtnStyle}>
                 {imgUrl
                   ? <img style={{height: 40}} src={require(`../assets/card-${imgUrl}.png`)} />
-                  : <p className='has-text-centered' style={{alignItems: 'center'}}>
+                  : <div className='has-text-centered' style={{alignItems: 'center'}}>
                     <strong style={lblColor}>
                       {isActive ? btnLbl : ''}
                     </strong>
-                  </p>
+                    {isActive && altLbl ? <p>{altLbl}</p> : null}
+                  </div>
                 }
               </div>
             </div>
@@ -82,7 +82,7 @@ POSButtons.defaultProps = {
     padding: 10
   },
   containerStyle: {},
-  onClickButton: (name) => { console.log('name', name) }
+  onClickButton: () => {}
 }
 
 export default POSButtons

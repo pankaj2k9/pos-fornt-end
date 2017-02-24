@@ -27,8 +27,8 @@ class LoginForm extends Component {
     })
   }
   handleStoreIdChange (event) {
-    const { onSetStoreId, storeIds } = this.props
-    onSetStoreId(event.target.value, storeIds)
+    const { onSetStoreId, stores } = this.props
+    onSetStoreId(event.target.value, stores)
   }
 
   onPressLogin (event) {
@@ -40,13 +40,13 @@ class LoginForm extends Component {
   }
 
   componentDidMount () {
-    const { onGetStoreIds, closeModal } = this.props
-    onGetStoreIds()
+    const { onGetStoreIds, closeModal, stores } = this.props
+    if (!stores || stores.length === 0) { onGetStoreIds() }
     closeModal()
   }
 
   render () {
-    const { errorMessage, isLoggingIn, isFetchingStoreIds, storeIds, networkStatus } = this.props
+    const { errorMessage, isLoggingIn, isFetchingStoreIds, stores, networkStatus } = this.props
     const formIsDisabled = isFetchingStoreIds || isLoggingIn ? 'is-disabled' : ''
     const storeIdSelectClass = `select is-fullwidth ${formIsDisabled}`
 
@@ -77,7 +77,7 @@ class LoginForm extends Component {
                           <div className='control'>
                             <div className={storeIdSelectClass}>
                               <select onChange={this.handleStoreIdChange.bind(this)}>
-                                {storeIds.map(store => {
+                                {stores.map(store => {
                                   let storeName = !store.name ? 'The ODBO Pte. Ltd' : store.name
                                   return (
                                     <option key={`store-id-${store.source}`} value={store.source}>

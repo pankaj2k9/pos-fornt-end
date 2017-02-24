@@ -7,11 +7,11 @@ const ModalCard = (props) => {
     title,
     cancelAction,
     closeAction,
+    retryAction,
     confirmAction,
     footer,
     children
   } = props
-
   return (
     <div className={`modal is-active ${isActive}`}>
       <div className='modal-background' />
@@ -28,7 +28,7 @@ const ModalCard = (props) => {
         <section className='modal-card-body'>
           {children}
         </section>
-        {confirmAction || cancelAction
+        {confirmAction || cancelAction || retryAction
           ? <footer className='modal-card-foot is-paddingless'>
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
               {cancelAction
@@ -39,9 +39,17 @@ const ModalCard = (props) => {
                 </div>
                 : null
               }
+              {retryAction
+                ? <div className='column' onClick={retryAction}>
+                  <a className='button is-large is-fullwidth is-warning'>
+                    <FormattedMessage id='app.button.retry' />
+                  </a>
+                </div>
+                : null
+              }
               {confirmAction
                 ? <div className='column'>
-                  <a className='button is-large is-fullwidth is-success'>
+                  <a className='button is-large is-fullwidth is-success' onClick={confirmAction}>
                     <FormattedMessage id='app.button.confirm' />
                   </a>
                 </div>
