@@ -1,7 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { browserHistory } from 'react-router'
-import { storeGetIds, storeSetId, storeSetActive, closeActiveModal } from '../actions/application'
+import {
+  storeSetActive,
+  closeActiveModal
+} from '../actions/app/mainUI'
+
+import {
+  storeGetIds
+} from '../actions/data/stores'
 
 // components/containers
 import LoginForm from '../components/LoginForm'
@@ -17,8 +23,8 @@ const Login = (props) => {
     errorMessage,
     isLoggingIn,
     isFetchingStoreIds,
-    storeIds,
-    storeId,
+    stores,
+    activeStore,
     handleSetStoreId,
     networkStatus
   } = props
@@ -29,40 +35,39 @@ const Login = (props) => {
       onGetStoreIds={handleGetStoreIds}
       isFetchingStoreIds={isFetchingStoreIds}
       onSetStoreId={handleSetStoreId}
-      storeIds={storeIds}
+      stores={stores}
       errorMessage={errorMessage}
       isLoggingIn={isLoggingIn}
-      storeId={storeId}
+      storeId={activeStore ? activeStore.source : []}
       networkStatus={networkStatus}
     />
   )
 }
 
 const mapStateToProps = (state) => {
-  const storeIds = state.application.storeIds.filter(store => {
-    return store.source !== 'ecomm'
+  const stores = state.data.stores.stores.filter(store => {
+    if (store) { return store.source !== 'ecomm' }
   })
 
   return {
     errorMessage: state.login.errorMessage,
     isLoggingIn: state.login.isLoggingIn,
-    isFetchingStoreIds: state.application.isFetchingStoreIds,
-    storeId: state.application.storeId,
-    cashdrawer: state.application.cashdrawer,
-    networkStatus: state.application.networkStatus,
-    storeIds
+    isFetchingStoreIds: state.data.stores.isProcessing,
+    activeStore: state.app.mainUI.activeStore,
+    networkStatus: state.app.mainUI.networkStatus,
+    stores
   }
 }
 
-const mapDispatchToProps = (dispatch, storeId) => {
+const mapDispatchToProps = (dispatch, activeStore) => {
   return {
-    handleLogin: (username, password, storeId, cashdrawer) => {
+    handleLogin: (username, password, storeId) => {
       const loginDetails = {
         username,
         password,
         store: storeId
       }
-      dispatch(login(loginDetails, browserHistory, storeId, cashdrawer))
+      dispatch(login(loginDetails))
     },
 
     handleGetStoreIds: () => {
@@ -73,9 +78,8 @@ const mapDispatchToProps = (dispatch, storeId) => {
       dispatch(closeActiveModal())
     },
 
-    handleSetStoreId: (storeId, storeIds) => {
-      dispatch(storeSetId(storeId))
-      storeIds.forEach(item => {
+    handleSetStoreId: (storeId, stores) => {
+      stores.forEach(item => {
         if (item.source === storeId) {
           dispatch(storeSetActive(item))
         }

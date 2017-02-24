@@ -10,7 +10,7 @@ import Dropdown from '../components/Dropdown'
 
 import {
   setActiveModal
-} from '../actions/application'
+} from '../actions/app/mainUI'
 
 import {
   storeOrderFetch,

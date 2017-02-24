@@ -7,11 +7,11 @@ import ModalCard from '../components/ModalCard'
 
 import {
   addOrderItem
-} from '../actions/dataORDinfo'
+} from '../actions/data/orderData'
 
 import {
   closeActiveModal
-} from '../actions/appMainUI'
+} from '../actions/app/mainUI'
 
 class ModalProductList extends Component {
 

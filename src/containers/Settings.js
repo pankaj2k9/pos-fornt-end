@@ -9,11 +9,11 @@ import {
   closeActiveModal,
   setActiveModal,
   storeGetDailyData
-} from '../actions/application'
+} from '../actions/app/mainUI'
 
 import { setSettingsActiveTab } from '../actions/settings'
 
-import { fetchCustomers } from '../actions/customers'
+// import { fetchCustomers } from '../actions/data/customers'
 
 class Settings extends Component {
   componentDidMount () {
@@ -25,7 +25,7 @@ class Settings extends Component {
     const {dispatch} = this.props
     dispatch(setSettingsActiveTab(tabName))
     if (tabName === 'customers') {
-      dispatch(fetchCustomers())
+      // dispatch(fetchCustomers())
     }
   }
 
@@ -66,14 +66,14 @@ class Settings extends Component {
 
 function mapStateToProps (state) {
   return {
-    activeModalId: state.application.activeModalId,
-    storeId: state.application.storeId,
+    activeModalId: state.app.mainUI.activeModalId,
+    storeId: state.app.mainUI.storeId,
     activeTab: state.settings.activeTab,
     tabs: state.settings.tabs,
     orderDetails: state.settings.orderFromGet,
     orderSearchKey: state.settings.orderSearchKey,
     refundSuccess: state.settings.refundSuccess,
-    cashdrawer: state.application.cashdrawer,
+    cashdrawer: state.app.mainUI.cashdrawer,
     reprintSuccess: state.settings.reprintSuccess
   }
 }

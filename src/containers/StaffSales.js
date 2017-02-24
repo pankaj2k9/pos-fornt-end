@@ -176,11 +176,11 @@ const mapStateToProps = (state) => {
 
   return {
     isProcessing: staffSales.isProcessing,
-    activeCashier: state.application.activeCashier,
+    activeCashier: state.app.mainUI.activeCashier,
     selectedStaffId: staffSales.staffId,
     from: staffSales.from,
     to: staffSales.to,
-    staffs: state.application.staff.user.staffs,
+    staffs: state.app.mainUI.activeStaff.staffs,
     orders: staffSales.orders
   }
 }

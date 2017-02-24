@@ -6,7 +6,7 @@ import ModalCard from '../components/ModalCard'
 import {
   setCashierLoggedIn,
   closeActiveModal
-} from '../actions/appMainUI'
+} from '../actions/app/mainUI'
 
 class ModalApp extends Component {
   _closeModal () {

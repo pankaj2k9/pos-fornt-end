@@ -9,7 +9,7 @@ import POSButtons from '../components/POSButtons'
 
 import {
   closeActiveModal
-} from '../actions/appMainUI'
+} from '../actions/app/mainUI'
 
 import {
   setPaymentMode,
@@ -18,12 +18,13 @@ import {
   setFieldsDefault,
   setTransCode,
   setCashTendered
-} from '../actions/appStoreUI'
+} from '../actions/app/storeUI'
 
 import {
   addPaymentType,
-  removePaymentType
-} from '../actions/dataORDinfo'
+  removePaymentType,
+  setOrderInfo
+} from '../actions/data/orderData'
 
 import { formatCurrency, formatNumber } from '../utils/string'
 import { compPaymentsSum } from '../utils/computations'
@@ -36,7 +37,12 @@ class ModalSetPayments extends Component {
   }
 
   _confirm () {
-    const { dispatch } = this.props
+    const { dispatch, mainUI, orderData } = this.props
+    dispatch(setOrderInfo({
+      orderData: orderData,
+      appData: mainUI
+    }))
+    dispatch(setFieldsDefault())
     dispatch(closeActiveModal())
   }
 
@@ -209,7 +215,7 @@ class ModalSetPayments extends Component {
                   value={payInput}
                   onChange={e => {
                     let value = formatNumber(e.target.value)
-                    dispatch(setCashTendered(value))
+                    if (paymentMode === 'cash') { dispatch(setCashTendered(value)) }
                     dispatch(setAmountTendered(value))
                     if (paymentMode === 'cash') { this._addPayment.bind(this, 'cash', value) }
                   }} />
@@ -279,18 +285,25 @@ const styles = {
 }
 
 function mapStateToProps (state) {
+  let mainUI = state.app.mainUI
+  let orderData = state.data.orderData
+  let storeUI = state.app.storeUI
   return {
+    mainUI,
+    orderData,
+    storeUI,
+    payments: orderData.payments,
+    total: orderData.total,
+    totalDisc: orderData.totalDisc,
+    amountToPay: storeUI.amountToPay,
+    paymentMode: storeUI.paymentMode,
+    card: storeUI.card,
+    cash: storeUI.cash,
+    nets: storeUI.nets,
+    voucher: storeUI.voucher,
+    cashTendered: storeUI.cashTendered,
     intl: state.intl,
-    payments: state.data.dataORDinfo.payments,
-    total: state.data.dataORDinfo.total,
-    totalDisc: state.data.dataORDinfo.totalDisc,
-    amountToPay: state.app.appStoreUI.amountToPay,
-    paymentMode: state.app.appStoreUI.paymentMode,
-    card: state.app.appStoreUI.card,
-    cash: state.app.appStoreUI.cash,
-    nets: state.app.appStoreUI.nets,
-    voucher: state.app.appStoreUI.voucher,
-    cashTendered: state.app.appStoreUI.cashTendered
+    locale: state.intl.locale
   }
 }
 

@@ -11,7 +11,7 @@ import DetailsModal from '../components/DetailsModal'
 import {
   closeActiveModal,
   setActiveModal
-} from '../actions/application'
+} from '../actions/app/mainUI'
 
 import {
   storeOrdersFetch,
@@ -201,7 +201,7 @@ class StoreOrders extends React.Component {
       <FormattedMessage id='app.page.reports.total' />
     ]
     // const modalTitle = <FormattedMessage id='app.modal.order' />
-    // console.log('activeOrder', activeOrder)
+    // ('activeOrder', activeOrder)
     // const ViewComponent = activeOrder
     //   ? <ViewOrder orderItemData={activeOrder} />
     //   : null
@@ -303,8 +303,8 @@ function mapStateToProps (state) {
 
   return {
     locale: state.intl.locale,
-    activeModalId: state.application.activeModalId,
-    store: state.application.store,
+    activeModalId: state.app.mainUI.activeModalId,
+    store: state.app.mainUI.store,
     date: state.reports.date,
     isLoading: state.reports.storeOrders.isLoading,
     orderItems: state.reports.storeOrders.orderItems,

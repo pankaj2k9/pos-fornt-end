@@ -137,8 +137,8 @@ class ExportSales extends React.Component {
 const mapStateToProps = (state) => {
   const TENANT_NUMBER_DEFAULT = 'XXXXXXX'
   const { exportSales: exp } = state.reports
-  const stores = state.application.storeIds
-  const storeId = state.application.storeId
+  const stores = state.app.mainUI.storeIds
+  const storeId = state.app.mainUI.storeId
   const store = stores && stores.find((st) => st.source === storeId)
   const tenantNumber = store && store.tenantNumber || TENANT_NUMBER_DEFAULT
 

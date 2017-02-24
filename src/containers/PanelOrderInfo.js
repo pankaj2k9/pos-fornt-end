@@ -9,16 +9,15 @@ import Truncate from '../components/Truncate'
 
 import {
   setActiveModal
-} from '../actions/appMainUI'
+} from '../actions/app/mainUI'
 
 import {
   setOrderItemQty,
   setCustomDiscount,
-  removeOrderItem,
-  setOrderInfo
+  removeOrderItem
   // removeCustomer,
   // setCurrencyType
-} from '../actions/dataORDinfo'
+} from '../actions/data/orderData'
 
 import { formatCurrency } from '../utils/string'
 import {
@@ -27,19 +26,18 @@ import {
   compCashChange
 } from '../utils/computations'
 
+import { processOrder } from '../actions/orders'
+
 class PanelOrderInfo extends Component {
 
   _onClickPanelButtons (name) {
-    const { dispatch, currency, dataORDinfo, appMainUI } = this.props
+    const { dispatch, orderInfo } = this.props
     switch (name) {
       case 'pay': return dispatch(setActiveModal('payments'))
       case 'printSub': return null
       case 'total':
-        return dispatch(setOrderInfo({
-          currency: currency,
-          orderData: dataORDinfo,
-          appData: appMainUI
-        }))
+        // ('orderInfo', orderInfo)
+        return dispatch(processOrder(orderInfo))
       default:
     }
   }
@@ -150,8 +148,6 @@ class PanelOrderInfo extends Component {
     let netsSum = formatCurrency(compPaymentsSumByType(payments, 'nets'))
     let voucherSum = formatCurrency(compPaymentsSumByType(payments, 'voucher'))
     let cashChange = formatCurrency(compCashChange(payments))
-
-    console.log(cashSum)
     let intFrameHeight = window.innerHeight
     let isActive = true
     let buttons = [
@@ -248,27 +244,28 @@ class PanelOrderInfo extends Component {
 }
 
 function mapStateToProps (state) {
-  let appMainUI = state.app.appMainUI
-  let appStoreUI = state.app.appStoreUI
-  let dataORDinfo = state.data.dataORDinfo
-  let mainUIediting = appMainUI.isEditing
-  let storeUIediting = appStoreUI.isEditing
+  let mainUI = state.app.mainUI
+  let storeUI = state.app.storeUI
+  let orderData = state.data.orderData
+  let mainUIediting = mainUI.isEditing
+  let storeUIediting = storeUI.isEditing
   return {
-    appMainUI,
-    appStoreUI,
-    dataORDinfo,
+    mainUI,
+    storeUI,
+    orderData,
     isEditing: mainUIediting || storeUIediting,
-    activeCustomer: dataORDinfo.activeCustomer,
-    total: dataORDinfo.total,
-    totalDisc: dataORDinfo.totalDisc,
-    totalOdbo: dataORDinfo.totalOdbo,
-    totalOdboDisc: dataORDinfo.totalOdboDisc,
-    currency: dataORDinfo.currency,
-    orderItems: dataORDinfo.orderItems,
-    payments: dataORDinfo.payments,
-    orderNote: dataORDinfo.orderNote,
-    shouldUpdate: dataORDinfo.shouldUpdate,
-    isProcessing: dataORDinfo.isProcessing,
+    activeCustomer: orderData.activeCustomer,
+    total: orderData.total,
+    totalDisc: orderData.totalDisc,
+    totalOdbo: orderData.totalOdbo,
+    totalOdboDisc: orderData.totalOdboDisc,
+    currency: orderData.currency,
+    orderItems: orderData.orderItems,
+    payments: orderData.payments,
+    orderNote: orderData.orderNote,
+    orderInfo: orderData.orderInfo,
+    shouldUpdate: orderData.shouldUpdate,
+    isProcessing: orderData.isProcessing,
     intl: state.intl,
     locale: state.intl.locale
   }

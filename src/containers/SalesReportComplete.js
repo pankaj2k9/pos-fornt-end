@@ -24,7 +24,13 @@ class SalesReportComplete extends React.Component {
 
   getCompleteSalesData () {
     let { completeSales, store, cashier } = this.props
-    var drawerData = this.cashdrawerData()
+    // let drawerData = this.cashdrawerData()
+    let drawerData = {
+      date: new Date(),
+      float: 0,
+      initialAmount: 0,
+      cashDrawerOpenCount: 0
+    }
 
     if (completeSales && drawerData) {
       // put real store address here
@@ -40,7 +46,7 @@ class SalesReportComplete extends React.Component {
         cashier: cashier,
         storeId: store.source,
         openCashDrawerCount: drawerData.cashDrawerOpenCount,
-        cashInDrawer: Number(drawerData.float),
+        cashInDrawer: Number(drawerData.float || 0),
         cashInfo: { count: 0, value: 0 },
         floatInfo: {
           count: drawerData.cashDrawerOpenCount,
@@ -54,19 +60,19 @@ class SalesReportComplete extends React.Component {
     }
   }
 
-  cashdrawerData () {
-    const { cashdrawers, csDate, selectedStore, storeId } = this.props
-    const searchStoreId = selectedStore || storeId
-
-    const drawerData = cashdrawers.find(function (drawer) {
-      let date1 = new Date(drawer.date).toISOString().slice(0, 10)
-      let date2 = new Date(csDate).toISOString().slice(0, 10)
-
-      return date1 === date2 && searchStoreId === drawer.storeId
-    })
-
-    return drawerData
-  }
+  // cashdrawerData () {
+  //   const { cashdrawers, csDate, selectedStore, storeId } = this.props
+  //   const searchStoreId = selectedStore || storeId
+  //
+  //   const drawerData = cashdrawers.find(function (drawer) {
+  //     let date1 = new Date(drawer.date).toISOString().slice(0, 10)
+  //     let date2 = new Date(csDate).toISOString().slice(0, 10)
+  //
+  //     return date1 === date2 && searchStoreId === drawer.storeId
+  //   })
+  //
+  //   return drawerData
+  // }
 
   _handleSourceChange (event) {
     const { dispatch, storeId, selectedDate } = this.props
@@ -77,7 +83,12 @@ class SalesReportComplete extends React.Component {
 
   render () {
     const { isLoading, storeId, storeIds, selectedStore } = this.props
-    const drawerData = this.cashdrawerData()
+    const drawerData = {
+      date: new Date(),
+      float: 0,
+      initialAmount: 0,
+      cashDrawerOpenCount: 0
+    }
     const salesData = this.getCompleteSalesData()
     const reportCanBeGenerated = !!drawerData && !!salesData
 
@@ -115,16 +126,16 @@ function mapStateToProps (state) {
     date: state.reports.date,
     csDate: state.reports.completeSales.date,
     completeSales: state.reports.completeSales.completeSales,
-    store: state.application.store,
-    cashier: state.application.activeCashier &&
-      state.application.activeCashier.firstName ||
-      state.application.staff.user.username,
+    store: state.app.mainUI.activeStore,
+    cashier: state.app.mainUI.activeCashier &&
+      state.app.mainUI.activeCashier.firstName ||
+      state.app.mainUI.activeStaff.username,
     from: state.reports.completeSales.date,
-    cashdrawers: state.application.cashdrawer,
-    openCount: state.application.activeCashdrawer.openCount,
-    cashInDrawer: state.application.activeCashdrawer.initialAmount,
-    storeId: state.application.storeId,
-    storeIds: state.application.storeIds,
+    cashdrawers: state.app.mainUI.cashdrawer,
+    openCount: state.app.mainUI.activeDrawer.openCount,
+    cashInDrawer: state.app.mainUI.activeDrawer.initialAmount,
+    storeId: state.app.mainUI.activeStore.source,
+    storeIds: state.data.stores.stores,
     selectedStore: state.reports.completeSales.source,
     selectedDate: state.reports.date
   }
