@@ -1,3 +1,5 @@
+import { formatCurrency } from '../string'
+
 export const compItemsSum = (data) => {
   let total = 0
   let totalOdbo = 0
@@ -14,9 +16,6 @@ export const compItemsSum = (data) => {
 }
 
 export const compDiscount = (pct, price) => {
-  console.log('pct and price: ', pct, price)
-  console.log('comp pct: ', (pct / 100) * price)
-  console.log('price - comp pct: ', price - (pct / 100) * price)
   return price - (pct / 100) * price
 }
 
@@ -44,9 +43,8 @@ export const compDiscSum = (data) => {
 }
 
 export const compPaymentsSum = (data) => {
-  console.log('compPaymentsSum data: ', data)
   let totalPayments = 0
-  if (data.length > 0) {
+  if (data && data.length > 0) {
     data.forEach(x => {
       if (x.type !== 'odbo') {
         if (x.type === 'voucher') {
@@ -62,7 +60,7 @@ export const compPaymentsSum = (data) => {
 
 export const compPaymentsSumByType = (data, mode) => {
   let totalPayments = 0
-  if (data.length > 0) {
+  if (data && data.length > 0) {
     data.forEach(x => {
       if (mode === x.type) {
         if (x.type !== 'odbo') {
@@ -80,7 +78,7 @@ export const compPaymentsSumByType = (data, mode) => {
 
 export const compCashChange = (data) => {
   let cashChange
-  if (data.length > 0) {
+  if (data && data.length > 0) {
     data.forEach(x => {
       if (x.type === 'cash') {
         cashChange = x.cash - x.amount
@@ -110,7 +108,32 @@ export const processProducts = (data, currency) => {
         : item.overallDiscount // overallDiscount is not 0
     }
   })
-  // console.log('processProducts: ', products)
+  return products
+}
+
+export const processReceiptProducts = (data, currency) => {
+  let products = data.map(item => {
+    let discount = item.overallDiscount === 0
+      ? item.customDiscount === 0
+        ? item.isDiscounted
+          ? currency === 'sgd'
+            ? item.priceDiscount // isDiscounted and sgd
+            : item.odboPriceDiscount // isDiscounted and odbo
+          : 0 // overall and item is not discount
+        : item.customDiscount // customDiscount is not 0
+      : item.overallDiscount // overallDiscount is not 0
+    let discountLbl = discount !== 0
+      ? `(less ${discount}%)`
+      : ''
+    let name = `${item.nameEn}\n${item.barcodeInfo || ''}\n${discountLbl}`
+    return {
+      productId: Number(item.id),
+      name: name,
+      quantity: item.qty,
+      itemCost: currency === 'sgd' ? formatCurrency(item.finalPR) : item.finalOdboPR,
+      totalCost: currency === 'sgd' ? formatCurrency(item.subTotalPrice) : item.subTotalOdboPrice
+    }
+  })
   return products
 }
 
@@ -120,14 +143,12 @@ export const processOrdID = (str, lastId) => {
   for (var i = id.toString().length; i < 7; i++) {
     zeroes = zeroes + '0'
   }
-  // console.log('processOrdID', `${str}${zeroes}${id}`)
   return `${str}${zeroes}${id}`
 }
 
 export const processPayments = (data, currency) => {
-  console.log('type: ', data)
   let payments = []
-  if (data.length > 0) {
+  if (data && data.length > 0) {
     data.forEach(x => {
       if (currency === 'sgd') {
         if (x.type !== 'odbo' && x.type !== 'voucher') { payments.push(x) }
@@ -135,7 +156,15 @@ export const processPayments = (data, currency) => {
         if (x.type === 'voucher') { payments.push(x) }
       }
     })
-    console.log('processPayments: ', payments)
   }
   return payments
+}
+
+export const processStoreAddress = (data) => {
+  let addr = data.address ? data.address.split('\\n') : ['200 Victoria Street']
+  let storeAddress = [
+    data.name,
+    ...addr
+  ]
+  return storeAddress
 }

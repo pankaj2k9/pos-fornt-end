@@ -192,6 +192,8 @@ const en = {
   'app.ph.notSynced': 'Not Synced',
   'app.ph.syncing': 'Syncing. . .',
   'app.ph.connected': 'Connected to the Internet. . . ',
+  'app.ph.procOrder': 'Processing Order. . .',
+  'app.ph.printingRCT': 'Printing Receipt. . .',
 
   'app.error.update.stock': 'Update stocks on admin app',
   'app.error.noNetwork': 'No Internet Connection. . . ',

@@ -186,6 +186,8 @@ const zh = {
   'app.ph.offlineOrders': '离线订单',
   'app.ph.cashdrawerData': '现金抽屉数据',
   'app.ph.connected': '你有互联网. . . ',
+  'app.ph.procOrder': '处理顺序. . .',
+  'app.ph.printingRCT': '打印收据. . .',
 
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noNetwork': '没有网络连接. . . ',
