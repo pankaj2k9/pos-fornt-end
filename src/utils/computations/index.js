@@ -15,8 +15,10 @@ export const compItemsSum = (data) => {
   }
 }
 
-export const compDiscount = (pct, price) => {
-  return price - (pct / 100) * price
+export const compDiscount = (pct, amount) => {
+  let price = Number(amount)
+  let discPCT = Number(pct || 0)
+  return price - (discPCT / 100) * price
 }
 
 export const compDiscSum = (data) => {
