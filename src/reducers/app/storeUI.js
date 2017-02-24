@@ -5,9 +5,9 @@ import {
   SET_CASH_TENDERED,
   SET_TRANS_CODE,
   SET_FIELDS_DEFAULT
-} from '../actions/appStoreUI'
+} from '../../actions/app/storeUI'
 
-function appStoreUI (state = {
+function storeUI (state = {
   isEditing: false,
   amountToPay: '$0.00',
   cashTendered: '$0.00',
@@ -78,4 +78,4 @@ function appStoreUI (state = {
   }
 }
 
-export default appStoreUI
+export default storeUI

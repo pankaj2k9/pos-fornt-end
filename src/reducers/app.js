@@ -1,9 +1,9 @@
 import { combineReducers } from 'redux'
 
-import appMainUI from './appMainUI'
-import appStoreUI from './appStoreUI'
+import mainUI from './app/mainUI'
+import storeUI from './app/storeUI'
 
 export default combineReducers({
-  appMainUI,
-  appStoreUI
+  mainUI,
+  storeUI
 })

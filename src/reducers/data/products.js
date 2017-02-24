@@ -4,9 +4,9 @@ import {
   PRODUCTS_FETCH_FAILURE,
   PRODUCTS_SHOULD_UPDATE,
   PRODUCTS_SET_DATA
-} from '../actions/dataPROD'
+} from '../../actions/data/products'
 
-function dataPROD (state = {
+function products (state = {
   error: null,
   isFetching: false,
   productsArray: [],
@@ -53,4 +53,4 @@ function dataPROD (state = {
   }
 }
 
-export default dataPROD
+export default products

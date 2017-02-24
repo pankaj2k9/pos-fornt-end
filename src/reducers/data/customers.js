@@ -2,9 +2,9 @@ import {
   CUSTOMERS_FETCH_REQUEST,
   CUSTOMERS_FETCH_SUCCESS,
   CUSTOMERS_FETCH_FAILURE
-} from '../actions/dataCUST'
+} from '../../actions/data/customers'
 
-function dataCUST (state = {
+function customers (state = {
   customersArray: [],
   customersById: {},
   isFetching: false,
@@ -36,4 +36,4 @@ function dataCUST (state = {
   }
 }
 
-export default dataCUST
+export default customers

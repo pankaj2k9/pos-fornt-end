@@ -12,17 +12,17 @@ import {
   REMOVE_NOTE,
   REMOVE_PAYMENT_TYPE,
   REMOVE_ORDER_ITEM,
-  RESET_ORDER_INFO,
+  RESET_ORDER_DATA,
   RECALL_ORDER
-} from '../actions/dataORDinfo'
+} from '../../actions/data/orderData'
 
 import {
   compDiscount,
   compItemsSum,
   compDiscSum
-} from '../utils/computations'
+} from '../../utils/computations'
 
-function dataORDinfo (state = {
+function orderData (state = {
   activeCustomer: null,
   currency: 'sgd',
   total: 0,
@@ -30,7 +30,7 @@ function dataORDinfo (state = {
   totalOdbo: 0,
   totalOdboDisc: 0,
   totalPayments: 0,
-  overallDiscount: 10,
+  overallDiscount: 0,
   orderItems: [],
   payments: [],
   orderNote: [],
@@ -217,7 +217,6 @@ function dataORDinfo (state = {
         if (payment.type === 'cash') {
           payments.forEach(prevPay => {
             if (payment.type === 'cash' && prevPay.type === 'cash') {
-              console.log(1, payment)
               prevPay.amount = payment.amount
               prevPay.cash = payment.cash
             }
@@ -225,7 +224,6 @@ function dataORDinfo (state = {
         }
         if (payment.type !== 'cash') { payments.push(payment) }
       } else {
-        console.log(3, payment)
         payments.push(payment)
       }
       return Object.assign({}, state, {
@@ -260,7 +258,7 @@ function dataORDinfo (state = {
         orderNote: state.orderNote,
         isEditing: false
       })
-    case RESET_ORDER_INFO:
+    case RESET_ORDER_DATA:
       return Object.assign({}, state, {
         activeCustomer: null,
         currency: 'sgd',
@@ -269,10 +267,12 @@ function dataORDinfo (state = {
         totalOdbo: 0,
         totalOdboDisc: 0,
         totalPayments: 0,
-        overallDiscount: 10,
+        overallDiscount: 0,
         orderItems: [],
         payments: [],
         orderNote: [],
+        orderInfo: null,
+        receipt: null,
         isEditing: false,
         isProcessing: false
       })
@@ -284,4 +284,4 @@ function dataORDinfo (state = {
   }
 }
 
-export default dataORDinfo
+export default orderData

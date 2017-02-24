@@ -3,6 +3,7 @@ import {
   HAMBURGER_TOGGLE,
   SET_ACTIVE_MODAL,
   CLOSE_ACTIVE_MODAL,
+  SET_NEW_LAST_ID,
   SET_STAFF_LOGGED_IN,
   SET_ACTIVE_CASHDRAWER,
   SET_CASHIER_LOGGED_IN,
@@ -13,11 +14,16 @@ import {
   RESET_APP_STATE,
   TOGGLE_NETWORK_STATUS,
   TOGGLE_POS_MODE
-} from '../actions/appMainUI'
+} from '../../actions/app/mainUI'
 
-function appMainUI (state = {
+function mainUI (state = {
   activeCashier: null,
-  activeDrawer: null,
+  activeDrawer: {
+    date: new Date(),
+    float: 0,
+    initialAmount: 0,
+    cashDrawerOpenCount: 0
+  },
   activeDrawerOffline: null,
   activeModalId: null,
   activeStaff: null,
@@ -50,6 +56,11 @@ function appMainUI (state = {
       return Object.assign({}, state, {
         activeModalId: action.activeModalId,
         isEditing: true
+      })
+    case SET_NEW_LAST_ID:
+      let lastId = state.activeStore['lastId'] += 1
+      return Object.assign({}, state, {
+        activeStore: Object.assign(state.activeStore, {lastId: lastId})
       })
     case CLOSE_ACTIVE_MODAL:
       return Object.assign({}, state, {
@@ -128,4 +139,4 @@ function appMainUI (state = {
   }
 }
 
-export default appMainUI
+export default mainUI

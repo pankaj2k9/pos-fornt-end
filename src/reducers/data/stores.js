@@ -2,9 +2,9 @@ import {
   STORE_GET_IDS_REQUEST,
   STORE_GET_IDS_SUCCESS,
   STORE_GET_IDS_FAILURE
-} from '../actions/dataSTRInfo'
+} from '../../actions/data/stores'
 
-function dataSTRInfo (state = {
+function stores (state = {
   error: null,
   isProcessing: false,
   stores: []
@@ -29,4 +29,4 @@ function dataSTRInfo (state = {
   }
 }
 
-export default dataSTRInfo
+export default stores
