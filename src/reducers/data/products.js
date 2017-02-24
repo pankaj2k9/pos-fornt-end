@@ -38,8 +38,8 @@ function products (state = {
       const productById = {}
       action.productsArray.forEach(product => {
         product['locale'] = action.locale
-        product['filter'] = action.productsFilter
-        product['searchKey'] = action.productsSearchKey
+        product['customDiscount'] = 0
+        product['overallDiscount'] = 0
         productById[product.id] = product
       })
       return Object.assign({}, state, {
