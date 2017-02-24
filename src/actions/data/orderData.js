@@ -1,9 +1,11 @@
 import {
   compItemsSum,
   processProducts,
+  processReceiptProducts,
   processOrdID,
-  processPayments
-} from '../utils/computations'
+  processPayments,
+  processStoreAddress
+} from '../../utils/computations'
 
 export const SET_ACTIVE_CUSTOMER = 'SET_ACTIVE_CUSTOMER'
 export function setActiveCustomer (customer) {
@@ -49,36 +51,50 @@ export function setOverallDiscount (discount) {
 
 export const SET_ORDER_INFO = 'SET_ORDER_INFO'
 export function setOrderInfo (data) {
-  console.log('data: ', data)
-  let { currency, orderData, appData } = data
-  let { total, pincode, activeCustomer, orderItems, payments } = orderData
+  let { orderData, appData } = data
+  let { currency, total, totalOdbo, totalDisc, totalOdboDisc, pincode, activeCustomer, orderItems, orderNote, payments } = orderData
   let { activeCashier, activeStore } = appData
   let { source, code, lastId } = activeStore
   let { odboId, odboCoins } = activeCustomer || {}
-  console.log('orderData: ', orderData)
-  console.log('appData: ', appData)
+
+  let orderTotal = currency === 'sgd' ? total : totalOdbo
+  let orderDisccount = currency === 'sgd' ? totalDisc : totalOdboDisc
+
   const orderInfo = {
     items: processProducts(orderItems, currency),
     id: processOrdID(code, lastId),
     adminId: activeCashier.id,
-    dataOrdered: new Date(),
+    dateOrdered: new Date(),
     source: source,
-    subtotal: total,
-    total: total,
+    subtotal: orderTotal,
+    total: orderTotal,
     totalQuantity: compItemsSum(orderItems).totalQuantity,
-    currency,
+    currency: currency,
     userPrevCoins: Number(odboCoins) || undefined,
     payments: processPayments(payments, currency),
     redemptionPoints: activeCustomer ? total : undefined,
     pinCode: pincode,
-    // vouchers: processPayments(payments, 'voucher'),
+    vouchers: processPayments(payments, 'voucher'),
     odboId: odboId || undefined
   }
-  console.log('orderInfo', orderInfo)
-  // return {
-  //   type: SET_ORDER_INFO,
-  //   orderInfo
-  // }
+
+  const receipt = {
+    currency: currency,
+    staff: `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`,
+    items: processReceiptProducts(orderItems, currency),
+    orderNote: orderNote,
+    orderTotal: orderTotal,
+    orderDisccount: orderDisccount,
+    payments: processPayments(payments, currency),
+    vouchers: processPayments(payments, 'voucher'),
+    storeAddress: processStoreAddress(activeStore)
+  }
+
+  return {
+    type: SET_ORDER_INFO,
+    orderInfo,
+    receipt
+  }
 }
 
 export const ADD_ORDER_ITEM = 'ADD_ORDER_ITEM'
@@ -129,10 +145,10 @@ export function removeOrderItem (orderItemID) {
   }
 }
 
-export const RESET_ORDER_INFO = 'RESET_ORDER_INFO'
-export function resetOrderInfo () {
+export const RESET_ORDER_DATA = 'RESET_ORDER_DATA'
+export function resetOrderData () {
   return {
-    type: RESET_ORDER_INFO
+    type: RESET_ORDER_DATA
   }
 }
 

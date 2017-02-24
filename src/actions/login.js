@@ -4,7 +4,7 @@ import loginService from '../services/login'
 
 import {
   setStaffLoggedIn
-} from './appMainUI'
+} from './app/mainUI'
 
 export const LOGIN_FIELD_SET_VALUE = 'LOGIN_FIELD_SET_VALUE'
 export const LOGIN_FIELD_SET_ERROR = 'LOGIN_FIELD_SET_ERROR'
@@ -39,7 +39,6 @@ export function loginError (error) {
 }
 
 export function login (details) {
-  console.log(12345, details)
   return (dispatch) => {
     dispatch(loginRequest())
     return loginService.login(details)
@@ -47,18 +46,14 @@ export function login (details) {
         const role = result.user.role
         dispatch(loginSuccess())
         dispatch(setStaffLoggedIn(result))
-        console.log(78768, role)
         if (role === 'admin' || role === 'super-admin' || role === 'staff') {
-          console.log(998798)
           browserHistory.push('settings')
         } else {
-          console.log(123)
           browserHistory.push('store')
         }
       })
       .catch(error => {
         if (error) {
-          console.log(error)
           dispatch(loginError('Invalid login. Try again'))
         }
       })

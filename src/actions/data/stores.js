@@ -1,6 +1,6 @@
-import storesService from '../services/stores'
+import storesService from '../../services/stores'
 
-import { storeSetActive } from './appMainUI.js'
+import { storeSetActive } from '../app/mainUI.js'
 
 export const STORE_GET_IDS_REQUEST = 'STORE_GET_IDS_REQUEST'
 export const STORE_GET_IDS_SUCCESS = 'STORE_GET_IDS_SUCCESS'

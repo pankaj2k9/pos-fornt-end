@@ -47,6 +47,13 @@ export function setError (error) {
   }
 }
 
+export const SET_NEW_LAST_ID = 'SET_NEW_LAST_ID'
+export function setNewLastID () {
+  return {
+    type: SET_NEW_LAST_ID
+  }
+}
+
 export const CLOSE_ACTIVE_MODAL = 'CLOSE_ACTIVE_MODAL'
 export function closeActiveModal (inputToFocus) {
   return {

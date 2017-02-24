@@ -26,7 +26,6 @@ export function setAmountTendered (amount) {
 
 export const SET_CASH_TENDERED = 'SET_CASH_TENDERED'
 export function setCashTendered (amount) {
-  console.log(3141234, amount)
   let tenderedAmt = `$${Number(amount)}`
   return {
     type: SET_CASH_TENDERED,

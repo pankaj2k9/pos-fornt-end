@@ -3,8 +3,8 @@ export const REFUND_SUCCESS = 'REFUND_SUCCESS'
 export const REFUND_FAILURE = 'REFUND_FAILURE'
 
 import refundService from '../services/refund'
-import { lastOrderidSuccess } from './offlineOrders'
-import { setError } from './appMainUI'
+import { lastOrderidSuccess } from './data/offlineOrders'
+import { setError } from './app/mainUI'
 
 import {
   printPreviewTotalReceipt
