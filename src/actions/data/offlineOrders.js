@@ -1,58 +1,20 @@
-import ordersService from '../services/orders'
+import ordersService from '../../services/orders'
 
 import {
   updateCashDrawer
   // setActiveModal
- } from './application'
+ } from '../app/mainUI'
 
 import {
   temporaryReceiptData,
   reprintingReceipt
-} from './orders'
+} from '../orders'
 
 import {
   afterOrderProcessed
-} from './helpers'
+} from '../helpers'
 
-import print from '../utils/printReceipt/print'
-
-export const LAST_ORDERID_REQUEST = 'LAST_ORDERID_REQUEST'
-export function lastOrderidRequest () {
-  return {
-    type: LAST_ORDERID_REQUEST
-  }
-}
-
-export const LAST_ORDERID_SUCCESS = 'LAST_ORDERID_SUCCESS'
-export function lastOrderidSuccess (lastId) {
-  return {
-    type: LAST_ORDERID_SUCCESS,
-    lastId
-  }
-}
-
-export const LAST_ORDERID_FAILURE = 'LAST_ORDERID_FAILURE'
-export function lastOrderidFailure (error) {
-  return {
-    type: LAST_ORDERID_FAILURE,
-    error
-  }
-}
-
-export function fetchLastOrderid (params) {
-  return (dispatch) => {
-    dispatch(lastOrderidRequest())
-    return ordersService.find(params)
-      .then(response => {
-        const lastOrder = response.data[0].id
-        const lastId = Number(lastOrder.replace(/^\D+/g, ''))
-        dispatch(lastOrderidSuccess(lastId))
-      })
-      .catch(error => {
-        dispatch(lastOrderidFailure(error.message))
-      })
-  }
-}
+import print from '../../utils/printReceipt/print'
 
 export const PROCESS_OFFLINE_ORDER = 'PROCESS_OFFLINE_ORDER'
 export function processOfflineOrder (orderInfo) {
@@ -70,7 +32,7 @@ export function makeOfflineOrder (orderInfo, receipt, lastId) {
     dispatch(updateCashDrawer(data))
     dispatch(afterOrderProcessed())
     dispatch(temporaryReceiptData(receipt))
-    dispatch(lastOrderidSuccess(lastId))
+    // dispatch(lastOrderidSuccess(lastId))
     /**
      * reprintingReceipt sets reprinting state
      * when reprinting state is set to true value, it diplays a loading text

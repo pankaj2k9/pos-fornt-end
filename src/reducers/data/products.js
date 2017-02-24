@@ -4,7 +4,7 @@ import {
   PRODUCTS_FETCH_FAILURE,
   PRODUCTS_SHOULD_UPDATE,
   PRODUCTS_SET_DATA
-} from '../actions/products'
+} from '../../actions/data/products'
 
 function products (state = {
   error: null,

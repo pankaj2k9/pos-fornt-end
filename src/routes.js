@@ -18,8 +18,8 @@ function requireAuth (nextState, replace, callback) {
   let appState = JSON.parse(window.localStorage.getItem('state'))
   let nextRoute = nextState.location.pathname
   let notStore = nextRoute !== 'store' ? nextRoute : null
-  const posMode = appState ? appState.application.posMode : undefined
-  const netStat = appState ? appState.application.networkStatus : undefined
+  const posMode = appState ? appState.app.mainUI.posMode : undefined
+  const netStat = appState ? appState.app.mainUI.networkStatus : undefined
   const token = window.localStorage.getItem('feathers-jwt')
   if (token && nextRoute === '/') {
     replace({ pathname: 'store' })
@@ -46,8 +46,8 @@ function requireAuth (nextState, replace, callback) {
       let error1 = 'NotAuthenticated: Could not find stored JWT and no authentication type was given'
       let error2 = 'Token provided to verifyJWT is missing or not a string'
       let error3 = 'Failed to fetch'
-      if (token && notStore) {
-        replace({ pathname: 'store' })
+      if (token) {
+        replace({ pathname: nextRoute })
         callback()
       } else if (errorMsg === error1) {
         replace({ pathname: '/' })
@@ -66,10 +66,10 @@ function requireAuth (nextState, replace, callback) {
 
 function changeInRoute (nextState) {
   let nextRoute = nextState.location.pathname
-  let appState = JSON.parse(window.localStorage.getItem('state'))
-  const focusedInput = appState.application.focusedInput
+  // let appState = JSON.parse(window.localStorage.getItem('state'))
+  // const focusedInput = appstate.app.mainUI.focusedInput
   if (nextRoute === '/store') {
-    document.getElementById(focusedInput).focus()
+    // document.getElementById(focusedInput).focus()
   }
 }
 

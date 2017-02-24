@@ -70,7 +70,7 @@ function mapStateToProps (state) {
     date: state.reports.date,
     isLoading: state.reports.productSales.isLoading,
     productSales: state.reports.productSales.productSales,
-    storeId: state.application.storeId,
+    storeId: state.app.mainUI.activeStore.source,
     from: state.reports.productSales.from,
     to: state.reports.productSales.to
   }

@@ -6,21 +6,27 @@ export const TEMPORARY_RECEIPT_DATA = 'TEMPORARY_RECEIPT_DATA'
 export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 
 import {
-  addCashdrawerOpenCount,
+  // addCashdrawerOpenCount,
   // updateCashDrawer,
-  setActiveModal
- } from './application'
+  setActiveModal,
+  setNewLastID
+} from './app/mainUI'
 
 import {
-  lastOrderidSuccess
-} from './offlineOrders'
+   resetOrderData,
+   setCashTendered
+} from './data/orderData'
 
 import {
-  afterOrderProcessed
+  // lastOrderidSuccess
+} from './data/offlineOrders'
+
+import {
+  // afterOrderProcessed
 } from './helpers'
 
 import ordersService from '../services/orders'
-import print from '../utils/printReceipt/print'
+// import print from '../utils/printReceipt/print'
 
 export function orderRequest () {
   return {
@@ -62,20 +68,24 @@ export function orderStateReset () {
 
 export function processOrder (orderInfo, receipt, lastId) {
   return (dispatch) => {
-    dispatch(setActiveModal('orderProcessing'))
+    dispatch(setActiveModal('processingOrder'))
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
+      dispatch(setActiveModal('orderSuccess'))
       dispatch(orderSuccess())
-      dispatch(lastOrderidSuccess(lastId))
+      dispatch(setNewLastID())
+      dispatch(resetOrderData())
+      dispatch(setCashTendered(0))
+      // dispatch(lastOrderidSuccess(lastId))
       // let data = { count: receipt.cashDrawerOpenCount }
       // dispatch(updateCashDrawer(staff, data, order))
-      dispatch(afterOrderProcessed())
-      dispatch(temporaryReceiptData(receipt))
-      if (order.id) {
-        print(receipt)
-        dispatch(addCashdrawerOpenCount())
-      }
+      // dispatch(afterOrderProcessed())
+      // dispatch(temporaryReceiptData(receipt))
+      // if (order.id) {
+      //   print(receipt)
+      //   dispatch(addCashdrawerOpenCount())
+      // }
       /**
        * reprintingReceipt sets reprinting state
        * when reprinting state is set to true value, it diplays a loading text
@@ -83,14 +93,16 @@ export function processOrder (orderInfo, receipt, lastId) {
        * print() function does not detect the printing state so setTimeout is used
        * setTimeout() is used to emulate the change in reprinting state
        */
-      dispatch(reprintingReceipt(true))
-      setTimeout(function () {
-        dispatch(reprintingReceipt(false))
-      }, 1000)
+      // dispatch(reprintingReceipt(true))
+      // setTimeout(function () {
+      //   dispatch(reprintingReceipt(false))
+      // }, 1000)
     })
     .catch(error => {
+      dispatch(setActiveModal('orderFailed'))
+      dispatch(setNewLastID())
       dispatch(orderFailure(error.message))
-      dispatch(afterOrderProcessed())
+      // dispatch(afterOrderProcessed())
     })
   }
 }

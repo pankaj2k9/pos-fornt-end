@@ -16,9 +16,9 @@ const focusOrderSearch = 'orderSearch'
 import {
   closeActiveModal,
   setActiveModal
-} from '../actions/application'
+} from '../actions/app/mainUI'
 
-import { fetchCustomers } from '../actions/customers'
+import { fetchCustomers } from '../actions/data/customers'
 
 import {
   storeOrdersSetSearchKey,
@@ -760,17 +760,17 @@ class SettingsTab extends Component {
 function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
-    activeModalId: state.application.activeModalId,
-    staff: state.application.staff.user,
-    activeCashier: state.application.activeCashier,
-    storeDetails: state.application.store,
-    storeId: state.application.storeId,
-    storeData: state.application.store,
+    activeModalId: state.app.mainUI.activeModalId,
+    staff: state.app.mainUI.activeStaff,
+    activeCashier: state.app.mainUI.activeCashier,
+    storeDetails: state.app.mainUI.store,
+    storeId: state.app.mainUI.storeId,
+    storeData: state.app.mainUI.store,
     lastOrderId: state.offlineOrders.lastOrderId,
     customers: state.data.customers.customersArray,
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,
-    appError: state.application.error,
+    appError: state.app.mainUI.error,
     settingsError: state.settings.error,
     showControl: state.settings.customer.showControl,
     ucSuccess: state.settings.customer.updateSuccess,

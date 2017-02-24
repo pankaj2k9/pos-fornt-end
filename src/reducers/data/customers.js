@@ -2,7 +2,7 @@ import {
   CUSTOMERS_FETCH_REQUEST,
   CUSTOMERS_FETCH_SUCCESS,
   CUSTOMERS_FETCH_FAILURE
-} from '../actions/customers'
+} from '../../actions/data/customers'
 
 function customers (state = {
   customersArray: [],

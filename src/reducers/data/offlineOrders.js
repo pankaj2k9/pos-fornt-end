@@ -1,41 +1,21 @@
 import {
-  LAST_ORDERID_REQUEST,
-  LAST_ORDERID_SUCCESS,
-  LAST_ORDERID_FAILURE,
   PROCESS_OFFLINE_ORDER,
   SYNC_ORDERS_REQUEST,
   SYNC_ORDER_SUCCESS,
   SYNC_ORDER_FAILED,
   SYNC_ORDERS_DONE,
   CLEAR_MESSAGES
-} from '../actions/offlineOrders'
+} from '../../actions/data/offlineOrders'
 
 function offlineOrders (state = {
-  lastOrderId: undefined,
   processedOfflineOrders: [],
   failedOrders: [],
   successOrders: [],
   syncSuccess: undefined,
   isProcessing: false,
-  syncError: undefined,
-  lastIdError: undefined
+  syncError: undefined
 }, action) {
   switch (action.type) {
-    case LAST_ORDERID_REQUEST:
-      return Object.assign({}, state, {
-        isProcessing: true
-      })
-    case LAST_ORDERID_SUCCESS:
-      return Object.assign({}, state, {
-        isProcessing: false,
-        lastOrderId: action.lastId,
-        lastIdError: undefined
-      })
-    case LAST_ORDERID_FAILURE:
-      return Object.assign({}, state, {
-        isProcessing: false,
-        lastIdError: action.error
-      })
     case PROCESS_OFFLINE_ORDER:
       state.processedOfflineOrders.push(action.orderInfo)
       return Object.assign({}, state, {

@@ -93,6 +93,9 @@ const zh = {
   'app.panel.sales': '销售',
   'app.panel.checkout': '查看',
 
+  'app.lbl.orderTotal': '合计订单',
+  'app.lbl.payTotal': '支付总额',
+
   'app.button.logout': '登出',
   'app.button.login': '登录',
   'app.button.view': '视图',
@@ -131,13 +134,15 @@ const zh = {
   'app.button.switchToOffline': '切换到离线',
   'app.button.syncData': '同步离线数据',
 
+  'app.button.pay': '工资',
+  'app.button.total': '总计',
+  'app.button.printTotal': '打印总计',
   'app.button.admin': '管理员',
   'app.button.prodList': '产品列表',
   'app.button.cust': '客户搜索',
   'app.button.adjustPts': '调整点',
   'app.button.switchOffline': '切换到离线',
   'app.button.switchOnline': '切换到开线',
-  'app.button.printTotal': '打印总计',
   'app.button.xzReading': '结帐',
   'app.button.viewBill': '查看您的发票',
   'app.button.staffSales': '员工营业额',
@@ -181,6 +186,8 @@ const zh = {
   'app.ph.offlineOrders': '离线订单',
   'app.ph.cashdrawerData': '现金抽屉数据',
   'app.ph.connected': '你有互联网. . . ',
+  'app.ph.procOrder': '处理顺序. . .',
+  'app.ph.printingRCT': '打印收据. . .',
 
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noNetwork': '没有网络连接. . . ',

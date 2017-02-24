@@ -5,7 +5,7 @@ export const PRODUCTS_FETCH_FAILURE = 'PRODUCTS_FETCH_FAILURE'
 export const PRODUCTS_SHOULD_UPDATE = 'PRODUCTS_SHOULD_UPDATE'
 export const PRODUCTS_SET_DATA = 'PRODUCTS_SET_DATA'
 
-import productsService from '../services/products'
+import productsService from '../../services/products'
 
 export function productsFetchRequest () {
   return {
@@ -43,7 +43,7 @@ export function productsSetData (productsArray, locale, productsFilter, products
   }
 }
 
-export function fetchAllProducts (locale, productsFilter, storeId) {
+export function fetchAllProducts (locale, productsFilter) {
   return (dispatch) => {
     dispatch(productsFetchRequest())
     return productsService.fetchAllProducts()

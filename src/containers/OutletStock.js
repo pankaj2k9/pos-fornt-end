@@ -5,15 +5,15 @@ import { FormattedMessage } from 'react-intl'
 import LoadingPane from '../components/LoadingPane'
 import StoresDropdown from '../components/StoresDropdown'
 
-import { fetchAllProducts } from '../actions/products'
+import { fetchAllProducts } from '../actions/data/products'
 import { outletStocksChSource } from '../actions/reports'
 import { formatDate } from '../utils/string'
 
 class ProductsStock extends React.Component {
   componentWillMount () {
-    const { dispatch, locale, productsFilter } = this.props
+    const { dispatch, locale } = this.props
 
-    dispatch(fetchAllProducts(locale, productsFilter))
+    dispatch(fetchAllProducts(locale))
   }
 
   _handleSourceChange (event) {
@@ -76,11 +76,10 @@ class ProductsStock extends React.Component {
 const mapStateToProps = (state) => {
   return {
     locale: state.intl.locale,
-    storeId: state.application.storeId,
-    storeIds: state.application.storeIds,
+    storeId: state.app.mainUI.activeStore.source,
+    storeIds: state.data.stores.stores,
     selectedStore: state.reports.outletStocks.source,
     products: state.data.products.productsArray,
-    productsFilter: state.panelProducts.productsFilter,
     isLoading: state.data.products.isFetching
   }
 }

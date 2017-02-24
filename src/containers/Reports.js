@@ -81,7 +81,6 @@ class Reports extends React.Component {
   render () {
     const { activeTab, csDate, staff } = this.props
     const hasStaffs = staff.staffs.length > 0
-
     return (
       <section className='section is-fullheight'>
         <div className='container'>
@@ -89,7 +88,6 @@ class Reports extends React.Component {
             <div className='control is-pulled-right' style={{marginRight: 100}}>
               <label className='label'>Select Date</label>
               <DatePicker
-                value={moment(csDate).format('ddd DD/MMM/YYYY')}
                 onChange={this.onChangeDate.bind(this)}
                 // this callback will parse inserted timestamp
                 onValuePreUpdate={v => parseInt(v, 10) > 1e8
@@ -164,8 +162,8 @@ function mapStateToProps (state) {
   return {
     csDate: state.reports.completeSales.date,
     activeTab: state.reports.activeTab,
-    store: state.application.store,
-    staff: state.application.staff.user,
+    store: state.app.mainUI.store,
+    staff: state.app.mainUI.activeStaff,
     page: state.reports.storeOrders.page,
     limit: state.reports.storeOrders.limit,
     skip: state.reports.storeOrders.skip,

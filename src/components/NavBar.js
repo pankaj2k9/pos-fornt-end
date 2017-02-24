@@ -19,7 +19,7 @@ const NavBar = ({
   posMode,
   onLogout,
   onLogoutCashier,
-  isLoggingOut,
+  authProcessing,
   openChooseUser
 }) => {
   const toggleClass = isHamburgerOpen ? 'is-active' : null
@@ -64,7 +64,7 @@ const NavBar = ({
               {staff.role === 'master'
                 ? <div>
                   {!activeCashier
-                    ? <a className={`button is-light is-outlined ${isLoggingOut
+                    ? <a className={`button is-light is-outlined ${authProcessing
                       ? 'is-loading' : null}`} onClick={openChooseUser}>
                       <span><FormattedMessage id='app.button.logCashier' /></span>
                       <span className='icon'>
@@ -95,7 +95,7 @@ const NavBar = ({
               }
             </div>
             <span className='nav-item' style={{ paddingRight: 10 }}>
-              <a className={`button is-light is-outlined ${isLoggingOut
+              <a className={`button is-light is-outlined ${authProcessing
                 ? 'is-loading' : null}`}
                 onClick={!activeCashier ? onLogout : onLogoutCashier}>
                 <span>

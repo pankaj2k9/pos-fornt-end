@@ -1,9 +1,17 @@
 import { combineReducers } from 'redux'
 
-import products from './products'
-import customers from './customers'
+import customers from './data/customers'
+// import dataDWR from './dataDWR'
+import products from './data/products'
+import stores from './data/stores'
+import orderData from './data/orderData'
+import offlineOrders from './data/offlineOrders'
 
 export default combineReducers({
+  customers,
+  // dataDWR,
+  offlineOrders,
   products,
-  customers
+  stores,
+  orderData
 })

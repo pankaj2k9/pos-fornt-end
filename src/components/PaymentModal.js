@@ -6,7 +6,7 @@ import { injectIntl, FormattedMessage } from 'react-intl'
 import {
   closeActiveModal,
   setError
-} from '../actions/application'
+} from '../actions/app/mainUI'
 
 import {
   addPaymentType,
@@ -306,7 +306,7 @@ class PaymentModal extends Component {
 
 function mapStateToProps (state) {
   return {
-    focusedInput: state.application.focusedInput
+    focusedInput: state.app.mainUI.focusedInput
   }
 }
 

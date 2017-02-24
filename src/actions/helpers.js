@@ -13,6 +13,10 @@ import {
 } from './panelCart'
 
 import {
+  resetOrderData
+} from './data/orderData'
+
+import {
   reportsStateReset
 } from './reports'
 
@@ -24,11 +28,11 @@ import {
 
 import {
   fetchCustomers
-} from './customers'
+} from './data/customers'
 
 import {
   fetchAllProducts
-} from './products'
+} from './data/products'
 
 import {
   closeActiveModal,
@@ -36,7 +40,12 @@ import {
   addCashdrawerOpenCount,
   resetAppState,
   setError
-} from './application'
+} from './app/mainUI'
+
+import {
+  setFieldsDefault,
+  setCashTendered
+} from './app/storeUI'
 
 import {
   reprintingReceipt,
@@ -77,6 +86,14 @@ export function printPreviewTotalReceipt (receipt, activeCustomer) {
       dispatch(setError(null))
       dispatch(closeActiveModal())
     }, 2000)
+  }
+}
+
+export function cancelOrder () {
+  return (dispatch) => {
+    dispatch(resetOrderData())
+    dispatch(setFieldsDefault())
+    dispatch(setCashTendered(0))
   }
 }
 
@@ -129,10 +146,7 @@ export function afterOrderProcessed () {
 export function holdOrderAndReset (orderData) {
   return (dispatch) => {
     dispatch(holdOrder(orderData))
-    dispatch(panelCartReset())
-    dispatch(panelCheckoutReset())
-    dispatch(orderStateReset())
-    dispatch(closeActiveModal(focusProductSearch))
+    dispatch(resetOrderData())
   }
 }
 

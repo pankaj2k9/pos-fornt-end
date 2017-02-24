@@ -2,46 +2,39 @@ import React from 'react'
 
 const Level = (props) => {
   const {
-    left,
+    leftSide,
     center,
-    right,
-    action,
-    button,
-    buttonIcon
+    rightSide
   } = props
+
   return (
     <nav className='level is-marginless'>
-      {left !== null || undefined
-        ? <div className={'level-left'} style={{width: 180}}>
-          <div className='level-item'>{left}</div>
+      <div className='level-left'>
+        <div className='level-item'>
+          {leftSide}
         </div>
-        : null
-      }
-      {center !== null || undefined
-        ? <div className='level-item has-text-centered is-fullwidth' style={{justifyContent: 'center'}}>
-          <center>
+      </div>
+      {center
+        ? <div className='level-right'>
+          <div className='level-item'>
             {center}
-          </center>
-        </div>
-        : null
-      }
-      {right !== null || undefined
-        ? <div className='level-right' style={{maxHeight: 27}}>
-          {button
-            ? <button onClick={action} className='button is-link'>
-              <span className='icon'><i className={buttonIcon} /></span>
-              <span>{button}</span>
-            </button>
-            : null
-          }
-          <div style={{padding: 5}}>
-            <div className='level-item has-text-right'>{right}</div>
           </div>
         </div>
         : null
       }
+      <div className='level-right'>
+        <div className='level-item'>
+          {rightSide}
+        </div>
+      </div>
     </nav>
   )
+}
+
+Level.defaultProps = {
+  leftSide: '',
+  center: '',
+  rightSide: ''
 }
 
 export default Level

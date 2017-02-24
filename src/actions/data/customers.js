@@ -6,12 +6,7 @@ export const CUSTOMER_FETCH_REQUEST = 'CUSTOMER_FETCH_REQUEST'
 export const CUSTOMER_FETCH_SUCCESS = 'CUSTOMER_FETCH_SUCCESS'
 export const CUSTOMER_FETCH_FAILURE = 'CUSTOMER_FETCH_FAILURE'
 
-import customerService from '../services/customers'
-import {
-  panelCartShouldUpdate,
-  setActiveCustomer,
-  setCustomerInputDisabled
-} from '../actions/panelCart'
+import customerService from '../../services/customers'
 
 export function customersFetchRequest () {
   return {
@@ -41,7 +36,7 @@ export function customerFetchRequest () {
 
 export function customerFetchSuccess (customer) {
   return (dispatch) => {
-    dispatch(setActiveCustomer(customer))
+    // dispatch(setActiveCustomer(customer))
   }
 }
 
@@ -111,7 +106,6 @@ export function fetchCustomers (query) {
 export function fetchCustomerByOdboId (searchKey) {
   return (dispatch) => {
     let odboId = Number(searchKey)
-    dispatch(panelCartShouldUpdate(true))
     dispatch(customerFetchRequest())
     const query = {query: { odboId: odboId }}
     return customerService.fetch(query)
@@ -119,15 +113,12 @@ export function fetchCustomerByOdboId (searchKey) {
       if (response) {
         if (!response.data[0]) {
           dispatch(customerFetchFailure('No Results'))
-          dispatch(panelCartShouldUpdate(false))
         } else {
           dispatch(customerFetchSuccess(response.data[0]))
         }
       } else {
         dispatch(customerFetchFailure('No Results'))
-        dispatch(panelCartShouldUpdate(false))
       }
-      dispatch(setCustomerInputDisabled())
     })
     .catch(error => {
       dispatch(customerFetchFailure(error.message))
