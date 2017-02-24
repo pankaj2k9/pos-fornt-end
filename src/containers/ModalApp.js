@@ -26,12 +26,12 @@ class ModalApp extends Component {
     const { dispatch, staff } = this.props
     let staffs = staff.staffs
     let changeUser = (staffId) => {
-      for (var i = 0; i < staffs.length; i++) {
-        if (staffs[i].id === staffId) {
-          dispatch(setCashierLoggedIn(staffs[i]))
+      staffs.forEach(staff => {
+        if (staff.id === staffId) {
+          dispatch(setCashierLoggedIn(staff))
           dispatch(closeActiveModal())
         }
-      }
+      })
     }
     return (
       <ModalCard title='app.button.logCashier' closeAction={e => this._closeModal(e)}>
