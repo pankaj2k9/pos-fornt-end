@@ -17,6 +17,11 @@ import {
   syncOfflineOrders
 } from '../actions/data/offlineOrders'
 
+import {
+  createDailyData,
+  updateDailyData
+} from '../actions/data/cashdrawers'
+
 import { formatCurrency, formatDate } from '../utils/string'
 import { processOdboID } from '../utils/computations'
 
@@ -29,6 +34,20 @@ class ModalStoreUtils extends Component {
   _setOADisc (value) {
     const {dispatch} = this.props
     dispatch(setOverallDiscount(value > 100 ? 100 : value))
+  }
+
+  _updateCashdrawer () {
+    const { dispatch, activeDrawer, activeDrawerOffline, storeId, posMode, networkStatus } = this.props
+    let amount = Number(document.getElementById('drawerAmtInput').value) || 0
+    if (activeDrawer && activeDrawer.float === 0) {
+      dispatch(updateDailyData(activeDrawer, amount))
+    } else if (!activeDrawer) {
+      if (posMode === 'online' || networkStatus === 'online') {
+        dispatch(createDailyData(storeId, amount))
+      } else {
+        dispatch(updateDailyData(activeDrawerOffline, amount, storeId))
+      }
+    }
   }
 
   syncOrders () {
@@ -211,14 +230,14 @@ class ModalStoreUtils extends Component {
             onSync={this.syncOrders.bind(this)}
             onClose={this._closeModal.bind(this)} />
         )
-      case 'updateCashDrawer':
+      case 'updateCashdrawer':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)} title={'Update Cashdrawer'}>
+          <ModalCard closeAction={this._closeModal.bind(this)} title={'Update Cashdrawer'} confirmAction={this._updateCashdrawer.bind(this)}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
                 <form onSubmit={this._closeModal.bind(this)} >
                   <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='overallDiscountInput' className='input is-large' type='Number'
+                    <input id='drawerAmtInput' className='input is-large' type='Number'
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}}
                       value={overallDiscount}
                       onChange={e => this._setOADisc(e.target.value)} />
@@ -244,11 +263,16 @@ function mapStateToProps (state) {
   return {
     custData,
     activeModalId: mainUI.activeModalId,
+    posMode: mainUI.posMode,
+    networkStatus: mainUI.networkStatus,
     overallDiscount: orderData.overallDiscount,
     orderNote: orderData.orderNote,
     orderInfo: orderData.orderInfo,
     ordersOnHold: state.ordersOnHold.items,
     offlineOrdersData: state.data.offlineOrders,
+    storeId: state.app.mainUI.activeStore.source,
+    activeDrawer: state.app.mainUI.activeDrawer,
+    activeDrawerOffline: state.app.mainUI.activeDrawerOffline,
     intl: state.intl
   }
 }

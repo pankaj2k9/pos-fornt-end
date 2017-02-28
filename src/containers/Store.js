@@ -11,6 +11,9 @@ import ModalStoreUtils from './ModalStoreUtils'
 
 import { fetchAllProducts } from '../actions/data/products'
 import { fetchCustomers } from '../actions/data/customers'
+import { fetchCashdrawers } from '../actions/data/cashdrawers'
+
+import { validateCashdrawers } from '../actions/helpers'
 
 class Store extends Component {
   componentWillMount () {
@@ -19,10 +22,19 @@ class Store extends Component {
   componentDidMount () {
     const {
       dispatch,
-      locale
+      locale,
+      posMode,
+      storeId,
+      networkStatus,
+      cashdrawers
     } = this.props
-    dispatch(fetchAllProducts(locale))
-    dispatch(fetchCustomers())
+    if (posMode || networkStatus) {
+      dispatch(fetchAllProducts(locale))
+      dispatch(fetchCustomers())
+      dispatch(fetchCashdrawers(storeId))
+    } else {
+      dispatch(validateCashdrawers(cashdrawers))
+    }
   }
 
   renderDisabledStore () {
@@ -128,10 +140,12 @@ function mapStateToProps (state) {
     activeModalId: state.app.mainUI.activeModalId,
     activeCashier: state.app.mainUI.activeCashier,
     cashdrawer: state.app.mainUI.activeDrawer,
+    cashdrawers: state.data.cashdrawers.cdList,
     adminToken: state.app.mainUI.adminToken,
     shouldUpdate: state.app.mainUI.shouldUpdate,
     error: state.app.mainUI.error,
     posMode: state.app.mainUI.posMode,
+    networkStatus: state.app.mainUI.networkStatus,
     storeId: state.app.mainUI.activeStore.source,
     store: state.app.mainUI.store,
     staff: state.app.mainUI.activeStaff,

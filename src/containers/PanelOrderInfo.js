@@ -40,8 +40,9 @@ class PanelOrderInfo extends Component {
         print(receipt)
         break
       case 'total':
-        // ('orderInfo', orderInfo)
-        return dispatch(processOrder(orderInfo))
+        dispatch(processOrder(orderInfo))
+        print(receipt)
+        break
       default:
     }
   }
