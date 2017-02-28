@@ -1,5 +1,5 @@
 import { formatCurrency, formatDate, splitStringByWordIntoLines } from '../string'
-import { processOdboID } from '../computations'
+import { processOdboID, compPaymentsSum } from '../computations'
 
 const RECEIPT_WIDTH = 240
 const RECEIPT_FONT = 'sans-serif'
@@ -61,16 +61,10 @@ export const buildReceipt = (receipt) => {
  * @param {string|string[]} headerText
  */
 export const buildHeader = (headerText) => {
-  let header = ''
-  if (headerText) {
-    header += `<div style="${HEADER_STYLE}">`
-    header += `<div style="${COMPANY_NAME}">The odbo</div>`
-    headerText.forEach(text => {
-      header += `<div>${text}</div>`
-    })
-    header += '</div>'
-  }
-  return header
+  return `<div style="${HEADER_STYLE}">
+          <div style="${COMPANY_NAME}">The odbo</div>
+          ${headerText.map((x) => { return `<div>${x}</div>` }).join('')}
+          </div>`
 }
 
 /**
@@ -82,16 +76,14 @@ export const buildExtraInfo = (info) => {
   let extra = ''
   let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER$[${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
   let orderId = id ? `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${id}</div>` : ''
-  extra += '<div>'
-  extra += RECEIPT_DIVIDER
-  extra += orderId
-  if (info.staff) {
-    extra += `<div>STAFF : ${staff}<div>`
-  }
-  extra += `<div>${formatDate(date)}</div>`
-  extra += custLbl
-  extra += RECEIPT_DIVIDER
-  extra += '</div>'
+  extra += `<div>
+  ${RECEIPT_DIVIDER}
+  ${orderId}
+  ${staff ? `<div>STAFF : ${staff}<div>` : ''}
+  <div>${formatDate(date)}</div>
+  ${custLbl}
+  ${RECEIPT_DIVIDER}
+  </div>`
 
   return extra
 }
@@ -108,12 +100,11 @@ const buildItemList = (items) => {
       if (index > 0) {
         receiptHtmlString += '\n'
       }
-
-      itemList += `<div style="${ITEM_LIST_STYLE}">`
-      itemList += stringifyItemQty(item.quantity)
-      itemList += stringifyItemName(item.name)
-      itemList += stringifyItemSubtotal(item.totalCost)
-      itemList += '</div>'
+      itemList += `<div style="${ITEM_LIST_STYLE}">
+                    ${stringifyItemQty(item.quantity)}
+                    ${stringifyItemName(item.name)}
+                    ${stringifyItemSubtotal(item.totalCost)}
+                  </div>`
     })
   }
   return itemList
@@ -174,19 +165,18 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
 
   if (paymentInfo) {
     const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo } = paymentInfo
-    const { id, activeCustomer } = extraInfo
+    const { id } = extraInfo
 
     comp += '<div>'
     if (currency === 'sgd') {
-      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>`
-      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(subtotal)}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>
+               <div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(subtotal)}</div>`
     }
 
     comp += RECEIPT_DIVIDER
 
-    comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(orderDisccount, currency)}</div>`
-
-    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(orderTotal, currency)}</div>`
+    comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(orderDisccount, currency)}</div>
+             <div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(orderTotal, currency)}</div>`
 
     comp += RECEIPT_DIVIDER
 
@@ -194,32 +184,33 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
       if (currency === 'sgd') {
         if (payment.type === 'credit') {
           if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CREDIT PAYMENT</div></div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CARD TYPE : </div>${payment.provider}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CREDIT PAYMENT</div></div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>CARD TYPE : </div>${payment.provider}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
         }
         if (payment.type === 'nets') {
           if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS PAYMENT</div></div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS PAYMENT</div></div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
         }
         if (payment.type === 'cash') {
           if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH PAYMENT</div></div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${formatCurrency(payment.cash)}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${formatCurrency(payment.amount)}</div>`
-            comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${formatCurrency(payment.change)}</div>`
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH PAYMENT</div></div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${formatCurrency(payment.cash)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${formatCurrency(payment.change)}</div>`
           }
         }
       } else if (currency === 'odbo') {
         if (payment.amount) {
-          comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>`
-          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${activeCustomer.odboCoins}</div>`
-          comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${orderTotal}</div>`
+          comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>
+                   <div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${odbo.prevCoins}</div>
+                   <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${orderTotal}</div>
+                   <div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${odbo.newCoins}</div>`
         }
       }
     })
@@ -231,19 +222,17 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
       })
     }
 
-    // if (currency === 'odbo') {
-    //   comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${computations.remainingOdbo || computations.paymentMinusOrderTotal}</div>`
-    // } else if (payments.length > 1) {
-    //   comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${formatCurrency(computations.paymentTotal)}</div>`
-    // }
+    if (currency === 'sgd' && payments.length > 1) {
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${formatCurrency(compPaymentsSum(payments))}</div>`
+    }
 
     if (currency === 'sgd') {
       if (odbo) {
         comp += RECEIPT_DIVIDER
-        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>---- THE ODBO COIN BALANCE ----</div></div>`
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${odbo.prevCoins}</div>`
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${odbo.earnedPts}</div>`
-        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${odbo.newCoins}<br/></div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>---- THE ODBO COIN BALANCE ----</div></div>
+                 <div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${odbo.prevCoins}</div>
+                 <div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${odbo.earnedPts}</div>
+                 <div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${odbo.newCoins}<br/></div>`
       }
     }
 
@@ -257,14 +246,14 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
 
     if (type === 'reprint') {
       comp += RECEIPT_DIVIDER
-      comp += `<div style="${TOTAL_DIV_STYLE_1}">REPRINTED RECEIPT: </div>`
-      comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}">REPRINTED RECEIP
+              <div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
     } else if (type === 'refund') {
       comp += RECEIPT_DIVIDER
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>`
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${id}</div>`
-      comp += `<div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(0)}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>
+              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${id}</div>
+              <div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>
+              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(0)}</div>`
     }
 
     comp += '</div>'
