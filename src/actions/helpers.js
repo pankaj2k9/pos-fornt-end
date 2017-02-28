@@ -37,6 +37,7 @@ import {
 import {
   closeActiveModal,
   setActiveModal,
+  setActiveCashdrawer,
   addCashdrawerOpenCount,
   resetAppState,
   setError
@@ -94,6 +95,27 @@ export function cancelOrder () {
     dispatch(resetOrderData())
     dispatch(setFieldsDefault())
     dispatch(setCashTendered(0))
+  }
+}
+
+export function validateCashdrawers (cashdrawers) {
+  return (dispatch) => {
+    let matchedDrawer
+    cashdrawers.forEach(drawer => {
+      let drawerDate = new Date(drawer.date).toISOString().slice(0, 10)
+      let currentDate = new Date().toISOString().slice(0, 10)
+      if (drawerDate === currentDate) {
+        matchedDrawer = drawer
+      }
+    })
+    if (matchedDrawer && Number(matchedDrawer.float) > 0) {
+      dispatch(setActiveCashdrawer(matchedDrawer))
+    } else if (matchedDrawer && Number(matchedDrawer.float) === 0) {
+      dispatch(setActiveCashdrawer(matchedDrawer))
+      dispatch(setActiveModal('updateCashdrawer'))
+    } else if (!matchedDrawer) {
+      dispatch(setActiveModal('updateCashdrawer'))
+    }
   }
 }
 
