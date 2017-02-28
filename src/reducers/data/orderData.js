@@ -135,14 +135,12 @@ function orderData (state = {
           orderItems[x].subTotalPrice = orderItems[x].subTotalPrice + newItem.finalPR
           orderItems[x].subTotalOdboPrice = orderItems[x].subTotalOdboPrice + newItem.finalOdboPR
         } else {
-          const finalPR = compDiscount(discPCT, newItem.price)
-          const finalOdboPR = compDiscount(odboDiscPCT, newItem.odboPrice)
           const qtyAndTotal = {
             qty: 1,
-            finalPR: finalPR,
-            finalOdboPR: finalOdboPR,
-            subTotalPrice: finalPR,
-            subTotalOdboPrice: finalOdboPR,
+            finalPR: compDiscount(discPCT, newItem.price),
+            finalOdboPR: compDiscount(odboDiscPCT, newItem.odboPrice),
+            subTotalPrice: compDiscount(discPCT, newItem.price),
+            subTotalOdboPrice: compDiscount(odboDiscPCT, newItem.odboPrice),
             customDiscount: 0,
             overallDiscount: oaDisc === 0 ? 0 : oaDisc
           }
@@ -219,6 +217,7 @@ function orderData (state = {
             if (payment.type === 'cash' && prevPay.type === 'cash') {
               prevPay.amount = payment.amount
               prevPay.cash = payment.cash
+              prevPay.change = payment.change
             }
           })
         }
