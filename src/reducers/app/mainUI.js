@@ -6,6 +6,7 @@ import {
   SET_NEW_LAST_ID,
   SET_STAFF_LOGGED_IN,
   SET_ACTIVE_CASHDRAWER,
+  SET_TEMPORARY_CASHDRAWER,
   SET_CASHIER_LOGGED_IN,
   SET_ERROR,
   STORE_SET_ACTIVE,
@@ -18,13 +19,12 @@ import {
 
 function mainUI (state = {
   activeCashier: null,
-  activeDrawer: {
-    date: new Date(),
+  activeDrawer: null,
+  activeDrawerOffline: {
+    date: new Date().toISOString().slice(0, 10),
     float: 0,
-    initialAmount: 0,
     cashDrawerOpenCount: 0
   },
-  activeDrawerOffline: null,
   activeModalId: null,
   activeStaff: null,
   activeStore: null,
@@ -50,6 +50,11 @@ function mainUI (state = {
     case SET_ACTIVE_CASHDRAWER:
       return Object.assign({}, state, {
         activeCashdrawer: action.cashdrawer,
+        isEditing: false
+      })
+    case SET_TEMPORARY_CASHDRAWER:
+      return Object.assign({}, state, {
+        activeDrawerOffline: action.cashdrawer,
         isEditing: false
       })
     case SET_ACTIVE_MODAL:
