@@ -47,9 +47,12 @@ class ModalSetPayments extends Component {
   }
 
   _addPayment (mode, amount) {
-    const { dispatch, card, cash, nets, voucher, amountToPay } = this.props
+    const { dispatch, card, cash, nets, voucher, amountToPay, total } = this.props
+    let change = formatNumber(amount) > total
+      ? formatNumber(amount) - total
+      : 0
     let paymentAmt = mode === 'cash'
-      ? {amount: formatNumber(amount), cash: formatNumber(amount)}
+      ? {amount: formatNumber(amount), cash: formatNumber(amount), change: change}
       : mode === 'voucher'
         ? {deduction: formatNumber(amountToPay)}
         : {amount: formatNumber(amountToPay)}

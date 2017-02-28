@@ -10,6 +10,7 @@ import ModalSetPayments from './ModalSetPayments'
 import ModalStoreUtils from './ModalStoreUtils'
 
 import { fetchAllProducts } from '../actions/data/products'
+import { fetchCustomers } from '../actions/data/customers'
 
 class Store extends Component {
   componentWillMount () {
@@ -21,6 +22,7 @@ class Store extends Component {
       locale
     } = this.props
     dispatch(fetchAllProducts(locale))
+    dispatch(fetchCustomers())
   }
 
   renderDisabledStore () {

@@ -8,13 +8,17 @@ import LoadingScreen from '../components/LoadingScreen'
 import SyncModal from '../components/SyncModal'
 
 import { closeActiveModal } from '../actions/app/mainUI'
-import { setOverallDiscount } from '../actions/data/orderData'
+import {
+  setActiveCustomer,
+  setOverallDiscount
+} from '../actions/data/orderData'
 
 import {
   syncOfflineOrders
 } from '../actions/data/offlineOrders'
 
-import { formatCurrency } from '../utils/string'
+import { formatCurrency, formatDate } from '../utils/string'
+import { processOdboID } from '../utils/computations'
 
 class ModalStoreUtils extends Component {
   _closeModal (event) {
@@ -39,6 +43,8 @@ class ModalStoreUtils extends Component {
 
   render () {
     const {
+      dispatch,
+      custData,
       activeModalId,
       overallDiscount,
       ordersOnHold,
@@ -48,24 +54,25 @@ class ModalStoreUtils extends Component {
     } = this.props
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
+    let bold = (txt) => { return <strong>{txt}</strong> }
 
     switch (activeModalId) {
       case 'overallDiscount':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={this._closeModal.bind(this)} title={'OVERALL DISCOUNT'}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
-              <div className='column is-8 is-offset-2'>
-                <div className='control is-horizontal'>
-                  <p className='control-label'><strong className='label'>Discount Percent</strong></p>
-                  <form onSubmit={this._closeModal.bind(this)} >
-                    <p className='control has-addons'>
-                      <input id='overallDiscountInput' className='input is-large' type='Number' style={{maxWidth: 80}}
-                        value={overallDiscount}
-                        onChange={e => this._setOADisc(e.target.value)} />
-                      <a className='button is-large'>%</a>
-                    </p>
-                  </form>
-                </div>
+              <div className='column is-4 is-offset-4 has-text-centered'>
+                <form onSubmit={this._closeModal.bind(this)} >
+                  <p className='control has-icon has-icon-right is-marginless'>
+                    <input id='overallDiscountInput' className='input is-large' type='Number'
+                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}}
+                      value={overallDiscount}
+                      onChange={e => this._setOADisc(e.target.value)} />
+                    <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '4.75rem'}}>
+                      <i className='fa fa-percent' />
+                    </span>
+                  </p>
+                </form>
               </div>
             </div>
           </ModalCard>
@@ -145,6 +152,52 @@ class ModalStoreUtils extends Component {
             </div>
           </ModalCard>
         )
+      case 'searchCustomer':
+        return (
+          <ModalCard closeAction={this._closeModal.bind(this)}>
+            <p className='control has-addons'>
+              <span className='select is-large'>
+                <select onChange={e => {}}>
+                  <option value='byId'>odbo ID</option>
+                  <option value='byName'>First Name</option>
+                  <option value='bySurName'>Last Name</option>
+                  <option value='byContactNum'>phone number</option>
+                </select>
+              </span>
+              <input className='input is-large is-expanded' type='text' placeholder={lblTR('app.ph.keyword')} />
+              <a className='button is-large is-success'>{lblTR('app.button.search')}</a>
+            </p>
+            <div>
+              {custData.customersArray.map((customer, key) => {
+                let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated} = customer
+                return (
+                  <div className='box is-clearfix' key={key}>
+                    <div className='media-content is-clearfix'>
+                      <p className='is-pulled-left title is-4'>
+                        {bold(`[ID#${processOdboID(odboId)}] `)}
+                        {`< ${firstName} ${lastName || ''} >`}
+                      </p>
+                      <a className='button is-success is-pulled-right'
+                        onClick={e => { dispatch(setActiveCustomer(customer)) }}>
+                        Add Customer
+                      </a>
+                      <ContentDivider contents={[
+                        <div>
+                          <p>{bold('membership:')} {membership}</p>
+                          <p>{bold('odbo coins:')} {odboCoins || 0}</p>
+                        </div>,
+                        <div>
+                          <p>{bold('status:')} {status}</p>
+                          <p>{bold('last update:')} {formatDate(dateUpdated)}</p>
+                        </div>
+                      ]} size={6} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </ModalCard>
+        )
       case 'syncModal':
         let { syncIsProcessing, syncSuccess, failedOrders, processedOfflineOrders, successOrders } = offlineOrdersData
 
@@ -158,6 +211,26 @@ class ModalStoreUtils extends Component {
             onSync={this.syncOrders.bind(this)}
             onClose={this._closeModal.bind(this)} />
         )
+      case 'updateCashDrawer':
+        return (
+          <ModalCard closeAction={this._closeModal.bind(this)} title={'Update Cashdrawer'}>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-4 is-offset-4 has-text-centered'>
+                <form onSubmit={this._closeModal.bind(this)} >
+                  <p className='control has-icon has-icon-right is-marginless'>
+                    <input id='overallDiscountInput' className='input is-large' type='Number'
+                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}}
+                      value={overallDiscount}
+                      onChange={e => this._setOADisc(e.target.value)} />
+                    <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '3rem'}}>
+                      <i className='fa fa-usd' />
+                    </span>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </ModalCard>
+        )
       default:
         return null
     }
@@ -167,7 +240,9 @@ class ModalStoreUtils extends Component {
 function mapStateToProps (state) {
   let mainUI = state.app.mainUI
   let orderData = state.data.orderData
+  let custData = state.data.customers
   return {
+    custData,
     activeModalId: mainUI.activeModalId,
     overallDiscount: orderData.overallDiscount,
     orderNote: orderData.orderNote,

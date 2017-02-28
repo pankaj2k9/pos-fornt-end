@@ -56,7 +56,7 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'searchCust':
-        return dispatch(setActiveModal('searchCust'))
+        return dispatch(setActiveModal('searchCustomer'))
       case 'sync':
         return dispatch(setActiveModal('syncModal'))
       case 'outletStock':

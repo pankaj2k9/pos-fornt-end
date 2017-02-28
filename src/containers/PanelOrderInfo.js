@@ -28,13 +28,17 @@ import {
 
 import { processOrder } from '../actions/orders'
 
+import print from '../utils/printReceipt/print'
+
 class PanelOrderInfo extends Component {
 
   _onClickPanelButtons (name) {
-    const { dispatch, orderInfo } = this.props
+    const { dispatch, orderInfo, receipt } = this.props
     switch (name) {
       case 'pay': return dispatch(setActiveModal('payments'))
-      case 'printSub': return null
+      case 'printSub':
+        print(receipt)
+        break
       case 'total':
         // ('orderInfo', orderInfo)
         return dispatch(processOrder(orderInfo))
@@ -264,6 +268,7 @@ function mapStateToProps (state) {
     payments: orderData.payments,
     orderNote: orderData.orderNote,
     orderInfo: orderData.orderInfo,
+    receipt: orderData.receipt,
     shouldUpdate: orderData.shouldUpdate,
     isProcessing: orderData.isProcessing,
     intl: state.intl,
