@@ -8,14 +8,9 @@ const dailyData = {
   },
 
   patch (data) {
-    let params = {}
-    if (data.float) {
-      params.float = data.float
-    }
-    if (data.count) {
-      params.cashDrawerOpenCount = data.count
-    }
-    return dailyDataService.patch(data.id, params)
+    return dailyDataService.patch(data.id, {
+      float: data.float, cashDrawerOpenCount: data.cashDrawerOpenCount
+    })
   },
 
   find (query) {
