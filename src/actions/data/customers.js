@@ -6,6 +6,8 @@ export const CUSTOMER_FETCH_REQUEST = 'CUSTOMER_FETCH_REQUEST'
 export const CUSTOMER_FETCH_SUCCESS = 'CUSTOMER_FETCH_SUCCESS'
 export const CUSTOMER_FETCH_FAILURE = 'CUSTOMER_FETCH_FAILURE'
 
+export const CUSTOMERS_SET_FILTER = 'CUSTOMERS_SET_FILTER'
+
 import customerService from '../../services/customers'
 
 export function customersFetchRequest () {
@@ -44,6 +46,14 @@ export function customerFetchFailure (error) {
   return {
     type: CUSTOMER_FETCH_FAILURE,
     error
+  }
+}
+
+export function customersSetFilter (filter, searchKey) {
+  return {
+    type: CUSTOMERS_SET_FILTER,
+    filter,
+    searchKey
   }
 }
 

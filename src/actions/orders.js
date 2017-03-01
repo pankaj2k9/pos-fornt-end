@@ -26,7 +26,7 @@ import {
 } from './helpers'
 
 import ordersService from '../services/orders'
-// import print from '../utils/printReceipt/print'
+import print from '../utils/printReceipt/print'
 
 export function orderRequest () {
   return {
@@ -66,13 +66,14 @@ export function orderStateReset () {
   }
 }
 
-export function processOrder (orderInfo, receipt, lastId) {
+export function processOrder (orderInfo, receipt) {
   return (dispatch) => {
     dispatch(setActiveModal('processingOrder'))
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(setActiveModal('orderSuccess'))
+      print(receipt)
       dispatch(orderSuccess())
       dispatch(setNewLastID())
       dispatch(resetOrderData())
