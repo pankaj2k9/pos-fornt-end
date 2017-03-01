@@ -1,18 +1,18 @@
 import ordersService from '../../services/orders'
 
 import {
-  updateCashDrawer
-  // setActiveModal
- } from '../app/mainUI'
+  updateDailyData
+} from './cashdrawers'
 
 import {
-  temporaryReceiptData,
-  reprintingReceipt
-} from '../orders'
+  resetOrderData
+  // setCashTendered
+} from './orderData'
 
 import {
-  afterOrderProcessed
-} from '../helpers'
+  setNewLastID,
+  setActiveModal
+} from '../app/mainUI'
 
 import print from '../../utils/printReceipt/print'
 
@@ -24,25 +24,16 @@ export function processOfflineOrder (orderInfo) {
   }
 }
 
-export function makeOfflineOrder (orderInfo, receipt, lastId) {
+export function makeOfflineOrder (orderInfo, receipt, activeDrawer) {
   return (dispatch) => {
-    dispatch(processOfflineOrder(orderInfo))
-    print(receipt)
-    let data = { count: receipt.cashDrawerOpenCount, posMode: 'offline' }
-    dispatch(updateCashDrawer(data))
-    dispatch(afterOrderProcessed())
-    dispatch(temporaryReceiptData(receipt))
-    // dispatch(lastOrderidSuccess(lastId))
-    /**
-     * reprintingReceipt sets reprinting state
-     * when reprinting state is set to true value, it diplays a loading text
-     * when reprinting state is set to false value, it hides the loading text
-     * print() function does not detect the printing state so setTimeout is used
-     * setTimeout() is used to emulate the change in reprinting state
-     */
-    dispatch(reprintingReceipt(true))
-    setTimeout(function () {
-      dispatch(reprintingReceipt(false))
+    dispatch(setActiveModal('processingOrder'))
+    setTimeout(e => {
+      dispatch(processOfflineOrder(orderInfo))
+      dispatch(setActiveModal('orderSuccess'))
+      print(receipt)
+      dispatch(setNewLastID())
+      dispatch(updateDailyData())
+      dispatch(resetOrderData())
     }, 1000)
   }
 }
@@ -74,6 +65,29 @@ export function syncOrderFailed (error, failedOrder) {
     type: SYNC_ORDER_FAILED,
     error,
     failedOrder
+  }
+}
+
+export const SAVE_RECEIPT = 'SAVE_RECEIPT'
+export function saveReceipt (receipt) {
+  return {
+    type: SAVE_RECEIPT,
+    receipt
+  }
+}
+
+export const SAVE_FAILED_DRAWER_UPDATE = 'SAVE_FAILED_DRAWER_UPDATE'
+export function saveFailedDrawerUpdate (drawer) {
+  return {
+    type: SAVE_FAILED_DRAWER_UPDATE,
+    drawer
+  }
+}
+
+export const CLEAR_SAVED_RECEIPTS = 'CLEAR_SAVED_RECEIPTS'
+export function clearSavedReceipts () {
+  return {
+    type: CLEAR_MESSAGES
   }
 }
 

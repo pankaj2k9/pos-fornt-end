@@ -25,7 +25,7 @@ export function setActiveCashdrawer (cashdrawer) {
 export const SET_TEMPORARY_CASHDRAWER = 'SET_TEMPORARY_CASHDRAWER'
 export function setTemporaryCashdrawer (cashdrawer) {
   return {
-    type: SET_ACTIVE_CASHDRAWER,
+    type: SET_TEMPORARY_CASHDRAWER,
     cashdrawer
   }
 }

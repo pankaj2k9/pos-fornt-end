@@ -6,6 +6,10 @@ import {
 } from '../app/mainUI'
 
 import {
+  saveFailedDrawerUpdate
+} from './offlineData'
+
+import {
   validateCashdrawers
 } from '../helpers'
 
@@ -57,10 +61,9 @@ export function dailyDataUpdateRequest () {
   }
 }
 
-export function dailyDataUpdateSuccess (data) {
+export function dailyDataUpdateSuccess () {
   return {
-    type: DAILYDATA_UPDATE_SUCCESS,
-    data
+    type: DAILYDATA_UPDATE_SUCCESS
   }
 }
 
@@ -77,18 +80,18 @@ export function updateDailyData (activeDrawer, amount, storeId) {
     if (activeDrawer) {
       let updatedData = {
         id: activeDrawer.id,
-        date: activeDrawer.date,
-        float: amount,
-        count: activeDrawer.cashDrawerOpenCount + 1
+        float: amount || Number(activeDrawer.float),
+        cashDrawerOpenCount: activeDrawer.cashDrawerOpenCount + 1
       }
       return dailyDataService.patch(updatedData)
         .then(response => {
           dispatch(dailyDataUpdateSuccess())
           dispatch(setActiveCashdrawer(response))
-          dispatch(setTemporaryCashdrawer(response))
           dispatch(closeActiveModal())
         })
         .catch(error => {
+          dispatch(saveFailedDrawerUpdate(updatedData))
+          dispatch(setActiveCashdrawer(updatedData))
           dispatch(dailyDataUpdateFailure(error))
         })
     } else {

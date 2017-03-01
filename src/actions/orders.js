@@ -13,13 +13,13 @@ import {
 } from './app/mainUI'
 
 import {
-  resetOrderData
+  // resetOrderData
   // setCashTendered
 } from './data/orderData'
 
 import {
   // lastOrderidSuccess
-} from './data/offlineOrders'
+} from './data/offlineData'
 
 import {
   // afterOrderProcessed
@@ -76,7 +76,6 @@ export function processOrder (orderInfo, receipt) {
       print(receipt)
       dispatch(orderSuccess())
       dispatch(setNewLastID())
-      dispatch(resetOrderData())
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))
