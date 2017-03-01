@@ -58,7 +58,6 @@ class ModalSetPayments extends Component {
       'voucher': voucher
     }
     let payment = Object.assign({}, paymentAmt, options[mode])
-    console.log(12341234, payment)
     dispatch(addPaymentType(payment))
     if (mode !== 'cash') {
       dispatch(setFieldsDefault())
@@ -216,9 +215,7 @@ class ModalSetPayments extends Component {
                     let value = formatNumber(e.target.value)
                     if (paymentMode === 'cash') { dispatch(setCashTendered(value)) }
                     dispatch(setAmountTendered(value))
-                    console.log(1234, paymentMode)
                     if (paymentMode === 'cash') {
-                      console.log('kjhdfjkhkasd')
                       this._addPayment('cash', value)
                     }
                   }} />

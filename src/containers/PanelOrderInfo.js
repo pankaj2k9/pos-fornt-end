@@ -19,6 +19,10 @@ import {
   // setCurrencyType
 } from '../actions/data/orderData'
 
+import {
+  makeOfflineOrder
+} from '../actions/data/offlineData'
+
 import { formatCurrency } from '../utils/string'
 import {
   compPaymentsSum,
@@ -33,14 +37,18 @@ import print from '../utils/printReceipt/print'
 class PanelOrderInfo extends Component {
 
   _onClickPanelButtons (name) {
-    const { dispatch, orderInfo, receipt } = this.props
+    const { dispatch, orderInfo, receipt, posMode, activeDrawer } = this.props
     switch (name) {
       case 'pay': return dispatch(setActiveModal('payments'))
       case 'printSub':
         print(receipt)
         break
       case 'total':
-        dispatch(processOrder(orderInfo, receipt))
+        if (posMode === 'online') {
+          dispatch(processOrder(orderInfo, receipt, activeDrawer))
+        } else {
+          dispatch(makeOfflineOrder(orderInfo, receipt, activeDrawer))
+        }
         break
       default:
     }
@@ -159,7 +167,6 @@ class PanelOrderInfo extends Component {
     let intFrameHeight = window.innerHeight
     let itemsNotEmpty = orderItems.length > 0
     let noPayBalance = payments.length > 0 && payBal === 0
-    console.log(1234, payBal)
     let buttons = [
       {name: 'pay', label: 'app.button.pay', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
       {name: 'printSub', label: 'app.button.printTotal', isActive: noPayBalance, color: 'purple', size: 'is-4'},
@@ -264,6 +271,7 @@ function mapStateToProps (state) {
     storeUI,
     orderData,
     isEditing: mainUIediting || storeUIediting,
+    activeDrawer: mainUI.activeDrawer,
     activeCustomer: orderData.activeCustomer,
     total: orderData.total,
     totalDisc: orderData.totalDisc,

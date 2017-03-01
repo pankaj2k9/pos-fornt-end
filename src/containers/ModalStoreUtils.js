@@ -5,17 +5,18 @@ import { injectIntl } from 'react-intl'
 import ModalCard from '../components/ModalCard'
 import ContentDivider from '../components/ContentDivider'
 import LoadingScreen from '../components/LoadingScreen'
-import SyncModal from '../components/SyncModal'
+// import SyncModal from '../components/SyncModal'
 
 import { closeActiveModal } from '../actions/app/mainUI'
 import {
   setActiveCustomer,
-  setOverallDiscount
+  setOverallDiscount,
+  resetOrderData
 } from '../actions/data/orderData'
 
 import {
   syncOfflineOrders
-} from '../actions/data/offlineOrders'
+} from '../actions/data/offlineData'
 
 import {
   createDailyData,
@@ -28,10 +29,17 @@ import {
 
 import { formatCurrency, formatDate } from '../utils/string'
 import { processOdboID, processCustomers } from '../utils/computations'
+import print from '../utils/printReceipt/print'
 
 class ModalStoreUtils extends Component {
   _closeModal (event) {
     const { dispatch } = this.props
+    dispatch(closeActiveModal())
+  }
+
+  _resetOrderData () {
+    const { dispatch } = this.props
+    dispatch(resetOrderData())
     dispatch(closeActiveModal())
   }
 
@@ -43,7 +51,7 @@ class ModalStoreUtils extends Component {
   _updateCashdrawer () {
     const { dispatch, activeDrawer, activeDrawerOffline, storeId, posMode, networkStatus } = this.props
     let amount = Number(document.getElementById('drawerAmtInput').value) || 0
-    if (activeDrawer && activeDrawer.float === 0) {
+    if (activeDrawer) {
       dispatch(updateDailyData(activeDrawer, amount))
     } else if (!activeDrawer) {
       if (posMode === 'online' || networkStatus === 'online') {
@@ -79,12 +87,14 @@ class ModalStoreUtils extends Component {
 
   render () {
     const {
+      dispatch,
       custData,
       activeModalId,
       overallDiscount,
       ordersOnHold,
       orderNote,
-      offlineOrdersData,
+      orderReceipt,
+      offlineData,
       intl
     } = this.props
 
@@ -123,9 +133,7 @@ class ModalStoreUtils extends Component {
                     <a className='button is-pulled-right'>Recall</a>
                     <ContentDivider size={6} contents={[
                       order.orderItems.map((item, key) => {
-                        return (
-                          <p key={key}>{item.nameEn}</p>
-                        )
+                        return (<p key={key}>{item.nameEn}</p>)
                       }),
                       <div>
                         <p>currency: {order.currency}</p>
@@ -171,10 +179,10 @@ class ModalStoreUtils extends Component {
         )
       case 'orderSuccess':
         return (
-          <ModalCard closeAction={e => this._closeModal()} confirmAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._resetOrderData()} confirmAction={this._resetOrderData.bind(this)}>
             <div className='content has-text-centered'>
               <p className='title'>Order Success</p>
-              <a>Reprint Receipt</a>
+              <a onClick={e => print(orderReceipt)}>Reprint Receipt</a>
             </div>
           </ModalCard>
         )
@@ -194,7 +202,7 @@ class ModalStoreUtils extends Component {
           <ModalCard closeAction={e => this._closeModal()}>
             <p className='control has-addons'>
               <span className='select is-large'>
-                <select id='custFilter' onChange={e => {}}>
+                <select id='custFilter'>
                   <option value='byId'>odbo ID</option>
                   <option value='byName'>First Name</option>
                   <option value='bySurName'>Last Name</option>
@@ -235,29 +243,56 @@ class ModalStoreUtils extends Component {
             </div>
           </ModalCard>
         )
-      case 'syncModal':
-        let { syncIsProcessing, syncSuccess, failedOrders, processedOfflineOrders, successOrders } = offlineOrdersData
 
+      case 'syncModal':
+        let { isProcessing, offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
+        let haveDatatoSync = offlineOrders.length > 0 || failedOrders.length > 0 || offlineDrawers.length > 0 || failedDrawers.length > 0
+        let container = (type, data, icon, lbl) => {
+          return (
+            data.length > 0
+            ? <div className='box' style={{margin: 10}}>
+              <article className='media'>
+                <div className='media-left'><span className='icon is-large'><i className={`fa fa-${icon}`} /></span></div>
+                <div className='media-content'>
+                  <div className='content'>
+                    <p className='subtitle'><strong>{data.length}</strong> {lblTR(`app.lbl.${lbl}`)}</p>
+                    <p>{type === 'orders' ? lblTR('app.lbl.offlineOrders') : lblTR('app.lbl.cashdrawerData')}</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+            : null
+          )
+        }
         return (
-          <SyncModal
-            isProcessing={syncIsProcessing}
-            syncSuccess={syncSuccess}
-            failedOrders={failedOrders}
-            offlineOrders={processedOfflineOrders}
-            successOrders={successOrders}
-            onSync={this.syncOrders.bind(this)}
-            onClose={this._closeModal.bind(this)} />
+          <ModalCard closeAction={e => this._closeModal()} title={lblTR('app.button.syncData')}>
+            {haveDatatoSync
+              ? <div className='has-text-centered'>
+                <ContentDivider contents={[
+                  container('orders', offlineOrders, 'list-alt', 'notSynced'),
+                  container('orders', failedOrders, 'close', 'syncFailed'),
+                  container('drawer', offlineDrawers, 'upload', 'notSynced'),
+                  container('drawer', failedDrawers, 'close', 'syncFailed')
+                ]} size={6} />
+                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => dispatch(syncOfflineOrders(offlineOrders))}>
+                  <span className='icon is-large'><i className={`fa fa-refresh ${isProcessing ? 'fa-spin fa-3x' : 'fa-2x'}`} /></span>
+                  <span>{isProcessing ? lblTR('app.lbl.syncing') : lblTR('app.button.syncOrders')}</span>
+                </a>
+              </div>
+              : <p className='title has-text-centered'>{lblTR('app.lbl.noDataToSync')}</p>
+            }
+          </ModalCard>
         )
+
       case 'updateCashdrawer':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)} title={'Update Cashdrawer'} confirmAction={this._updateCashdrawer.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer()}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
-                <form onSubmit={this._closeModal.bind(this)} >
+                <form onSubmit={e => this._closeModal()} >
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='drawerAmtInput' className='input is-large' type='Number'
-                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}}
-                      value={overallDiscount} />
+                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}} />
                     <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '3rem'}}>
                       <i className='fa fa-usd' />
                     </span>
@@ -287,10 +322,11 @@ function mapStateToProps (state) {
     overallDiscount: orderData.overallDiscount,
     orderNote: orderData.orderNote,
     orderInfo: orderData.orderInfo,
+    orderReceipt: orderData.receipt,
     ordersOnHold: state.ordersOnHold.items,
-    offlineOrdersData: state.data.offlineOrders,
+    offlineData: state.data.offlineData,
     storeId: state.app.mainUI.activeStore.source,
-    activeDrawer: state.app.mainUI.activeDrawer,
+    activeDrawer: mainUI.activeDrawer,
     activeDrawerOffline: state.app.mainUI.activeDrawerOffline,
     intl: state.intl
   }
