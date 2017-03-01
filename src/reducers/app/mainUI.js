@@ -49,7 +49,7 @@ function mainUI (state = {
       })
     case SET_ACTIVE_CASHDRAWER:
       return Object.assign({}, state, {
-        activeCashdrawer: action.cashdrawer,
+        activeDrawer: action.cashdrawer,
         isEditing: false
       })
     case SET_TEMPORARY_CASHDRAWER:
