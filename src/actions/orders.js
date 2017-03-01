@@ -6,24 +6,9 @@ export const TEMPORARY_RECEIPT_DATA = 'TEMPORARY_RECEIPT_DATA'
 export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
 
 import {
-  // addCashdrawerOpenCount,
-  // updateCashDrawer,
   setActiveModal,
   setNewLastID
 } from './app/mainUI'
-
-import {
-  // resetOrderData
-  // setCashTendered
-} from './data/orderData'
-
-import {
-  // lastOrderidSuccess
-} from './data/offlineData'
-
-import {
-  // afterOrderProcessed
-} from './helpers'
 
 import ordersService from '../services/orders'
 import print from '../utils/printReceipt/print'
