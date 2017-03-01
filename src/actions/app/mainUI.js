@@ -22,6 +22,14 @@ export function setActiveCashdrawer (cashdrawer) {
   }
 }
 
+export const SET_TEMPORARY_CASHDRAWER = 'SET_TEMPORARY_CASHDRAWER'
+export function setTemporaryCashdrawer (cashdrawer) {
+  return {
+    type: SET_TEMPORARY_CASHDRAWER,
+    cashdrawer
+  }
+}
+
 export const SET_ACTIVE_MODAL = 'SET_ACTIVE_MODAL'
 export function setActiveModal (activeModalId, inputToFocus) {
   return {

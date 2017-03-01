@@ -56,7 +56,7 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'searchCust':
-        return dispatch(setActiveModal('searchCust'))
+        return dispatch(setActiveModal('searchCustomer'))
       case 'sync':
         return dispatch(setActiveModal('syncModal'))
       case 'outletStock':
@@ -94,14 +94,15 @@ class PanelButtons extends Component {
   }
 
   render () {
-    const { currency, posMode } = this.props
+    const { currency, posMode, orderData } = this.props
     let isActive = posMode === 'online'
+    let hasOdboUser = orderData.activeCustomer
     let posModeToggleButton = posMode === 'online'
       ? {name: 'offline', isActive: true, color: 'yellow', label: 'SWITCH TO OFFLINE', altLbl: '切换到离线模式', size: 'is-6'}
       : {name: 'online', isActive: true, color: 'yellow', label: 'SWITCH TO ONLINE', altLbl: '切换到在线模式', size: 'is-6'}
 
     let currencyButton = currency === 'sgd'
-      ? {name: 'useOdbo', isActive, color: 'purple', label: 'USE "The odbo" COINS', altLbl: '电子钱包', size: 'is-3'}
+      ? {name: 'useOdbo', isActive: hasOdboUser, color: 'purple', label: 'USE "The odbo" COINS', altLbl: '电子钱包', size: 'is-3'}
       : {name: 'useSgd', isActive, color: 'purple', label: 'USE SGD', altLbl: '使用SGD', size: 'is-3'}
 
     let buttons = [
@@ -115,7 +116,7 @@ class PanelButtons extends Component {
       {name: 'outletSales', isActive, color: 'blue', label: 'OUTLET SALES', altLbl: '各分店业绩', size: 'is-3'},
       {name: 'viewBill', isActive, color: 'blue', label: 'VIEW BILL', altLbl: '历史账单', size: 'is-3'},
       {name: 'refund', isActive, color: 'blue', label: 'REFUND / REPRINT', altLbl: '从新打印', size: 'is-3'},
-      {name: 'doublePoints', isActive, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'},
+      {name: 'doublePoints', isActive: hasOdboUser, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'},
       currencyButton,
       {name: 'adjustPoints', isActive, color: 'purple', label: 'ADJUST POINTS', altLbl: '修改分数', size: 'is-3'},
       {name: 'prodList', isActive: true, color: 'purple', label: 'PRODUCTS LIST', altLbl: '产品明细', size: 'is-3'},

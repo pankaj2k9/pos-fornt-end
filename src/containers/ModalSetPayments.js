@@ -30,11 +30,6 @@ import { formatCurrency, formatNumber } from '../utils/string'
 import { compPaymentsSum } from '../utils/computations'
 
 class ModalSetPayments extends Component {
-  _closeModal (event) {
-    const { dispatch } = this.props
-    dispatch(closeActiveModal())
-    dispatch(setFieldsDefault())
-  }
 
   _confirm () {
     const { dispatch, mainUI, orderData } = this.props
@@ -47,9 +42,12 @@ class ModalSetPayments extends Component {
   }
 
   _addPayment (mode, amount) {
-    const { dispatch, card, cash, nets, voucher, amountToPay } = this.props
+    const { dispatch, card, cash, nets, voucher, amountToPay, total } = this.props
+    let change = formatNumber(amount) > total
+      ? formatNumber(amount) - total
+      : 0
     let paymentAmt = mode === 'cash'
-      ? {amount: formatNumber(amount), cash: formatNumber(amount)}
+      ? {amount: formatNumber(amount), cash: formatNumber(amount), change: change}
       : mode === 'voucher'
         ? {deduction: formatNumber(amountToPay)}
         : {amount: formatNumber(amountToPay)}
@@ -192,8 +190,8 @@ class ModalSetPayments extends Component {
 
     return (
       <ModalCard title={'app.modal.payment'}
-        closeAction={this._closeModal.bind(this)}
-        confirmAction={this._confirm.bind(this)} >
+        closeAction={e => this._confirm()}
+        confirmAction={e => this._confirm()} >
         <ContentDivider offset={2} size={8}
           contents={[
             <div className='columns is-multiline is-mobile is-fullwidth is-marginless'>
@@ -217,7 +215,9 @@ class ModalSetPayments extends Component {
                     let value = formatNumber(e.target.value)
                     if (paymentMode === 'cash') { dispatch(setCashTendered(value)) }
                     dispatch(setAmountTendered(value))
-                    if (paymentMode === 'cash') { this._addPayment.bind(this, 'cash', value) }
+                    if (paymentMode === 'cash') {
+                      this._addPayment('cash', value)
+                    }
                   }} />
               </div>
               <div className='column is-4 has-text-centered' style={styles.center}>

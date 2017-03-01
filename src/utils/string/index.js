@@ -18,7 +18,6 @@ export const formatCurrency = (number, currency) => {
 
 export const formatNumber = (string) => {
   // let newValue = Number(`${newValue}`.replace(/\D/g, ''))
-  console.log(123412342134, string)
   let value = String(string)
   let newValue = Number(value.replace(/[^\d.]/g, ''))
   return newValue
@@ -31,7 +30,8 @@ export const formatNumber = (string) => {
  *
  * @returns {array} of strings split from str that is below
  */
-export const formatDate = (date, options) => {
+export const formatDate = (value, options) => {
+  let date = new Date(value)
   const opt = options || {
     hour: '2-digit',
     minute: '2-digit'

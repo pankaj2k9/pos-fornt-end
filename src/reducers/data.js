@@ -1,16 +1,16 @@
 import { combineReducers } from 'redux'
 
 import customers from './data/customers'
-// import dataDWR from './dataDWR'
+import cashdrawers from './data/cashdrawers'
 import products from './data/products'
 import stores from './data/stores'
 import orderData from './data/orderData'
-import offlineOrders from './data/offlineOrders'
+import offlineData from './data/offlineData'
 
 export default combineReducers({
   customers,
-  // dataDWR,
-  offlineOrders,
+  cashdrawers,
+  offlineData,
   products,
   stores,
   orderData

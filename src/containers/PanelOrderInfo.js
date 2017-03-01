@@ -19,6 +19,10 @@ import {
   // setCurrencyType
 } from '../actions/data/orderData'
 
+import {
+  makeOfflineOrder
+} from '../actions/data/offlineData'
+
 import { formatCurrency } from '../utils/string'
 import {
   compPaymentsSum,
@@ -28,16 +32,24 @@ import {
 
 import { processOrder } from '../actions/orders'
 
+import print from '../utils/printReceipt/print'
+
 class PanelOrderInfo extends Component {
 
   _onClickPanelButtons (name) {
-    const { dispatch, orderInfo } = this.props
+    const { dispatch, orderInfo, receipt, posMode, activeDrawer } = this.props
     switch (name) {
       case 'pay': return dispatch(setActiveModal('payments'))
-      case 'printSub': return null
+      case 'printSub':
+        print(receipt)
+        break
       case 'total':
-        // ('orderInfo', orderInfo)
-        return dispatch(processOrder(orderInfo))
+        if (posMode === 'online') {
+          dispatch(processOrder(orderInfo, receipt, activeDrawer))
+        } else {
+          dispatch(makeOfflineOrder(orderInfo, receipt, activeDrawer))
+        }
+        break
       default:
     }
   }
@@ -130,6 +142,7 @@ class PanelOrderInfo extends Component {
       intl,
       isEditing,
       currency,
+      orderItems,
       payments,
       total,
       totalDisc,
@@ -142,6 +155,9 @@ class PanelOrderInfo extends Component {
     let orderTotal = currency === 'sgd' ? total : totalOdbo
     let orderDisc = currency === 'sgd' ? totalDisc : totalOdboDisc
     let subtotal = orderTotal + orderDisc
+    let payBal = currency === 'sgd'
+      ? total - compPaymentsSum(payments) < 0 ? 0 : total - compPaymentsSum(payments)
+      : totalOdbo - compPaymentsSum(payments) < 0 ? 0 : totalOdbo - compPaymentsSum(payments)
     let paymentsSum = formatCurrency(compPaymentsSum(payments))
     let cashSum = formatCurrency(compPaymentsSumByType(payments, 'cash'))
     let creditSum = formatCurrency(compPaymentsSumByType(payments, 'credit'))
@@ -149,11 +165,12 @@ class PanelOrderInfo extends Component {
     let voucherSum = formatCurrency(compPaymentsSumByType(payments, 'voucher'))
     let cashChange = formatCurrency(compCashChange(payments))
     let intFrameHeight = window.innerHeight
-    let isActive = true
+    let itemsNotEmpty = orderItems.length > 0
+    let noPayBalance = payments.length > 0 && payBal === 0
     let buttons = [
-      {name: 'pay', label: 'app.button.pay', isActive, color: 'pink', size: 'is-4'},
-      {name: 'printSub', label: 'app.button.printTotal', isActive, color: 'purple', size: 'is-4'},
-      {name: 'total', label: 'app.button.total', isActive, color: 'blue', size: 'is-4'}
+      {name: 'pay', label: 'app.button.pay', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
+      {name: 'printSub', label: 'app.button.printTotal', isActive: noPayBalance, color: 'purple', size: 'is-4'},
+      {name: 'total', label: 'app.button.total', isActive: noPayBalance, color: 'blue', size: 'is-4'}
     ]
 
     return (
@@ -254,6 +271,7 @@ function mapStateToProps (state) {
     storeUI,
     orderData,
     isEditing: mainUIediting || storeUIediting,
+    activeDrawer: mainUI.activeDrawer,
     activeCustomer: orderData.activeCustomer,
     total: orderData.total,
     totalDisc: orderData.totalDisc,
@@ -264,6 +282,7 @@ function mapStateToProps (state) {
     payments: orderData.payments,
     orderNote: orderData.orderNote,
     orderInfo: orderData.orderInfo,
+    receipt: orderData.receipt,
     shouldUpdate: orderData.shouldUpdate,
     isProcessing: orderData.isProcessing,
     intl: state.intl,

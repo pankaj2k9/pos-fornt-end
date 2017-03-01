@@ -4,7 +4,8 @@ import {
   processReceiptProducts,
   processOrdID,
   processPayments,
-  processStoreAddress
+  processStoreAddress,
+  processOdbo
 } from '../../utils/computations'
 
 export const SET_ACTIVE_CUSTOMER = 'SET_ACTIVE_CUSTOMER'
@@ -79,15 +80,25 @@ export function setOrderInfo (data) {
   }
 
   const receipt = {
-    currency: currency,
-    staff: `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`,
+    type: 'order',
+    storeAddress: processStoreAddress(activeStore),
     items: processReceiptProducts(orderItems, currency),
-    orderNote: orderNote,
-    orderTotal: orderTotal,
-    orderDisccount: orderDisccount,
-    payments: processPayments(payments, currency),
-    vouchers: processPayments(payments, 'voucher'),
-    storeAddress: processStoreAddress(activeStore)
+    extraInfo: {
+      id: processOrdID(code, lastId),
+      customer: activeCustomer,
+      date: new Date(),
+      staff: `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
+    },
+    paymentInfo: {
+      currency: currency,
+      payments: payments,
+      vouchers: processPayments(payments, 'voucher'),
+      subtotal: orderTotal + orderDisccount,
+      odbo: processOdbo(activeCustomer, orderTotal),
+      orderTotal: orderTotal,
+      orderDisccount: orderDisccount,
+      notes: orderNote
+    }
   }
 
   return {

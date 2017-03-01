@@ -83,9 +83,7 @@ export const compCashChange = (data) => {
   if (data && data.length > 0) {
     data.forEach(x => {
       if (x.type === 'cash') {
-        cashChange = x.cash - x.amount
-      } else {
-        cashChange = 0
+        cashChange = x.change
       }
     })
   }
@@ -148,6 +146,14 @@ export const processOrdID = (str, lastId) => {
   return `${str}${zeroes}${id}`
 }
 
+export const processOdboID = (odboId) => {
+  let zeroes = ''
+  for (var i = odboId.toString().length; i < 7; i++) {
+    zeroes = zeroes + '0'
+  }
+  return `${zeroes}${odboId}`
+}
+
 export const processPayments = (data, currency) => {
   let payments = []
   if (data && data.length > 0) {
@@ -169,4 +175,35 @@ export const processStoreAddress = (data) => {
     ...addr
   ]
   return storeAddress
+}
+
+export const processOdbo = (customer, orderTotal) => {
+  let odbo = customer
+    ? { prevCoins: customer.odboCoins, earnedPts: orderTotal, newCoins: customer.odboCoins + orderTotal }
+    : undefined
+  return odbo
+}
+
+export const processCustomers = (data, filterKey, searchKey) => {
+  let filtered
+  let numberKey = String(Number(searchKey))
+  let nameKey = searchKey.toLowerCase()
+  if (searchKey !== '') {
+    filtered = data.filter(x => {
+      if (filterKey === 'byId') {
+        return (numberKey.match(x.odboId))
+      } else if (filterKey === 'byName') {
+        // let firstName = x.firstName ? x.firstName.toLowerCase() : ''
+        return (x.combinedName.match(nameKey))
+      } else if (filterKey === 'bySurName') {
+        // let lastName = x.lastName ? x.lastName.toLowerCase() : ''
+        return (x.combinedName.match(nameKey))
+      } else if (filterKey === 'byContactNum') {
+        return (x.phoneNumber.match(searchKey))
+      }
+    })
+  } else {
+    filtered = data
+  }
+  return filtered
 }

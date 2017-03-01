@@ -766,7 +766,7 @@ function mapStateToProps (state) {
     storeDetails: state.app.mainUI.store,
     storeId: state.app.mainUI.storeId,
     storeData: state.app.mainUI.store,
-    lastOrderId: state.offlineOrders.lastOrderId,
+    lastOrderId: state.app.mainUI.activeStore.lastOrderId,
     customers: state.data.customers.customersArray,
     isFetching: state.data.customers.isFetching,
     customersById: state.data.customers.customersById,

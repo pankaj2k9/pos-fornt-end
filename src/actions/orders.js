@@ -13,20 +13,20 @@ import {
 } from './app/mainUI'
 
 import {
-   resetOrderData,
-   setCashTendered
+  // resetOrderData
+  // setCashTendered
 } from './data/orderData'
 
 import {
   // lastOrderidSuccess
-} from './data/offlineOrders'
+} from './data/offlineData'
 
 import {
   // afterOrderProcessed
 } from './helpers'
 
 import ordersService from '../services/orders'
-// import print from '../utils/printReceipt/print'
+import print from '../utils/printReceipt/print'
 
 export function orderRequest () {
   return {
@@ -66,43 +66,21 @@ export function orderStateReset () {
   }
 }
 
-export function processOrder (orderInfo, receipt, lastId) {
+export function processOrder (orderInfo, receipt) {
   return (dispatch) => {
     dispatch(setActiveModal('processingOrder'))
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(setActiveModal('orderSuccess'))
+      print(receipt)
       dispatch(orderSuccess())
       dispatch(setNewLastID())
-      dispatch(resetOrderData())
-      dispatch(setCashTendered(0))
-      // dispatch(lastOrderidSuccess(lastId))
-      // let data = { count: receipt.cashDrawerOpenCount }
-      // dispatch(updateCashDrawer(staff, data, order))
-      // dispatch(afterOrderProcessed())
-      // dispatch(temporaryReceiptData(receipt))
-      // if (order.id) {
-      //   print(receipt)
-      //   dispatch(addCashdrawerOpenCount())
-      // }
-      /**
-       * reprintingReceipt sets reprinting state
-       * when reprinting state is set to true value, it diplays a loading text
-       * when reprinting state is set to false value, it hides the loading text
-       * print() function does not detect the printing state so setTimeout is used
-       * setTimeout() is used to emulate the change in reprinting state
-       */
-      // dispatch(reprintingReceipt(true))
-      // setTimeout(function () {
-      //   dispatch(reprintingReceipt(false))
-      // }, 1000)
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))
       dispatch(setNewLastID())
       dispatch(orderFailure(error.message))
-      // dispatch(afterOrderProcessed())
     })
   }
 }
