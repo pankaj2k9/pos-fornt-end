@@ -40,8 +40,7 @@ class PanelOrderInfo extends Component {
         print(receipt)
         break
       case 'total':
-        dispatch(processOrder(orderInfo))
-        print(receipt)
+        dispatch(processOrder(orderInfo, receipt))
         break
       default:
     }
@@ -135,6 +134,7 @@ class PanelOrderInfo extends Component {
       intl,
       isEditing,
       currency,
+      orderItems,
       payments,
       total,
       totalDisc,
@@ -147,6 +147,9 @@ class PanelOrderInfo extends Component {
     let orderTotal = currency === 'sgd' ? total : totalOdbo
     let orderDisc = currency === 'sgd' ? totalDisc : totalOdboDisc
     let subtotal = orderTotal + orderDisc
+    let payBal = currency === 'sgd'
+      ? total - compPaymentsSum(payments) < 0 ? 0 : total - compPaymentsSum(payments)
+      : totalOdbo - compPaymentsSum(payments) < 0 ? 0 : totalOdbo - compPaymentsSum(payments)
     let paymentsSum = formatCurrency(compPaymentsSum(payments))
     let cashSum = formatCurrency(compPaymentsSumByType(payments, 'cash'))
     let creditSum = formatCurrency(compPaymentsSumByType(payments, 'credit'))
@@ -154,11 +157,13 @@ class PanelOrderInfo extends Component {
     let voucherSum = formatCurrency(compPaymentsSumByType(payments, 'voucher'))
     let cashChange = formatCurrency(compCashChange(payments))
     let intFrameHeight = window.innerHeight
-    let isActive = true
+    let itemsNotEmpty = orderItems.length > 0
+    let noPayBalance = payments.length > 0 && payBal === 0
+    console.log(1234, payBal)
     let buttons = [
-      {name: 'pay', label: 'app.button.pay', isActive, color: 'pink', size: 'is-4'},
-      {name: 'printSub', label: 'app.button.printTotal', isActive, color: 'purple', size: 'is-4'},
-      {name: 'total', label: 'app.button.total', isActive, color: 'blue', size: 'is-4'}
+      {name: 'pay', label: 'app.button.pay', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
+      {name: 'printSub', label: 'app.button.printTotal', isActive: noPayBalance, color: 'purple', size: 'is-4'},
+      {name: 'total', label: 'app.button.total', isActive: noPayBalance, color: 'blue', size: 'is-4'}
     ]
 
     return (

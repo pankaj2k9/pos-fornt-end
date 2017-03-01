@@ -30,11 +30,6 @@ import { formatCurrency, formatNumber } from '../utils/string'
 import { compPaymentsSum } from '../utils/computations'
 
 class ModalSetPayments extends Component {
-  _closeModal (event) {
-    const { dispatch } = this.props
-    dispatch(closeActiveModal())
-    dispatch(setFieldsDefault())
-  }
 
   _confirm () {
     const { dispatch, mainUI, orderData } = this.props
@@ -63,6 +58,7 @@ class ModalSetPayments extends Component {
       'voucher': voucher
     }
     let payment = Object.assign({}, paymentAmt, options[mode])
+    console.log(12341234, payment)
     dispatch(addPaymentType(payment))
     if (mode !== 'cash') {
       dispatch(setFieldsDefault())
@@ -195,8 +191,8 @@ class ModalSetPayments extends Component {
 
     return (
       <ModalCard title={'app.modal.payment'}
-        closeAction={this._closeModal.bind(this)}
-        confirmAction={this._confirm.bind(this)} >
+        closeAction={e => this._confirm()}
+        confirmAction={e => this._confirm()} >
         <ContentDivider offset={2} size={8}
           contents={[
             <div className='columns is-multiline is-mobile is-fullwidth is-marginless'>
@@ -220,7 +216,11 @@ class ModalSetPayments extends Component {
                     let value = formatNumber(e.target.value)
                     if (paymentMode === 'cash') { dispatch(setCashTendered(value)) }
                     dispatch(setAmountTendered(value))
-                    if (paymentMode === 'cash') { this._addPayment.bind(this, 'cash', value) }
+                    console.log(1234, paymentMode)
+                    if (paymentMode === 'cash') {
+                      console.log('kjhdfjkhkasd')
+                      this._addPayment('cash', value)
+                    }
                   }} />
               </div>
               <div className='column is-4 has-text-centered' style={styles.center}>

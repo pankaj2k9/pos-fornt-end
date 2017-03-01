@@ -22,8 +22,12 @@ import {
   updateDailyData
 } from '../actions/data/cashdrawers'
 
+import {
+  customersSetFilter
+} from '../actions/data/customers'
+
 import { formatCurrency, formatDate } from '../utils/string'
-import { processOdboID } from '../utils/computations'
+import { processOdboID, processCustomers } from '../utils/computations'
 
 class ModalStoreUtils extends Component {
   _closeModal (event) {
@@ -50,6 +54,19 @@ class ModalStoreUtils extends Component {
     }
   }
 
+  _setActiveCustomer (customer) {
+    const { dispatch } = this.props
+    dispatch(setActiveCustomer(customer))
+    dispatch(closeActiveModal())
+  }
+
+  _setSearchCustFilters () {
+    const { dispatch } = this.props
+    let filter = document.getElementById('custFilter').value
+    let searchKey = document.getElementById('custSearchKey').value
+    dispatch(customersSetFilter(filter, searchKey))
+  }
+
   syncOrders () {
     const {dispatch, offlineOrdersData} = this.props
     let { failedOrders, processedOfflineOrders } = offlineOrdersData
@@ -62,7 +79,6 @@ class ModalStoreUtils extends Component {
 
   render () {
     const {
-      dispatch,
       custData,
       activeModalId,
       overallDiscount,
@@ -78,10 +94,10 @@ class ModalStoreUtils extends Component {
     switch (activeModalId) {
       case 'overallDiscount':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)} title={'OVERALL DISCOUNT'}>
+          <ModalCard closeAction={e => this._closeModal()} title={'OVERALL DISCOUNT'}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
-                <form onSubmit={this._closeModal.bind(this)} >
+                <form onSubmit={e => this._closeModal()} >
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='overallDiscountInput' className='input is-large' type='Number'
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}}
@@ -98,7 +114,7 @@ class ModalStoreUtils extends Component {
         )
       case 'recallOrder':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()}>
             {ordersOnHold.map((order, key) => {
               return (
                 <div className='box is-clearfix' key={key}>
@@ -124,7 +140,7 @@ class ModalStoreUtils extends Component {
         )
       case 'notes':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()}>
             {orderNote.length > 0
               ? orderNote.map((note, key) => {
                 return (
@@ -155,7 +171,7 @@ class ModalStoreUtils extends Component {
         )
       case 'orderSuccess':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)} confirmAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()} confirmAction={this._closeModal.bind(this)}>
             <div className='content has-text-centered'>
               <p className='title'>Order Success</p>
               <a>Reprint Receipt</a>
@@ -164,7 +180,7 @@ class ModalStoreUtils extends Component {
         )
       case 'orderFailed':
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)} retryAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()} retryAction={this._closeModal.bind(this)}>
             <div className='content has-text-centered'>
               <p className='title'>Order Failed</p>
               <p className='subtitle'>Try Again</p>
@@ -172,22 +188,24 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
       case 'searchCustomer':
+        let { customersArray, customerFilter, customerSearchKey } = custData
+        let customers = processCustomers(customersArray, customerFilter, customerSearchKey)
         return (
-          <ModalCard closeAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()}>
             <p className='control has-addons'>
               <span className='select is-large'>
-                <select onChange={e => {}}>
+                <select id='custFilter' onChange={e => {}}>
                   <option value='byId'>odbo ID</option>
                   <option value='byName'>First Name</option>
                   <option value='bySurName'>Last Name</option>
                   <option value='byContactNum'>phone number</option>
                 </select>
               </span>
-              <input className='input is-large is-expanded' type='text' placeholder={lblTR('app.ph.keyword')} />
-              <a className='button is-large is-success'>{lblTR('app.button.search')}</a>
+              <input id='custSearchKey' className='input is-large is-expanded' type='text' placeholder={lblTR('app.ph.keyword')} onChange={e => this._setSearchCustFilters()} />
+              <a className='button is-large is-success' onClick={e => this._setSearchCustFilters()}>{lblTR('app.button.search')}</a>
             </p>
             <div>
-              {custData.customersArray.map((customer, key) => {
+              {customers.map((customer, key) => {
                 let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated} = customer
                 return (
                   <div className='box is-clearfix' key={key}>
@@ -197,7 +215,7 @@ class ModalStoreUtils extends Component {
                         {`< ${firstName} ${lastName || ''} >`}
                       </p>
                       <a className='button is-success is-pulled-right'
-                        onClick={e => { dispatch(setActiveCustomer(customer)) }}>
+                        onClick={e => { this._setActiveCustomer(customer) }}>
                         Add Customer
                       </a>
                       <ContentDivider contents={[
@@ -239,8 +257,7 @@ class ModalStoreUtils extends Component {
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='drawerAmtInput' className='input is-large' type='Number'
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}}
-                      value={overallDiscount}
-                      onChange={e => this._setOADisc(e.target.value)} />
+                      value={overallDiscount} />
                     <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '3rem'}}>
                       <i className='fa fa-usd' />
                     </span>
@@ -262,6 +279,8 @@ function mapStateToProps (state) {
   let custData = state.data.customers
   return {
     custData,
+    customerSearchKey: custData.customerSearchKey,
+    customerFilter: custData.customerFilter,
     activeModalId: mainUI.activeModalId,
     posMode: mainUI.posMode,
     networkStatus: mainUI.networkStatus,

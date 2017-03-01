@@ -183,3 +183,27 @@ export const processOdbo = (customer, orderTotal) => {
     : undefined
   return odbo
 }
+
+export const processCustomers = (data, filterKey, searchKey) => {
+  let filtered
+  let numberKey = String(Number(searchKey))
+  let nameKey = searchKey.toLowerCase()
+  if (searchKey !== '') {
+    filtered = data.filter(x => {
+      if (filterKey === 'byId') {
+        return (numberKey.match(x.odboId))
+      } else if (filterKey === 'byName') {
+        // let firstName = x.firstName ? x.firstName.toLowerCase() : ''
+        return (x.combinedName.match(nameKey))
+      } else if (filterKey === 'bySurName') {
+        // let lastName = x.lastName ? x.lastName.toLowerCase() : ''
+        return (x.combinedName.match(nameKey))
+      } else if (filterKey === 'byContactNum') {
+        return (x.phoneNumber.match(searchKey))
+      }
+    })
+  } else {
+    filtered = data
+  }
+  return filtered
+}
