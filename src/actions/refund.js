@@ -3,7 +3,6 @@ export const REFUND_SUCCESS = 'REFUND_SUCCESS'
 export const REFUND_FAILURE = 'REFUND_FAILURE'
 
 import refundService from '../services/refund'
-import { lastOrderidSuccess } from './data/offlineOrders'
 import { setError } from './app/mainUI'
 
 import {
@@ -34,7 +33,6 @@ export function refund (orderId, refundRemarks, refundId, details) {
     return refundService.create({id: orderId, refundRemarks: refundRemarks, refundId: refundId})
       .then(response => {
         details.trans.refundId = response.refundId
-        dispatch(lastOrderidSuccess(details.lastOrderNum))
         dispatch(refundSuccess(response))
         dispatch(setError(null))
         dispatch(printPreviewTotalReceipt(details))
