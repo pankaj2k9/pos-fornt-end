@@ -53,13 +53,15 @@ export function setOverallDiscount (discount) {
 export const SET_ORDER_INFO = 'SET_ORDER_INFO'
 export function setOrderInfo (data) {
   let { orderData, appData } = data
-  let { currency, total, totalOdbo, totalDisc, totalOdboDisc, pincode, activeCustomer, orderItems, orderNote, payments } = orderData
+  let { currency, total, totalOdbo, totalDisc, totalOdboDisc, activeCustomer, orderItems, orderNote, payments, bonusPoints } = orderData
   let { activeCashier, activeStore } = appData
   let { source, code, lastId } = activeStore
-  let { odboId, odboCoins } = activeCustomer || {}
 
   let orderTotal = currency === 'sgd' ? total : totalOdbo
   let orderDisccount = currency === 'sgd' ? totalDisc : totalOdboDisc
+  let pincodeInput = document.getElementById('custCodeInput') || undefined
+  let pincode = pincodeInput ? pincodeInput.value : undefined
+  let odbo = processOdbo(activeCustomer, orderTotal, bonusPoints)
 
   const orderInfo = {
     items: processProducts(orderItems, currency),
@@ -71,12 +73,12 @@ export function setOrderInfo (data) {
     total: orderTotal,
     totalQuantity: compItemsSum(orderItems).totalQuantity,
     currency: currency,
-    userPrevCoins: Number(odboCoins) || undefined,
+    userPrevCoins: odbo ? odbo.prevCoins : undefined,
     payments: processPayments(payments, currency),
-    redemptionPoints: activeCustomer ? total : undefined,
+    redemptionPoints: currency === 'sgd' ? odbo ? odbo.earnedPts : undefined : undefined,
     pinCode: pincode,
-    vouchers: processPayments(payments, 'voucher'),
-    odboId: odboId || undefined
+    vouchers: currency === 'sgd' ? processPayments(payments, 'voucher') : undefined,
+    odboId: activeCustomer ? activeCustomer.odboId : undefined
   }
 
   const receipt = {
@@ -94,7 +96,7 @@ export function setOrderInfo (data) {
       payments: payments,
       vouchers: processPayments(payments, 'voucher'),
       subtotal: orderTotal + orderDisccount,
-      odbo: processOdbo(activeCustomer, orderTotal),
+      odbo: odbo,
       orderTotal: orderTotal,
       orderDisccount: orderDisccount,
       notes: orderNote
@@ -105,6 +107,14 @@ export function setOrderInfo (data) {
     type: SET_ORDER_INFO,
     orderInfo,
     receipt
+  }
+}
+
+export const ADD_BONUS_MULTIPLIER = 'ADD_BONUS_MULTIPLIER'
+export function addBonusMultiplier (amount) {
+  return {
+    type: ADD_BONUS_MULTIPLIER,
+    amount
   }
 }
 
@@ -136,6 +146,13 @@ export function removeNote (message) {
   return {
     type: REMOVE_NOTE,
     message
+  }
+}
+
+export const REMOVE_BONUS_MULTIPLIER = 'REMOVE_BONUS_MULTIPLIER'
+export function removeBonusMultiplier () {
+  return {
+    type: REMOVE_BONUS_MULTIPLIER
   }
 }
 

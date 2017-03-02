@@ -131,7 +131,6 @@ function mainUI (state = {
         activeDrawerOffline: null,
         activeModalId: null,
         activeStaff: null,
-        activeStore: null,
         adminToken: null,
         isEditing: false,
         error: null,

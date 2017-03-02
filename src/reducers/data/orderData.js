@@ -9,6 +9,8 @@ import {
   ADD_ORDER_ITEM,
   ADD_ORDER_NOTE,
   ADD_PAYMENT_TYPE,
+  ADD_BONUS_MULTIPLIER,
+  REMOVE_BONUS_MULTIPLIER,
   REMOVE_NOTE,
   REMOVE_PAYMENT_TYPE,
   REMOVE_ORDER_ITEM,
@@ -25,6 +27,7 @@ import {
 function orderData (state = {
   activeCustomer: null,
   currency: 'sgd',
+  bonusPoints: undefined,
   total: 0,
   totalDisc: 0,
   totalOdbo: 0,
@@ -218,10 +221,12 @@ function orderData (state = {
               prevPay.amount = payment.amount
               prevPay.cash = payment.cash
               prevPay.change = payment.change
+            } else if (payment.type === 'odbo') {
+              prevPay.amount = payment.amount
             }
           })
         }
-        if (payment.type !== 'cash') { payments.push(payment) }
+        if (payment.type !== 'cash' || payment.type !== 'odbo') { payments.push(payment) }
       } else {
         payments.push(payment)
       }
@@ -246,6 +251,14 @@ function orderData (state = {
       return Object.assign({}, state, {
         orderNote: state.orderNote.push(action.note),
         isEditing: false
+      })
+    case ADD_BONUS_MULTIPLIER:
+      return Object.assign({}, state, {
+        bonusPoints: action.amount || 100
+      })
+    case REMOVE_BONUS_MULTIPLIER:
+      return Object.assign({}, state, {
+        bonusPoints: undefined
       })
     case REMOVE_NOTE:
       state.orderNote.forEach(function (item, index, object) {

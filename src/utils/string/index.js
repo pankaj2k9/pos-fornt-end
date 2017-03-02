@@ -7,7 +7,7 @@
  */
 export const formatCurrency = (number, currency) => {
   if (currency === 'odbo') {
-    return `The odbo: ${number}`
+    return number
   } else if (currency === 'sgd' || !currency) {
     return `$${Number(number).toLocaleString('en', {
       minimumFractionDigits: 2,

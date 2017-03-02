@@ -131,7 +131,7 @@ function mapStateToProps (state) {
       state.app.mainUI.activeCashier.firstName ||
       state.app.mainUI.activeStaff.username,
     from: state.reports.completeSales.date,
-    cashdrawers: state.app.mainUI.cashdrawer,
+    // cashdrawers: state.app.mainUI.cashdrawer,
     openCount: state.app.mainUI.activeDrawer.openCount,
     cashInDrawer: state.app.mainUI.activeDrawer.initialAmount,
     storeId: state.app.mainUI.activeStore.source,

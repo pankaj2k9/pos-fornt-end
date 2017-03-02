@@ -74,7 +74,7 @@ export const buildHeader = (headerText) => {
 export const buildExtraInfo = (info) => {
   let { staff, customer, id, date } = info
   let extra = ''
-  let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER$[${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
+  let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[ID#${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
   let orderId = id ? `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${id}</div>` : ''
   extra += `<div>
   ${RECEIPT_DIVIDER}
@@ -170,10 +170,9 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
     comp += '<div>'
     if (currency === 'sgd') {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>
-               <div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(subtotal)}</div>`
+               <div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(subtotal)}</div>
+               ${RECEIPT_DIVIDER}`
     }
-
-    comp += RECEIPT_DIVIDER
 
     comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(orderDisccount, currency)}</div>
              <div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(orderTotal, currency)}</div>`
@@ -210,7 +209,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>
                    <div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${odbo.prevCoins}</div>
                    <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${orderTotal}</div>
-                   <div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${odbo.newCoins}</div>`
+                   <div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${odbo.newCoins2}</div>`
         }
       }
     })
@@ -231,7 +230,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
         comp += RECEIPT_DIVIDER
         comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>---- THE ODBO COIN BALANCE ----</div></div>
                  <div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${odbo.prevCoins}</div>
-                 <div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS : </div>${odbo.earnedPts}</div>
+                 <div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS ${odbo.bonus ? odbo.bonus : ''} : </div>${odbo.earnedPts}</div>
                  <div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${odbo.newCoins}<br/></div>`
       }
     }

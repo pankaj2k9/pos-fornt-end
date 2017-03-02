@@ -11,10 +11,12 @@ import { closeActiveModal } from '../actions/app/mainUI'
 import {
   setActiveCustomer,
   setOverallDiscount,
+  setOrderInfo,
   resetOrderData
 } from '../actions/data/orderData'
 
 import {
+  makeOfflineOrder,
   syncOfflineOrders
 } from '../actions/data/offlineData'
 
@@ -26,6 +28,10 @@ import {
 import {
   customersSetFilter
 } from '../actions/data/customers'
+
+import {
+  processOrder
+} from '../actions/orders'
 
 import { formatCurrency, formatDate } from '../utils/string'
 import { processOdboID, processCustomers } from '../utils/computations'
@@ -73,6 +79,20 @@ class ModalStoreUtils extends Component {
     let filter = document.getElementById('custFilter').value
     let searchKey = document.getElementById('custSearchKey').value
     dispatch(customersSetFilter(filter, searchKey))
+  }
+
+  _setOdboOrderInfo () {
+    const {dispatch, orderData, mainUI} = this.props
+    dispatch(setOrderInfo({orderData: orderData, appData: mainUI}))
+  }
+
+  _processOdboOrder () {
+    const {dispatch, activeDrawer, orderInfo, orderReceipt, posMode} = this.props
+    if (posMode === 'online') {
+      dispatch(processOrder(orderInfo, orderReceipt, activeDrawer))
+    } else {
+      dispatch(makeOfflineOrder(orderInfo, orderReceipt, activeDrawer))
+    }
   }
 
   syncOrders () {
@@ -244,6 +264,25 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
 
+      case 'custPincode':
+        return (
+          <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOdboOrder()}>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-6 is-offset-3 has-text-centered'>
+                <form onSubmit={e => this._processOdboOrder()} >
+                  <p className='control has-icon has-icon-right is-marginless'>
+                    <input id='custCodeInput' className='input is-large' type='password' onChange={e => this._setOdboOrderInfo()}
+                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}} />
+                    <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '4.75rem'}}>
+                      <i className='fa fa-lock' />
+                    </span>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </ModalCard>
+        )
+
       case 'syncModal':
         let { isProcessing, offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
         let haveDatatoSync = offlineOrders.length > 0 || failedOrders.length > 0 || offlineDrawers.length > 0 || failedDrawers.length > 0
@@ -313,6 +352,8 @@ function mapStateToProps (state) {
   let orderData = state.data.orderData
   let custData = state.data.customers
   return {
+    mainUI,
+    orderData,
     custData,
     customerSearchKey: custData.customerSearchKey,
     customerFilter: custData.customerFilter,

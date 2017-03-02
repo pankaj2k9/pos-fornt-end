@@ -11,7 +11,8 @@ export const compItemsSum = (data) => {
   }
   return {
     total: total,
-    totalOdbo: totalOdbo
+    totalOdbo: totalOdbo,
+    totalQuantity: totalQuantity
   }
 }
 
@@ -162,6 +163,8 @@ export const processPayments = (data, currency) => {
         if (x.type !== 'odbo' && x.type !== 'voucher') { payments.push(x) }
       } else if (currency === 'voucher') {
         if (x.type === 'voucher') { payments.push(x) }
+      } else if (currency === 'odbo') {
+        if (x.type === 'odbo') { payments.push(x) }
       }
     })
   }
@@ -177,9 +180,16 @@ export const processStoreAddress = (data) => {
   return storeAddress
 }
 
-export const processOdbo = (customer, orderTotal) => {
+export const processOdbo = (customer, orderTotal, multiplier) => {
+  let bonus = multiplier ? orderTotal + (orderTotal * multiplier / 100) : orderTotal
   let odbo = customer
-    ? { prevCoins: customer.odboCoins, earnedPts: orderTotal, newCoins: customer.odboCoins + orderTotal }
+    ? {
+      prevCoins: customer.odboCoins,
+      earnedPts: bonus,
+      newCoins: customer.odboCoins + orderTotal,
+      newCoins2: customer.odboCoins - orderTotal,
+      bonus: multiplier ? `x${1 + (multiplier / 100)}` : null
+    }
     : undefined
   return odbo
 }
