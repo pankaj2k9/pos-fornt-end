@@ -94,10 +94,10 @@ function orderData (state = {
       orderItems.forEach(item => {
         let itemPR = Number(item.price || 0)
         let itemOdboPR = Number(item.odboPrice || 0)
-        let discPCT = oaDisc === 0
+        let discPCT = oaDiscFrmAtn === 0
           ? item.isDiscounted ? item.priceDiscount
             : item.customDiscount === 0 ? 0 : item.customDiscount
-          : oaDisc
+          : oaDiscFrmAtn
         let odboDiscPCT = oaDiscFrmAtn === 0
           ? item.isDiscounted ? item.odboPriceDiscount
             : item.customDiscount === 0 ? 0 : item.customDiscount
