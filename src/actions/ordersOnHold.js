@@ -1,6 +1,6 @@
 export const SET_ORDER_SEARCH_KEY = 'SET_SEARCH_KEY'
 export const HOLD_ORDER = 'HOLD_ORDER'
-export const RECALL_ORDER = 'RECALL_ORDER'
+export const REMOVE_ORDER = 'REMOVE_ORDER'
 
 export function setOrderSearchKey (value) {
   return {
@@ -16,9 +16,9 @@ export function holdOrder (orderData) {
   }
 }
 
-export function recallOrder (key) {
+export function removeOrderOnHold (key) {
   return {
-    type: RECALL_ORDER,
+    type: REMOVE_ORDER,
     key
   }
 }

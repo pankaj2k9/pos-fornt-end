@@ -118,7 +118,7 @@ class PanelButtons extends Component {
       {name: 'staffSales', isActive, color: 'blue', label: 'STAFF SALES', altLbl: '个人业绩', size: 'is-3'},
       {name: 'searchCust', isActive, color: 'blue', label: 'SEARCH CUSTOMER', altLbl: '搜寻会员', size: 'is-3'},
       {name: 'sync', isActive: true, color: 'yellow', label: 'SYNC OFFLINE DATA', altLbl: '同步与数据库', size: 'is-6'},
-      {name: 'holdOrder', isActive: true, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
+      {name: 'holdOrder', isActive: orderData.orderItems.length > 0, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
       {name: 'recallOrder', isActive: true, color: 'purple', label: 'RECALL_ORDER', altLbl: '找回订单', size: 'is-3'},
       {name: 'outletStock', isActive, color: 'blue', label: 'OUTLET STOCK', altLbl: '各分店库存', size: 'is-3'},
       {name: 'outletSales', isActive, color: 'blue', label: 'OUTLET SALES', altLbl: '各分店业绩', size: 'is-3'},

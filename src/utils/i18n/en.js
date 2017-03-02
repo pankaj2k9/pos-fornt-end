@@ -102,6 +102,9 @@ const en = {
   'app.lbl.syncFailed': 'Failed to Sync',
   'app.lbl.notSynced': 'Not Synced',
   'app.lbl.syncing': 'Syncing. . .',
+  'app.lbl.noOnholdOrders': 'No orders on-hold',
+  'app.lbl.noOrderNotes': 'No notes for this order',
+  'app.lbl.noCustomers': 'No customers found',
 
   'app.button.logout': 'Logout',
   'app.button.login': 'Login',

@@ -12,7 +12,8 @@ import {
   setActiveCustomer,
   setOverallDiscount,
   setOrderInfo,
-  resetOrderData
+  resetOrderData,
+  recallOrder
 } from '../actions/data/orderData'
 
 import {
@@ -32,6 +33,10 @@ import {
 import {
   processOrder
 } from '../actions/orders'
+
+import {
+  removeOrderOnHold
+} from '../actions/ordersOnHold'
 
 import { formatCurrency, formatDate } from '../utils/string'
 import { processOdboID, processCustomers } from '../utils/computations'
@@ -95,6 +100,13 @@ class ModalStoreUtils extends Component {
     }
   }
 
+  _recallOrder (orderData, orderKey) {
+    const { dispatch } = this.props
+    dispatch(removeOrderOnHold(orderKey))
+    dispatch(recallOrder(orderData))
+    dispatch(closeActiveModal())
+  }
+
   syncOrders () {
     const {dispatch, offlineOrdersData} = this.props
     let { failedOrders, processedOfflineOrders } = offlineOrdersData
@@ -120,6 +132,16 @@ class ModalStoreUtils extends Component {
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
     let bold = (txt) => { return <strong>{txt}</strong> }
+    let emptyListLbl = (data, lbl) => {
+      if (data.length === 0) {
+        return (
+          <div className='box has-text-centered'>
+            <span className='icon is-large'><i className='fa fa-info-circle' /></span>
+            <p className='title'>{lblTR(lbl)}</p>
+          </div>
+        )
+      }
+    }
 
     switch (activeModalId) {
       case 'overallDiscount':
@@ -150,7 +172,7 @@ class ModalStoreUtils extends Component {
                 <div className='box is-clearfix' key={key}>
                   <div className='media-content is-clearfix'>
                     <p className='is-pulled-left'>Order {key + 1}</p>
-                    <a className='button is-pulled-right'>Recall</a>
+                    <a className='button is-pulled-right' onClick={e => this._recallOrder(order, key)}>Recall</a>
                     <ContentDivider size={6} contents={[
                       order.orderItems.map((item, key) => {
                         return (<p key={key}>{item.nameEn}</p>)
@@ -164,29 +186,26 @@ class ModalStoreUtils extends Component {
                 </div>
               )
             })}
+            {emptyListLbl(ordersOnHold, 'app.lbl.noOnholdOrders')}
           </ModalCard>
         )
       case 'notes':
         return (
           <ModalCard closeAction={e => this._closeModal()}>
-            {orderNote.length > 0
-              ? orderNote.map((note, key) => {
-                return (
-                  <div className='card'>
-                    <header className='card-header'>
-                      <p className='card-header-title'>{note}</p>
-                      <a className='card-header-icon'>
-                        remove
-                        <span><i className='fa fa-close' /></span>
-                      </a>
-                    </header>
-                  </div>
-                )
-              })
-              : <div>
-                NO NOTES
-              </div>
-            }
+            {orderNote.map((note, key) => {
+              return (
+                <div className='card'>
+                  <header className='card-header'>
+                    <p className='card-header-title'>{note}</p>
+                    <a className='card-header-icon'>
+                      remove
+                      <span><i className='fa fa-close' /></span>
+                    </a>
+                  </header>
+                </div>
+              )
+            })}
+            {emptyListLbl(orderNote, 'app.lbl.noOrderNotes')}
           </ModalCard>
         )
       case 'processingOrder':
@@ -260,6 +279,7 @@ class ModalStoreUtils extends Component {
                   </div>
                 )
               })}
+              {emptyListLbl(customers, 'app.lbl.noCustomers')}
             </div>
           </ModalCard>
         )

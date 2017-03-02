@@ -73,12 +73,12 @@ export function setOrderInfo (data) {
     total: orderTotal,
     totalQuantity: compItemsSum(orderItems).totalQuantity,
     currency: currency,
-    userPrevCoins: odbo ? odbo.prevCoins : undefined,
+    userPrevCoins: odbo && odbo.prevCoins,
     payments: processPayments(payments, currency),
-    redemptionPoints: currency === 'sgd' ? odbo ? odbo.earnedPts : undefined : undefined,
+    redemptionPoints: odbo && odbo.earnedPts,
     pinCode: pincode,
-    vouchers: currency === 'sgd' ? processPayments(payments, 'voucher') : undefined,
-    odboId: activeCustomer ? activeCustomer.odboId : undefined
+    vouchers: currency === 'sgd' && processPayments(payments, 'voucher'),
+    odboId: activeCustomer && activeCustomer.odboId
   }
 
   const receipt = {
@@ -183,6 +183,7 @@ export function resetOrderData () {
 export const RECALL_ORDER = 'RECALL_ORDER'
 export function recallOrder (data) {
   return {
+    type: RECALL_ORDER,
     data
   }
 }

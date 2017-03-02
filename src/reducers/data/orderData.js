@@ -226,7 +226,7 @@ function orderData (state = {
             }
           })
         }
-        if (payment.type !== 'cash' || payment.type !== 'odbo') { payments.push(payment) }
+        if (payment.type !== 'cash' && payment.type !== 'odbo') { payments.push(payment) }
       } else {
         payments.push(payment)
       }

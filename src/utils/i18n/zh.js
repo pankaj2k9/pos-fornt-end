@@ -102,6 +102,9 @@ const zh = {
   'app.lbl.noDataToSync': '无数据要同步',
   'app.lbl.offlineOrders': '离线订单',
   'app.lbl.cashdrawerData': '现金抽屉数据',
+  'app.lbl.noOnholdOrders': '没有暂停订单',
+  'app.lbl.noOrderNotes': '此订单没有注释',
+  'app.lbl.noCustomers': '没有找到客户',
 
   'app.button.logout': '登出',
   'app.button.login': '登录',
