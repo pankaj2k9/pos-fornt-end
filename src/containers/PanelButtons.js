@@ -90,7 +90,7 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'admin':
-        return
+        return window.open('https://uat-admin.theodbocare.com/', '_blank')
       case 'cancelOrder':
         return dispatch(cancelOrder())
       default:
@@ -116,7 +116,7 @@ class PanelButtons extends Component {
     let buttons = [
       posModeToggleButton,
       {name: 'staffSales', isActive, color: 'blue', label: 'STAFF SALES', altLbl: '个人业绩', size: 'is-3'},
-      {name: 'searchCust', isActive, color: 'blue', label: 'app.button.cust', altLbl: '搜寻会员', size: 'is-3'},
+      {name: 'searchCust', isActive, color: 'blue', label: 'SEARCH CUSTOMER', altLbl: '搜寻会员', size: 'is-3'},
       {name: 'sync', isActive: true, color: 'yellow', label: 'SYNC OFFLINE DATA', altLbl: '同步与数据库', size: 'is-6'},
       {name: 'holdOrder', isActive: true, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
       {name: 'recallOrder', isActive: true, color: 'purple', label: 'RECALL_ORDER', altLbl: '找回订单', size: 'is-3'},
