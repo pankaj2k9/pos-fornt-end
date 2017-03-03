@@ -198,9 +198,15 @@ export const processCustomers = (data, filterKey, searchKey) => {
   let newData
   let numberKey = String(Number(searchKey))
   let nameKey = searchKey.toLowerCase()
-  if (searchKey !== '') {
+  if (searchKey !== '') { // if searchKey not an empty string, filter data
     newData = data.filter((x, index, array) => {
-      let phoneNumSearch = x.phoneNumber && x.phoneNumber.match(searchKey)
+      let phoneNumSearch = x.phoneNumber && x.phoneNumber.match(searchKey) // some phoneNumber value is undefined or null
+      /**
+       * filter items by 'filterKey' which are: 'byId', 'byName', 'bySurName' or 'byContactNum'
+       * fuzzy search using javascript filter
+       * javascript filter || foreach returns duplicate results from operator/method 'str.match(regexp)'
+       * fixed this by using map to validate items by its property 'id'
+       */
       if (filterKey === 'byId' && numberKey.match(x.odboId)) {
         return array.map(x => x['id']).indexOf(x['id']) === index
       } else if (filterKey === 'byName' && x.combinedName.match(nameKey)) {
@@ -212,7 +218,7 @@ export const processCustomers = (data, filterKey, searchKey) => {
       }
     })
   } else {
-    newData = data
+    newData = data // if searchKey is an empty string, just return the default data
   }
   return newData
 }

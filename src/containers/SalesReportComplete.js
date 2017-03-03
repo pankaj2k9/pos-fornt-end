@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
+import moment from 'moment'
 
 import LoadingPane from '../components/LoadingPane'
 import StoresDropdown from '../components/StoresDropdown'
@@ -58,8 +59,8 @@ class SalesReportComplete extends React.Component {
     const { cashdrawers, csDate, selectedStore, storeId } = this.props
     const searchStoreId = selectedStore || storeId
     const drawerData = cashdrawers.find(function (drawer) {
-      let date1 = new Date(drawer.date).toISOString().slice(0, 10)
-      let date2 = new Date(csDate).toISOString().slice(0, 10)
+      let date1 = moment(new Date(drawer.date)).format('L')
+      let date2 = moment(new Date(csDate)).format('L')
       return date1 === date2 && searchStoreId === drawer.storeId
     })
     return drawerData
