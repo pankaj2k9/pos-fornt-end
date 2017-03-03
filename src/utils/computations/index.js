@@ -195,25 +195,24 @@ export const processOdbo = (customer, orderTotal, multiplier) => {
 }
 
 export const processCustomers = (data, filterKey, searchKey) => {
-  let filtered
+  let newData
   let numberKey = String(Number(searchKey))
   let nameKey = searchKey.toLowerCase()
   if (searchKey !== '') {
-    filtered = data.filter(x => {
-      if (filterKey === 'byId') {
-        return (numberKey.match(x.odboId))
-      } else if (filterKey === 'byName') {
-        // let firstName = x.firstName ? x.firstName.toLowerCase() : ''
-        return (x.combinedName.match(nameKey))
-      } else if (filterKey === 'bySurName') {
-        // let lastName = x.lastName ? x.lastName.toLowerCase() : ''
-        return (x.combinedName.match(nameKey))
-      } else if (filterKey === 'byContactNum') {
-        return (x.phoneNumber.match(searchKey))
+    newData = data.filter((x, index, array) => {
+      let phoneNumSearch = x.phoneNumber && x.phoneNumber.match(searchKey)
+      if (filterKey === 'byId' && numberKey.match(x.odboId)) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
+      } else if (filterKey === 'byName' && x.combinedName.match(nameKey)) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
+      } else if (filterKey === 'bySurName' && x.combinedName.match(nameKey)) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
+      } else if (filterKey === 'byContactNum' && phoneNumSearch) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
       }
     })
   } else {
-    filtered = data
+    newData = data
   }
-  return filtered
+  return newData
 }

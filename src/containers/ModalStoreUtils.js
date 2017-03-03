@@ -253,7 +253,7 @@ class ModalStoreUtils extends Component {
             </p>
             <div>
               {customers.map((customer, key) => {
-                let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated} = customer
+                let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
                 return (
                   <div className='box is-clearfix' key={key}>
                     <div className='media-content is-clearfix'>
@@ -269,6 +269,7 @@ class ModalStoreUtils extends Component {
                         <div>
                           <p>{bold('membership:')} {membership}</p>
                           <p>{bold('odbo coins:')} {odboCoins || 0}</p>
+                          <p>{bold('contact number:')} {phoneNumber || 'N/A'}</p>
                         </div>,
                         <div>
                           <p>{bold('status:')} {status}</p>
