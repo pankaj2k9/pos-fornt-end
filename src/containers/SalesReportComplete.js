@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
+import moment from 'moment'
 
 import LoadingPane from '../components/LoadingPane'
 import StoresDropdown from '../components/StoresDropdown'
@@ -18,21 +19,15 @@ class SalesReportComplete extends React.Component {
   }
   componentWillMount () {
     const { dispatch, storeId, selectedDate } = this.props
-
+    dispatch(completeSalesChSource(storeId))
     dispatch(completeSalesFetch(storeId, selectedDate))
   }
 
   getCompleteSalesData () {
-    let { completeSales, store, cashier } = this.props
-    // let drawerData = this.cashdrawerData()
-    let drawerData = {
-      date: new Date(),
-      float: 0,
-      initialAmount: 0,
-      cashDrawerOpenCount: 0
-    }
+    const { completeSales, store, cashier, activeDrawer } = this.props
+    let { cashDrawerOpenCount, float } = activeDrawer
 
-    if (completeSales && drawerData) {
+    if (completeSales && activeDrawer) {
       // put real store address here
       const addr = store.address ? store.address.split('\\n') : ['200 Victoria Street']
       completeSales.headerText = [
@@ -45,12 +40,12 @@ class SalesReportComplete extends React.Component {
       completeSales.info = {
         cashier: cashier,
         storeId: store.source,
-        openCashDrawerCount: drawerData.cashDrawerOpenCount,
-        cashInDrawer: Number(drawerData.float || 0),
+        openCashDrawerCount: cashDrawerOpenCount,
+        cashInDrawer: Number(float || 0),
         cashInfo: { count: 0, value: 0 },
         floatInfo: {
-          count: drawerData.cashDrawerOpenCount,
-          value: Number(drawerData.float)
+          count: cashDrawerOpenCount,
+          value: Number(float)
         },
         PO: { count: 0, value: 0 },
         RA: { count: 0, value: 0 }
@@ -60,19 +55,16 @@ class SalesReportComplete extends React.Component {
     }
   }
 
-  // cashdrawerData () {
-  //   const { cashdrawers, csDate, selectedStore, storeId } = this.props
-  //   const searchStoreId = selectedStore || storeId
-  //
-  //   const drawerData = cashdrawers.find(function (drawer) {
-  //     let date1 = new Date(drawer.date).toISOString().slice(0, 10)
-  //     let date2 = new Date(csDate).toISOString().slice(0, 10)
-  //
-  //     return date1 === date2 && searchStoreId === drawer.storeId
-  //   })
-  //
-  //   return drawerData
-  // }
+  cashdrawerData () {
+    const { cashdrawers, csDate, selectedStore, storeId } = this.props
+    const searchStoreId = selectedStore || storeId
+    const drawerData = cashdrawers.find(function (drawer) {
+      let date1 = moment(new Date(drawer.date)).format('L')
+      let date2 = moment(new Date(csDate)).format('L')
+      return date1 === date2 && searchStoreId === drawer.storeId
+    })
+    return drawerData
+  }
 
   _handleSourceChange (event) {
     const { dispatch, storeId, selectedDate } = this.props
@@ -131,9 +123,8 @@ function mapStateToProps (state) {
       state.app.mainUI.activeCashier.firstName ||
       state.app.mainUI.activeStaff.username,
     from: state.reports.completeSales.date,
-    cashdrawers: state.app.mainUI.cashdrawer,
-    openCount: state.app.mainUI.activeDrawer.openCount,
-    cashInDrawer: state.app.mainUI.activeDrawer.initialAmount,
+    activeDrawer: state.app.mainUI.activeDrawer,
+    cashdrawers: state.data.cashdrawers.cdList,
     storeId: state.app.mainUI.activeStore.source,
     storeIds: state.data.stores.stores,
     selectedStore: state.reports.completeSales.source,

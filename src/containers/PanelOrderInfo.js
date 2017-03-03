@@ -12,6 +12,10 @@ import {
 } from '../actions/app/mainUI'
 
 import {
+  addOdboPayment
+} from '../actions/helpers'
+
+import {
   setOrderItemQty,
   setCustomDiscount,
   removeOrderItem
@@ -24,10 +28,12 @@ import {
 } from '../actions/data/offlineData'
 
 import { formatCurrency } from '../utils/string'
+
 import {
   compPaymentsSum,
   compPaymentsSumByType,
-  compCashChange
+  compCashChange,
+  processOdbo
 } from '../utils/computations'
 
 import { processOrder } from '../actions/orders'
@@ -37,7 +43,7 @@ import print from '../utils/printReceipt/print'
 class PanelOrderInfo extends Component {
 
   _onClickPanelButtons (name) {
-    const { dispatch, orderInfo, receipt, posMode, activeDrawer } = this.props
+    const { dispatch, currency, totalOdbo, orderInfo, receipt, posMode, activeDrawer } = this.props
     switch (name) {
       case 'pay': return dispatch(setActiveModal('payments'))
       case 'printSub':
@@ -45,7 +51,11 @@ class PanelOrderInfo extends Component {
         break
       case 'total':
         if (posMode === 'online') {
-          dispatch(processOrder(orderInfo, receipt, activeDrawer))
+          if (currency === 'sgd') {
+            dispatch(processOrder(orderInfo, receipt, activeDrawer))
+          } else {
+            dispatch(addOdboPayment(totalOdbo))
+          }
         } else {
           dispatch(makeOfflineOrder(orderInfo, receipt, activeDrawer))
         }
@@ -142,12 +152,14 @@ class PanelOrderInfo extends Component {
       intl,
       isEditing,
       currency,
+      bonusPoints,
       orderItems,
       payments,
       total,
       totalDisc,
       totalOdbo,
-      totalOdboDisc
+      totalOdboDisc,
+      activeCustomer
     } = this.props
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
@@ -158,19 +170,22 @@ class PanelOrderInfo extends Component {
     let payBal = currency === 'sgd'
       ? total - compPaymentsSum(payments) < 0 ? 0 : total - compPaymentsSum(payments)
       : totalOdbo - compPaymentsSum(payments) < 0 ? 0 : totalOdbo - compPaymentsSum(payments)
-    let paymentsSum = formatCurrency(compPaymentsSum(payments))
+    let paymentsSum = currency === 'sgd' ? formatCurrency(compPaymentsSum(payments)) : orderTotal
     let cashSum = formatCurrency(compPaymentsSumByType(payments, 'cash'))
     let creditSum = formatCurrency(compPaymentsSumByType(payments, 'credit'))
     let netsSum = formatCurrency(compPaymentsSumByType(payments, 'nets'))
     let voucherSum = formatCurrency(compPaymentsSumByType(payments, 'voucher'))
     let cashChange = formatCurrency(compCashChange(payments))
+    let custName = activeCustomer ? activeCustomer.firstName : 'N/A'
+    let odbo = processOdbo(activeCustomer, orderTotal, bonusPoints)
     let intFrameHeight = window.innerHeight
-    let itemsNotEmpty = orderItems.length > 0
-    let noPayBalance = payments.length > 0 && payBal === 0
+    let itemsNotEmpty = currency === 'sgd' && orderItems.length > 0
+    let activePrintAndTotal = currency === 'sgd'
+      ? payments.length > 0 && payBal === 0 : odbo.newCoins2 > 0
     let buttons = [
       {name: 'pay', label: 'app.button.pay', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
-      {name: 'printSub', label: 'app.button.printTotal', isActive: noPayBalance, color: 'purple', size: 'is-4'},
-      {name: 'total', label: 'app.button.total', isActive: noPayBalance, color: 'blue', size: 'is-4'}
+      {name: 'printSub', label: 'app.button.printTotal', isActive: activePrintAndTotal, color: 'purple', size: 'is-4'},
+      {name: 'total', label: 'app.button.total', isActive: activePrintAndTotal, color: 'blue', size: 'is-4'}
     ]
 
     return (
@@ -196,7 +211,7 @@ class PanelOrderInfo extends Component {
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
               <div className='column is-8 is-paddingless'>
                 <ContentDivider contents={[
-                  <strong>{`GST: ${formatCurrency(0, currency)}`}</strong>,
+                  <strong>{currency === 'sgd' ? `GST: ${formatCurrency(0, currency)}` : lblTR('app.page.reports.odbo')}</strong>,
                   <strong>{`${lblTR('app.modal.subtotal')}: ${formatCurrency(subtotal, currency)}`}</strong> ]}
                   size={6} />
                 <ContentDivider contents={[
@@ -212,16 +227,29 @@ class PanelOrderInfo extends Component {
           </div>
           <div className='panel-block'>
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
-              <div className='column is-8 is-paddingless'>
-                <ContentDivider contents={[
-                  <p><strong>{lblTR('app.general.cash')}</strong>: {cashSum}</p>,
-                  <p><strong>{lblTR('app.button.credit')}</strong>: {creditSum}</p>
-                ]} size={6} />
-                <ContentDivider contents={[
-                  <p><strong>{lblTR('app.button.voucher')}</strong>: {voucherSum}</p>,
-                  <p><strong>{lblTR('app.button.debit')}</strong>: {netsSum}</p>
-                ]} size={6} />
-              </div>
+              {currency === 'sgd'
+                ? <div className='column is-8 is-paddingless'>
+                  <ContentDivider contents={[
+                    <p><strong>{lblTR('app.general.cash')}</strong>: {cashSum}</p>,
+                    <p><strong>{lblTR('app.button.credit')}</strong>: {creditSum}</p>
+                  ]} size={6} />
+                  <ContentDivider contents={[
+                    <p><strong>{lblTR('app.button.voucher')}</strong>: {voucherSum}</p>,
+                    <p><strong>{lblTR('app.button.debit')}</strong>: {netsSum}</p>
+                  ]} size={6} />
+                </div>
+                : <div className='column is-8 is-paddingless'>
+                  <ContentDivider contents={[
+                    <strong>{lblTR('app.general.odboPay')}</strong>,
+                    <div>
+                      <strong>COINS</strong>: {odbo.prevCoins}<br />
+                      {odbo.newCoins2 < 0
+                        ? <p style={{color: 'red'}}>{lblTR('app.general.ib')}</p>
+                        : <p><strong>REMAINING</strong>: {odbo.newCoins2}</p>}
+                    </div>
+                  ]} size={6} />
+                </div>
+              }
               <div className='column is-4 is-paddingless has-text-centered'>
                 <strong>{lblTR('app.lbl.payTotal')}</strong>
                 <p>{!isEditing ? paymentsSum : null}</p>
@@ -231,19 +259,19 @@ class PanelOrderInfo extends Component {
           <div className='panel-block' style={{flexDirection: 'column'}}>
             <h1>Order Summary</h1>
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
-              <div className='column is-4 is-paddingless'>
+              <div className='column is-3 is-paddingless'>
                 Notes
                 <a onClick={this._onClickViewNotes.bind(this)}>view</a>
               </div>
-              <div className='column is-4 is-paddingless'>
-                <p>customer</p>
-                <p>double points</p>
-                <p>points to recieve</p>
+              <div className='column is-5 is-paddingless'>
+                <p>{`customer: ${custName}`}</p>
+                <p>bonus points: {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : '(1x)'}</p>
+                <p>{`order points: ${currency === 'sgd' ? odbo ? odbo.earnedPts + 'pts' : 'N/A' : 'N/A'}`}</p>
               </div>
               <div className='column is-4 is-paddingless'>
                 <p>{`payment total: ${paymentsSum}`}</p>
                 <p>{`order total: ${formatCurrency(orderTotal, currency)}`}</p>
-                <p>{`cash change: ${cashChange}`}</p>
+                {currency === 'sgd' ? <p>{`cash change: ${cashChange}`}</p> : null}
               </div>
             </div>
           </div>
@@ -272,12 +300,14 @@ function mapStateToProps (state) {
     orderData,
     isEditing: mainUIediting || storeUIediting,
     activeDrawer: mainUI.activeDrawer,
+    posMode: mainUI.posMode,
     activeCustomer: orderData.activeCustomer,
     total: orderData.total,
     totalDisc: orderData.totalDisc,
     totalOdbo: orderData.totalOdbo,
     totalOdboDisc: orderData.totalOdboDisc,
     currency: orderData.currency,
+    bonusPoints: orderData.bonusPoints,
     orderItems: orderData.orderItems,
     payments: orderData.payments,
     orderNote: orderData.orderNote,

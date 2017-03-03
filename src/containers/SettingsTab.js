@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
-import SearchModal from './SearchModal'
 import SearchBar from '../components/SearchBar'
 import LabeledControl from '../components/LabeledControl'
 import BoxItem from '../components/BoxItem'
@@ -21,7 +20,6 @@ import {
 import { fetchCustomers } from '../actions/data/customers'
 
 import {
-  storeOrdersSetSearchKey,
   customersSetSearchKey,
   customersSetSearchKeyOIDFR,
   customersSetSearchKeyOIDTO,
@@ -35,8 +33,7 @@ import {
 } from '../actions/settings'
 
 import {
-  searchCustomer,
-  closeAndResetUtilitytModal
+  searchCustomer
 } from '../actions/helpers'
 
 class SettingsTab extends Component {
@@ -588,144 +585,6 @@ class SettingsTab extends Component {
     return <Account />
   }
 
-  renderOrderSearchModal () {
-    const {activeModalId, orderSearchKey, intl, appError,
-           orderDetails, refundSuccess, locale, storeId, storeData,
-           isProcessing, storeDetails, reprintSuccess, lastOrderId} = this.props
-    const modalId = activeModalId === 'refundModal'
-                    ? 'refundModal' : 'reprintModal'
-    const type = activeModalId
-
-    if (orderDetails) {
-      const {currency, id, dateOrdered, items, payments, users, remarks, subtotal, total, vouchers} = orderDetails
-      let storeAddress = !storeDetails.storeAddress
-        ? [
-          'The ODBO',
-          '200 Victoria Street',
-          'Bugis Junction #02-22',
-          'SINGAPORE',
-          'Telephone : 6238 1337'
-        ]
-        : [storeDetails.name, storeDetails.storeAddress]
-
-      let processedPayments = []
-      let cashChange
-      payments.forEach(function (payment) {
-        if (currency === 'sgd') {
-          if (payment.amount || payment.amount > 0) {
-            if (payment.type !== 'odbo' && payment.type !== 'voucher') {
-              payment.amount = Number(payment.amount)
-              if (payment.type === 'cash') { payment.cash = Number(payment.cash) }
-              cashChange = Number(payment.cash) - Number(payment.amount)
-              processedPayments.push(payment)
-            }
-          }
-        } else {
-          if (payment.amount || payment.amount > 0) {
-            if (payment.type === 'odbo') {
-              payment.amount = Number(payment.amount)
-              processedPayments.push(payment)
-            }
-          }
-        }
-      })
-
-      let processedItems = []
-      items.forEach(item => {
-        let itemQty = Number(item.quantity)
-        let discountPercent = item.product.isDiscounted
-          ? currency === 'sgd'
-            ? `${item.product.priceDiscount}%`
-            : `${item.product.odboPriceDiscount}%`
-          : ''
-        let showDiscount = item.product.isDiscounted
-          ? locale === 'en'
-            ? `(less ${discountPercent})`
-            : `(减去 ${discountPercent})`
-          : ''
-        let discount = item.product.isDiscounted
-          ? currency === 'sgd'
-            ? (Number(item.product.priceDiscount) / 100) * item.product.price
-            : (Number(item.product.odboPriceDiscount) / 100) * item.product.odboPrice
-          : 0.00
-        let computedDiscount = currency === 'sgd'
-          ? Number(item.product.price) - discount
-          : Number(item.product.odboPrice) - Math.round(discount)
-        processedItems.push({
-          id: item.product.id,
-          name: `${item.product.nameEn.substring(0, 18)}...\n
-            #${item.product.barcodeInfo || ''}\n
-            ${showDiscount}`,
-          qty: itemQty,
-          subtotal: currency === 'sgd'
-            ? Number(itemQty * computedDiscount.toFixed(2))
-            : itemQty * computedDiscount
-        })
-      })
-
-      let zeroes = ''
-      for (var i = lastOrderId.toString().length; i < 7; i++) {
-        zeroes = zeroes + '0'
-      }
-      const lastId = lastOrderId + 1
-
-      var receipt = {
-        info: {
-          orderId: id,
-          lastOrderId: `${storeData.code}${zeroes}${lastId}`,
-          lasrOrderNum: lastId,
-          date: dateOrdered
-        },
-        items: processedItems,
-        trans: {
-          type: undefined,
-          refundId: undefined,
-          payments: processedPayments,
-          activeCustomer: users,
-          computations: {
-            total: total,
-            subtotal: subtotal,
-            cashChange: cashChange,
-            remainingOdbo: currency === 'odbo' ? Number(users.odboCoins) : null,
-            paymentTotal: total
-          },
-          vouchers: vouchers || [],
-          orderNote: remarks,
-          currency: currency,
-          previousOdbo: users
-            ? currency === 'odbo'
-              ? Number(users.odboCoins) + Number(total)
-              : Number(users.odboCoins) - Number(total)
-            : undefined,
-          points: users ? Number(total) : undefined,
-          newOdbo: users ? Number(users.odboCoins) + Number(total) : undefined
-        },
-        headerText: storeAddress,
-        footerText: ['']
-      }
-    }
-
-    return (
-      <SearchModal
-        id={modalId}
-        inputPh={intl.formatMessage({ id: 'app.ph.enterRefundRemarks' })}
-        type={type}
-        locale={locale}
-        storeId={storeId}
-        storeDetails={storeDetails}
-        title='Enter Order ID'
-        active={activeModalId}
-        error={appError}
-        processing={isProcessing}
-        displayData='details'
-        details={!orderDetails ? undefined : receipt}
-        orderSearchKey={orderSearchKey}
-        modalStatus={{refund: refundSuccess, reprintSuccess}}
-        search={{ id: 'searchOrder', value: orderSearchKey, placeholder: 'Search Order Id', onChange: storeOrdersSetSearchKey }}
-        closeButton={{name: 'Close', event: closeAndResetUtilitytModal}} />
-    )
-  }
-
   openCashdrawerModal () {
     const {dispatch} = this.props
     dispatch(setActiveModal('updateCashDrawer'))
@@ -751,7 +610,6 @@ class SettingsTab extends Component {
     return (
       <div className='is-fullheight'>
         {visibleContent}
-        {this.renderOrderSearchModal()}
       </div>
     )
   }

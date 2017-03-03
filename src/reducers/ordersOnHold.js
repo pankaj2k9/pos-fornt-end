@@ -1,7 +1,7 @@
 import {
   SET_ORDER_SEARCH_KEY,
   HOLD_ORDER,
-  RECALL_ORDER
+  REMOVE_ORDER
 } from '../actions/ordersOnHold'
 
 function ordersOnHold (state = {
@@ -18,7 +18,7 @@ function ordersOnHold (state = {
       return Object.assign({}, state, {
         items: state.items
       })
-    case RECALL_ORDER:
+    case REMOVE_ORDER:
       state.items.forEach(function (item, index, object) {
         if (index === action.key) {
           object.splice(index, 1)

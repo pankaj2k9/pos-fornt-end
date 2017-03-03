@@ -15,6 +15,8 @@ import {
 } from '../actions/helpers'
 
 import {
+  addBonusMultiplier,
+  removeBonusMultiplier,
   setCurrencyType
 } from '../actions/data/orderData'
 
@@ -76,7 +78,9 @@ class PanelButtons extends Component {
         browserHistory.push('settings')
         break
       case 'doublePoints':
-        return
+        return dispatch(addBonusMultiplier(100))
+      case 'removeBonus':
+        return dispatch(removeBonusMultiplier())
       case 'adjustPoints':
         dispatch(setSettingsActiveTab('customers'))
         browserHistory.push('settings')
@@ -86,7 +90,7 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'admin':
-        return
+        return window.open('https://uat-admin.theodbocare.com/', '_blank')
       case 'cancelOrder':
         return dispatch(cancelOrder())
       default:
@@ -105,18 +109,22 @@ class PanelButtons extends Component {
       ? {name: 'useOdbo', isActive: hasOdboUser, color: 'purple', label: 'USE "The odbo" COINS', altLbl: '电子钱包', size: 'is-3'}
       : {name: 'useSgd', isActive, color: 'purple', label: 'USE SGD', altLbl: '使用SGD', size: 'is-3'}
 
+    let doublePointsButton = orderData.bonusPoints
+      ? {name: 'removeBonus', isActive: hasOdboUser, color: 'purple', label: 'REMOVE DOUBLE POINTS', altLbl: '去掉双倍积分', size: 'is-3'}
+      : {name: 'doublePoints', isActive: hasOdboUser, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'}
+
     let buttons = [
       posModeToggleButton,
       {name: 'staffSales', isActive, color: 'blue', label: 'STAFF SALES', altLbl: '个人业绩', size: 'is-3'},
-      {name: 'searchCust', isActive, color: 'blue', label: 'app.button.cust', altLbl: '搜寻会员', size: 'is-3'},
+      {name: 'searchCust', isActive, color: 'blue', label: 'SEARCH CUSTOMER', altLbl: '搜寻会员', size: 'is-3'},
       {name: 'sync', isActive: true, color: 'yellow', label: 'SYNC OFFLINE DATA', altLbl: '同步与数据库', size: 'is-6'},
-      {name: 'holdOrder', isActive: true, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
+      {name: 'holdOrder', isActive: orderData.orderItems.length > 0, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
       {name: 'recallOrder', isActive: true, color: 'purple', label: 'RECALL_ORDER', altLbl: '找回订单', size: 'is-3'},
       {name: 'outletStock', isActive, color: 'blue', label: 'OUTLET STOCK', altLbl: '各分店库存', size: 'is-3'},
       {name: 'outletSales', isActive, color: 'blue', label: 'OUTLET SALES', altLbl: '各分店业绩', size: 'is-3'},
       {name: 'viewBill', isActive, color: 'blue', label: 'VIEW BILL', altLbl: '历史账单', size: 'is-3'},
       {name: 'refund', isActive, color: 'blue', label: 'REFUND / REPRINT', altLbl: '从新打印', size: 'is-3'},
-      {name: 'doublePoints', isActive: hasOdboUser, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'},
+      doublePointsButton,
       currencyButton,
       {name: 'adjustPoints', isActive, color: 'purple', label: 'ADJUST POINTS', altLbl: '修改分数', size: 'is-3'},
       {name: 'prodList', isActive: true, color: 'purple', label: 'PRODUCTS LIST', altLbl: '产品明细', size: 'is-3'},

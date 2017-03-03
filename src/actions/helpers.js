@@ -1,18 +1,5 @@
-import { browserHistory } from 'react-router'
-
 import {
-  panelCheckoutReset,
-  checkoutFieldsReset,
-  printPreviewTotal
-} from './panelCheckout'
-import {
-  panelCartReset,
-  setWalkinCustomer,
-  setActiveCustomer,
-  recallCartItems
-} from './panelCart'
-
-import {
+  addPaymentType,
   resetOrderData
 } from './data/orderData'
 
@@ -21,26 +8,14 @@ import {
 } from './reports'
 
 import {
-  holdOrder,
-  recallOrder,
-  setOrderSearchKey
+  holdOrder
 } from './ordersOnHold'
-
-import {
-  fetchCustomers
-} from './data/customers'
-
-import {
-  fetchAllProducts
-} from './data/products'
 
 import {
   closeActiveModal,
   setActiveModal,
   setActiveCashdrawer,
-  addCashdrawerOpenCount,
-  resetAppState,
-  setError
+  resetAppState
 } from './app/mainUI'
 
 import {
@@ -49,44 +24,13 @@ import {
 } from './app/storeUI'
 
 import {
-  reprintingReceipt,
   orderStateReset
 } from './orders'
 
-import {
-  resetSettingsState,
-  customersSetSearchKey
-} from './settings'
-
-import print from '../utils/printReceipt/print'
-
-const focusProductSearch = 'productsSearch'
-
-export function printPreviewTotalReceipt (receipt, activeCustomer) {
+export function addOdboPayment (total) {
   return (dispatch) => {
-    /**
-     * reprintingReceipt sets reprinting state
-     * when reprinting state is set to true value, it diplays a loading text
-     * when reprinting state is set to false value, it hides the loading text
-     * print() function does not detect the printing state so setTimeout is used
-     * setTimeout() is used to emulate the change in reprinting state
-     */
-    if (activeCustomer) {
-      let newPoints = {
-        points: receipt.trans.computations.total,
-        newOdbo: Number(receipt.trans.previousOdbo) + Number(receipt.trans.computations.total)
-      }
-      receipt.trans = Object.assign(receipt.trans, newPoints)
-    }
-    receipt.info = { date: new Date() }
-    print(receipt)
-    setTimeout(function () {
-      let print = false
-      let shouldUpdate = false
-      dispatch(printPreviewTotal(print, shouldUpdate))
-      dispatch(setError(null))
-      dispatch(closeActiveModal())
-    }, 2000)
+    dispatch(setActiveModal('custPincode'))
+    dispatch(addPaymentType({type: 'odbo', amount: total}))
   }
 }
 
@@ -119,45 +63,6 @@ export function validateCashdrawers (cashdrawers) {
   }
 }
 
-export function reprintReceipt (receiptData) {
-  return (dispatch) => {
-    /**
-     * reprintingReceipt sets reprinting state
-     * when reprinting state is set to true value, it diplays a loading text
-     * when reprinting state is set to false value, it hides the loading text
-     * print() function does not detect the printing state so setTimeout is used
-     * setTimeout() is used to emulate the change in reprinting state
-     */
-    dispatch(addCashdrawerOpenCount())
-    dispatch(reprintingReceipt(true))
-    print(receiptData)
-    setTimeout(function () {
-      dispatch(reprintingReceipt(false))
-    }, 3000)
-  }
-}
-
-export function resetStore (locale, posMode) {
-  return (dispatch) => {
-    if (posMode === 'online') {
-      dispatch(fetchAllProducts(locale))
-      dispatch(fetchCustomers())
-    }
-    dispatch(panelCheckoutReset())
-    dispatch(panelCartReset())
-    dispatch(closeActiveModal(focusProductSearch))
-    dispatch(orderStateReset())
-    browserHistory.push('store')
-  }
-}
-
-export function resetCheckoutModal () {
-  return (dispatch) => {
-    dispatch(checkoutFieldsReset())
-    dispatch(orderStateReset())
-  }
-}
-
 export function afterOrderProcessed () {
   return (dispatch) => {
     dispatch(closeActiveModal())
@@ -172,67 +77,10 @@ export function holdOrderAndReset (orderData) {
   }
 }
 
-export function recallOrderOnHold (dispatch, cartData, key) {
-  return () => {
-    dispatch(setWalkinCustomer(cartData.walkinCustomer))
-    dispatch(setActiveCustomer(cartData.activeCustomer))
-    dispatch(
-      recallCartItems(
-      cartData.cartItemsArray,
-      cartData.totalPrice,
-      cartData.totalOdboPrice)
-    )
-    dispatch(recallOrder(key))
-    dispatch(closeActiveModal(focusProductSearch))
-  }
-}
-
-export function setActiveCustomerAndFocus (dispatch, customer, key) {
-  return () => {
-    dispatch(setActiveCustomer(customer))
-    dispatch(closeActiveModal(focusProductSearch))
-  }
-}
-
-export function searchCustomer (query) {
-  return (dispatch) => {
-    dispatch(fetchCustomers(query))
-  }
-}
-
 export function onLogout () {
   return (dispatch) => {
     dispatch(reportsStateReset())
     dispatch(orderStateReset())
     dispatch(resetAppState())
-  }
-}
-
-export function closeAndResetRecallModal (dispatch) {
-  return () => {
-    dispatch(closeActiveModal(focusProductSearch))
-    dispatch(setOrderSearchKey(''))
-  }
-}
-
-export function closeAndResetCustomerModal (dispatch) {
-  return () => {
-    dispatch(closeActiveModal(focusProductSearch))
-    dispatch(customersSetSearchKey(null))
-  }
-}
-
-export function setSearchKeyInOrders (dispatch, value) {
-  return () => {
-    dispatch(setOrderSearchKey(value))
-  }
-}
-
-export function closeAndResetUtilitytModal (dispatch) {
-  return () => {
-    dispatch(closeActiveModal())
-    dispatch(resetSettingsState())
-    dispatch(setError(null))
-    document.getElementById('orderSearch').value = ''
   }
 }

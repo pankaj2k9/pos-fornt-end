@@ -9,8 +9,11 @@ import {
   ADD_ORDER_ITEM,
   ADD_ORDER_NOTE,
   ADD_PAYMENT_TYPE,
+  ADD_BONUS_MULTIPLIER,
+  REMOVE_BONUS_MULTIPLIER,
   REMOVE_NOTE,
   REMOVE_PAYMENT_TYPE,
+  REMOVE_PAYMENT_BYKEY,
   REMOVE_ORDER_ITEM,
   RESET_ORDER_DATA,
   RECALL_ORDER
@@ -25,6 +28,7 @@ import {
 function orderData (state = {
   activeCustomer: null,
   currency: 'sgd',
+  bonusPoints: undefined,
   total: 0,
   totalDisc: 0,
   totalOdbo: 0,
@@ -91,10 +95,10 @@ function orderData (state = {
       orderItems.forEach(item => {
         let itemPR = Number(item.price || 0)
         let itemOdboPR = Number(item.odboPrice || 0)
-        let discPCT = oaDisc === 0
+        let discPCT = oaDiscFrmAtn === 0
           ? item.isDiscounted ? item.priceDiscount
             : item.customDiscount === 0 ? 0 : item.customDiscount
-          : oaDisc
+          : oaDiscFrmAtn
         let odboDiscPCT = oaDiscFrmAtn === 0
           ? item.isDiscounted ? item.odboPriceDiscount
             : item.customDiscount === 0 ? 0 : item.customDiscount
@@ -218,10 +222,12 @@ function orderData (state = {
               prevPay.amount = payment.amount
               prevPay.cash = payment.cash
               prevPay.change = payment.change
+            } else if (payment.type === 'odbo') {
+              prevPay.amount = payment.amount
             }
           })
         }
-        if (payment.type !== 'cash') { payments.push(payment) }
+        if (payment.type !== 'cash' && payment.type !== 'odbo') { payments.push(payment) }
       } else {
         payments.push(payment)
       }
@@ -242,10 +248,25 @@ function orderData (state = {
       return Object.assign({}, state, {
         payments: filteredPayments
       })
+    case REMOVE_PAYMENT_BYKEY:
+      let updatedPayments = state.payments.filter((payment, index, arr) => {
+        return arr.indexOf(payment) !== action.key
+      })
+      return Object.assign({}, state, {
+        payments: updatedPayments
+      })
     case ADD_ORDER_NOTE:
       return Object.assign({}, state, {
         orderNote: state.orderNote.push(action.note),
         isEditing: false
+      })
+    case ADD_BONUS_MULTIPLIER:
+      return Object.assign({}, state, {
+        bonusPoints: action.amount || 100
+      })
+    case REMOVE_BONUS_MULTIPLIER:
+      return Object.assign({}, state, {
+        bonusPoints: undefined
       })
     case REMOVE_NOTE:
       state.orderNote.forEach(function (item, index, object) {

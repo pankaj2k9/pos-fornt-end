@@ -102,6 +102,10 @@ const zh = {
   'app.lbl.noDataToSync': '无数据要同步',
   'app.lbl.offlineOrders': '离线订单',
   'app.lbl.cashdrawerData': '现金抽屉数据',
+  'app.lbl.noOnholdOrders': '没有暂停订单',
+  'app.lbl.noOrderNotes': '此订单没有注释',
+  'app.lbl.noCustomers': '没有找到客户',
+  'app.lbl.balAmt': '平衡量',
 
   'app.button.logout': '登出',
   'app.button.login': '登录',
@@ -192,6 +196,7 @@ const zh = {
   'app.ph.connected': '你有互联网. . . ',
   'app.ph.procOrder': '处理顺序. . .',
   'app.ph.printingRCT': '打印收据. . .',
+  'app.ph.enterAmt1st': '输入金额最初',
 
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noNetwork': '没有网络连接. . . ',

@@ -11,7 +11,8 @@ export const compItemsSum = (data) => {
   }
   return {
     total: total,
-    totalOdbo: totalOdbo
+    totalOdbo: totalOdbo,
+    totalQuantity: totalQuantity
   }
 }
 
@@ -162,6 +163,8 @@ export const processPayments = (data, currency) => {
         if (x.type !== 'odbo' && x.type !== 'voucher') { payments.push(x) }
       } else if (currency === 'voucher') {
         if (x.type === 'voucher') { payments.push(x) }
+      } else if (currency === 'odbo') {
+        if (x.type === 'odbo') { payments.push(x) }
       }
     })
   }
@@ -177,33 +180,45 @@ export const processStoreAddress = (data) => {
   return storeAddress
 }
 
-export const processOdbo = (customer, orderTotal) => {
+export const processOdbo = (customer, orderTotal, multiplier) => {
+  let bonus = multiplier ? orderTotal + (orderTotal * multiplier / 100) : orderTotal
   let odbo = customer
-    ? { prevCoins: customer.odboCoins, earnedPts: orderTotal, newCoins: customer.odboCoins + orderTotal }
+    ? {
+      prevCoins: customer.odboCoins,
+      earnedPts: bonus,
+      newCoins: customer.odboCoins + orderTotal,
+      newCoins2: customer.odboCoins - orderTotal,
+      bonus: multiplier ? `x${1 + (multiplier / 100)}` : null
+    }
     : undefined
   return odbo
 }
 
 export const processCustomers = (data, filterKey, searchKey) => {
-  let filtered
+  let newData
   let numberKey = String(Number(searchKey))
   let nameKey = searchKey.toLowerCase()
-  if (searchKey !== '') {
-    filtered = data.filter(x => {
-      if (filterKey === 'byId') {
-        return (numberKey.match(x.odboId))
-      } else if (filterKey === 'byName') {
-        // let firstName = x.firstName ? x.firstName.toLowerCase() : ''
-        return (x.combinedName.match(nameKey))
-      } else if (filterKey === 'bySurName') {
-        // let lastName = x.lastName ? x.lastName.toLowerCase() : ''
-        return (x.combinedName.match(nameKey))
-      } else if (filterKey === 'byContactNum') {
-        return (x.phoneNumber.match(searchKey))
+  if (searchKey !== '') { // if searchKey not an empty string, filter data
+    newData = data.filter((x, index, array) => {
+      let phoneNumSearch = x.phoneNumber && x.phoneNumber.match(searchKey) // some phoneNumber value is undefined or null
+      /**
+       * filter items by 'filterKey' which are: 'byId', 'byName', 'bySurName' or 'byContactNum'
+       * fuzzy search using javascript filter
+       * javascript filter || foreach returns duplicate results from operator/method 'str.match(regexp)'
+       * fixed this by using map to validate items by its property 'id'
+       */
+      if (filterKey === 'byId' && numberKey.match(x.odboId)) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
+      } else if (filterKey === 'byName' && x.combinedName.match(nameKey)) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
+      } else if (filterKey === 'bySurName' && x.combinedName.match(nameKey)) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
+      } else if (filterKey === 'byContactNum' && phoneNumSearch) {
+        return array.map(x => x['id']).indexOf(x['id']) === index
       }
     })
   } else {
-    filtered = data
+    newData = data // if searchKey is an empty string, just return the default data
   }
-  return filtered
+  return newData
 }

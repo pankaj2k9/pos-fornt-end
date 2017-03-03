@@ -11,10 +11,13 @@ import { closeActiveModal } from '../actions/app/mainUI'
 import {
   setActiveCustomer,
   setOverallDiscount,
-  resetOrderData
+  setOrderInfo,
+  resetOrderData,
+  recallOrder
 } from '../actions/data/orderData'
 
 import {
+  makeOfflineOrder,
   syncOfflineOrders
 } from '../actions/data/offlineData'
 
@@ -26,6 +29,14 @@ import {
 import {
   customersSetFilter
 } from '../actions/data/customers'
+
+import {
+  processOrder
+} from '../actions/orders'
+
+import {
+  removeOrderOnHold
+} from '../actions/ordersOnHold'
 
 import { formatCurrency, formatDate } from '../utils/string'
 import { processOdboID, processCustomers } from '../utils/computations'
@@ -75,6 +86,27 @@ class ModalStoreUtils extends Component {
     dispatch(customersSetFilter(filter, searchKey))
   }
 
+  _setOdboOrderInfo () {
+    const {dispatch, orderData, mainUI} = this.props
+    dispatch(setOrderInfo({orderData: orderData, appData: mainUI}))
+  }
+
+  _processOdboOrder () {
+    const {dispatch, activeDrawer, orderInfo, orderReceipt, posMode} = this.props
+    if (posMode === 'online') {
+      dispatch(processOrder(orderInfo, orderReceipt, activeDrawer))
+    } else {
+      dispatch(makeOfflineOrder(orderInfo, orderReceipt, activeDrawer))
+    }
+  }
+
+  _recallOrder (orderData, orderKey) {
+    const { dispatch } = this.props
+    dispatch(removeOrderOnHold(orderKey))
+    dispatch(recallOrder(orderData))
+    dispatch(closeActiveModal())
+  }
+
   syncOrders () {
     const {dispatch, offlineOrdersData} = this.props
     let { failedOrders, processedOfflineOrders } = offlineOrdersData
@@ -100,6 +132,16 @@ class ModalStoreUtils extends Component {
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
     let bold = (txt) => { return <strong>{txt}</strong> }
+    let emptyListLbl = (data, lbl) => {
+      if (data.length === 0) {
+        return (
+          <div className='box has-text-centered'>
+            <span className='icon is-large'><i className='fa fa-info-circle' /></span>
+            <p className='title'>{lblTR(lbl)}</p>
+          </div>
+        )
+      }
+    }
 
     switch (activeModalId) {
       case 'overallDiscount':
@@ -130,7 +172,7 @@ class ModalStoreUtils extends Component {
                 <div className='box is-clearfix' key={key}>
                   <div className='media-content is-clearfix'>
                     <p className='is-pulled-left'>Order {key + 1}</p>
-                    <a className='button is-pulled-right'>Recall</a>
+                    <a className='button is-pulled-right' onClick={e => this._recallOrder(order, key)}>Recall</a>
                     <ContentDivider size={6} contents={[
                       order.orderItems.map((item, key) => {
                         return (<p key={key}>{item.nameEn}</p>)
@@ -144,29 +186,26 @@ class ModalStoreUtils extends Component {
                 </div>
               )
             })}
+            {emptyListLbl(ordersOnHold, 'app.lbl.noOnholdOrders')}
           </ModalCard>
         )
       case 'notes':
         return (
           <ModalCard closeAction={e => this._closeModal()}>
-            {orderNote.length > 0
-              ? orderNote.map((note, key) => {
-                return (
-                  <div className='card'>
-                    <header className='card-header'>
-                      <p className='card-header-title'>{note}</p>
-                      <a className='card-header-icon'>
-                        remove
-                        <span><i className='fa fa-close' /></span>
-                      </a>
-                    </header>
-                  </div>
-                )
-              })
-              : <div>
-                NO NOTES
-              </div>
-            }
+            {orderNote.map((note, key) => {
+              return (
+                <div className='card'>
+                  <header className='card-header'>
+                    <p className='card-header-title'>{note}</p>
+                    <a className='card-header-icon'>
+                      remove
+                      <span><i className='fa fa-close' /></span>
+                    </a>
+                  </header>
+                </div>
+              )
+            })}
+            {emptyListLbl(orderNote, 'app.lbl.noOrderNotes')}
           </ModalCard>
         )
       case 'processingOrder':
@@ -214,7 +253,7 @@ class ModalStoreUtils extends Component {
             </p>
             <div>
               {customers.map((customer, key) => {
-                let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated} = customer
+                let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
                 return (
                   <div className='box is-clearfix' key={key}>
                     <div className='media-content is-clearfix'>
@@ -230,6 +269,7 @@ class ModalStoreUtils extends Component {
                         <div>
                           <p>{bold('membership:')} {membership}</p>
                           <p>{bold('odbo coins:')} {odboCoins || 0}</p>
+                          <p>{bold('contact number:')} {phoneNumber || 'N/A'}</p>
                         </div>,
                         <div>
                           <p>{bold('status:')} {status}</p>
@@ -240,6 +280,26 @@ class ModalStoreUtils extends Component {
                   </div>
                 )
               })}
+              {emptyListLbl(customers, 'app.lbl.noCustomers')}
+            </div>
+          </ModalCard>
+        )
+
+      case 'custPincode':
+        return (
+          <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOdboOrder()}>
+            <div className='content columns is-mobile is-multiline has-text-centered'>
+              <div className='column is-6 is-offset-3 has-text-centered'>
+                <form onSubmit={e => this._processOdboOrder()} >
+                  <p className='control has-icon has-icon-right is-marginless'>
+                    <input id='custCodeInput' className='input is-large' type='password' onChange={e => this._setOdboOrderInfo()}
+                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}} />
+                    <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '4.75rem'}}>
+                      <i className='fa fa-lock' />
+                    </span>
+                  </p>
+                </form>
+              </div>
             </div>
           </ModalCard>
         )
@@ -313,6 +373,8 @@ function mapStateToProps (state) {
   let orderData = state.data.orderData
   let custData = state.data.customers
   return {
+    mainUI,
+    orderData,
     custData,
     customerSearchKey: custData.customerSearchKey,
     customerFilter: custData.customerFilter,

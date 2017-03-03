@@ -173,7 +173,6 @@ class StaffSales extends React.Component {
 
 const mapStateToProps = (state) => {
   const { staffSales } = state.reports
-
   return {
     isProcessing: staffSales.isProcessing,
     activeCashier: state.app.mainUI.activeCashier,
