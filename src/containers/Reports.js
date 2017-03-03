@@ -2,7 +2,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
 import moment from 'moment'
-import { DatePicker } from 'react-input-enhancements'
 
 import SalesReport from './SalesReport'
 import SalesReportComplete from './SalesReportComplete'
@@ -85,28 +84,6 @@ class Reports extends React.Component {
       <section className='section is-fullheight'>
         <div className='container'>
           <div className='content is-clearfix'>
-            <div className='control is-pulled-right' style={{marginRight: 100}}>
-              <label className='label'>Select Date</label>
-              <DatePicker
-                onChange={this.onChangeDate.bind(this)}
-                // this callback will parse inserted timestamp
-                onValuePreUpdate={v => parseInt(v, 10) > 1e8
-                  ? moment(parseInt(v, 10)).format('ddd DD/MMM/YYYY') : v
-                }
-              >
-                {(inputProps, { registerInput }) =>
-                  <p className='control'>
-                    <input
-                      {...inputProps}
-                      className='input is-medium'
-                      style={{ fontFamily: 'monospace' }}
-                      id='selectedDate'
-                      type='text'
-                    />
-                  </p>
-                }
-              </DatePicker>
-            </div>
             <div className='title is-marginless'>
               <strong>Currently Viewing:</strong>
               <p>{moment(csDate).format('ddd DD/MMM/YYYY')}</p>

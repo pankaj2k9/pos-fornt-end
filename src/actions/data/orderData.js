@@ -78,7 +78,7 @@ export function setOrderInfo (data) {
     redemptionPoints: odbo && odbo.earnedPts,
     pinCode: pincode,
     vouchers: currency === 'sgd' && processPayments(payments, 'voucher'),
-    odboId: activeCustomer && activeCustomer.odboId
+    odboId: activeCustomer ? activeCustomer.odboId : undefined
   }
 
   const receipt = {

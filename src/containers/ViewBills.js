@@ -237,8 +237,8 @@ function mapStateToProps (state) {
 
   return {
     intl: state.intl,
-    stores: state.app.mainUI.storeIds,
-    store: state.app.mainUI.store,
+    stores: state.data.stores.stores,
+    store: state.app.mainUI.activeStore,
     from,
     to,
     idFrom,
