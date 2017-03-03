@@ -13,6 +13,7 @@ import {
   REMOVE_BONUS_MULTIPLIER,
   REMOVE_NOTE,
   REMOVE_PAYMENT_TYPE,
+  REMOVE_PAYMENT_BYKEY,
   REMOVE_ORDER_ITEM,
   RESET_ORDER_DATA,
   RECALL_ORDER
@@ -246,6 +247,13 @@ function orderData (state = {
       })
       return Object.assign({}, state, {
         payments: filteredPayments
+      })
+    case REMOVE_PAYMENT_BYKEY:
+      let updatedPayments = state.payments.filter((payment, index, arr) => {
+        return arr.indexOf(payment) !== action.key
+      })
+      return Object.assign({}, state, {
+        payments: updatedPayments
       })
     case ADD_ORDER_NOTE:
       return Object.assign({}, state, {

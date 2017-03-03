@@ -165,6 +165,14 @@ export function removePaymentType (paymentType, key) {
   }
 }
 
+export const REMOVE_PAYMENT_BYKEY = 'REMOVE_PAYMENT_BYKEY'
+export function removePaymentByKey (key) {
+  return {
+    type: REMOVE_PAYMENT_BYKEY,
+    key
+  }
+}
+
 export const REMOVE_ORDER_ITEM = 'REMOVE_ORDER_ITEM'
 export function removeOrderItem (orderItemID) {
   return {

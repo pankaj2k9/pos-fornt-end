@@ -23,6 +23,7 @@ import {
 import {
   addPaymentType,
   removePaymentType,
+  removePaymentByKey,
   setOrderInfo
 } from '../actions/data/orderData'
 
@@ -85,6 +86,9 @@ class ModalSetPayments extends Component {
 
     // Buttons
 
+    let lbl = (id) => { return intl.formatMessage({id: id}) } // translated lbl
+    let lblAC = (id) => { return (intl.formatMessage({id: id})).toUpperCase() } // lbl all caps
+
     let isActive = true
     let quickCashBtns = [
       {name: '', blank: true, label: '', size: 'is-1'},
@@ -119,8 +123,9 @@ class ModalSetPayments extends Component {
 
     let otherCtrls = (mode) => {
       let inputPH = mode !== 'cash'
-        ? mode !== 'voucher' ? intl.formatMessage({id: 'app.ph.enterTransId'}) : intl.formatMessage({id: 'app.general.voucherCode'})
+        ? mode !== 'voucher' ? lbl('app.ph.enterTransId') : lbl('app.general.voucherCode')
         : null
+      let disabled = formatNumber(amountToPay) <= 0
       return (
         <div className='columns is-multiline is-mobile is-fullwidth is-marginless'>
           <div className={`column ${mode === 'cash' ? 'is-12' : 'is-7'}`}>
@@ -148,17 +153,21 @@ class ModalSetPayments extends Component {
             }
             {mode !== 'cash'
               ? <p className='control has-icon has-addons' style={{marginTop: 7}}>
-                <input id='transID' className='input is-info' style={{width: '100%'}}
-                  placeholder={inputPH}
+                <input id='transID' className={`input is-medium ${!disabled ? 'is-info' : 'is-danger'}`} style={{width: '100%', paddingLeft: '1.5em'}}
+                  placeholder={!disabled ? inputPH : lbl('app.ph.enterAmt1st')}
                   onChange={
                     (e) => { dispatch(setTransCode(e.target.value, mode)) }
                   } />
-                <span className='icon is-small'>
-                  <i className='fa fa-asterisk' />
+                <span className='icon is-medium' style={{left: '1rem'}}>
+                  <i className='fa fa-info-circle' />
                 </span>
-                <a className='button is-info' onClick={(e) => { this._addPayment(mode) }}>
-                  add card
-                </a>
+                {!disabled
+                  ? <a className='button is-medium is-info'
+                    onClick={(e) => { !disabled && this._addPayment(mode) }}>
+                    {lblAC('app.button.add')}
+                  </a>
+                  : null
+                }
               </p>
               : null
             }
@@ -172,8 +181,9 @@ class ModalSetPayments extends Component {
                   ? payments.map((payment, key) => {
                     if (payment.type === mode) {
                       return (
-                        <span className='tag' key={key} style={{margin: 5}}>
+                        <span className='tag is-medium' key={key} style={{margin: 5}}>
                           {`${payment.provider || payment.type}:  ${formatCurrency(payment.deduction || payment.amount)}`}
+                          <button className='delete' onClick={e => dispatch(removePaymentByKey(key))} />
                         </span>
                       )
                     }
@@ -196,7 +206,7 @@ class ModalSetPayments extends Component {
             <div className='columns is-multiline is-mobile is-fullwidth is-marginless'>
               <div className='column is-4 has-text-centered' style={styles.center}>
                 <p className='title is-4'>
-                  <strong>TOTAL</strong>
+                  <strong>{lblAC('app.button.total')}</strong>
                 </p>
               </div>
               <div className='column is-8 has-text-centered'>
@@ -204,7 +214,7 @@ class ModalSetPayments extends Component {
               </div>
               <div className='column is-4 has-text-centered' style={styles.center}>
                 <p className='title is-4'>
-                  <strong>PAY</strong>
+                  <strong>{lblAC('app.button.pay')}</strong>
                 </p>
               </div>
               <div className='column is-8'>
@@ -221,7 +231,7 @@ class ModalSetPayments extends Component {
               </div>
               <div className='column is-4 has-text-centered' style={styles.center}>
                 <p className='title is-5'>
-                  <strong>BALANCE AMOUNT</strong>
+                  <strong>{lblAC('app.lbl.balAmt')}</strong>
                 </p>
               </div>
               <div className='column is-8 has-text-centered'>
