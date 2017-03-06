@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
-// import { browserHistory } from 'react-router'
 import { connect } from 'react-redux'
-// import { FormattedMessage } from 'react-intl'
 
 import ModalCard from '../components/ModalCard'
 
@@ -98,4 +96,13 @@ class ModalProductList extends Component {
   }
 }
 
-export default connect()(ModalProductList)
+function mapStateToProps (state) {
+  return {
+    productsArray: state.data.products.productsArray,
+    productsById: state.data.products.productsById,
+    storeId: state.app.mainUI.activeStore.source,
+    locale: state.intl.locale
+  }
+}
+
+export default connect(mapStateToProps)(ModalProductList)

@@ -16,6 +16,7 @@ import {
 
 import {
   addBonusMultiplier,
+  addOrderItem,
   removeBonusMultiplier,
   setCurrencyType
 } from '../actions/data/orderData'
@@ -97,6 +98,16 @@ class PanelButtons extends Component {
     }
   }
 
+  _barcodeSearch (e) {
+    e.preventDefault()
+    const { dispatch, products } = this.props
+    let barcode = document.getElementById('barcodeInput').value
+    products.forEach(product => {
+      if (product.barcodeInfo === barcode) { dispatch(addOrderItem(product)) }
+    })
+    document.getElementById('barcode').reset()
+  }
+
   render () {
     const { currency, posMode, orderData } = this.props
     let isActive = posMode === 'online'
@@ -136,6 +147,14 @@ class PanelButtons extends Component {
     return (
       <div className='panel'>
         <POSButtons buttons={buttons} onClickButton={this._onClickPanelButtons.bind(this)} />
+        <div style={{padding: 10, paddingTop: 30}}>
+          <form id='barcode' onSubmit={e => this._barcodeSearch(e)}>
+            <p className='control has-addons'>
+              <input id='barcodeInput' className='input is-large is-expanded' type='text' />
+              <a className='button is-large is-dark'>BARCODE</a>
+            </p>
+          </form>
+        </div>
       </div>
     )
   }
@@ -147,6 +166,7 @@ function mapStateToProps (state) {
   return {
     orderData,
     currency: orderData.currency,
+    products: state.data.products.productsArray,
     posMode: mainUI.posMode
   }
 }

@@ -106,6 +106,7 @@ const zh = {
   'app.lbl.noOrderNotes': '此订单没有注释',
   'app.lbl.noCustomers': '没有找到客户',
   'app.lbl.balAmt': '平衡量',
+  'app.lbl.slcCardProv': '选择卡提供商',
 
   'app.button.logout': '登出',
   'app.button.login': '登录',

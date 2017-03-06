@@ -107,6 +107,7 @@ class PanelOrderInfo extends Component {
       let subtotal = currency === 'sgd'
         ? formatCurrency(item.subTotalPrice)
         : item.subTotalOdboPrice.toFixed(0)
+      let disabled = item.overallDiscount || item.overallDiscount !== 0
       return (
         notEmpty
         ? <tr key={key}>
@@ -125,7 +126,7 @@ class PanelOrderInfo extends Component {
               <p className='control has-addons' style={{width: 50}}>
                 <input id='itemDiscount' className='input is-small' type='Number'
                   placeholder={discountVal} value={discountVal}
-                  onChange={e => setDiscount(e.target.value)} />
+                  onChange={e => { !disabled && setDiscount(e.target.value) }} />
                 <a className='button is-small'>%</a>
               </p>
             </form>
@@ -191,7 +192,7 @@ class PanelOrderInfo extends Component {
     return (
       <div>
         <div className='panel'>
-          <div className='panel-block' style={{height: intFrameHeight / 3, overflowY: 'scroll', width: '100%'}}>
+          <div className='panel-block' style={{height: intFrameHeight / 2.3, overflowY: 'scroll', width: '100%'}}>
             <table className='table' style={{alignSelf: 'flex-start'}}>
               <thead>
                 <tr>
@@ -261,7 +262,7 @@ class PanelOrderInfo extends Component {
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
               <div className='column is-3 is-paddingless'>
                 Notes
-                <a onClick={this._onClickViewNotes.bind(this)}>view</a>
+                <a onClick={this._onClickViewNotes.bind(this)}> ( {lblTR('app.button.view')} )</a>
               </div>
               <div className='column is-5 is-paddingless'>
                 <p>{`customer: ${custName}`}</p>
@@ -292,13 +293,11 @@ function mapStateToProps (state) {
   let mainUI = state.app.mainUI
   let storeUI = state.app.storeUI
   let orderData = state.data.orderData
-  let mainUIediting = mainUI.isEditing
-  let storeUIediting = storeUI.isEditing
   return {
     mainUI,
     storeUI,
     orderData,
-    isEditing: mainUIediting || storeUIediting,
+    isEditing: mainUI.isEditing,
     activeDrawer: mainUI.activeDrawer,
     posMode: mainUI.posMode,
     activeCustomer: orderData.activeCustomer,

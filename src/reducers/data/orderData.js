@@ -173,12 +173,12 @@ function orderData (state = {
 
         if (item.id === action.orderItemID) {
           if (action.opperand === 'plus') {
-            item.qty = item.qty + 1
+            item.qty = qty + 1
             item.subTotalPrice = subTotalPrice + finalPR
             item.subTotalOdboPrice = subTotalOdboPrice + finalPR
           } else {
             if (qty > 1) {
-              qty = item.qty - 1
+              item.qty = qty - 1
               item.subTotalPrice = subTotalPrice - finalPR
               item.subTotalOdboPrice = subTotalOdboPrice - finalOdboPR
             }
@@ -256,8 +256,10 @@ function orderData (state = {
         payments: updatedPayments
       })
     case ADD_ORDER_NOTE:
+      let orderNote = state.orderNote
+      orderNote.push(action.note)
       return Object.assign({}, state, {
-        orderNote: state.orderNote.push(action.note),
+        orderNote: orderNote,
         isEditing: false
       })
     case ADD_BONUS_MULTIPLIER:
@@ -270,7 +272,7 @@ function orderData (state = {
       })
     case REMOVE_NOTE:
       state.orderNote.forEach(function (item, index, object) {
-        if (item.message === action.message) {
+        if (index === action.key) {
           object.splice(index, 1)
         }
       })

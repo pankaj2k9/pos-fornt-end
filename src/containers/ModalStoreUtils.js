@@ -5,15 +5,16 @@ import { injectIntl } from 'react-intl'
 import ModalCard from '../components/ModalCard'
 import ContentDivider from '../components/ContentDivider'
 import LoadingScreen from '../components/LoadingScreen'
-// import SyncModal from '../components/SyncModal'
 
 import { closeActiveModal } from '../actions/app/mainUI'
 import {
+  addOrderNote,
   setActiveCustomer,
   setOverallDiscount,
   setOrderInfo,
   resetOrderData,
-  recallOrder
+  recallOrder,
+  removeNote
 } from '../actions/data/orderData'
 
 import {
@@ -27,7 +28,8 @@ import {
 } from '../actions/data/cashdrawers'
 
 import {
-  customersSetFilter
+  customersSetFilter,
+  fetchCustomerByFilter
 } from '../actions/data/customers'
 
 import {
@@ -73,10 +75,24 @@ class ModalStoreUtils extends Component {
     }
   }
 
+  _searchCustomer () {
+    const { dispatch, custData } = this.props
+    let { customerFilter, customerSearchKey } = custData
+    dispatch(fetchCustomerByFilter(customerFilter, customerSearchKey))
+  }
+
   _setActiveCustomer (customer) {
     const { dispatch } = this.props
     dispatch(setActiveCustomer(customer))
     dispatch(closeActiveModal())
+  }
+
+  _addNoteToOrder (e) {
+    e.preventDefault()
+    const { dispatch } = this.props
+    let note = document.getElementById('noteInput').value
+    dispatch(addOrderNote(note))
+    document.getElementById('note').reset()
   }
 
   _setSearchCustFilters () {
@@ -126,7 +142,6 @@ class ModalStoreUtils extends Component {
       ordersOnHold,
       orderNote,
       orderReceipt,
-      offlineData,
       intl
     } = this.props
 
@@ -141,6 +156,15 @@ class ModalStoreUtils extends Component {
           </div>
         )
       }
+    }
+
+    let isFetchingLbl = (lbl) => {
+      return (
+        <div className='box has-text-centered'>
+          <span className='icon is-large'><i className='fa fa-spinner fa-pulse fa-fw' /></span>
+          <p className='title'>{lbl ? lblTR(lbl) : 'Searching . . .'}</p>
+        </div>
+      )
     }
 
     switch (activeModalId) {
@@ -192,14 +216,21 @@ class ModalStoreUtils extends Component {
       case 'notes':
         return (
           <ModalCard closeAction={e => this._closeModal()}>
+            <form id='note' onSubmit={e => this._addNoteToOrder(e)} style={{margin: 15}}>
+              <p className='control has-addons'>
+                <input id='noteInput' className='input is-large is-expanded' type='text' />
+                <a className='button is-large is-success'
+                  onClick={e => this._addNoteToOrder(e)}>ADD NOTE</a>
+              </p>
+            </form>
             {orderNote.map((note, key) => {
               return (
                 <div className='card'>
                   <header className='card-header'>
                     <p className='card-header-title'>{note}</p>
-                    <a className='card-header-icon'>
-                      remove
-                      <span><i className='fa fa-close' /></span>
+                    <a className='card-header-icon' onClick={e => dispatch(removeNote(key))}>
+                      {lblTR('app.button.remove')}
+                      <span><i className='fa fa-close fa-2x' /></span>
                     </a>
                   </header>
                 </div>
@@ -235,52 +266,64 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
       case 'searchCustomer':
-        let { customersArray, customerFilter, customerSearchKey } = custData
-        let customers = processCustomers(customersArray, customerFilter, customerSearchKey)
+        let { isFetching, customersArray, customerFilter, customerSearchKey, customerSearch } = custData
+        let fromFetched = processCustomers(customersArray, customerFilter, customerSearchKey)
+        let fromSearch = customerSearch
+        let customers = fromFetched.length > 0 ? fromFetched : fromSearch
         return (
           <ModalCard closeAction={e => this._closeModal()}>
-            <p className='control has-addons'>
-              <span className='select is-large'>
-                <select id='custFilter'>
-                  <option value='byId'>odbo ID</option>
-                  <option value='byName'>First Name</option>
-                  <option value='bySurName'>Last Name</option>
-                  <option value='byContactNum'>phone number</option>
-                </select>
-              </span>
-              <input id='custSearchKey' className='input is-large is-expanded' type='text' placeholder={lblTR('app.ph.keyword')} onChange={e => this._setSearchCustFilters()} />
-              <a className='button is-large is-success' onClick={e => this._setSearchCustFilters()}>{lblTR('app.button.search')}</a>
-            </p>
+            <form id='searchCust' onSubmit={e => this._searchCustomer(e)}>
+              <p className='control has-addons'>
+                <span className='select is-large'>
+                  <select id='custFilter'>
+                    <option value='byId'>odbo ID</option>
+                    <option value='byName'>First Name</option>
+                    <option value='bySurName'>Last Name</option>
+                    <option value='byContactNum'>phone number</option>
+                  </select>
+                </span>
+                <input id='custSearchKey' className='input is-large is-expanded'
+                  type='text' placeholder={lblTR('app.ph.keyword')}
+                  value={customerSearchKey} onChange={e => this._setSearchCustFilters()} />
+                <a className='button is-large is-success' onClick={e => this._searchCustomer()}>{lblTR('app.button.search')}</a>
+              </p>
+            </form>
             <div>
-              {customers.map((customer, key) => {
-                let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
-                return (
-                  <div className='box is-clearfix' key={key}>
-                    <div className='media-content is-clearfix'>
-                      <p className='is-pulled-left title is-4'>
-                        {bold(`[ID#${processOdboID(odboId)}] `)}
-                        {`< ${firstName} ${lastName || ''} >`}
-                      </p>
-                      <a className='button is-success is-pulled-right'
-                        onClick={e => { this._setActiveCustomer(customer) }}>
-                        Add Customer
-                      </a>
-                      <ContentDivider contents={[
-                        <div>
-                          <p>{bold('membership:')} {membership}</p>
-                          <p>{bold('odbo coins:')} {odboCoins || 0}</p>
-                          <p>{bold('contact number:')} {phoneNumber || 'N/A'}</p>
-                        </div>,
-                        <div>
-                          <p>{bold('status:')} {status}</p>
-                          <p>{bold('last update:')} {formatDate(dateUpdated)}</p>
-                        </div>
-                      ]} size={6} />
+              {!isFetching
+                ? customers.map((customer, key) => {
+                  let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
+                  return (
+                    <div className='box is-clearfix' key={key}>
+                      <div className='media-content is-clearfix'>
+                        <p className='is-pulled-left title is-4'>
+                          {bold(`[ID#${processOdboID(odboId)}] `)}
+                          {`< ${firstName} ${lastName || ''} >`}
+                        </p>
+                        <a className='button is-success is-pulled-right'
+                          onClick={e => { this._setActiveCustomer(customer) }}>
+                          Add Customer
+                        </a>
+                        <ContentDivider contents={[
+                          <div>
+                            <p>{bold('membership:')} {membership}</p>
+                            <p>{bold('odbo coins:')} {odboCoins || 0}</p>
+                            <p>{bold('contact number:')} {phoneNumber || 'N/A'}</p>
+                          </div>,
+                          <div>
+                            <p>{bold('status:')} {status}</p>
+                            <p>{bold('last update:')} {formatDate(dateUpdated)}</p>
+                          </div>
+                        ]} size={6} />
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-              {emptyListLbl(customers, 'app.lbl.noCustomers')}
+                  )
+                })
+                : null
+              }
+              {isFetching
+                ? isFetchingLbl()
+                : emptyListLbl(customers, 'app.lbl.noCustomers')
+              }
             </div>
           </ModalCard>
         )
@@ -304,64 +347,6 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
 
-      case 'syncModal':
-        let { isProcessing, offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
-        let haveDatatoSync = offlineOrders.length > 0 || failedOrders.length > 0 || offlineDrawers.length > 0 || failedDrawers.length > 0
-        let container = (type, data, icon, lbl) => {
-          return (
-            data.length > 0
-            ? <div className='box' style={{margin: 10}}>
-              <article className='media'>
-                <div className='media-left'><span className='icon is-large'><i className={`fa fa-${icon}`} /></span></div>
-                <div className='media-content'>
-                  <div className='content'>
-                    <p className='subtitle'><strong>{data.length}</strong> {lblTR(`app.lbl.${lbl}`)}</p>
-                    <p>{type === 'orders' ? lblTR('app.lbl.offlineOrders') : lblTR('app.lbl.cashdrawerData')}</p>
-                  </div>
-                </div>
-              </article>
-            </div>
-            : null
-          )
-        }
-        return (
-          <ModalCard closeAction={e => this._closeModal()} title={lblTR('app.button.syncData')}>
-            {haveDatatoSync
-              ? <div className='has-text-centered'>
-                <ContentDivider contents={[
-                  container('orders', offlineOrders, 'list-alt', 'notSynced'),
-                  container('orders', failedOrders, 'close', 'syncFailed'),
-                  container('drawer', offlineDrawers, 'upload', 'notSynced'),
-                  container('drawer', failedDrawers, 'close', 'syncFailed')
-                ]} size={6} />
-                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => dispatch(syncOfflineOrders(offlineOrders))}>
-                  <span className='icon is-large'><i className={`fa fa-refresh ${isProcessing ? 'fa-spin fa-3x' : 'fa-2x'}`} /></span>
-                  <span>{isProcessing ? lblTR('app.lbl.syncing') : lblTR('app.button.syncOrders')}</span>
-                </a>
-              </div>
-              : <p className='title has-text-centered'>{lblTR('app.lbl.noDataToSync')}</p>
-            }
-          </ModalCard>
-        )
-
-      case 'updateCashdrawer':
-        return (
-          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer()}>
-            <div className='content columns is-mobile is-multiline has-text-centered'>
-              <div className='column is-4 is-offset-4 has-text-centered'>
-                <form onSubmit={e => this._closeModal()} >
-                  <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='drawerAmtInput' className='input is-large' type='Number'
-                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}} />
-                    <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '3rem'}}>
-                      <i className='fa fa-usd' />
-                    </span>
-                  </p>
-                </form>
-              </div>
-            </div>
-          </ModalCard>
-        )
       default:
         return null
     }

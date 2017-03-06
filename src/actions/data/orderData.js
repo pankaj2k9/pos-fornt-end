@@ -142,10 +142,10 @@ export function addPaymentType (payment) {
   }
 }
 export const REMOVE_NOTE = 'REMOVE_NOTE'
-export function removeNote (message) {
+export function removeNote (key) {
   return {
     type: REMOVE_NOTE,
-    message
+    key
   }
 }
 

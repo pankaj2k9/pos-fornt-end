@@ -115,6 +115,7 @@ export function syncOfflineOrders (offlineOrders) {
       })
       .catch(error => {
         dispatch(syncOrderFailed(error.message, offlineOrder))
+        dispatch(syncOrdersDone())
       })
     })
   }

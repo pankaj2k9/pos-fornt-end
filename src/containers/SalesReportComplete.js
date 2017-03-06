@@ -59,8 +59,8 @@ class SalesReportComplete extends React.Component {
     const { cashdrawers, csDate, selectedStore, storeId } = this.props
     const searchStoreId = selectedStore || storeId
     const drawerData = cashdrawers.find(function (drawer) {
-      let date1 = moment(new Date(drawer.date)).format('L')
-      let date2 = moment(new Date(csDate)).format('L')
+      let date1 = moment(drawer.date).format('L')
+      let date2 = moment(csDate).format('L')
       return date1 === date2 && searchStoreId === drawer.storeId
     })
     return drawerData

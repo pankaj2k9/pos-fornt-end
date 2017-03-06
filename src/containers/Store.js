@@ -69,19 +69,11 @@ class Store extends Component {
 
   renderStoreModals () {
     const {
-      locale,
-      activeModalId,
-      productsArray,
-      productsById,
-      storeId
+      activeModalId
     } = this.props
     if (activeModalId === 'productsList') {
       return (
-        <ModalProductList
-          locale={locale}
-          productsArray={productsArray}
-          productsById={productsById}
-          storeId={storeId} />
+        <ModalProductList />
       )
     } else if (activeModalId === 'payments') {
       return <ModalSetPayments />
@@ -96,18 +88,18 @@ class Store extends Component {
         <div className='hero-body' style={{padding: 0}}>
           <div className='tile is-ancestor is-fullwidth'>
             <div className='tile is-parent is-6 is-vertical'>
-              <div className='tile is-child' style={{
-                paddingTop: 15,
-                display: 'flex',
-                justifyContent: 'center',
-                flexDirection: 'column'
-              }}>
+              <div className='tile is-child'>
                 <PanelButtons />
               </div>
             </div>
             <div className='tile is-parent is-vertical'>
               <div>
-                <div className='tile is-child'>
+                <div className='tile is-child' style={{
+                  // paddingTop: 15,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  flexDirection: 'column'
+                }}>
                   <PanelOrderInfo />
                 </div>
               </div>

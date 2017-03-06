@@ -2,9 +2,9 @@ export const CUSTOMERS_FETCH_REQUEST = 'CUSTOMERS_FETCH_REQUEST'
 export const CUSTOMERS_FETCH_SUCCESS = 'CUSTOMERS_FETCH_SUCCESS'
 export const CUSTOMERS_FETCH_FAILURE = 'CUSTOMERS_FETCH_FAILURE'
 
-export const CUSTOMER_FETCH_REQUEST = 'CUSTOMER_FETCH_REQUEST'
-export const CUSTOMER_FETCH_SUCCESS = 'CUSTOMER_FETCH_SUCCESS'
-export const CUSTOMER_FETCH_FAILURE = 'CUSTOMER_FETCH_FAILURE'
+export const CUSTOMER_SEARCH_REQUEST = 'CUSTOMER_SEARCH_REQUEST'
+export const CUSTOMER_SEARCH_SUCCESS = 'CUSTOMER_SEARCH_SUCCESS'
+export const CUSTOMER_SEARCH_FAILURE = 'CUSTOMER_SEARCH_FAILURE'
 
 export const CUSTOMERS_SET_FILTER = 'CUSTOMERS_SET_FILTER'
 
@@ -30,26 +30,28 @@ export function customersFetchFailure (error) {
   }
 }
 
-export function customerFetchRequest () {
+export function customerSearchRequest () {
   return {
-    type: CUSTOMER_FETCH_REQUEST
+    type: CUSTOMER_SEARCH_REQUEST
   }
 }
 
-export function customerFetchSuccess (customer) {
-  return (dispatch) => {
-    // dispatch(setActiveCustomer(customer))
+export function customerSearchSuccess (data) {
+  return {
+    type: CUSTOMER_SEARCH_SUCCESS,
+    data
   }
 }
 
-export function customerFetchFailure (error) {
+export function customerSearchFailure (error) {
   return {
-    type: CUSTOMER_FETCH_FAILURE,
+    type: CUSTOMER_SEARCH_FAILURE,
     error
   }
 }
 
-export function customersSetFilter (filter, searchKey) {
+export function customersSetFilter (filter, key) {
+  let searchKey = key.replace(/[^\w\s]/gi, '') // removes any special characters
   return {
     type: CUSTOMERS_SET_FILTER,
     filter,
@@ -113,25 +115,25 @@ export function fetchCustomers (query) {
   }
 }
 
-export function fetchCustomerByOdboId (searchKey) {
+export function fetchCustomerByFilter (filter, key) {
   return (dispatch) => {
-    let odboId = Number(searchKey)
-    dispatch(customerFetchRequest())
-    const query = {query: { odboId: odboId }}
+    dispatch(customerSearchRequest())
+    let query
+    if (filter === 'byId') {
+      query = {query: { odboID: Number(key) }}
+    } else if (filter === 'byName') {
+      query = {query: { firstName: { $like: `%${key}%` } }}
+    } else if (filter === 'bySurName') {
+      query = {query: { lastName: { $like: `%${key}%` } }}
+    } else if (filter === 'byContactNum') {
+      query = {query: { phoneNumber: { $like: `%${key}%` } }}
+    }
     return customerService.fetch(query)
     .then(response => {
-      if (response) {
-        if (!response.data[0]) {
-          dispatch(customerFetchFailure('No Results'))
-        } else {
-          dispatch(customerFetchSuccess(response.data[0]))
-        }
-      } else {
-        dispatch(customerFetchFailure('No Results'))
-      }
+      dispatch(customerSearchSuccess(response.data))
     })
     .catch(error => {
-      dispatch(customerFetchFailure(error.message))
+      dispatch(customerSearchFailure(error.message))
     })
   }
 }

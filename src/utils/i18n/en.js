@@ -106,6 +106,7 @@ const en = {
   'app.lbl.noOrderNotes': 'No notes for this order',
   'app.lbl.noCustomers': 'No customers found',
   'app.lbl.balAmt': 'balance amount',
+  'app.lbl.slcCardProv': 'select card providers',
 
   'app.button.logout': 'Logout',
   'app.button.login': 'Login',
