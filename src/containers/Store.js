@@ -43,7 +43,7 @@ class Store extends Component {
       <div className='hero is-large'>
         <div className='hero-body'>
           <div className='container has-text-centered'>
-            {staff.role === 'master'
+            {staff && staff.role === 'master'
               ? <div>
                 <h1 className='title'>
                   <FormattedMessage id='app.general.noCashier' />
