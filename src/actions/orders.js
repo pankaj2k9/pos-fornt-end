@@ -10,6 +10,10 @@ import {
   setNewLastID
 } from './app/mainUI'
 
+import {
+  saveReceipt
+} from './data/offlineData'
+
 import ordersService from '../services/orders'
 import print from '../utils/printReceipt/print'
 
@@ -61,6 +65,7 @@ export function processOrder (orderInfo, receipt) {
       print(receipt)
       dispatch(orderSuccess())
       dispatch(setNewLastID())
+      dispatch(saveReceipt(receipt))
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))

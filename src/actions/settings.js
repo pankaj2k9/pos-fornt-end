@@ -12,9 +12,9 @@ import {
 
 import { fetchCustomers } from './data/customers'
 
-export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
-export function reprintingReceipt (value) {
-  return { type: REPRINTING_RECEIPT, value }
+export const SET_PROCESSING_STATUS = 'SET_PROCESSING_STATUS'
+export function setProcessingStatus (value) {
+  return { type: SET_PROCESSING_STATUS, value }
 }
 
 export const RESET_SETTINGS_STATE = 'RESET_SETTINGS_STATE'
@@ -30,6 +30,11 @@ export function settingsError () {
 export const STOREORDER_SET_SEARCH_KEY = 'STOREORDER_SET_SEARCH_KEY'
 export function storeOrdersSetSearchKey (orderKey) {
   return { type: STOREORDER_SET_SEARCH_KEY, orderKey }
+}
+
+export const SET_ACTIVE_ORDER_DETAILS = 'SET_ACTIVE_ORDER_DETAILS'
+export function setActiveOrderDetails (order) {
+  return { type: SET_ACTIVE_ORDER_DETAILS, order }
 }
 
 export const CUSTOMERS_SET_SEARCH_KEY = 'CUSTOMERS_SET_SEARCH_KEY'
@@ -95,20 +100,7 @@ export function storeOrderFetch (params) {
 
     return ordersService.find(params)
       .then(response => {
-        if (response) {
-          if (!response.data[0]) {
-            dispatch(storeOrderFetchFailure())
-          } else if (response.data.length > 1) {
-            dispatch(storeOrderFetchFailure())
-            dispatch(setError('There are no matched results'))
-          } else {
-            dispatch(storeOrderFetchSuccess(response.data[0]))
-            dispatch(setError(null))
-          }
-        } else {
-          dispatch(storeOrderFetchFailure())
-          dispatch(setError('There are no matched results'))
-        }
+        dispatch(storeOrderFetchSuccess(response.data))
       })
       .catch(error => {
         dispatch(storeOrderFetchFailure(error))

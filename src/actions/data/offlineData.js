@@ -76,6 +76,14 @@ export function saveReceipt (receipt) {
   }
 }
 
+export const UPDATE_SAVED_RECEIPT = 'UPDATE_SAVED_RECEIPT'
+export function updateSavedReceipt (receipt) {
+  return {
+    type: UPDATE_SAVED_RECEIPT,
+    receipt
+  }
+}
+
 export const SAVE_FAILED_DRAWER_UPDATE = 'SAVE_FAILED_DRAWER_UPDATE'
 export function saveFailedDrawerUpdate (drawer) {
   return {

@@ -236,8 +236,10 @@ function completeSales (state, action) {
 function storeOrders (state, action) {
   switch (action.type) {
     case STOREORDERS_SET_ACTIVE_ID:
+      let orderById = state.byId
       return Object.assign({}, state, {
         activeOrderId: action.orderId,
+        activeOrderDetails: orderById[action.orderId],
         activeModal: action.orderId === null ? null : 'view'
       })
     case STOREORDERS_SET_PAGE:
@@ -297,6 +299,7 @@ function report (state = {
     error: false,
     orderSearchKey: '',
     activeOrderId: null,
+    activeOrderDetails: null,
     activeModal: null,
     page: 1,
     limit: 10,

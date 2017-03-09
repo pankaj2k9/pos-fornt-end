@@ -6,6 +6,7 @@ import {
   SYNC_ORDERS_DONE,
   SAVE_RECEIPT,
   SAVE_FAILED_DRAWER_UPDATE,
+  UPDATE_SAVED_RECEIPT,
   CLEAR_SAVED_RECEIPTS,
   CLEAR_MESSAGES
 } from '../../actions/data/offlineData'
@@ -22,6 +23,7 @@ function offlineData (state = {
   isProcessing: false,
   connectionError: null
 }, action) {
+  let printedReceipts = state.printedReceipts
   switch (action.type) {
     case PROCESS_OFFLINE_ORDER:
       state.offlineOrders.push(action.orderInfo)
@@ -53,13 +55,22 @@ function offlineData (state = {
         syncOrderSuccess: noFailedOrders
       })
     case SAVE_RECEIPT:
-      let updatedData = state.printedReceipts.push(action.receipt)
+      printedReceipts.push(action.receipt)
+      return Object.assign({}, state, {
+        printedReceipts: printedReceipts
+      })
+    case UPDATE_SAVED_RECEIPT:
+      let newReceipt = action.receipt
+      let updatedData = printedReceipts.filter(receipt => { return receipt.extraInfo.id !== newReceipt.extraInfo.id })
+      updatedData.push(newReceipt)
       return Object.assign({}, state, {
         printedReceipts: updatedData
       })
     case SAVE_FAILED_DRAWER_UPDATE:
+      let offlineDrawers = state.offlineDrawers
+      offlineDrawers.push(action.drawer)
       return Object.assign({}, state, {
-        offlineDrawers: state.offlineDrawers.push(action.drawer)
+        offlineDrawers: offlineDrawers
       })
     case CLEAR_SAVED_RECEIPTS:
       return Object.assign({}, state, {

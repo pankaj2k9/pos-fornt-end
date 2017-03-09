@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { injectIntl } from 'react-intl'
+import moment from 'moment'
 
 import {
   createDailyData,
@@ -16,8 +17,20 @@ import ContentDivider from '../components/ContentDivider'
 
 import {
   setCashierLoggedIn,
+  setActiveModal,
   closeActiveModal
 } from '../actions/app/mainUI'
+
+import { refund } from '../actions/refund'
+
+import { formatCurrency } from '../utils/string'
+import {
+  processOrderSearchReceipt,
+  processStoreAddress,
+  processOrdID
+} from '../utils/computations'
+
+import print from '../utils/printReceipt/print'
 
 class ModalApp extends Component {
   _closeModal () {
@@ -58,8 +71,39 @@ class ModalApp extends Component {
     dispatch(syncOfflineOrders(allOfflineOrders))
   }
 
+  _reprint () {
+    const { activeOD, mainUI } = this.props
+    if (!activeOD.storeAddress) {
+      let storeAddress = processStoreAddress(mainUI.activeStore)
+      let receipt = processOrderSearchReceipt('reprint', activeOD, storeAddress)
+      print(receipt)
+    } else {
+      print(activeOD)
+    }
+  }
+
+  _refund () {
+    const { dispatch, activeOD, mainUI, currentPath } = this.props
+    let remark = document.getElementById('refundRemark').value
+    let refundId = processOrdID(mainUI.activeStore.code, mainUI.activeStore.lastId)
+    let refundData = {id: activeOD.id || activeOD.extraInfo.id, refundRemarks: remark, refundId: refundId}
+    dispatch(setActiveModal('orderDetails'))
+    dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
+  }
+
+  renderEmptyListLbl (lbl, isProcessing) {
+    return (
+      isProcessing
+        ? <div className='has-text-centered' style={{padding: 50}}>
+          <span className='icon is-large'><i className='fa fa-spinner fa-pulse fa-fw' /></span>
+          <p className='title'>{lbl}</p>
+        </div>
+        : null
+    )
+  }
+
   render () {
-    const { intl, dispatch, mainUI, offlineData } = this.props
+    const { intl, dispatch, mainUI, offlineData, activeOD, settings } = this.props
     let { activeModalId, activeStaff } = mainUI
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
@@ -156,14 +200,65 @@ class ModalApp extends Component {
             }
           </ModalCard>
         )
-      case 'reprintModal':
+      case 'refundRemark':
+        let hideCpnt = settings.isProcessing
         return (
-          <ModalCard>
-            <p className='control has-addons'>
-              <input id='custSearchKey' className='input is-large is-expanded' type='text' placeholder={lblTR('app.ph.keyword')} onChange={e => this._setSearchCustFilters()} />
-              <a className='button is-large is-success' onClick={e => this._setSearchCustFilters()}>{lblTR('app.button.search')}</a>
-            </p>
+          <ModalCard
+            closeAction={e => dispatch(setActiveModal('orderDetails'))}
+            confirmAction={!hideCpnt ? e => this._refund() : null} cancelAction={!hideCpnt ? e => dispatch(setActiveModal('orderDetails')) : null}>
+            {!hideCpnt
+              ? <div className='content has-text-centered'>
+                <h1 className='title'>Refund Remarks</h1>
+                <p className='subtitle'>Reason of refund</p>
+                <input id='refundRemark' className='input is-medium' />
+              </div>
+              : this.renderEmptyListLbl('refund is processing', hideCpnt)
+            }
           </ModalCard>
+        )
+      case 'orderDetails':
+        let currency = activeOD && (activeOD.currency || activeOD.paymentInfo.currency)
+        let date = activeOD && (activeOD.dateCreated || activeOD.extraInfo.date)
+        let total = activeOD && (activeOD.total || activeOD.paymentInfo.orderTotal)
+        let payments = activeOD && (activeOD.payments || activeOD.paymentInfo.payments)
+        let orderId = activeOD && (activeOD.id || activeOD.extraInfo && activeOD.extraInfo.id)
+        let refundId = activeOD && (activeOD.refundId || activeOD.paymentInfo && activeOD.paymentInfo.refundId)
+        let dateRefunded = activeOD && (activeOD.dateRefunded || activeOD.paymentInfo && activeOD.paymentInfo.dateRefunded)
+        return (
+          activeOD
+          ? <ModalCard closeAction={e => this._closeModal()}>
+            <div className='content'>
+              <h1>{`${!refundId ? 'ORDER' : 'REFUNDED ORDER'} #${refundId || orderId}`}</h1>
+              <p className='is-marginless'>{`Date Ordered: ${moment(date).format('L')}`}</p>
+              {refundId && <p>{`Date Refunded: ${moment(dateRefunded).format('L')}`}</p>}
+              <ContentDivider contents={[
+                <div><p className='is-marginless'>ITEMS:</p>
+                  <ul style={{marginTop: 0}}>
+                    {activeOD.items.map((x, key) => { return <li key={key}>{`${(x.product && x.product.nameEn) || x.name} (x${x.quantity})`}</li> })}
+                  </ul>
+                </div>,
+                <p>
+                  {`${lblTR('app.modal.currency')}: ${currency.toUpperCase()}`}
+                  <br />{`${lblTR('app.lbl.orderTotal')}: ${formatCurrency(total, currency)}`}
+                </p>,
+                <div><p className='is-marginless'>PAYMENTS:</p>
+                  <ul style={{marginTop: 0}}>
+                    {payments.map((x, key) => { return <li key={key}>{`${x.type}: ${formatCurrency(x.amount, currency)}`}</li> })}
+                  </ul>
+                </div>
+              ]} size={4} />
+              <ContentDivider contents={[
+                <div style={{margin: 20}}>
+                  <a className='button is-large is-fullwidth is-info' onClick={e => this._reprint()}>{lblTR('app.button.reprint')}</a>
+                </div>,
+                <div style={{margin: 20}}>
+                  {!refundId && <a className='button is-large is-fullwidth is-dark' onClick={e => dispatch(setActiveModal('refundRemark'))}>{lblTR('app.button.refund')}</a>}
+                </div>
+              ]} size={!refundId ? 5 : 10} offset={1} />
+              {settings.error && <p>{settings.errorMessage}</p>}
+            </div>
+          </ModalCard>
+          : null
         )
       default:
         return null
@@ -172,10 +267,14 @@ class ModalApp extends Component {
 }
 
 function mapStateToProps (state) {
+  let activeOD1 = state.settings.activeOrderDetails
+  let activeOD2 = state.reports.storeOrders.activeOrderDetails
   return {
     mainUI: state.app.mainUI,
     orderData: state.data.orderData,
+    settings: state.settings,
     custData: state.data.customers,
+    activeOD: activeOD1 || activeOD2,
     offlineData: state.data.offlineData,
     intl: state.intl
   }

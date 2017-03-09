@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 import {
   addPaymentType,
   resetOrderData
@@ -46,8 +48,8 @@ export function validateCashdrawers (cashdrawers) {
   return (dispatch) => {
     let matchedDrawer
     cashdrawers.forEach(drawer => {
-      let drawerDate = new Date(drawer.date).toISOString().slice(0, 10)
-      let currentDate = new Date().toISOString().slice(0, 10)
+      let drawerDate = moment(drawer.date).format('L')
+      let currentDate = moment(new Date()).format('L')
       if (drawerDate === currentDate) {
         matchedDrawer = drawer
       }
