@@ -29,7 +29,8 @@ import {
 
 import {
   customersSetFilter,
-  fetchCustomerByFilter
+  fetchCustomerByFilter,
+  customersResetState
 } from '../actions/data/customers'
 
 import {
@@ -48,6 +49,7 @@ class ModalStoreUtils extends Component {
   _closeModal (event) {
     const { dispatch } = this.props
     dispatch(closeActiveModal())
+    dispatch(customersResetState())
   }
 
   _resetOrderData () {

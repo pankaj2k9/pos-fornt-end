@@ -5,7 +5,8 @@ import {
   CUSTOMER_SEARCH_REQUEST,
   CUSTOMER_SEARCH_SUCCESS,
   CUSTOMER_SEARCH_FAILURE,
-  CUSTOMERS_SET_FILTER
+  CUSTOMERS_SET_FILTER,
+  CUSTOMERS_RESET_STATE
 } from '../../actions/data/customers'
 
 function customers (state = {
@@ -72,6 +73,16 @@ function customers (state = {
       return Object.assign({}, state, {
         customerFilter: action.filter,
         customerSearchKey: action.searchKey
+      })
+    case CUSTOMERS_RESET_STATE:
+      return Object.assign({}, state, {
+        customerFilter: '',
+        customerSearchKey: '',
+        customerSearch: [],
+        customerSearchById: {},
+        isFetching: false,
+        shouldUpdate: false,
+        error: null
       })
     default:
       return state

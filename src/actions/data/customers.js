@@ -7,8 +7,23 @@ export const CUSTOMER_SEARCH_SUCCESS = 'CUSTOMER_SEARCH_SUCCESS'
 export const CUSTOMER_SEARCH_FAILURE = 'CUSTOMER_SEARCH_FAILURE'
 
 export const CUSTOMERS_SET_FILTER = 'CUSTOMERS_SET_FILTER'
-
+export const CUSTOMERS_RESET_STATE = 'CUSTOMERS_RESET_STATE'
 import customerService from '../../services/customers'
+
+export function customersSetFilter (filter, key) {
+  let searchKey = key.replace(/[^\w\s]/gi, '') // removes any special characters
+  return {
+    type: CUSTOMERS_SET_FILTER,
+    filter,
+    searchKey
+  }
+}
+
+export function customersResetState () {
+  return {
+    type: CUSTOMERS_RESET_STATE
+  }
+}
 
 export function customersFetchRequest () {
   return {
@@ -47,15 +62,6 @@ export function customerSearchFailure (error) {
   return {
     type: CUSTOMER_SEARCH_FAILURE,
     error
-  }
-}
-
-export function customersSetFilter (filter, key) {
-  let searchKey = key.replace(/[^\w\s]/gi, '') // removes any special characters
-  return {
-    type: CUSTOMERS_SET_FILTER,
-    filter,
-    searchKey
   }
 }
 
