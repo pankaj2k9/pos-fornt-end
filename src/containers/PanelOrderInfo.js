@@ -192,7 +192,7 @@ class PanelOrderInfo extends Component {
     return (
       <div>
         <div className='panel'>
-          <div className='panel-block' style={{height: intFrameHeight / 2.3, overflowY: 'scroll', width: '100%'}}>
+          <div className='panel-block' style={{height: intFrameHeight / 2.5, overflowY: 'scroll', width: '100%'}}>
             <table className='table' style={{alignSelf: 'flex-start'}}>
               <thead>
                 <tr>

@@ -6,7 +6,6 @@ import { injectIntl, FormattedMessage } from 'react-intl'
 // import SimpleModal from '../components/SimpleModal'
 import Table from '../components/Table'
 import LoadingPane from '../components/LoadingPane'
-import DetailsModal from '../components/DetailsModal'
 
 import {
   closeActiveModal,
@@ -64,7 +63,7 @@ class StoreOrders extends React.Component {
   _handleOrderClick (orderId) {
     const { dispatch } = this.props
     dispatch(storeOrdersSetActiveId(orderId))
-    dispatch(setActiveModal('orderDetailReport'))
+    dispatch(setActiveModal('orderDetails'))
   }
 
   _onClickModalClose () {
@@ -191,7 +190,7 @@ class StoreOrders extends React.Component {
   }
 
   render () {
-    const { locale, isLoading, orderItems, activeModalId, activeOrder, intl } = this.props
+    const { locale, isLoading, orderItems, activeOrder, intl } = this.props
 
     const productOrderItems = this._constructOrderItems(orderItems)
     const columnHeaders = [
@@ -200,11 +199,6 @@ class StoreOrders extends React.Component {
       <FormattedMessage id='app.page.reports.currency' />,
       <FormattedMessage id='app.page.reports.total' />
     ]
-    // const modalTitle = <FormattedMessage id='app.modal.order' />
-    // ('activeOrder', activeOrder)
-    // const ViewComponent = activeOrder
-    //   ? <ViewOrder orderItemData={activeOrder} />
-    //   : null
 
     let details = []
     if (activeOrder) {
@@ -281,16 +275,6 @@ class StoreOrders extends React.Component {
           onClickRow={this._handleOrderClick}
         />
         {this._renderPagination()}
-        {activeOrder
-          ? <DetailsModal
-            title='app.page.settings.orderDetails'
-            activeModalId={activeModalId}
-            id='orderDetailReport'
-            items={details}
-            hideDetails={false}
-            close={this.onClickCloseModal.bind(this)} />
-          : null
-        }
       </div>
     )
   }
@@ -304,7 +288,7 @@ function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
     activeModalId: state.app.mainUI.activeModalId,
-    store: state.app.mainUI.store,
+    store: state.app.mainUI.activeStore,
     date: state.reports.date,
     isLoading: state.reports.storeOrders.isLoading,
     orderItems: state.reports.storeOrders.orderItems,

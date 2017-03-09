@@ -66,8 +66,6 @@ class App extends React.Component {
 
   render () {
     const {
-      intl,
-      activeModalId,
       isHamburgerOpen,
       location,
       authProcessing,
@@ -75,7 +73,6 @@ class App extends React.Component {
       posMode,
       staff,
       activeCashier,
-      activeDrawer,
       adminToken
     } = this.props
 
@@ -134,12 +131,7 @@ class App extends React.Component {
             {this.props.children}
           </div>
         </section>
-        <ModalApp
-          intl={intl}
-          activeCashier={activeCashier}
-          activeDrawer={activeDrawer}
-          activeModalId={activeModalId}
-          staff={staff} />
+        <ModalApp currentPath={location.pathname} />
       </div>
     )
   }

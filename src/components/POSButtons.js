@@ -78,7 +78,7 @@ const POSButtons = (props) => {
 
 POSButtons.defaultProps = {
   buttonStyle: {
-    height: 98,
+    height: 90,
     padding: 10
   },
   containerStyle: {},

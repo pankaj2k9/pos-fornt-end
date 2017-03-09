@@ -75,7 +75,7 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'refund':
-        dispatch(setSettingsActiveTab('orders'))
+        dispatch(setSettingsActiveTab('orderSearch'))
         browserHistory.push('settings')
         break
       case 'doublePoints':
