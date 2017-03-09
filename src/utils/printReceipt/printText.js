@@ -164,8 +164,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
   let comp = ''
 
   if (paymentInfo) {
-    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo } = paymentInfo
-    const { id } = extraInfo
+    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, refundAmt } = paymentInfo
 
     comp += '<div>'
     if (currency === 'sgd') {
@@ -174,8 +173,8 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
                ${RECEIPT_DIVIDER}`
     }
 
-    comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(orderDisccount, currency)}</div>
-             <div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(orderTotal, currency)}</div>`
+    comp += orderDisccount ? `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(orderDisccount, currency)}</div>` : ''
+    comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(orderTotal, currency)}</div>`
 
     comp += RECEIPT_DIVIDER
 
@@ -245,14 +244,14 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
 
     if (type === 'reprint') {
       comp += RECEIPT_DIVIDER
-      comp += `<div style="${TOTAL_DIV_STYLE_1}">REPRINTED RECEIP
+      comp += `<div style="${TOTAL_DIV_STYLE_2}">REPRINTED RECEIPT
               <div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
     } else if (type === 'refund') {
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${id}</div>
+              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>
               <div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(0)}</div>`
+              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>`
     }
 
     comp += '</div>'

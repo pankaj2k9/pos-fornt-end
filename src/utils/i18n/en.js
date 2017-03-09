@@ -171,6 +171,8 @@ const en = {
   'app.button.openDrawer': 'Open Drawer',
   'app.button.syncOrders': 'sync offline data',
   'app.button.hideBar': ' Hide this notification',
+  'app.button.refund': 'Refund',
+  'app.button.reprint': 'Reprint',
 
   'app.ph.paymentAmount': 'Input Exact Amount/Custom Amount',
   'app.ph.voucherAmount': 'Input Voucher Amount',
@@ -201,6 +203,7 @@ const en = {
   'app.ph.printingRCT': 'Printing Receipt. . .',
   'app.ph.enterAmt1st': 'Enter amount to pay first',
 
+  'app.error.noRemark': 'Specify the reason of refund before refunding',
   'app.error.update.stock': 'Update stocks on admin app',
   'app.error.noNetwork': 'No Internet Connection. . . ',
   'app.error.needNetwork': 'Internet Connection is needed to Login. ',

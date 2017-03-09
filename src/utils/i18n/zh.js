@@ -171,6 +171,8 @@ const zh = {
   'app.button.openDrawer': '打开钱箱',
   'app.button.syncOrders': '同步订单',
   'app.button.hideBar': ' 隐藏此通知',
+  'app.button.refund': '退款',
+  'app.button.reprint': '重印',
 
   'app.ph.paymentAmount': '输入确切的金额或自定义金额',
   'app.ph.searchOrBarcode': '搜索产品或扫描条形码',
@@ -199,6 +201,7 @@ const zh = {
   'app.ph.printingRCT': '打印收据. . .',
   'app.ph.enterAmt1st': '输入金额最初',
 
+  'app.error.noRemark': '指定退款前的退款原因',
   'app.error.update.stock': '更新股票在管理员',
   'app.error.noNetwork': '没有网络连接. . . ',
   'app.error.needNetwork': '需要网络连接',
