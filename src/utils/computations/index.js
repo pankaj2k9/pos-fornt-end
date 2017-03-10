@@ -45,12 +45,12 @@ export const compDiscSum = (data) => {
   }
 }
 
-export const compPaymentsSum = (data) => {
+export const compPaymentsSum = (data, noVoucher) => {
   let totalPayments = 0
   if (data && data.length > 0) {
     data.forEach(x => {
       if (x.type !== 'odbo') {
-        if (x.type === 'voucher') {
+        if (x.type === 'voucher' && !noVoucher) {
           totalPayments = totalPayments + x.deduction
         } else {
           totalPayments = totalPayments + x.amount
@@ -138,9 +138,45 @@ export const processReceiptProducts = (data, currency) => {
   return products
 }
 
-export const processOrdID = (str, lastId) => {
+export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
+  let currency = data.currency
+  let products = data.items.map(item => {
+    let name = `${item.product.nameEn}\n${item.product.barcodeInfo || ''}`
+    return {
+      productId: Number(item.productId),
+      name: name,
+      quantity: item.quantity,
+      itemCost: currency === 'sgd' ? formatCurrency(item.itemCost) : item.itemCost,
+      totalCost: currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
+    }
+  })
+  return {
+    type: type,
+    storeAddress,
+    items: products,
+    extraInfo: {
+      id: data.id,
+      customer: data.users,
+      data: new Date(),
+      staff: `STAFF ID#${data.adminId}`
+    },
+    paymentInfo: {
+      currency: data.currency,
+      payments: data.payments,
+      subtotal: data.total,
+      vouchers: data.vouchers,
+      orderTotal: data.total,
+      refundId: type === 'refund' && lastId,
+      refundAmt: type === 'refund' && compPaymentsSum(data.payments, 'noVoucher'),
+      odbo: processOdbo(data.users, data.total, data.bonusPoints),
+      notes: data.remarks
+    }
+  }
+}
+
+export const processOrdID = (str, lastId, normal) => {
   let zeroes = ''
-  let id = lastId + 1
+  let id = !normal ? lastId + 1 : lastId
   for (var i = id.toString().length; i < 7; i++) {
     zeroes = zeroes + '0'
   }

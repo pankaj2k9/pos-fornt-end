@@ -1,5 +1,6 @@
 import {
   SET_SETTINGS_ACTIVE_TAB,
+  SET_ACTIVE_ORDER_DETAILS,
   CUSTOMERS_SET_SEARCH_KEY,
   CUSTOMERS_SET_FILTER,
   CUSTOMERS_SET_ACTIVE_ID,
@@ -15,7 +16,7 @@ import {
   VERIFY_STORE_PIN_SUCCESS,
   VERIFY_STORE_PIN_FAILURE,
   SETTINGS_ERROR,
-  REPRINTING_RECEIPT,
+  SET_PROCESSING_STATUS,
 
   UPDATE_CUSTOMER_SHOW,
   UPDATE_CUSTOMER_REQUEST,
@@ -112,9 +113,10 @@ function customer (state, action) {
 }
 
 function settings (state = {
-  orderFromGet: null,
+  searchedOrders: [],
   activeTab: 'main',
   activeCustomerId: null,
+  activeOrderDetails: undefined,
   tabs: [
     {name: 'app.page.settings.tabMain', value: 'main'},
     {name: 'app.page.settings.tabOrders', value: 'orders'},
@@ -178,9 +180,13 @@ function settings (state = {
         activeCustomerId: action.odboId
       })
     }
-    case REPRINTING_RECEIPT:
+    case SET_ACTIVE_ORDER_DETAILS: {
       return Object.assign({}, state, {
-        reprintSuccess: action.value,
+        activeOrderDetails: action.order
+      })
+    }
+    case SET_PROCESSING_STATUS:
+      return Object.assign({}, state, {
         isProcessing: false
       })
     case REFUND_REQUEST:
@@ -192,8 +198,7 @@ function settings (state = {
       return Object.assign({}, state, {
         refundSuccess: true,
         isProcessing: false,
-        orderFromGet: null,
-        orderSearchKey: null
+        orderSearchKey: ''
       })
     case REFUND_FAILURE:
       return Object.assign({}, state, {
@@ -210,13 +215,13 @@ function settings (state = {
       })
     case STOREORDER_FETCH_SUCCESS:
       return Object.assign({}, state, {
-        orderFromGet: action.response,
+        searchedOrders: action.response,
         isProcessing: false
       })
     case STOREORDER_FETCH_FAILURE:
     case RESET_SETTINGS_STATE: {
       return Object.assign({}, state, {
-        orderFromGet: null,
+        searchedOrders: null,
         error: false,
         orderSearchKey: '',
         refundSuccess: null,
@@ -237,7 +242,7 @@ function settings (state = {
     case VERIFY_STORE_PIN_FAILURE:
       return Object.assign({}, state, {
         errorMessage: action.error,
-        orderSearchKey: null,
+        orderSearchKey: '',
         isProcessing: false
       })
     case SETTINGS_ERROR:

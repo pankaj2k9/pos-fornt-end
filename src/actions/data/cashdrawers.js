@@ -124,7 +124,10 @@ export function dailyDataFetchDataFailure (error) {
 export function fetchCashdrawers (storeId) {
   return (dispatch) => {
     dispatch(dailyDataFetchDataRequest())
-    return dailyDataService.find({query: { storeId: storeId }})
+    return dailyDataService.find({query: {
+      storeId: storeId,
+      date: new Date().toISOString().slice(0, 10)
+    }})
       .then(response => {
         dispatch(dailyDataFetchDataSuccess(response.data))
         dispatch(validateCashdrawers(response.data))

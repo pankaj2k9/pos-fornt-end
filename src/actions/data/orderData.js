@@ -51,11 +51,14 @@ export function setOverallDiscount (discount) {
 }
 
 export const SET_ORDER_INFO = 'SET_ORDER_INFO'
-export function setOrderInfo (data) {
+export function setOrderInfo (data, otherData) {
   let { orderData, appData } = data
-  let { currency, total, totalOdbo, totalDisc, totalOdboDisc, activeCustomer, orderItems, orderNote, payments, bonusPoints } = orderData
+  let { currency, total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote, payments } = orderData
   let { activeCashier, activeStore } = appData
   let { source, code, lastId } = activeStore
+
+  let activeCustomer = otherData || orderData.activeCustomer
+  let bonusPoints = otherData || orderData.bonusPoints
 
   let orderTotal = currency === 'sgd' ? total : totalOdbo
   let orderDisccount = currency === 'sgd' ? totalDisc : totalOdboDisc
@@ -67,6 +70,7 @@ export function setOrderInfo (data) {
     items: processProducts(orderItems, currency),
     id: processOrdID(code, lastId),
     adminId: activeCashier.id,
+    bonusPoints: bonusPoints,
     dateOrdered: new Date(),
     source: source,
     subtotal: orderTotal,
@@ -142,10 +146,10 @@ export function addPaymentType (payment) {
   }
 }
 export const REMOVE_NOTE = 'REMOVE_NOTE'
-export function removeNote (message) {
+export function removeNote (key) {
   return {
     type: REMOVE_NOTE,
-    message
+    key
   }
 }
 

@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 import { FormattedMessage } from 'react-intl'
-import Tabs from '../components/Tabs'
 import SettingsTab from './SettingsTab'
 
 import {
@@ -21,7 +20,7 @@ class Settings extends Component {
     dispatch(storeGetDailyData(storeId, cashdrawer))
   }
 
-  onClickTab (tabName) {
+  onClickOption (tabName) {
     const {dispatch} = this.props
     dispatch(setSettingsActiveTab(tabName))
     if (tabName === 'customers') {
@@ -45,19 +44,59 @@ class Settings extends Component {
   }
 
   render () {
-    const {activeTab, tabs} = this.props
+    const {activeTab} = this.props
     return (
       <div className='hero'>
         <div className='section' style={{padding: 10}}>
-          <center style={{marginBottom: 20}}>
-            <h1 className='title is-3'><FormattedMessage id={'app.page.settings.title'} /></h1>
-          </center>
-          <Tabs
-            activeLink={activeTab}
-            links={tabs}
-            onClick={this.onClickTab.bind(this)}
-            type='is-centered is-toggle is-fullwidth is-medium' />
-          <SettingsTab />
+          <p className='title is-1'>
+            <FormattedMessage id={'app.page.settings.title'} />
+          </p>
+          <div className='columns is-multiline is-mobile is-fullwidth'>
+            <div className='column is-3'>
+              <aside className='menu box'>
+                <p className='menu-label'>
+                  settings options
+                </p>
+                <ul className='menu-list'>
+                  <li>
+                    <a className={activeTab === 'main' && 'is-active'} onClick={this.onClickOption.bind(this, 'main')}>
+                      Main
+                    </a>
+                  </li>
+                  <li>
+                    <a className={activeTab.match('order') && 'is-active'} onClick={this.onClickOption.bind(this, 'orderSearch')}>
+                      <FormattedMessage id={'app.page.settings.tabOrders'} />
+                    </a>
+                    <ul>
+                      <li>
+                        <a className={activeTab === 'orderSearch' && 'is-active'} onClick={this.onClickOption.bind(this, 'orderSearch')}>
+                          Search
+                        </a>
+                      </li>
+                      <li>
+                        <a className={activeTab === 'ordersCached' && 'is-active'} onClick={this.onClickOption.bind(this, 'ordersCached')}>
+                          Cached
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a className={activeTab === 'customers' && 'is-active'} onClick={this.onClickOption.bind(this, 'customers')}>
+                      <FormattedMessage id={'app.page.settings.customers'} />
+                    </a>
+                  </li>
+                  <li>
+                    <a className={activeTab === 'account' && 'is-active'} onClick={this.onClickOption.bind(this, 'account')}>
+                      <FormattedMessage id={'app.page.settings.account'} />
+                    </a>
+                  </li>
+                </ul>
+              </aside>
+            </div>
+            <div className='column is-9'>
+              <SettingsTab />
+            </div>
+          </div>
         </div>
       </div>
     )

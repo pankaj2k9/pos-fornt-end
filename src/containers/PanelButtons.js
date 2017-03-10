@@ -16,7 +16,9 @@ import {
 
 import {
   addBonusMultiplier,
+  addOrderItem,
   removeBonusMultiplier,
+  setOrderInfo,
   setCurrencyType
 } from '../actions/data/orderData'
 
@@ -33,7 +35,8 @@ class PanelButtons extends Component {
   _onClickPanelButtons (name) {
     const {
       dispatch,
-      orderData
+      orderData,
+      mainUI
     } = this.props
 
     switch (name) {
@@ -74,12 +77,15 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'refund':
-        dispatch(setSettingsActiveTab('orders'))
+        dispatch(setSettingsActiveTab('orderSearch'))
         browserHistory.push('settings')
         break
       case 'doublePoints':
-        return dispatch(addBonusMultiplier(100))
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, 100))
+        dispatch(addBonusMultiplier(100))
+        break
       case 'removeBonus':
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, undefined))
         return dispatch(removeBonusMultiplier())
       case 'adjustPoints':
         dispatch(setSettingsActiveTab('customers'))
@@ -95,6 +101,16 @@ class PanelButtons extends Component {
         return dispatch(cancelOrder())
       default:
     }
+  }
+
+  _barcodeSearch (e) {
+    e.preventDefault()
+    const { dispatch, products } = this.props
+    let barcode = document.getElementById('barcodeInput').value
+    products.forEach(product => {
+      if (product.barcodeInfo === barcode) { dispatch(addOrderItem(product)) }
+    })
+    document.getElementById('barcode').reset()
   }
 
   render () {
@@ -136,6 +152,14 @@ class PanelButtons extends Component {
     return (
       <div className='panel'>
         <POSButtons buttons={buttons} onClickButton={this._onClickPanelButtons.bind(this)} />
+        <div style={{padding: 10, paddingTop: 30}}>
+          <form id='barcode' onSubmit={e => this._barcodeSearch(e)}>
+            <p className='control has-addons'>
+              <input id='barcodeInput' className='input is-large is-expanded' type='text' />
+              <a className='button is-large is-dark'>BARCODE</a>
+            </p>
+          </form>
+        </div>
       </div>
     )
   }
@@ -146,7 +170,9 @@ function mapStateToProps (state) {
   let mainUI = state.app.mainUI
   return {
     orderData,
+    mainUI,
     currency: orderData.currency,
+    products: state.data.products.productsArray,
     posMode: mainUI.posMode
   }
 }

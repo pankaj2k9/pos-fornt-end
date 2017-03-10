@@ -6,6 +6,7 @@ import { injectIntl } from 'react-intl'
 import ModalCard from '../components/ModalCard'
 import ContentDivider from '../components/ContentDivider'
 import POSButtons from '../components/POSButtons'
+// import MoneyInput from '../components/MoneyInput'
 
 import {
   closeActiveModal
@@ -17,6 +18,7 @@ import {
   setAmountTendered,
   setFieldsDefault,
   setTransCode,
+  setFinalValue,
   setCashTendered
 } from '../actions/app/storeUI'
 
@@ -27,10 +29,14 @@ import {
   setOrderInfo
 } from '../actions/data/orderData'
 
-import { formatCurrency, formatNumber } from '../utils/string'
+import { formatCurrency, formatNumber, formatDecimalStr } from '../utils/string'
 import { compPaymentsSum } from '../utils/computations'
 
 class ModalSetPayments extends Component {
+
+  componentDidMount () {
+    document.getElementById('payInput').focus()
+  }
 
   _confirm () {
     const { dispatch, mainUI, orderData } = this.props
@@ -65,6 +71,21 @@ class ModalSetPayments extends Component {
     }
   }
 
+  _setFinalValue (e) {
+    e.preventDefault()
+    const { dispatch, paymentMode } = this.props
+    let amtInput = document.getElementById('payInput')
+    let amt = amtInput && document.getElementById('payInput').value
+    let initial = amt.replace(/[^\d.]/g, '')
+    let final = formatDecimalStr(initial)
+    dispatch(setFinalValue(paymentMode, final))
+    if (paymentMode === 'cash') {
+      this._addPayment('cash', final)
+    } else {
+      document.getElementById('transID').focus()
+    }
+  }
+
   _removePayment (mode) {
     const { dispatch } = this.props
     dispatch(setFieldsDefault())
@@ -83,6 +104,12 @@ class ModalSetPayments extends Component {
     let payInput = paymentMode === 'cash'
       ? cashTendered
       : amountToPay
+    let cashInputPH = paymentMode === 'cash' && (cashTendered !== '' || cashTendered !== '$0.00')
+      ? cashTendered
+      : '$0.00'
+    if (document.getElementById('payInput')) {
+      document.getElementById('payInput').value = payInput
+    }
 
     // Buttons
 
@@ -125,28 +152,36 @@ class ModalSetPayments extends Component {
       let inputPH = mode !== 'cash'
         ? mode !== 'voucher' ? lbl('app.ph.enterTransId') : lbl('app.general.voucherCode')
         : null
+      let ctrlLbl = mode !== 'cash'
+        ? mode !== 'voucher' ? 'CARD' : 'VOUCHER'
+        : 'QUICK CASH'
       let disabled = formatNumber(amountToPay) <= 0
       return (
         <div className='columns is-multiline is-mobile is-fullwidth is-marginless'>
           <div className={`column ${mode === 'cash' ? 'is-12' : 'is-7'}`}>
-            <p>select card providers</p>
+            <p>{ctrlLbl}</p>
             {mode === 'credit' || mode === 'cash'
               ? <POSButtons
                 containerStyle={mode !== 'cash' ? styles.cardCtnr : styles.btnCtnr}
                 buttonStyle={mode === 'cash' ? styles.btnStyle : styles.cardProv}
                 buttons={mode === 'cash' ? quickCashBtns : cardBtns}
                 onClickButton={mode !== 'cash'
-                  ? (name) => { dispatch(setActiveCard('credit', name)) }
+                  ? (name) => {
+                    dispatch(setActiveCard('credit', name))
+                    document.getElementById('transID').focus()
+                  }
                   : (value) => {
                     if (value !== 'clear') {
-                      let amount = formatNumber(amountToPay) + Number(value)
-                      dispatch(setAmountTendered(amount))
-                      dispatch(setCashTendered(amount))
-                      this._addPayment(mode, amount)
+                      let initial = formatNumber(amountToPay) + Number(value)
+                      let final = formatDecimalStr(String(initial).replace(/[^\d.]/g, ''))
+                      dispatch(setAmountTendered(final))
+                      dispatch(setCashTendered(final))
+                      this._addPayment(mode, initial)
                     } else {
                       dispatch(setCashTendered(0))
                       this._removePayment(mode)
                     }
+                    document.getElementById('payInput').focus()
                   }
                 } />
               : null
@@ -218,16 +253,21 @@ class ModalSetPayments extends Component {
                 </p>
               </div>
               <div className='column is-8'>
-                <input className='input is-large is-success' style={styles.input}
-                  value={payInput}
-                  onChange={e => {
-                    let value = formatNumber(e.target.value)
-                    if (paymentMode === 'cash') { dispatch(setCashTendered(value)) }
-                    dispatch(setAmountTendered(value))
-                    if (paymentMode === 'cash') {
-                      this._addPayment('cash', value)
-                    }
-                  }} />
+                <form onSubmit={e => this._setFinalValue(e)}>
+                  <p className='control has-addons'>
+                    <input id='payInput' className='input is-large is-success' style={styles.input}
+                      onChange={e => {
+                        if (e.target.value !== '') {
+                          document.getElementById('okBtn').className = 'button is-large is-success'
+                        } else if (e.target.value === '') {
+                          document.getElementById('okBtn').className = 'is-hidden'
+                        }
+                      }} onFocus={e => { document.getElementById('okBtn').className = 'is-hidden' }} placeholder={cashInputPH} />
+                    <a id='okBtn' onClick={e => this._setFinalValue(e)} style={{height: 48, fontSize: 10}}>
+                      {paymentMode === 'cash' && cashTendered !== '' ? 'EDIT' : 'ENTER'}
+                    </a>
+                  </p>
+                </form>
               </div>
               <div className='column is-4 has-text-centered' style={styles.center}>
                 <p className='title is-5'>
@@ -257,8 +297,10 @@ class ModalSetPayments extends Component {
                 buttonStyle={styles.btnStyle}
                 buttons={payModeBtns}
                 onClickButton={(name) => {
-                  if (name !== 'cash') { dispatch(setFieldsDefault()) }
                   dispatch(setPaymentMode(name))
+                  document.getElementById('okBtn').className = 'is-hidden'
+                  if (name !== 'cash') { dispatch(setFieldsDefault()) }
+                  document.getElementById('payInput').focus()
                 }} />
             </div>
           ]}
@@ -276,7 +318,7 @@ const styles = {
   },
   input: {
     height: 'inherit',
-    fontSize: '2.25rem',
+    fontSize: '2.1rem',
     fontWeight: 600,
     paddingTop: ' 0.0em',
     textAlign: 'center'

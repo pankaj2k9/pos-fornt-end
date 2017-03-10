@@ -45,11 +45,11 @@ class PanelOrderInfo extends Component {
   _onClickPanelButtons (name) {
     const { dispatch, currency, totalOdbo, orderInfo, receipt, posMode, activeDrawer } = this.props
     switch (name) {
-      case 'pay': return dispatch(setActiveModal('payments'))
+      case 'total': return dispatch(setActiveModal('payments'))
       case 'printSub':
         print(receipt)
         break
-      case 'total':
+      case 'pay':
         if (posMode === 'online') {
           if (currency === 'sgd') {
             dispatch(processOrder(orderInfo, receipt, activeDrawer))
@@ -107,6 +107,7 @@ class PanelOrderInfo extends Component {
       let subtotal = currency === 'sgd'
         ? formatCurrency(item.subTotalPrice)
         : item.subTotalOdboPrice.toFixed(0)
+      let disabled = item.overallDiscount || item.overallDiscount !== 0
       return (
         notEmpty
         ? <tr key={key}>
@@ -125,7 +126,7 @@ class PanelOrderInfo extends Component {
               <p className='control has-addons' style={{width: 50}}>
                 <input id='itemDiscount' className='input is-small' type='Number'
                   placeholder={discountVal} value={discountVal}
-                  onChange={e => setDiscount(e.target.value)} />
+                  onChange={e => { !disabled && setDiscount(e.target.value) }} />
                 <a className='button is-small'>%</a>
               </p>
             </form>
@@ -183,15 +184,15 @@ class PanelOrderInfo extends Component {
     let activePrintAndTotal = currency === 'sgd'
       ? payments.length > 0 && payBal === 0 : odbo.newCoins2 > 0
     let buttons = [
-      {name: 'pay', label: 'app.button.pay', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
+      {name: 'total', label: 'app.button.total', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
       {name: 'printSub', label: 'app.button.printTotal', isActive: activePrintAndTotal, color: 'purple', size: 'is-4'},
-      {name: 'total', label: 'app.button.total', isActive: activePrintAndTotal, color: 'blue', size: 'is-4'}
+      {name: 'pay', label: 'app.button.pay', isActive: activePrintAndTotal, color: 'blue', size: 'is-4'}
     ]
 
     return (
       <div>
         <div className='panel'>
-          <div className='panel-block' style={{height: intFrameHeight / 3, overflowY: 'scroll', width: '100%'}}>
+          <div className='panel-block' style={{height: intFrameHeight / 2.5, overflowY: 'scroll', width: '100%'}}>
             <table className='table' style={{alignSelf: 'flex-start'}}>
               <thead>
                 <tr>
@@ -261,7 +262,7 @@ class PanelOrderInfo extends Component {
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
               <div className='column is-3 is-paddingless'>
                 Notes
-                <a onClick={this._onClickViewNotes.bind(this)}>view</a>
+                <a onClick={this._onClickViewNotes.bind(this)}> ( {lblTR('app.button.view')} )</a>
               </div>
               <div className='column is-5 is-paddingless'>
                 <p>{`customer: ${custName}`}</p>
@@ -292,13 +293,11 @@ function mapStateToProps (state) {
   let mainUI = state.app.mainUI
   let storeUI = state.app.storeUI
   let orderData = state.data.orderData
-  let mainUIediting = mainUI.isEditing
-  let storeUIediting = storeUI.isEditing
   return {
     mainUI,
     storeUI,
     orderData,
-    isEditing: mainUIediting || storeUIediting,
+    isEditing: mainUI.isEditing,
     activeDrawer: mainUI.activeDrawer,
     posMode: mainUI.posMode,
     activeCustomer: orderData.activeCustomer,

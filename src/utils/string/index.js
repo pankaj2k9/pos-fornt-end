@@ -23,6 +23,22 @@ export const formatNumber = (string) => {
   return newValue
 }
 
+export const formatDecimalStr = (string) => {
+  let initial = string.replace(/[^\d.]/g, '')
+  let i = parseFloat(initial)
+  if (isNaN(i)) { i = 0.00 }
+  let minus = ''
+  if (i < 0) { minus = '-' }
+  i = Math.abs(i)
+  i = parseInt((i + 0.005) * 100)
+  i = i / 100
+  let s = String(i)
+  if (s.indexOf('.') < 0) { s += '.00' }
+  if (s.indexOf('.') === (s.length - 2)) { s += '0' }
+  s = minus + s
+  return `$${s}`
+}
+
 /**
  * Format a date to locale format
  * @param {Date} date to format

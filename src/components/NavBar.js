@@ -61,7 +61,7 @@ const NavBar = ({
                 <i className={`fa fa-user fa-2x st-icon ${staffColor}`}
                   style={userIconStyle} />
               </span>
-              {staff.role === 'master'
+              {staff && staff.role === 'master'
                 ? <div>
                   {!activeCashier
                     ? <a className={`button is-light is-outlined ${authProcessing
@@ -125,7 +125,7 @@ const NavBar = ({
 
           {posMode === 'online'
             ? <div className={`nav-right nav-menu ${toggleClass}`}>
-              {staff.role === 'master'
+              {staff && staff.role === 'master'
                 ? <NavLink to='/store'>
                   <FormattedMessage id='app.navBar.store.title' />
                 </NavLink>

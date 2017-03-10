@@ -9,8 +9,8 @@ import {
 
 function storeUI (state = {
   isEditing: false,
-  amountToPay: '$0.00',
-  cashTendered: '$0.00',
+  amountToPay: '',
+  cashTendered: '',
   cash: { type: 'cash' },
   card: {
     type: 'credit',
@@ -66,7 +66,7 @@ function storeUI (state = {
     case SET_FIELDS_DEFAULT: {
       return Object.assign({}, state, {
         isEditing: false,
-        amountToPay: '$0.00',
+        amountToPay: '',
         card: {
           type: 'credit',
           provider: undefined

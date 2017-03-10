@@ -1,46 +1,73 @@
-export const REFUND_REQUEST = 'REFUND REQUEST'
-export const REFUND_SUCCESS = 'REFUND_SUCCESS'
-export const REFUND_FAILURE = 'REFUND_FAILURE'
-
 import refundService from '../services/refund'
-import { setError } from './app/mainUI'
 
 import {
-  printPreviewTotalReceipt
-} from '../actions/helpers'
+  setError,
+  setActiveModal,
+  setNewLastID
+} from './app/mainUI'
+import { updateSavedReceipt } from './data/offlineData'
+import { setActiveOrderDetails } from './settings'
+import { storeOrdersSetActiveOrder } from './reports'
 
+import print from '../utils/printReceipt/print'
+
+import {
+  processOrderSearchReceipt,
+  processStoreAddress,
+  compPaymentsSum
+} from '../utils/computations'
+
+export const REFUND_REQUEST = 'REFUND REQUEST'
 export function refundRequest () {
   return {
     type: REFUND_REQUEST
   }
 }
 
+export const REFUND_SUCCESS = 'REFUND_SUCCESS'
 export function refundSuccess () {
   return {
     type: REFUND_SUCCESS
   }
 }
 
+export const REFUND_FAILURE = 'REFUND_FAILURE'
 export function refundFailure () {
   return {
     type: REFUND_FAILURE
   }
 }
 
-export function refund (orderId, refundRemarks, refundId, details) {
+export function refund (refundData, storeData, orderData, currentPath) {
   return (dispatch) => {
     dispatch(refundRequest())
-    return refundService.create({id: orderId, refundRemarks: refundRemarks, refundId: refundId})
+    return refundService.create(refundData)
       .then(response => {
-        details.trans.refundId = response.refundId
+        if (currentPath === '/settings') {
+          dispatch(setActiveOrderDetails(response))
+        } else {
+          dispatch(storeOrdersSetActiveOrder(response))
+        }
+        dispatch(setActiveModal('orderDetails'))
         dispatch(refundSuccess(response))
-        dispatch(setError(null))
-        dispatch(printPreviewTotalReceipt(details))
+        dispatch(setNewLastID())
+        if (!orderData.storeAddress) {
+          let storeAddress = processStoreAddress(storeData)
+          let receipt = processOrderSearchReceipt('refund', orderData, storeAddress, refundData.refundId)
+          print(receipt)
+        } else {
+          orderData.type = 'refund'
+          orderData.paymentInfo.refundId = refundData.refundId
+          orderData.paymentInfo.refundAmt = compPaymentsSum(orderData.paymentInfo.payments, 'noVoucher')
+          orderData.paymentInfo.dataRefunded = new Date()
+          dispatch(updateSavedReceipt(orderData))
+          print(orderData)
+        }
       })
       .catch(error => {
         dispatch(refundFailure())
-        if (!refundRemarks) {
-          dispatch(setError('Specify the reason of refund before refunding'))
+        if (!refundData.refundRemarks) {
+          dispatch(setError('app.error.noRemark'))
         } else {
           dispatch(setError(error.message))
         }

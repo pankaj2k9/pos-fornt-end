@@ -35,6 +35,8 @@ function requireAuth (nextState, replace, callback) {
     callback()
   } else if (!token) {
     callback()
+  } else if (token && appState && nextRoute === 'store' && netStat === 'offline') {
+    callback()
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
     .then(token => {
