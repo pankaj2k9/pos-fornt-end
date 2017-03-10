@@ -45,11 +45,11 @@ class PanelOrderInfo extends Component {
   _onClickPanelButtons (name) {
     const { dispatch, currency, totalOdbo, orderInfo, receipt, posMode, activeDrawer } = this.props
     switch (name) {
-      case 'pay': return dispatch(setActiveModal('payments'))
+      case 'total': return dispatch(setActiveModal('payments'))
       case 'printSub':
         print(receipt)
         break
-      case 'total':
+      case 'pay':
         if (posMode === 'online') {
           if (currency === 'sgd') {
             dispatch(processOrder(orderInfo, receipt, activeDrawer))
@@ -184,9 +184,9 @@ class PanelOrderInfo extends Component {
     let activePrintAndTotal = currency === 'sgd'
       ? payments.length > 0 && payBal === 0 : odbo.newCoins2 > 0
     let buttons = [
-      {name: 'pay', label: 'app.button.pay', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
+      {name: 'total', label: 'app.button.total', isActive: itemsNotEmpty, color: 'pink', size: 'is-4'},
       {name: 'printSub', label: 'app.button.printTotal', isActive: activePrintAndTotal, color: 'purple', size: 'is-4'},
-      {name: 'total', label: 'app.button.total', isActive: activePrintAndTotal, color: 'blue', size: 'is-4'}
+      {name: 'pay', label: 'app.button.pay', isActive: activePrintAndTotal, color: 'blue', size: 'is-4'}
     ]
 
     return (
