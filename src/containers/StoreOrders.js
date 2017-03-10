@@ -2,8 +2,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 
-// import ViewOrder from '../components/ViewOrder'
-// import SimpleModal from '../components/SimpleModal'
 import Table from '../components/Table'
 import LoadingPane from '../components/LoadingPane'
 

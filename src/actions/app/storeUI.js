@@ -1,3 +1,5 @@
+// import { formatDecimalStr } from '../../utils/string'
+
 export const SET_PAYMENT_MODE = 'SET_PAYMENT_MODE'
 export function setPaymentMode (mode) {
   return {
@@ -17,19 +19,27 @@ export function setActiveCard (cardType, cardProv) {
 
 export const SET_AMOUNT_TENDERED = 'SET_AMOUNT_TENDERED'
 export function setAmountTendered (amount) {
-  let tenderedAmt = `$${Number(amount)}`
   return {
     type: SET_AMOUNT_TENDERED,
-    amount: tenderedAmt
+    amount
   }
 }
 
 export const SET_CASH_TENDERED = 'SET_CASH_TENDERED'
 export function setCashTendered (amount) {
-  let tenderedAmt = `$${Number(amount)}`
   return {
     type: SET_CASH_TENDERED,
-    amount: tenderedAmt
+    amount
+  }
+}
+
+export function setFinalValue (option, amount) {
+  return (dispatch) => {
+    if (option === 'cash') {
+      dispatch(setCashTendered(amount))
+    } else {
+      dispatch(setAmountTendered(amount))
+    }
   }
 }
 

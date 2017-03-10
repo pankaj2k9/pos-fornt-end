@@ -17,8 +17,15 @@ import {
   storeOrdersSetSearchKey
 } from '../actions/settings'
 
-import { processOrdID } from '../utils/computations'
-import { formatCurrency, formatNumber } from '../utils/string'
+import {
+  customersSetFilter,
+  fetchCustomerByFilter
+} from '../actions/data/customers'
+
+import { processOrdID, processOdboID, processCustomers } from '../utils/computations'
+import { formatCurrency, formatNumber, formatDate } from '../utils/string'
+
+let bold = (txt) => { return <strong>{txt}</strong> }
 
 class SettingsTab extends Component {
   componentDidMount () {
@@ -69,6 +76,19 @@ class SettingsTab extends Component {
     const {dispatch} = this.props
     dispatch(setActiveOrderDetails(order))
     dispatch(setActiveModal('orderDetails'))
+  }
+
+  _setSearchCustFilters () {
+    const { dispatch } = this.props
+    let filter = document.getElementById('custFilter').value
+    let searchKey = document.getElementById('custSearchKey').value
+    dispatch(customersSetFilter(filter, searchKey))
+  }
+
+  _searchCustomer () {
+    const { dispatch, custData } = this.props
+    let { customerFilter, customerSearchKey } = custData
+    dispatch(fetchCustomerByFilter(customerFilter, customerSearchKey))
   }
 
   renderMainTab () {
@@ -192,8 +212,78 @@ class SettingsTab extends Component {
   }
 
   renderCustomersTab () {
+    const { intl, custData } = this.props
+    let { isFetching, customersArray, customerFilter, customerSearchKey, customerSearch } = custData
+    let fromFetched = processCustomers(customersArray, customerFilter, customerSearchKey)
+    let fromSearch = customerSearch
+    let customers = fromFetched.length > 0 ? fromFetched : fromSearch
+    let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
     return (
-      <div />
+      <div>
+        <form id='searchCust' onSubmit={e => this._searchCustomer(e)} style={{marginBottom: 20}}>
+          <p className='control has-addons'>
+            <span className='select is-large'>
+              <select id='custFilter'>
+                <option value='byId'>odbo ID</option>
+                <option value='byName'>First Name</option>
+                <option value='bySurName'>Last Name</option>
+                <option value='byContactNum'>phone number</option>
+              </select>
+            </span>
+            <input id='custSearchKey' className='input is-large is-expanded'
+              type='text' placeholder={lblTR('app.ph.keyword')}
+              value={customerSearchKey} onChange={e => this._setSearchCustFilters()} />
+            {customers.length === 0
+              ? <a className='button is-large is-success' onClick={e => this._searchCustomer()}>{lblTR('app.button.search')}</a>
+              : null
+            }
+          </p>
+        </form>
+        <div>
+          {!isFetching
+            ? customers.map((customer, key) => {
+              let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
+              return (
+                <div className='box is-clearfix' key={key}>
+                  <div className='media-content is-clearfix'>
+                    <p className='is-pulled-left title is-4'>
+                      {bold(`[ID#${processOdboID(odboId)}] `)}
+                      {`< ${firstName} ${lastName || ''} >`}
+                    </p>
+                    <a className='button is-success is-pulled-right'
+                      onClick={e => { this._setActiveCustomer(customer) }}>
+                      {lblTR('app.button.adjustPts')}
+                    </a>
+                    <ContentDivider contents={[
+                      <div>
+                        <p>{bold('membership:')} {membership}</p>
+                        <p>{bold('odbo coins:')} {odboCoins || 0}</p>
+                        <p>{bold('contact number:')} {phoneNumber || 'N/A'}</p>
+                      </div>,
+                      <div>
+                        <p>{bold('status:')} {status}</p>
+                        <p>{bold('last update:')} {formatDate(dateUpdated)}</p>
+                      </div>
+                    ]} size={6} />
+                  </div>
+                </div>
+              )
+            })
+            : null
+          }
+          {isFetching
+            ? <div className='box has-text-centered'>
+              <span className='icon is-large'><i className='fa fa-spinner fa-pulse fa-fw' /></span>
+              <p className='title'>{'Searching . . .'}</p>
+            </div>
+            : customers.length === 0 ? <div className='box has-text-centered'>
+              <span className='icon is-large'><i className='fa fa-info-circle' /></span>
+              <p className='title'>{lblTR('app.lbl.noCustomers')}</p>
+            </div>
+              : null
+          }
+        </div>
+      </div>
     )
   }
 

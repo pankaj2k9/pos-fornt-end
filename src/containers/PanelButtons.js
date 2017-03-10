@@ -18,6 +18,7 @@ import {
   addBonusMultiplier,
   addOrderItem,
   removeBonusMultiplier,
+  setOrderInfo,
   setCurrencyType
 } from '../actions/data/orderData'
 
@@ -34,7 +35,8 @@ class PanelButtons extends Component {
   _onClickPanelButtons (name) {
     const {
       dispatch,
-      orderData
+      orderData,
+      mainUI
     } = this.props
 
     switch (name) {
@@ -79,8 +81,11 @@ class PanelButtons extends Component {
         browserHistory.push('settings')
         break
       case 'doublePoints':
-        return dispatch(addBonusMultiplier(100))
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, 100))
+        dispatch(addBonusMultiplier(100))
+        break
       case 'removeBonus':
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, undefined))
         return dispatch(removeBonusMultiplier())
       case 'adjustPoints':
         dispatch(setSettingsActiveTab('customers'))
@@ -165,6 +170,7 @@ function mapStateToProps (state) {
   let mainUI = state.app.mainUI
   return {
     orderData,
+    mainUI,
     currency: orderData.currency,
     products: state.data.products.productsArray,
     posMode: mainUI.posMode

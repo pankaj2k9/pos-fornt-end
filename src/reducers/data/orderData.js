@@ -283,6 +283,7 @@ function orderData (state = {
     case RESET_ORDER_DATA:
       return Object.assign({}, state, {
         activeCustomer: null,
+        bonusPoints: undefined,
         currency: 'sgd',
         total: 0,
         totalDisc: 0,

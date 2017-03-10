@@ -84,8 +84,9 @@ class ModalStoreUtils extends Component {
   }
 
   _setActiveCustomer (customer) {
-    const { dispatch } = this.props
+    const {dispatch, orderData, mainUI} = this.props
     dispatch(setActiveCustomer(customer))
+    dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, customer))
     dispatch(closeActiveModal())
   }
 
