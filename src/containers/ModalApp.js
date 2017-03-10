@@ -61,16 +61,6 @@ class ModalApp extends Component {
     }
   }
 
-  _syncOrders () {
-    const {dispatch, offlineOrdersData} = this.props
-    let { failedOrders, processedOfflineOrders } = offlineOrdersData
-
-    const allOfflineOrders = failedOrders.length > 0
-      ? processedOfflineOrders.concat(failedOrders)
-      : processedOfflineOrders
-    dispatch(syncOfflineOrders(allOfflineOrders))
-  }
-
   _reprint () {
     const { activeOD, mainUI } = this.props
     if (!activeOD.storeAddress) {
@@ -89,6 +79,16 @@ class ModalApp extends Component {
     let refundData = {id: activeOD.id || activeOD.extraInfo.id, refundRemarks: remark, refundId: refundId}
     dispatch(setActiveModal('orderDetails'))
     dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
+  }
+
+  _syncOrders () {
+    const {dispatch, offlineData} = this.props
+    let { failedOrders, offlineOrders } = offlineData
+
+    const allOfflineOrders = failedOrders.length > 0
+      ? offlineOrders.concat(failedOrders)
+      : offlineOrders
+    dispatch(syncOfflineOrders(allOfflineOrders))
   }
 
   renderEmptyListLbl (lbl, isProcessing) {
@@ -191,7 +191,7 @@ class ModalApp extends Component {
                   container('drawer', offlineDrawers, 'upload', 'notSynced'),
                   container('drawer', failedDrawers, 'close', 'syncFailed')
                 ]} size={6} />
-                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => dispatch(syncOfflineOrders(offlineOrders))}>
+                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => this._syncOrders()}>
                   <span className='icon is-large'><i className={`fa fa-refresh ${isProcessing ? 'fa-spin fa-3x' : 'fa-2x'}`} /></span>
                   <span>{isProcessing ? lblTR('app.lbl.syncing') : lblTR('app.button.syncOrders')}</span>
                 </a>

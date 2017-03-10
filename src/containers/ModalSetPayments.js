@@ -40,12 +40,10 @@ class ModalSetPayments extends Component {
 
   _confirm () {
     const { dispatch, mainUI, orderData } = this.props
-    dispatch(setOrderInfo({
-      orderData: orderData,
-      appData: mainUI
-    }))
+    dispatch(setOrderInfo({ orderData: orderData, appData: mainUI }))
     dispatch(setFieldsDefault())
     dispatch(closeActiveModal())
+    document.getElementById('barcodeInput').focus()
   }
 
   _addPayment (mode, amount) {
