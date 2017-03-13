@@ -43,13 +43,15 @@ export function refund (refundData, storeData, orderData, currentPath) {
     dispatch(refundRequest())
     return refundService.create(refundData)
       .then(response => {
+        orderData.refundId = response.refundId
+        orderData.dateRefunded = response.dateRefunded
         if (currentPath === '/settings') {
-          dispatch(setActiveOrderDetails(response))
+          dispatch(setActiveOrderDetails(orderData))
         } else {
-          dispatch(storeOrdersSetActiveOrder(response))
+          dispatch(storeOrdersSetActiveOrder(orderData))
         }
         dispatch(setActiveModal('orderDetails'))
-        dispatch(refundSuccess(response))
+        dispatch(refundSuccess())
         dispatch(setNewLastID())
         if (!orderData.storeAddress) {
           let storeAddress = processStoreAddress(storeData)
