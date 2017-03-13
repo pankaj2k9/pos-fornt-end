@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { injectIntl } from 'react-intl'
 import moment from 'moment'
 
+import LoadingScreen from '../components/LoadingScreen'
+
 import {
   createDailyData,
   updateDailyData
@@ -21,13 +23,18 @@ import {
   closeActiveModal
 } from '../actions/app/mainUI'
 
+import {
+  updateCustomer
+} from '../actions/settings'
+
 import { refund } from '../actions/refund'
 
 import { formatCurrency } from '../utils/string'
 import {
   processOrderSearchReceipt,
   processStoreAddress,
-  processOrdID
+  processOrdID,
+  processOdboID
 } from '../utils/computations'
 
 import print from '../utils/printReceipt/print'
@@ -59,6 +66,15 @@ class ModalApp extends Component {
         dispatch(updateDailyData(activeDrawerOffline, amount, activeStore.source))
       }
     }
+  }
+
+  _adjustCustPoints (customer, option) {
+    const { dispatch } = this.props
+    let { id, odboCoins } = customer
+    let amount = Number(document.getElementById('adjPoints').value)
+    let coins = option === 'add' ? odboCoins + amount : odboCoins - amount
+    let updatedData = { odboCoins: coins }
+    dispatch(updateCustomer(Number(id), updatedData))
   }
 
   _reprint () {
@@ -103,12 +119,16 @@ class ModalApp extends Component {
   }
 
   render () {
-    const { intl, dispatch, mainUI, offlineData, activeOD, settings } = this.props
+    const { intl, dispatch, mainUI, offlineData, activeOD, settings, isProcessing } = this.props
     let { activeModalId, activeStaff } = mainUI
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
 
     switch (activeModalId) {
+      case 'settingsIsProcessing':
+        return (
+          <LoadingScreen loadingText={'ADJUSTING POINTS . . . '} />
+        )
       case 'chooseUser':
         let staffs = activeStaff.staffs
         let changeUser = (staffId) => {
@@ -162,7 +182,7 @@ class ModalApp extends Component {
           </ModalCard>
         )
       case 'syncModal':
-        let { isProcessing, offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
+        let { offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
         let haveDatatoSync = offlineOrders.length > 0 || failedOrders.length > 0 || offlineDrawers.length > 0 || failedDrawers.length > 0
         let container = (type, data, icon, lbl) => {
           return (
@@ -216,6 +236,50 @@ class ModalApp extends Component {
             }
           </ModalCard>
         )
+      case 'customerDetails':
+        let { activeCustomer, updateSuccess, error } = settings
+        let { id, firstName, lastName, odboCoins, membershipPoints, membership,
+              phoneNumber, emailAddress, dateCreated, dateUpdated, status } = activeCustomer
+        let successStr = (str) => <strong style={{color: updateSuccess ? 'limeGreen' : 'black'}}>{str}</strong>
+        return (
+          <ModalCard closeAction={e => this._closeModal()}>
+            <div className='content'>
+              <h1 className='title'>{`ID#${processOdboID(id)}`}</h1>
+              <p className='subtitle'>{`date joined: ${moment(dateCreated).format('LLLL')}`}</p>
+            </div>
+            <ContentDivider contents={[
+              <p>
+                {`Status: ${status}`}<br />{`First name: ${firstName}`}<br />{`Last name: ${lastName || 'N/A'}`}<br />
+                {`contact: ${phoneNumber}`}<br />{`email: ${emailAddress}`}
+              </p>,
+              <p>
+                {`Membership: ${membership}`}<br />{`Member Points: `}{successStr(membershipPoints)}<br />
+                {`The odbo coins: `}{successStr(odboCoins)}<br />
+                {`date of last update:`}<br />{successStr(moment(dateUpdated).format('LLLL'))}
+              </p> ]} size={6} />
+            <hr />
+            {!isProcessing
+              ? <div className='content has-text-centered'>
+                <h1 className='title'>{lblTR('app.button.adjustPts')}</h1>
+                {!error && updateSuccess
+                  ? <p className='subtitle' style={{color: 'limeGreen'}}>{`Successfully adjusted customer points`}</p>
+                  : error && <p className='subtitle' style={{color: 'red'}}>{`Error: ${error}`}</p>
+                }
+                {!updateSuccess && <input id='adjPoints' className='input is-large' type='Number'
+                  placeholder='0' style={{width: '25%', textAlign: 'center'}} />}
+              </div>
+              : null }
+            {!isProcessing && !updateSuccess
+              ? <ContentDivider contents={[
+                <div style={{margin: 20}}>
+                  <a className='button is-large is-fullwidth is-dark' onClick={e => this._adjustCustPoints(activeCustomer, 'deduct')}>Deduct</a>
+                </div>,
+                <div style={{margin: 20}}>
+                  <a className='button is-large is-fullwidth is-info' onClick={e => this._adjustCustPoints(activeCustomer, 'add')}>Add</a>
+                </div> ]} size={!refundId ? 5 : 10} offset={1} />
+              : null }
+          </ModalCard>
+        )
       case 'orderDetails':
         let currency = activeOD && (activeOD.currency || activeOD.paymentInfo.currency)
         let date = activeOD && (activeOD.dateCreated || activeOD.extraInfo.date)
@@ -267,15 +331,19 @@ class ModalApp extends Component {
 }
 
 function mapStateToProps (state) {
-  let activeOD1 = state.settings.activeOrderDetails
+  let custData = state.data.customers
+  let offlineData = state.data.offlineData
+  let settings = state.settings
+  let activeOD1 = settings.activeOrderDetails
   let activeOD2 = state.reports.storeOrders.activeOrderDetails
   return {
+    custData,
+    settings,
+    offlineData,
     mainUI: state.app.mainUI,
     orderData: state.data.orderData,
-    settings: state.settings,
-    custData: state.data.customers,
     activeOD: activeOD1 || activeOD2,
-    offlineData: state.data.offlineData,
+    isProcessing: settings.isProcessing || offlineData.isProcessing,
     intl: state.intl
   }
 }
