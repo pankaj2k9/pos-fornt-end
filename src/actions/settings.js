@@ -143,11 +143,11 @@ export function verifyStorePin (query, staff, data) {
   }
 }
 
-export const UPDATE_CUSTOMER_SHOW = 'UPDATE_CUSTOMER_SHOW'
-export function updateCustomerShow (value) {
+export const SET_ACTIVE_CUSTOMER = 'SET_ACTIVE_CUSTOMER'
+export function setActiveCustomer (customer) {
   return {
-    type: UPDATE_CUSTOMER_SHOW,
-    value
+    type: SET_ACTIVE_CUSTOMER,
+    customer
   }
 }
 
@@ -159,9 +159,10 @@ export function updateCustomerRequest () {
 }
 
 export const UPDATE_CUSTOMER_SUCCESS = 'UPDATE_CUSTOMER_SUCCESS'
-export function updateCustomerSuccess () {
+export function updateCustomerSuccess (response) {
   return {
-    type: UPDATE_CUSTOMER_SUCCESS
+    type: UPDATE_CUSTOMER_SUCCESS,
+    response
   }
 }
 
@@ -173,17 +174,26 @@ export function updateCustomerFailure (error) {
   }
 }
 
-export function updateCustomer (id, params) {
+export function updateCustomer (id, data) {
   return (dispatch) => {
     dispatch(updateCustomerRequest())
-    customers.patch(id, params)
-      .then(() => {
-        dispatch(updateCustomerSuccess())
+    dispatch(setActiveModal('settingsIsProcessing'))
+    customers.patch(id, data)
+      .then((response) => {
+        dispatch(updateCustomerSuccess(response))
+        dispatch(setActiveModal('customerDetails'))
         dispatch(fetchCustomers())
       })
       .catch((error) => {
         dispatch(updateCustomerFailure(error.message))
       })
+  }
+}
+
+export const CLEAR_MESSAGES = 'CLEAR_MESSAGES'
+export function clearSettingsMessages () {
+  return {
+    type: CLEAR_MESSAGES
   }
 }
 

@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { injectIntl } from 'react-intl'
 import moment from 'moment'
 
+import LoadingScreen from '../components/LoadingScreen'
+
 import {
   createDailyData,
   updateDailyData
@@ -21,13 +23,18 @@ import {
   closeActiveModal
 } from '../actions/app/mainUI'
 
+import {
+  updateCustomer
+} from '../actions/settings'
+
 import { refund } from '../actions/refund'
 
 import { formatCurrency } from '../utils/string'
 import {
   processOrderSearchReceipt,
   processStoreAddress,
-  processOrdID
+  processOrdID,
+  processOdboID
 } from '../utils/computations'
 
 import print from '../utils/printReceipt/print'
@@ -46,7 +53,8 @@ class ModalApp extends Component {
     return active
   }
 
-  _updateCashdrawer () {
+  _updateCashdrawer (e) {
+    e.preventDefault()
     const { dispatch, mainUI } = this.props
     let { activeDrawer, activeDrawerOffline, activeStore, posMode, networkStatus } = mainUI
     let amount = Number(document.getElementById('drawerAmtInput').value) || 0
@@ -61,14 +69,13 @@ class ModalApp extends Component {
     }
   }
 
-  _syncOrders () {
-    const {dispatch, offlineOrdersData} = this.props
-    let { failedOrders, processedOfflineOrders } = offlineOrdersData
-
-    const allOfflineOrders = failedOrders.length > 0
-      ? processedOfflineOrders.concat(failedOrders)
-      : processedOfflineOrders
-    dispatch(syncOfflineOrders(allOfflineOrders))
+  _adjustCustPoints (customer, option) {
+    const { dispatch } = this.props
+    let { id, odboCoins } = customer
+    let amount = Number(document.getElementById('adjPoints').value)
+    let coins = option === 'add' ? odboCoins + amount : odboCoins - amount
+    let updatedData = { odboCoins: coins }
+    dispatch(updateCustomer(Number(id), updatedData))
   }
 
   _reprint () {
@@ -91,6 +98,16 @@ class ModalApp extends Component {
     dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
   }
 
+  _syncOrders () {
+    const {dispatch, offlineData} = this.props
+    let { failedOrders, offlineOrders } = offlineData
+
+    const allOfflineOrders = failedOrders.length > 0
+      ? offlineOrders.concat(failedOrders)
+      : offlineOrders
+    dispatch(syncOfflineOrders(allOfflineOrders))
+  }
+
   renderEmptyListLbl (lbl, isProcessing) {
     return (
       isProcessing
@@ -103,12 +120,16 @@ class ModalApp extends Component {
   }
 
   render () {
-    const { intl, dispatch, mainUI, offlineData, activeOD, settings } = this.props
+    const { intl, dispatch, mainUI, offlineData, activeOD, settings, isProcessing } = this.props
     let { activeModalId, activeStaff } = mainUI
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
 
     switch (activeModalId) {
+      case 'settingsIsProcessing':
+        return (
+          <LoadingScreen loadingText={'ADJUSTING POINTS . . . '} />
+        )
       case 'chooseUser':
         let staffs = activeStaff.staffs
         let changeUser = (staffId) => {
@@ -145,10 +166,10 @@ class ModalApp extends Component {
         )
       case 'updateCashdrawer':
         return (
-          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer()}>
+          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer(e)}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
-                <form onSubmit={e => this._updateCashdrawer()} >
+                <form onSubmit={e => this._updateCashdrawer(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='drawerAmtInput' className='input is-large' type='Number'
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}} />
@@ -162,7 +183,7 @@ class ModalApp extends Component {
           </ModalCard>
         )
       case 'syncModal':
-        let { isProcessing, offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
+        let { offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
         let haveDatatoSync = offlineOrders.length > 0 || failedOrders.length > 0 || offlineDrawers.length > 0 || failedDrawers.length > 0
         let container = (type, data, icon, lbl) => {
           return (
@@ -191,7 +212,7 @@ class ModalApp extends Component {
                   container('drawer', offlineDrawers, 'upload', 'notSynced'),
                   container('drawer', failedDrawers, 'close', 'syncFailed')
                 ]} size={6} />
-                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => dispatch(syncOfflineOrders(offlineOrders))}>
+                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => this._syncOrders()}>
                   <span className='icon is-large'><i className={`fa fa-refresh ${isProcessing ? 'fa-spin fa-3x' : 'fa-2x'}`} /></span>
                   <span>{isProcessing ? lblTR('app.lbl.syncing') : lblTR('app.button.syncOrders')}</span>
                 </a>
@@ -214,6 +235,50 @@ class ModalApp extends Component {
               </div>
               : this.renderEmptyListLbl('refund is processing', hideCpnt)
             }
+          </ModalCard>
+        )
+      case 'customerDetails':
+        let { activeCustomer, updateSuccess, error } = settings
+        let { id, firstName, lastName, odboCoins, membershipPoints, membership,
+              phoneNumber, emailAddress, dateCreated, dateUpdated, status } = activeCustomer
+        let successStr = (str) => <strong style={{color: updateSuccess ? 'limeGreen' : 'black'}}>{str}</strong>
+        return (
+          <ModalCard closeAction={e => this._closeModal()}>
+            <div className='content'>
+              <h1 className='title'>{`ID#${processOdboID(id)}`}</h1>
+              <p className='subtitle'>{`date joined: ${moment(dateCreated).format('LLLL')}`}</p>
+            </div>
+            <ContentDivider contents={[
+              <p>
+                {`Status: ${status}`}<br />{`First name: ${firstName}`}<br />{`Last name: ${lastName || 'N/A'}`}<br />
+                {`contact: ${phoneNumber}`}<br />{`email: ${emailAddress}`}
+              </p>,
+              <p>
+                {`Membership: ${membership}`}<br />{`Member Points: `}{successStr(membershipPoints)}<br />
+                {`The odbo coins: `}{successStr(odboCoins)}<br />
+                {`date of last update:`}<br />{successStr(moment(dateUpdated).format('LLLL'))}
+              </p> ]} size={6} />
+            <hr />
+            {!isProcessing
+              ? <div className='content has-text-centered'>
+                <h1 className='title'>{lblTR('app.button.adjustPts')}</h1>
+                {!error && updateSuccess
+                  ? <p className='subtitle' style={{color: 'limeGreen'}}>{`Successfully adjusted customer points`}</p>
+                  : error && <p className='subtitle' style={{color: 'red'}}>{`Error: ${error}`}</p>
+                }
+                {!updateSuccess && <input id='adjPoints' className='input is-large' type='Number'
+                  placeholder='0' style={{width: '25%', textAlign: 'center'}} />}
+              </div>
+              : null }
+            {!isProcessing && !updateSuccess
+              ? <ContentDivider contents={[
+                <div style={{margin: 20}}>
+                  <a className='button is-large is-fullwidth is-dark' onClick={e => this._adjustCustPoints(activeCustomer, 'deduct')}>Deduct</a>
+                </div>,
+                <div style={{margin: 20}}>
+                  <a className='button is-large is-fullwidth is-info' onClick={e => this._adjustCustPoints(activeCustomer, 'add')}>Add</a>
+                </div> ]} size={!refundId ? 5 : 10} offset={1} />
+              : null }
           </ModalCard>
         )
       case 'orderDetails':
@@ -267,15 +332,19 @@ class ModalApp extends Component {
 }
 
 function mapStateToProps (state) {
-  let activeOD1 = state.settings.activeOrderDetails
+  let custData = state.data.customers
+  let offlineData = state.data.offlineData
+  let settings = state.settings
+  let activeOD1 = settings.activeOrderDetails
   let activeOD2 = state.reports.storeOrders.activeOrderDetails
   return {
+    custData,
+    settings,
+    offlineData,
     mainUI: state.app.mainUI,
     orderData: state.data.orderData,
-    settings: state.settings,
-    custData: state.data.customers,
     activeOD: activeOD1 || activeOD2,
-    offlineData: state.data.offlineData,
+    isProcessing: settings.isProcessing || offlineData.isProcessing,
     intl: state.intl
   }
 }

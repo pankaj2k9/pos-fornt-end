@@ -23,6 +23,7 @@ class ModalProductList extends Component {
   _closeModal (event) {
     const { dispatch } = this.props
     dispatch(closeActiveModal())
+    document.getElementById('barcodeInput').focus()
   }
 
   renderProductItems () {

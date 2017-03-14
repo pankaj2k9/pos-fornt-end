@@ -266,7 +266,7 @@ class PanelOrderInfo extends Component {
               </div>
               <div className='column is-5 is-paddingless'>
                 <p>{`customer: ${custName}`}</p>
-                <p>bonus points: {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : '(1x)'}</p>
+                <p>bonus points: {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : activeCustomer ? '(1x)' : 'N/A'}</p>
                 <p>{`order points: ${currency === 'sgd' ? odbo ? odbo.earnedPts + 'pts' : 'N/A' : 'N/A'}`}</p>
               </div>
               <div className='column is-4 is-paddingless'>

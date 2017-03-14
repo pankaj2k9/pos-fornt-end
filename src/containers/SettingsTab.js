@@ -14,7 +14,8 @@ import {
   setActiveOrderDetails,
   setSettingsActiveTab,
   storeOrderFetch,
-  storeOrdersSetSearchKey
+  storeOrdersSetSearchKey,
+  setActiveCustomer
 } from '../actions/settings'
 
 import {
@@ -89,6 +90,12 @@ class SettingsTab extends Component {
     const { dispatch, custData } = this.props
     let { customerFilter, customerSearchKey } = custData
     dispatch(fetchCustomerByFilter(customerFilter, customerSearchKey))
+  }
+
+  _setActiveCustomer (customer) {
+    const { dispatch } = this.props
+    dispatch(setActiveModal('customerDetails'))
+    dispatch(setActiveCustomer(customer))
   }
 
   renderMainTab () {
@@ -251,7 +258,7 @@ class SettingsTab extends Component {
                       {`< ${firstName} ${lastName || ''} >`}
                     </p>
                     <a className='button is-success is-pulled-right'
-                      onClick={e => { this._setActiveCustomer(customer) }}>
+                      onClick={e => this._setActiveCustomer(customer)}>
                       {lblTR('app.button.adjustPts')}
                     </a>
                     <ContentDivider contents={[

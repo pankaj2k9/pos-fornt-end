@@ -31,6 +31,9 @@ import {
 } from '../actions/settings'
 
 class PanelButtons extends Component {
+  componentDidMount () {
+    document.getElementById('barcodeInput').focus()
+  }
 
   _onClickPanelButtons (name) {
     const {
@@ -38,23 +41,25 @@ class PanelButtons extends Component {
       orderData,
       mainUI
     } = this.props
-
+    if (name.match('Btn1')) {
+      document.getElementById('barcodeInput').focus()
+    }
     switch (name) {
-      case 'online':
+      case 'onlineBtn1':
         return dispatch(togglePosMode('online'))
-      case 'offline':
+      case 'offlineBtn1':
         return dispatch(togglePosMode('offline'))
       case 'prodList':
         return dispatch(setActiveModal('productsList'))
       case 'addDiscount':
         return dispatch(setActiveModal('overallDiscount'))
-      case 'holdOrder':
+      case 'holdOrderBtn1':
         return dispatch(holdOrderAndReset(orderData))
       case 'recallOrder':
         return dispatch(setActiveModal('recallOrder'))
-      case 'useOdbo':
+      case 'useOdboBtn1':
         return dispatch(setCurrencyType('odbo'))
-      case 'useSgd':
+      case 'useSgdBtn1':
         return dispatch(setCurrencyType('sgd'))
       case 'staffSales':
         dispatch(reportsSetTab('staffSales'))
@@ -80,11 +85,11 @@ class PanelButtons extends Component {
         dispatch(setSettingsActiveTab('orderSearch'))
         browserHistory.push('settings')
         break
-      case 'doublePoints':
+      case 'doublePointsBtn1':
         dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, 100))
         dispatch(addBonusMultiplier(100))
         break
-      case 'removeBonus':
+      case 'removeBonusBtn1':
         dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, undefined))
         return dispatch(removeBonusMultiplier())
       case 'adjustPoints':
@@ -97,7 +102,7 @@ class PanelButtons extends Component {
         break
       case 'admin':
         return window.open('https://uat-admin.theodbocare.com/', '_blank')
-      case 'cancelOrder':
+      case 'cancelOrderBtn1':
         return dispatch(cancelOrder())
       default:
     }
@@ -118,23 +123,23 @@ class PanelButtons extends Component {
     let isActive = posMode === 'online'
     let hasOdboUser = orderData.activeCustomer
     let posModeToggleButton = posMode === 'online'
-      ? {name: 'offline', isActive: true, color: 'yellow', label: 'SWITCH TO OFFLINE', altLbl: '切换到离线模式', size: 'is-6'}
-      : {name: 'online', isActive: true, color: 'yellow', label: 'SWITCH TO ONLINE', altLbl: '切换到在线模式', size: 'is-6'}
+      ? {name: 'offlineBtn1', isActive: true, color: 'yellow', label: 'SWITCH TO OFFLINE', altLbl: '切换到离线模式', size: 'is-6'}
+      : {name: 'onlineBtn1', isActive: true, color: 'yellow', label: 'SWITCH TO ONLINE', altLbl: '切换到在线模式', size: 'is-6'}
 
     let currencyButton = currency === 'sgd'
-      ? {name: 'useOdbo', isActive: hasOdboUser, color: 'purple', label: 'USE "The odbo" COINS', altLbl: '电子钱包', size: 'is-3'}
-      : {name: 'useSgd', isActive, color: 'purple', label: 'USE SGD', altLbl: '使用SGD', size: 'is-3'}
+      ? {name: 'useOdboBtn1', isActive: hasOdboUser, color: 'purple', label: 'USE "The odbo" COINS', altLbl: '电子钱包', size: 'is-3'}
+      : {name: 'useSgdBtn1', isActive, color: 'purple', label: 'USE SGD', altLbl: '使用SGD', size: 'is-3'}
 
     let doublePointsButton = orderData.bonusPoints
-      ? {name: 'removeBonus', isActive: hasOdboUser, color: 'purple', label: 'REMOVE DOUBLE POINTS', altLbl: '去掉双倍积分', size: 'is-3'}
-      : {name: 'doublePoints', isActive: hasOdboUser, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'}
+      ? {name: 'removeBonusBtn1', isActive: hasOdboUser, color: 'purple', label: 'REMOVE DOUBLE POINTS', altLbl: '去掉双倍积分', size: 'is-3'}
+      : {name: 'doublePointsBtn1', isActive: hasOdboUser, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'}
 
     let buttons = [
       posModeToggleButton,
       {name: 'staffSales', isActive, color: 'blue', label: 'STAFF SALES', altLbl: '个人业绩', size: 'is-3'},
       {name: 'searchCust', isActive, color: 'blue', label: 'SEARCH CUSTOMER', altLbl: '搜寻会员', size: 'is-3'},
       {name: 'sync', isActive: true, color: 'yellow', label: 'SYNC OFFLINE DATA', altLbl: '同步与数据库', size: 'is-6'},
-      {name: 'holdOrder', isActive: orderData.orderItems.length > 0, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
+      {name: 'holdOrderBtn1', isActive: orderData.orderItems.length > 0, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
       {name: 'recallOrder', isActive: true, color: 'purple', label: 'RECALL_ORDER', altLbl: '找回订单', size: 'is-3'},
       {name: 'outletStock', isActive, color: 'blue', label: 'OUTLET STOCK', altLbl: '各分店库存', size: 'is-3'},
       {name: 'outletSales', isActive, color: 'blue', label: 'OUTLET SALES', altLbl: '各分店业绩', size: 'is-3'},
@@ -147,7 +152,7 @@ class PanelButtons extends Component {
       {name: 'reading', isActive, color: 'pink', label: 'X/Z READING', altLbl: '结算关机', size: 'is-3'},
       {name: 'admin', isActive, color: 'blue', label: 'ADMIN', altLbl: '管理', size: 'is-3'},
       {name: 'addDiscount', isActive: true, color: 'blue', label: 'ADD OVERALL DISCOUNT', altLbl: '整单打折', size: 'is-3'},
-      {name: 'cancelOrder', isActive: true, color: 'pink', label: 'CANCEL ORDER', altLbl: '取消订单', size: 'is-3'}
+      {name: 'cancelOrderBtn1', isActive: true, color: 'pink', label: 'CANCEL ORDER', altLbl: '取消订单', size: 'is-3'}
     ]
     return (
       <div className='panel'>

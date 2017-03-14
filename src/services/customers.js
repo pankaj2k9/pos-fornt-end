@@ -15,7 +15,7 @@ export default {
 
     return customers.find(params)
   },
-  patch (id, params) {
-    return customers.patch(id, params)
+  patch (id, data) {
+    return customers.patch(id, data)
   }
 }

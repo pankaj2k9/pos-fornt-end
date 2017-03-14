@@ -17,8 +17,9 @@ import {
   VERIFY_STORE_PIN_FAILURE,
   SETTINGS_ERROR,
   SET_PROCESSING_STATUS,
+  CLEAR_MESSAGES,
 
-  UPDATE_CUSTOMER_SHOW,
+  SET_ACTIVE_CUSTOMER,
   UPDATE_CUSTOMER_REQUEST,
   UPDATE_CUSTOMER_SUCCESS,
   UPDATE_CUSTOMER_FAILURE,
@@ -81,41 +82,10 @@ function account (state, action) {
   }
 }
 
-function customer (state, action) {
-  switch (action.type) {
-    case UPDATE_CUSTOMER_SHOW:
-      return Object.assign({}, state, {
-        showControl: action.value,
-        isProcessing: false,
-        updateSuccess: false,
-        error: null
-      })
-    case UPDATE_CUSTOMER_REQUEST:
-      return Object.assign({}, state, {
-        isProcessing: true
-      })
-    case UPDATE_CUSTOMER_SUCCESS:
-      return Object.assign({}, state, {
-        showControl: false,
-        isProcessing: false,
-        updateSuccess: true,
-        error: null
-      })
-    case UPDATE_CUSTOMER_FAILURE:
-      return Object.assign({}, state, {
-        isProcessing: false,
-        updateSuccess: false,
-        error: action.error
-      })
-    default:
-      return state
-  }
-}
-
 function settings (state = {
   searchedOrders: [],
   activeTab: 'main',
-  activeCustomerId: null,
+  activeCustomer: null,
   activeOrderDetails: undefined,
   tabs: [
     {name: 'app.page.settings.tabMain', value: 'main'},
@@ -123,17 +93,15 @@ function settings (state = {
     {name: 'app.page.settings.tabCustomers', value: 'customers'},
     {name: 'app.page.settings.tabAccount', value: 'account'}
   ],
-  error: false,
-  errorMessage: null,
+  error: null,
   orderSearchKey: '',
   customerSearchKey: '',
   customerSearchKeyOIDFR: '',
   customerSearchKeyOIDTO: '',
   customerFilter: 'odbo id',
   customerContactFilter: '',
-  refundSuccess: false,
-  reprintSuccess: null,
   isProcessing: false,
+  updateSuccess: false,
   account: {
     isChangePwActive: false,
     isChangingPw: false,
@@ -142,12 +110,6 @@ function settings (state = {
     confirmPw: '',
     errorMessage: '',
     successMessage: ''
-  },
-  customer: {
-    showControl: false,
-    isProcessing: false,
-    updateSuccess: false,
-    error: null
   }
 }, action) {
   switch (action.type) {
@@ -236,12 +198,11 @@ function settings (state = {
     case VERIFY_STORE_PIN_SUCCESS:
       return Object.assign({}, state, {
         isProcessing: false,
-        error: false,
-        errorMessage: null
+        error: null
       })
     case VERIFY_STORE_PIN_FAILURE:
       return Object.assign({}, state, {
-        errorMessage: action.error,
+        error: action.error,
         orderSearchKey: '',
         isProcessing: false
       })
@@ -249,12 +210,29 @@ function settings (state = {
       return Object.assign({}, state, {
         error: true
       })
-    case UPDATE_CUSTOMER_SHOW:
+    case SET_ACTIVE_CUSTOMER:
+      return Object.assign({}, state, {
+        activeCustomer: action.customer,
+        isProcessing: false,
+        updateSuccess: false,
+        error: null
+      })
     case UPDATE_CUSTOMER_REQUEST:
+      return Object.assign({}, state, {
+        isProcessing: true
+      })
     case UPDATE_CUSTOMER_SUCCESS:
+      return Object.assign({}, state, {
+        activeCustomer: action.response || state.activeCustomer,
+        isProcessing: false,
+        updateSuccess: true,
+        error: null
+      })
     case UPDATE_CUSTOMER_FAILURE:
       return Object.assign({}, state, {
-        customer: customer(state.customer, action)
+        isProcessing: false,
+        updateSuccess: false,
+        error: action.error
       })
     case ACCOUNT_CHANGEPW_TOGGLE_VIEW:
     case ACCOUNT_CHANGEPW_REQUEST:
@@ -266,6 +244,12 @@ function settings (state = {
     case ACCOUNT_CHANGEPW_CLEAR_MESSAGES:
       return Object.assign({}, state, {
         account: account(state.account, action)
+      })
+    case CLEAR_MESSAGES:
+      return Object.assign({}, state, {
+        isProcessing: false,
+        updateSuccess: false,
+        error: null
       })
     default:
       return state

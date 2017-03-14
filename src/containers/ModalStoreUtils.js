@@ -18,14 +18,8 @@ import {
 } from '../actions/data/orderData'
 
 import {
-  makeOfflineOrder,
-  syncOfflineOrders
+  makeOfflineOrder
 } from '../actions/data/offlineData'
-
-import {
-  createDailyData,
-  updateDailyData
-} from '../actions/data/cashdrawers'
 
 import {
   customersSetFilter,
@@ -46,10 +40,22 @@ import { processOdboID, processCustomers } from '../utils/computations'
 import print from '../utils/printReceipt/print'
 
 class ModalStoreUtils extends Component {
-  _closeModal (event) {
+  componentDidUpdate () {
+    switch (this.props.activeModalId) {
+      case 'searchCustomer': return document.getElementById('custSearchKey').focus()
+      case 'notes': return document.getElementById('noteInput').focus()
+      case 'custPincode': return document.getElementById('custCodeInput').focus()
+      case 'overallDiscount': return document.getElementById('discountInput').focus()
+      default: null
+    }
+  }
+
+  _closeModal (e) {
+    e && e.preventDefault()
     const { dispatch } = this.props
     dispatch(closeActiveModal())
     dispatch(customersResetState())
+    document.getElementById('barcodeInput').focus()
   }
 
   _resetOrderData () {
@@ -63,21 +69,8 @@ class ModalStoreUtils extends Component {
     dispatch(setOverallDiscount(value > 100 ? 100 : value))
   }
 
-  _updateCashdrawer () {
-    const { dispatch, activeDrawer, activeDrawerOffline, storeId, posMode, networkStatus } = this.props
-    let amount = Number(document.getElementById('drawerAmtInput').value) || 0
-    if (activeDrawer) {
-      dispatch(updateDailyData(activeDrawer, amount))
-    } else if (!activeDrawer) {
-      if (posMode === 'online' || networkStatus === 'online') {
-        dispatch(createDailyData(storeId, amount))
-      } else {
-        dispatch(updateDailyData(activeDrawerOffline, amount, storeId))
-      }
-    }
-  }
-
-  _searchCustomer () {
+  _searchCustomer (e) {
+    e && e.preventDefault()
     const { dispatch, custData } = this.props
     let { customerFilter, customerSearchKey } = custData
     dispatch(fetchCustomerByFilter(customerFilter, customerSearchKey))
@@ -110,7 +103,8 @@ class ModalStoreUtils extends Component {
     dispatch(setOrderInfo({orderData: orderData, appData: mainUI}))
   }
 
-  _processOdboOrder () {
+  _processOdboOrder (e) {
+    e && e.preventDefault()
     const {dispatch, activeDrawer, orderInfo, orderReceipt, posMode} = this.props
     if (posMode === 'online') {
       dispatch(processOrder(orderInfo, orderReceipt, activeDrawer))
@@ -126,16 +120,6 @@ class ModalStoreUtils extends Component {
     dispatch(closeActiveModal())
   }
 
-  syncOrders () {
-    const {dispatch, offlineOrdersData} = this.props
-    let { failedOrders, processedOfflineOrders } = offlineOrdersData
-
-    const allOfflineOrders = failedOrders.length > 0
-      ? processedOfflineOrders.concat(failedOrders)
-      : processedOfflineOrders
-    dispatch(syncOfflineOrders(allOfflineOrders))
-  }
-
   render () {
     const {
       dispatch,
@@ -143,6 +127,7 @@ class ModalStoreUtils extends Component {
       activeModalId,
       overallDiscount,
       ordersOnHold,
+      orderData,
       orderNote,
       orderReceipt,
       intl
@@ -173,12 +158,12 @@ class ModalStoreUtils extends Component {
     switch (activeModalId) {
       case 'overallDiscount':
         return (
-          <ModalCard closeAction={e => this._closeModal()} title={'OVERALL DISCOUNT'}>
+          <ModalCard closeAction={e => this._closeModal()} title={'OVERALL DISCOUNT'} confirmAction={e => this._closeModal()}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
-                <form onSubmit={e => this._closeModal()} >
+                <form onSubmit={e => this._closeModal(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='overallDiscountInput' className='input is-large' type='Number'
+                    <input id='discountInput' className='input is-large' type='Number'
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}}
                       value={overallDiscount}
                       onChange={e => this._setOADisc(e.target.value)} />
@@ -273,6 +258,7 @@ class ModalStoreUtils extends Component {
         let fromFetched = processCustomers(customersArray, customerFilter, customerSearchKey)
         let fromSearch = customerSearch
         let customers = fromFetched.length > 0 ? fromFetched : fromSearch
+        let activeCustomer = orderData.activeCustomer
         return (
           <ModalCard closeAction={e => this._closeModal()}>
             <form id='searchCust' onSubmit={e => this._searchCustomer(e)}>
@@ -288,10 +274,19 @@ class ModalStoreUtils extends Component {
                 <input id='custSearchKey' className='input is-large is-expanded'
                   type='text' placeholder={lblTR('app.ph.keyword')}
                   value={customerSearchKey} onChange={e => this._setSearchCustFilters()} />
-                <a className='button is-large is-success' onClick={e => this._searchCustomer()}>{lblTR('app.button.search')}</a>
+                {customers.length === 0 && <a className='button is-large is-success' onClick={e => this._searchCustomer()}>{lblTR('app.button.search')}</a>}
               </p>
             </form>
             <div>
+              {activeCustomer &&
+                <div className='box is-clearfix'>
+                  <p className='is-pulled-left title is-marginless'>
+                    <strong>Current Customer: </strong>
+                    {`${activeCustomer.firstName} ${activeCustomer.lastName}`}
+                  </p>
+                  <a className='button is-danger is-pulled-right' onClick={e => dispatch(setActiveCustomer(null))}>REMOVE</a>
+                </div>
+              }
               {!isFetching
                 ? customers.map((customer, key) => {
                   let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
@@ -336,7 +331,7 @@ class ModalStoreUtils extends Component {
           <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOdboOrder()}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-6 is-offset-3 has-text-centered'>
-                <form onSubmit={e => this._processOdboOrder()} >
+                <form onSubmit={e => this._processOdboOrder(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='custCodeInput' className='input is-large' type='password' onChange={e => this._setOdboOrderInfo()}
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}} />
@@ -374,7 +369,6 @@ function mapStateToProps (state) {
     orderInfo: orderData.orderInfo,
     orderReceipt: orderData.receipt,
     ordersOnHold: state.ordersOnHold.items,
-    offlineData: state.data.offlineData,
     storeId: state.app.mainUI.activeStore.source,
     activeDrawer: mainUI.activeDrawer,
     activeDrawerOffline: state.app.mainUI.activeDrawerOffline,
