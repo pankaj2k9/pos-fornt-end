@@ -155,7 +155,7 @@ class Account extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    staff: state.mainUI.activeStaff,
+    staff: state.app.mainUI.activeStaff,
     isChangePwActive: state.settings.account.isChangePwActive,
     isChangingPw: state.settings.account.isChangingPw,
     oldPw: state.settings.account.oldPw,

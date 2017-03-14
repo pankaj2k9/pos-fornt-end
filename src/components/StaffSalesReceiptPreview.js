@@ -37,7 +37,6 @@ export default class ViewBillReceiptPreview extends React.Component {
 
   render () {
     const { orders, staff, from, to } = this.props.data
-
     const dateOptions = {
       day: 'numeric',
       month: 'numeric',
@@ -56,6 +55,7 @@ export default class ViewBillReceiptPreview extends React.Component {
     const daysCount = moment(to).diff(moment(from), 'days') + 1
     const monthsCount = Math.ceil(daysCount / DAYS_IN_MONTH)
     let total = 0
+    let totalOdbo = 0
 
     const keyPref = 'rcptprev-ss'
     return (
@@ -79,7 +79,8 @@ export default class ViewBillReceiptPreview extends React.Component {
           {orders.map((order, i) => {
             const key = `${keyPref}-order-${i}`
             const idKey = `${key}-id-${order.id}`
-            total += Number(order.total) || 0
+            total += order.currency === 'sgd' && (Number(order.total) || 0)
+            totalOdbo += order.currency === 'odbo' && (Number(order.total) || 0)
 
             return (
               <span key={key}>
@@ -100,7 +101,7 @@ export default class ViewBillReceiptPreview extends React.Component {
                       cols={[
                         item.product.barcodeInfo,
                         `${item.quantity}x`,
-                        formatCurrency(Number(item.totalCost))
+                        formatCurrency(Number(item.totalCost), order.currency)
                       ]}
                     />
                   )
@@ -115,7 +116,7 @@ export default class ViewBillReceiptPreview extends React.Component {
             key={`${keyPref}-salespermonth`}
             keyPrefix={`${keyPref}-salespermonth`}
             cols={[
-              'Staff sales/month',
+              'SGD sales/month:',
               formatCurrency(total / monthsCount)
             ]} />
 
@@ -123,8 +124,24 @@ export default class ViewBillReceiptPreview extends React.Component {
             key={`${keyPref}-salesperday`}
             keyPrefix={`${keyPref}-salesperday`}
             cols={[
-              'Staff sales/day',
+              'SGD sales/day:',
               formatCurrency(total / daysCount)
+            ]} />
+
+          <ReceiptPreviewRow
+            key={`${keyPref}-odbosalespermonth`}
+            keyPrefix={`${keyPref}-salespermonth`}
+            cols={[
+              '"odbo coins" sales/month:',
+              formatCurrency(totalOdbo / monthsCount, 'odbo')
+            ]} />
+
+          <ReceiptPreviewRow
+            key={`${keyPref}-odbosalesperday`}
+            keyPrefix={`${keyPref}-salesperday`}
+            cols={[
+              '"odbo coins" sales/day:',
+              formatCurrency(totalOdbo / daysCount, 'odbo')
             ]} />
         </span>
 

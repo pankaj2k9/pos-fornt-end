@@ -72,6 +72,7 @@ class ModalSetPayments extends Component {
   _setFinalValue (e) {
     e.preventDefault()
     const { dispatch, paymentMode } = this.props
+    document.getElementById('okBtn').className = 'is-hidden'
     let amtInput = document.getElementById('payInput')
     let amt = amtInput && document.getElementById('payInput').value
     let initial = amt.replace(/[^\d.]/g, '')
@@ -176,7 +177,7 @@ class ModalSetPayments extends Component {
                       dispatch(setCashTendered(final))
                       this._addPayment(mode, initial)
                     } else {
-                      dispatch(setCashTendered(0))
+                      dispatch(setCashTendered(''))
                       this._removePayment(mode)
                     }
                     document.getElementById('payInput').focus()

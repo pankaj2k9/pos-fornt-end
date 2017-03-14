@@ -53,7 +53,8 @@ class ModalApp extends Component {
     return active
   }
 
-  _updateCashdrawer () {
+  _updateCashdrawer (e) {
+    e.preventDefault()
     const { dispatch, mainUI } = this.props
     let { activeDrawer, activeDrawerOffline, activeStore, posMode, networkStatus } = mainUI
     let amount = Number(document.getElementById('drawerAmtInput').value) || 0
@@ -165,10 +166,10 @@ class ModalApp extends Component {
         )
       case 'updateCashdrawer':
         return (
-          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer()}>
+          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer(e)}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
-                <form onSubmit={e => this._updateCashdrawer()} >
+                <form onSubmit={e => this._updateCashdrawer(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='drawerAmtInput' className='input is-large' type='Number'
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}} />

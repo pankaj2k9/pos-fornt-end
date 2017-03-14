@@ -127,6 +127,7 @@ class ModalStoreUtils extends Component {
       activeModalId,
       overallDiscount,
       ordersOnHold,
+      orderData,
       orderNote,
       orderReceipt,
       intl
@@ -257,6 +258,7 @@ class ModalStoreUtils extends Component {
         let fromFetched = processCustomers(customersArray, customerFilter, customerSearchKey)
         let fromSearch = customerSearch
         let customers = fromFetched.length > 0 ? fromFetched : fromSearch
+        let activeCustomer = orderData.activeCustomer
         return (
           <ModalCard closeAction={e => this._closeModal()}>
             <form id='searchCust' onSubmit={e => this._searchCustomer(e)}>
@@ -276,6 +278,15 @@ class ModalStoreUtils extends Component {
               </p>
             </form>
             <div>
+              {activeCustomer &&
+                <div className='box is-clearfix'>
+                  <p className='is-pulled-left title is-marginless'>
+                    <strong>Current Customer: </strong>
+                    {`${activeCustomer.firstName} ${activeCustomer.lastName}`}
+                  </p>
+                  <a className='button is-danger is-pulled-right' onClick={e => dispatch(setActiveCustomer(null))}>REMOVE</a>
+                </div>
+              }
               {!isFetching
                 ? customers.map((customer, key) => {
                   let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
