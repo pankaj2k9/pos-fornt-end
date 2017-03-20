@@ -14,29 +14,26 @@ import Reports from './containers/Reports'
  *
  * Is called right before a route is entered.
  */
+
 function requireAuth (nextState, replace, callback) {
   let appState = JSON.parse(window.localStorage.getItem('state'))
   let nextRoute = nextState.location.pathname
-  let notStore = nextRoute !== 'store' ? nextRoute : null
   const posMode = appState ? appState.app.mainUI.posMode : undefined
   const netStat = appState ? appState.app.mainUI.networkStatus : undefined
   const token = window.localStorage.getItem('feathers-jwt')
-  if (token && nextRoute === '/') {
-    replace({ pathname: 'store' })
+
+  if (!token) {
     callback()
-  } else if (token && appState && netStat === 'offline' && notStore) {
-    replace({ pathname: 'store' })
-    callback()
-  } else if (token && appState && posMode === 'offline' && notStore) {
-    replace({ pathname: 'store' })
-    callback()
-  } else if (!token && nextRoute !== '/') {
-    replace({ pathname: '/' })
-    callback()
-  } else if (!token) {
-    callback()
-  } else if (token && appState && nextRoute === 'store' && netStat === 'offline') {
-    callback()
+  } else if (token && appState) {
+    if (netStat === 'online' && posMode === 'offline' && nextRoute !== 'store') {
+      replace({ pathname: 'store' })
+      callback()
+    } else if (netStat === 'offline' && posMode === 'offline' && nextRoute !== 'store') {
+      replace({ pathname: 'store' })
+      callback()
+    } else {
+      callback()
+    }
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
     .then(token => {
@@ -66,19 +63,10 @@ function requireAuth (nextState, replace, callback) {
   }
 }
 
-function changeInRoute (nextState) {
-  let nextRoute = nextState.location.pathname
-  // let appState = JSON.parse(window.localStorage.getItem('state'))
-  // const focusedInput = appstate.app.mainUI.focusedInput
-  if (nextRoute === '/store') {
-    // document.getElementById(focusedInput).focus()
-  }
-}
-
 export default (
   <Route path='/' component={App}>
     <IndexRoute component={Login} onEnter={requireAuth} />
-    <Route path='store' component={Store} onEnter={requireAuth} onChange={changeInRoute} />
+    <Route path='store' component={Store} onEnter={requireAuth} />
     <Route path='settings' component={Settings} onEnter={requireAuth} />
     <Route path='reports' component={Reports} onEnter={requireAuth} />
     <Route path='*' component={NotFound} />

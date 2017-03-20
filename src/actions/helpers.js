@@ -1,7 +1,6 @@
 import moment from 'moment'
 
 import {
-  addPaymentType,
   resetOrderData
 } from './data/orderData'
 
@@ -28,13 +27,6 @@ import {
 import {
   orderStateReset
 } from './orders'
-
-export function addOdboPayment (total) {
-  return (dispatch) => {
-    dispatch(setActiveModal('custPincode'))
-    dispatch(addPaymentType({type: 'odbo', amount: total}))
-  }
-}
 
 export function cancelOrder () {
   return (dispatch) => {

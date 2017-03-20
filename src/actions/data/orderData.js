@@ -26,6 +26,7 @@ export function setCurrencyType (currency) {
 
 export const SET_ORDER_ITEM_QTY = 'SET_ORDER_ITEM_QTY'
 export function setOrderItemQty (orderItemID, opperand) {
+  document.getElementById('barcodeInput').focus()
   return {
     type: SET_ORDER_ITEM_QTY,
     orderItemID,
@@ -53,13 +54,17 @@ export function setOverallDiscount (discount) {
 export const SET_ORDER_INFO = 'SET_ORDER_INFO'
 export function setOrderInfo (data, otherData) {
   let { orderData, appData } = data
-  let { currency, total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote, payments } = orderData
+  let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote } = orderData
   let { activeCashier, activeStore } = appData
   let { source, code, lastId } = activeStore
 
-  let activeCustomer = otherData || orderData.activeCustomer
-  let bonusPoints = otherData || orderData.bonusPoints
+  let currency = (otherData && otherData.currency) || orderData.currency
+  let activeCustomer = (otherData && otherData.customer) || orderData.activeCustomer
+  let bonusPoints = (otherData && otherData.bonus) || orderData.bonusPoints
 
+  let payments = currency === 'odbo'
+    ? [{type: 'odbo', amount: totalOdbo}]
+    : orderData.payments
   let orderTotal = currency === 'sgd' ? total : totalOdbo
   let orderDisccount = currency === 'sgd' ? totalDisc : totalOdboDisc
   let pincodeInput = document.getElementById('custCodeInput') || undefined
@@ -79,7 +84,7 @@ export function setOrderInfo (data, otherData) {
     currency: currency,
     userPrevCoins: odbo && odbo.prevCoins,
     payments: processPayments(payments, currency),
-    redemptionPoints: odbo && odbo.earnedPts,
+    redemptionPoints: currency === 'sgd' ? odbo && odbo.earnedPts : undefined,
     pinCode: pincode,
     vouchers: currency === 'sgd' && processPayments(payments, 'voucher'),
     odboId: activeCustomer ? activeCustomer.odboId : undefined
@@ -179,6 +184,7 @@ export function removePaymentByKey (key) {
 
 export const REMOVE_ORDER_ITEM = 'REMOVE_ORDER_ITEM'
 export function removeOrderItem (orderItemID) {
+  document.getElementById('barcodeInput').focus()
   return {
     type: REMOVE_ORDER_ITEM,
     orderItemID

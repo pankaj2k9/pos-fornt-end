@@ -14,8 +14,11 @@ import {
   saveReceipt
 } from './data/offlineData'
 
+import {
+  updateDailyData
+} from './data/cashdrawers'
+
 import ordersService from '../services/orders'
-import print from '../utils/printReceipt/print'
 
 export function orderRequest () {
   return {
@@ -55,21 +58,20 @@ export function orderStateReset () {
   }
 }
 
-export function processOrder (orderInfo, receipt) {
+export function processOrder (orderInfo, receipt, activeDrawer) {
   return (dispatch) => {
     dispatch(setActiveModal('processingOrder'))
     dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(setActiveModal('orderSuccess'))
-      print(receipt)
       dispatch(orderSuccess())
       dispatch(setNewLastID())
+      dispatch(updateDailyData(activeDrawer))
       dispatch(saveReceipt(receipt))
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))
-      dispatch(setNewLastID())
       dispatch(orderFailure(error.message))
     })
   }

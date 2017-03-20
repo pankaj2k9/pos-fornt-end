@@ -12,10 +12,6 @@ import {
 } from '../actions/app/mainUI'
 
 import {
-  addOdboPayment
-} from '../actions/helpers'
-
-import {
   setOrderItemQty,
   setCustomDiscount,
   removeOrderItem
@@ -43,18 +39,20 @@ import print from '../utils/printReceipt/print'
 class PanelOrderInfo extends Component {
 
   _onClickPanelButtons (name) {
-    const { dispatch, currency, totalOdbo, orderInfo, receipt, posMode, activeDrawer } = this.props
+    const { dispatch, currency, orderInfo, receipt, posMode, activeDrawer } = this.props
     switch (name) {
       case 'total': return dispatch(setActiveModal('payments'))
       case 'printSub':
         print(receipt)
+        document.getElementById('barcodeInput').focus()
         break
       case 'pay':
         if (posMode === 'online') {
           if (currency === 'sgd') {
             dispatch(processOrder(orderInfo, receipt, activeDrawer))
+            print(receipt)
           } else {
-            dispatch(addOdboPayment(totalOdbo))
+            dispatch(setActiveModal('custPincode'))
           }
         } else {
           dispatch(makeOfflineOrder(orderInfo, receipt, activeDrawer))

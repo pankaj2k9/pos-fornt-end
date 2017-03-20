@@ -34,44 +34,44 @@ const orders = {
       $skip: skip || undefined
     }
 
-    if (id) {
-      query.id = id
-    }
+    let orderId
+    let staff
+    let store
+    let dateParam
 
-    if (staffId) {
-      query.adminId = staffId
-    }
-
+    if (id) { orderId = id }
+    if (staffId) { staff = staffId }
     if (storeId) {
       const storeIds = stores ? stores.map((store) => { return store.source }) : []
       const storeIn = storeId ? [storeId] : storeIds
-
-      query.source = { $in: storeIn }
+      store = { $in: storeIn }
     }
-
     if (dateCreated || (to && from)) {
-      const dateFr = dateCreated || from
-      const dateTo = dateCreated || to
-
-      query.dateCreated = {
-        $gte: moment(dateFr).startOf('day').toDate(),
-        $lte: moment(dateTo).endOf('day').toDate()
+      dateParam = {
+        $gte: moment(dateCreated || from).startOf('day').toDate(),
+        $lte: moment(dateCreated || to).endOf('day').toDate()
       }
     }
+
+    query.$or = [
+      {
+        adminId: staff,
+        dateCreated: dateParam,
+        id: orderId,
+        source: store
+      },
+      {
+        adminId: staff,
+        dateRefunded: dateParam,
+        id: orderId,
+        source: store
+      }
+    ]
 
     if (idFrom || idTo) {
       query.id = {}
       if (idFrom) { query.id.$gte = buildOrderId(storeId, idFrom, null, stores) }
       if (idTo) { query.id.$lte = buildOrderId(storeId, idTo, null, stores) }
-    }
-
-    return ordersService.find({ query })
-  },
-
-  get (orderId) {
-    const query = {
-      id: orderId,
-      $eager: '[users, items, items.product]'
     }
     return ordersService.find({ query })
   }
