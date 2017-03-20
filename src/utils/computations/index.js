@@ -157,7 +157,9 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
     extraInfo: {
       id: data.id,
       customer: data.users,
-      data: new Date(),
+      refundId: data.refundId,
+      date: data.dateOrdered,
+      dateRefunded: data.dateRefunded,
       staff: `STAFF ID#${data.adminId}`
     },
     paymentInfo: {
@@ -166,8 +168,9 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
       subtotal: data.total,
       vouchers: data.vouchers,
       orderTotal: data.total,
-      refundId: type === 'refund' && lastId,
-      refundAmt: type === 'refund' && compPaymentsSum(data.payments, 'noVoucher'),
+      refundId: lastId || data.refundId,
+      refundAmt: compPaymentsSum(data.payments, 'noVoucher'),
+      dateRefunded: data.dateRefunded || undefined,
       odbo: processOdbo(data.users, data.total, data.bonusPoints),
       notes: data.remarks
     }

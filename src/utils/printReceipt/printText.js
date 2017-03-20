@@ -39,7 +39,7 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += receipt.headerText ? RECEIPT_DIVIDER : ''
 
   // build extra info
-  receiptHtmlString += buildExtraInfo(receipt.extraInfo)
+  receiptHtmlString += buildExtraInfo(receipt.type, receipt.extraInfo)
   receiptHtmlString += receipt.info ? RECEIPT_DIVIDER : ''
 
   // build item list
@@ -71,16 +71,20 @@ export const buildHeader = (headerText) => {
  * Add staff, date, etc.
  * @param {Object} info of receipt
  */
-export const buildExtraInfo = (info) => {
-  let { staff, customer, id, date } = info
+export const buildExtraInfo = (type, info) => {
+  let { staff, customer, id, date, refundId, dateRefunded } = info
   let extra = ''
   let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[ID#${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
-  let orderId = id ? `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${id}</div>` : ''
+  let orderId = type === 'reprint' && refundId
+    ? `<div style="${TOTAL_DIV_STYLE_1}">Refund ID : ${refundId}</div>`
+    : id
+      ? `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${id}</div>`
+      : ''
   extra += `<div>
   ${RECEIPT_DIVIDER}
   ${orderId}
   ${staff ? `<div>STAFF : ${staff}<div>` : ''}
-  <div>${formatDate(date)}</div>
+  <div>${formatDate((dateRefunded || date) || new Date())}</div>
   ${custLbl}
   ${RECEIPT_DIVIDER}
   </div>`
@@ -164,8 +168,8 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
   let comp = ''
 
   if (paymentInfo) {
-    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, refundAmt } = paymentInfo
-
+    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, refundAmt, dateRefunded } = paymentInfo
+    let deductSign = refundId ? '-' : ''
     comp += '<div>'
     if (currency === 'sgd') {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>
@@ -183,7 +187,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
         if (payment.type === 'credit') {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CREDIT PAYMENT</div></div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${formatCurrency(payment.amount)}</div>
                      <div style="${TOTAL_DIV_STYLE_2}"><div>CARD TYPE : </div>${payment.provider}</div>
                      <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
@@ -191,7 +195,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
         if (payment.type === 'nets') {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS PAYMENT</div></div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${formatCurrency(payment.amount)}</div>
                      <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
         }
@@ -199,7 +203,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH PAYMENT</div></div>
                      <div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${formatCurrency(payment.cash)}</div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${deductSign}${formatCurrency(payment.amount)}</div>
                      <div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${formatCurrency(payment.change)}</div>`
           }
         }
@@ -207,7 +211,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
         if (payment.amount) {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>
                    <div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${odbo.prevCoins}</div>
-                   <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${orderTotal}</div>
+                   <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${orderTotal}</div>
                    <div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${odbo.newCoins2}</div>`
         }
       }
@@ -221,7 +225,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
     }
 
     if (currency === 'sgd' && payments.length > 1) {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${formatCurrency(compPaymentsSum(payments))}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${deductSign}${formatCurrency(compPaymentsSum(payments))}</div>`
     }
 
     if (currency === 'sgd') {
@@ -242,19 +246,26 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
       })
     }
 
+    if (type === 'reprint' && refundId) {
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>`
+    }
+
+    if (type === 'refund' && refundId) {
+      comp += RECEIPT_DIVIDER
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED ORDER: </div></div>
+              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>
+              <div style="${TOTAL_DIV_STYLE_2}">${formatDate(dateRefunded)}</div>
+              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>
+              </div>`
+    }
+
     if (type === 'reprint') {
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_2}">REPRINTED RECEIPT
-              <div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>`
-    } else if (type === 'refund') {
-      comp += RECEIPT_DIVIDER
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED RECEIPT: </div></div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>
               <div style="${TOTAL_DIV_STYLE_2}">${formatDate(new Date())}</div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>`
+              </div>`
     }
-
-    comp += '</div>'
   }
 
   return comp

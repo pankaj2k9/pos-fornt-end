@@ -11,6 +11,8 @@ import ReceiptPreviewRow, {
 
 import { printReceiptFromString } from '../utils/receipt'
 
+import { compPaymentsSum } from '../utils/computations'
+
 import { formatCurrency, formatDate } from '../utils/string'
 
 export default class ViewBillReceiptPreview extends React.PureComponent {
@@ -186,6 +188,8 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
           const addrList = this.splitAddr(order.source, stores)
           const staff = order.staff
           let orderSalesPerson = ''
+          const refundAmt = compPaymentsSum(order.payments, 'noVoucher')
+          const deductSign = order.refundId ? '-' : ''
 
           if (staff) {
             orderSalesPerson += staff.firstName && `${staff.firstName.toUpperCase()} `
@@ -226,10 +230,16 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               <ReceiptRowDivider />
 
               {/* Order ID */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}order-id`}
-                rowType='is-bold'
-                cols={[`Order ID: ${order.id}`]} />
+              <span>
+                {order.refundId &&
+                  <ReceiptPreviewRow
+                    keyPrefix={`${keyPref}refund-id`}
+                    rowType='is-bold'
+                    cols={[`Refund ID: ${order.refundId}`]} />}
+                <ReceiptPreviewRow
+                  keyPrefix={`${keyPref}order-id`}
+                  cols={[`Order ID: ${order.id}`]} />
+              </span>
 
               {/* Order sales person */}
               <ReceiptPreviewRow
@@ -239,7 +249,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               {/* Date */}
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}order-id`}
-                cols={[formatDate(new Date(order.dateOrdered), dateOptions)]} />
+                cols={[formatDate(new Date(!order.refundId ? order.dateOrdered : order.dateRefunded), dateOptions)]} />
               <ReceiptRowDivider />
 
               {/* Items list */}
@@ -320,7 +330,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                         <ReceiptPreviewRow
                           key={`${key}-amount`}
                           keyPrefix={`${key}-amount`}
-                          cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
                         <ReceiptPreviewRow
                           key={`${key}-cardtype`}
                           keyPrefix={`${key}-cardtype`}
@@ -343,7 +353,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                         <ReceiptPreviewRow
                           key={`${key}-amount`}
                           keyPrefix={`${key}-amount`}
-                          cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
                         <ReceiptPreviewRow
                           key={`${key}-transnum`}
                           keyPrefix={`${key}-transnum`}
@@ -366,7 +376,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                         <ReceiptPreviewRow
                           key={`${key}-amount`}
                           keyPrefix={`${key}-amount`}
-                          cols={['AMOUNT PAID:', formatCurrency(payment.amount)]} />
+                          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
                         <ReceiptPreviewRow
                           key={`${key}-change`}
                           keyPrefix={`${key}-change`}
@@ -399,6 +409,17 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                   )
                 }
               })}
+
+              {/* Refund details */}
+              {order.refundId &&
+                <span>
+                  <ReceiptRowDivider />
+                  <ReceiptPreviewRow
+                    keyPrefix={`${keyPref}order-id`}
+                    rowType='is-bold'
+                    cols={['REFUNDED AMOUNT:', formatCurrency(refundAmt, order.currency)]} />
+                </span>
+              }
 
               {/* Footer */}
               <ReceiptRowDivider />
