@@ -58,9 +58,13 @@ class PanelButtons extends Component {
       case 'recallOrder':
         return dispatch(setActiveModal('recallOrder'))
       case 'useOdboBtn1':
-        return dispatch(setCurrencyType('odbo'))
+        dispatch(setCurrencyType('odbo'))
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, {currency: 'odbo'}))
+        break
       case 'useSgdBtn1':
-        return dispatch(setCurrencyType('sgd'))
+        dispatch(setCurrencyType('sgd'))
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, {currency: 'sgd'}))
+        break
       case 'staffSales':
         dispatch(reportsSetTab('staffSales'))
         browserHistory.push('reports')
@@ -86,11 +90,11 @@ class PanelButtons extends Component {
         browserHistory.push('settings')
         break
       case 'doublePointsBtn1':
-        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, 100))
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, {bonus: 100}))
         dispatch(addBonusMultiplier(100))
         break
       case 'removeBonusBtn1':
-        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, undefined))
+        dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, {bonus: undefined}))
         return dispatch(removeBonusMultiplier())
       case 'adjustPoints':
         dispatch(setSettingsActiveTab('customers'))
@@ -132,7 +136,7 @@ class PanelButtons extends Component {
 
     let doublePointsButton = orderData.bonusPoints
       ? {name: 'removeBonusBtn1', isActive: hasOdboUser, color: 'purple', label: 'REMOVE DOUBLE POINTS', altLbl: '去掉双倍积分', size: 'is-3'}
-      : {name: 'doublePointsBtn1', isActive: hasOdboUser, color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'}
+      : {name: 'doublePointsBtn1', isActive: hasOdboUser && currency === 'sgd', color: 'purple', label: 'DOUBLE POINTS', altLbl: '双倍积分', size: 'is-3'}
 
     let buttons = [
       posModeToggleButton,

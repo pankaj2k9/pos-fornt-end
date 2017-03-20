@@ -50,6 +50,10 @@ class ModalStoreUtils extends Component {
     }
   }
 
+  _print () {
+    print(this.props.orderReceipt)
+  }
+
   _closeModal (e) {
     e && e.preventDefault()
     const { dispatch } = this.props
@@ -79,7 +83,7 @@ class ModalStoreUtils extends Component {
   _setActiveCustomer (customer) {
     const {dispatch, orderData, mainUI} = this.props
     dispatch(setActiveCustomer(customer))
-    dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, customer))
+    dispatch(setOrderInfo({orderData: orderData, appData: mainUI}, {customer: customer}))
     dispatch(closeActiveModal())
   }
 
@@ -103,14 +107,16 @@ class ModalStoreUtils extends Component {
     dispatch(setOrderInfo({orderData: orderData, appData: mainUI}))
   }
 
-  _processOdboOrder (e) {
+  _processOrder (e) {
     e && e.preventDefault()
-    const {dispatch, activeDrawer, orderInfo, orderReceipt, posMode} = this.props
-    if (posMode === 'online') {
-      dispatch(processOrder(orderInfo, orderReceipt, activeDrawer))
-    } else {
-      dispatch(makeOfflineOrder(orderInfo, orderReceipt, activeDrawer))
-    }
+    const {dispatch, activeDrawer, orderInfo, orderReceipt} = this.props
+    dispatch(processOrder(orderInfo, orderReceipt, activeDrawer))
+  }
+
+  _processOfflineOrder (e) {
+    e && e.preventDefault()
+    const {dispatch, activeDrawer, orderInfo, orderReceipt} = this.props
+    dispatch(makeOfflineOrder(orderInfo, orderReceipt, activeDrawer))
   }
 
   _recallOrder (orderData, orderKey) {
@@ -237,7 +243,7 @@ class ModalStoreUtils extends Component {
         )
       case 'orderSuccess':
         return (
-          <ModalCard closeAction={e => this._resetOrderData()} confirmAction={this._resetOrderData.bind(this)}>
+          <ModalCard closeAction={e => this._resetOrderData()} confirmAction={e => this._resetOrderData()}>
             <div className='content has-text-centered'>
               <p className='title'>Order Success</p>
               <a onClick={e => print(orderReceipt)}>Reprint Receipt</a>
@@ -246,10 +252,12 @@ class ModalStoreUtils extends Component {
         )
       case 'orderFailed':
         return (
-          <ModalCard closeAction={e => this._closeModal()} retryAction={this._closeModal.bind(this)}>
+          <ModalCard closeAction={e => this._closeModal()} retryAction={e => this._processOrder}>
             <div className='content has-text-centered'>
               <p className='title'>Order Failed</p>
               <p className='subtitle'>Try Again</p>
+              <p>or</p>
+              <a className='button is-info'>Process as Offline Order</a>
             </div>
           </ModalCard>
         )
@@ -328,10 +336,10 @@ class ModalStoreUtils extends Component {
 
       case 'custPincode':
         return (
-          <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOdboOrder()}>
+          <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOrder()}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-6 is-offset-3 has-text-centered'>
-                <form onSubmit={e => this._processOdboOrder(e)} >
+                <form onSubmit={e => this._processOrder(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
                     <input id='custCodeInput' className='input is-large' type='password' onChange={e => this._setOdboOrderInfo()}
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}} />

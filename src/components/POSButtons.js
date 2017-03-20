@@ -65,7 +65,6 @@ const POSButtons = (props) => {
           let finalBtnStyle = imgUrl
             ? Object.assign({}, buttonStyle, btnColor, imgBtn, imgBtnSLC)
             : Object.assign({}, buttonStyle, btnColor, defaultBtn, imgBtnSLC)
-          // let onHover = (key) => { document.getElementById(key).style.borderStyle = 'outset' }
           return (
             <div key={key} className={`column ${size}`} style={{padding: 7}} onClick={bountItemClick}>
               <div id={btnKey} className={!blank ? !imgUrl ? 'box' : '' : ''} style={finalBtnStyle}

@@ -40,8 +40,8 @@ class LoginForm extends Component {
   }
 
   componentDidMount () {
-    const { onGetStoreIds, closeModal, stores } = this.props
-    if (!stores || stores.length === 0) { onGetStoreIds() }
+    const { onGetStoreIds, closeModal, networkStatus } = this.props
+    if (networkStatus !== 'offline') { onGetStoreIds() }
     closeModal()
   }
 

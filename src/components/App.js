@@ -138,23 +138,23 @@ class App extends React.Component {
 }
 
 function mapStateToProps (state) {
-  let posMode = state.app.mainUI.posMode
-  let activeDrawer = posMode === 'online'
+  let mainUI = state.app.mainUI
+  let activeDrawer = mainUI.posMode === 'online'
     ? state.app.mainUI.activeDrawer
     : state.app.mainUI.activeDrawerOffline
   return {
     intl: state.intl,
-    isHamburgerOpen: state.app.mainUI.isHamburgerOpen,
-    networkStatus: state.app.mainUI.networkStatus,
-    posMode,
-    staff: state.app.mainUI.activeStaff,
-    storeId: state.app.mainUI.storeId,
-    shouldUpdate: state.app.mainUI.shouldUpdate,
-    error: state.app.mainUI.error,
-    activeModalId: state.app.mainUI.activeModalId,
+    isHamburgerOpen: mainUI.isHamburgerOpen,
+    networkStatus: mainUI.networkStatus,
+    posMode: mainUI.posMode,
+    staff: mainUI.activeStaff,
+    storeId: mainUI.storeId,
+    shouldUpdate: mainUI.shouldUpdate,
+    error: mainUI.error,
+    activeModalId: mainUI.activeModalId,
     activeDrawer,
-    activeCashier: state.app.mainUI.activeCashier,
-    adminToken: state.app.mainUI.adminToken,
+    activeCashier: mainUI.activeCashier,
+    adminToken: mainUI.adminToken,
     authProcessing: state.login.isProcessing
   }
 }
