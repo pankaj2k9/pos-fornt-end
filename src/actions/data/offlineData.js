@@ -14,8 +14,6 @@ import {
   setActiveModal
 } from '../app/mainUI'
 
-import print from '../../utils/printReceipt/print'
-
 export const PROCESS_OFFLINE_ORDER = 'PROCESS_OFFLINE_ORDER'
 export function processOfflineOrder (orderInfo) {
   return {
@@ -30,9 +28,8 @@ export function makeOfflineOrder (orderInfo, receipt, activeDrawer) {
     setTimeout(e => {
       dispatch(processOfflineOrder(orderInfo))
       dispatch(setActiveModal('orderSuccess'))
-      print(receipt)
       dispatch(setNewLastID())
-      dispatch(updateDailyData())
+      dispatch(updateDailyData(activeDrawer))
       dispatch(resetOrderData())
     }, 1000)
   }

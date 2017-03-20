@@ -74,35 +74,25 @@ export function dailyDataUpdateFailure (error) {
   }
 }
 
-export function updateDailyData (activeDrawer, amount, storeId) {
+export function updateDailyData (activeDrawer, amount) {
   return (dispatch) => {
     dispatch(dailyDataUpdateRequest())
-    if (activeDrawer) {
-      let updatedData = {
-        id: activeDrawer.id,
-        float: amount || Number(activeDrawer.float),
-        cashDrawerOpenCount: activeDrawer.cashDrawerOpenCount + 1
-      }
-      return dailyDataService.patch(updatedData)
-        .then(response => {
-          dispatch(dailyDataUpdateSuccess())
-          dispatch(setActiveCashdrawer(response))
-          dispatch(closeActiveModal())
-        })
-        .catch(error => {
-          dispatch(saveFailedDrawerUpdate(updatedData))
-          dispatch(setActiveCashdrawer(updatedData))
-          dispatch(dailyDataUpdateFailure(error))
-        })
-    } else {
-      let updatedData = {
-        storeId: storeId,
-        date: new Date().toISOString().slice(0, 10),
-        float: amount,
-        cashDrawerOpenCount: activeDrawer.cashDrawerOpenCount + 1
-      }
-      dispatch(setTemporaryCashdrawer(updatedData))
+    let updatedData = {
+      id: activeDrawer.id,
+      float: amount || Number(activeDrawer.float),
+      cashDrawerOpenCount: activeDrawer.cashDrawerOpenCount + 1
     }
+    return dailyDataService.patch(updatedData)
+      .then(response => {
+        dispatch(dailyDataUpdateSuccess())
+        dispatch(setActiveCashdrawer(response))
+        dispatch(closeActiveModal())
+      })
+      .catch(error => {
+        dispatch(saveFailedDrawerUpdate(updatedData))
+        dispatch(setActiveCashdrawer(updatedData))
+        dispatch(dailyDataUpdateFailure(error))
+      })
   }
 }
 
