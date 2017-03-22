@@ -1,5 +1,4 @@
 import {
-  // setActiveModal,
   closeActiveModal,
   setActiveCashdrawer,
   setTemporaryCashdrawer
@@ -86,11 +85,9 @@ export function updateDailyData (activeDrawer, amount) {
       .then(response => {
         dispatch(dailyDataUpdateSuccess())
         dispatch(setActiveCashdrawer(response))
-        dispatch(closeActiveModal())
       })
       .catch(error => {
         dispatch(saveFailedDrawerUpdate(updatedData))
-        dispatch(setActiveCashdrawer(updatedData))
         dispatch(dailyDataUpdateFailure(error))
       })
   }

@@ -20,11 +20,7 @@ import {
 function mainUI (state = {
   activeCashier: null,
   activeDrawer: null,
-  activeDrawerOffline: {
-    date: new Date().toISOString().slice(0, 10),
-    float: 0,
-    cashDrawerOpenCount: 0
-  },
+  activeDrawerOffline: null,
   activeModalId: null,
   activeStaff: null,
   activeStore: null,
