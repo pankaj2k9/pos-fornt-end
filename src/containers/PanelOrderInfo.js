@@ -15,8 +15,6 @@ import {
   setOrderItemQty,
   setCustomDiscount,
   removeOrderItem
-  // removeCustomer,
-  // setCurrencyType
 } from '../actions/data/orderData'
 
 import {
@@ -49,8 +47,8 @@ class PanelOrderInfo extends Component {
       case 'pay':
         if (posMode === 'online') {
           if (currency === 'sgd') {
-            dispatch(processOrder(orderInfo, receipt, activeDrawer))
             print(receipt)
+            dispatch(processOrder(orderInfo, receipt, activeDrawer))
           } else {
             dispatch(setActiveModal('custPincode'))
           }

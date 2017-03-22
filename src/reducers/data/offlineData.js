@@ -4,12 +4,16 @@ import {
   SYNC_ORDER_SUCCESS,
   SYNC_ORDER_FAILED,
   SYNC_ORDERS_DONE,
+  UPDATE_SYNC_LOG,
+  CLEAR_SYNC_LOG,
   SAVE_RECEIPT,
   SAVE_FAILED_DRAWER_UPDATE,
   UPDATE_SAVED_RECEIPT,
   CLEAR_SAVED_RECEIPTS,
   CLEAR_MESSAGES
 } from '../../actions/data/offlineData'
+
+import moment from 'moment'
 
 function offlineData (state = {
   offlineOrders: [],
@@ -20,6 +24,7 @@ function offlineData (state = {
   successDrawers: [],
   offlineDrawers: [],
   syncSuccess: null,
+  syncLog: [],
   isProcessing: false,
   connectionError: null
 }, action) {
@@ -41,10 +46,9 @@ function offlineData (state = {
         syncOrderSuccess: true
       })
     case SYNC_ORDER_FAILED:
-      state.failedOrders.push(action.failedOrder)
+      let updatedFailedOrders = state.failedOrders.push(action.failedOrder)
       return Object.assign({}, state, {
-        connectionError: action.error,
-        failedOrders: state.failedOrders
+        failedOrders: updatedFailedOrders
       })
     case SYNC_ORDERS_DONE:
       const noFailedOrders = state.failedOrders.length === 0
@@ -53,6 +57,15 @@ function offlineData (state = {
         offlineOrders: [],
         connectionError: !noFailedOrders ? 'syncError' : undefined,
         syncOrderSuccess: noFailedOrders
+      })
+    case UPDATE_SYNC_LOG:
+      state.syncLog.push(action.syncLog)
+      return Object.assign({}, state, {
+        syncLog: state.syncLog
+      })
+    case CLEAR_SYNC_LOG:
+      return Object.assign({}, state, {
+        syncLog: []
       })
     case SAVE_RECEIPT:
       printedReceipts.push(action.receipt)
@@ -67,10 +80,14 @@ function offlineData (state = {
         printedReceipts: updatedData
       })
     case SAVE_FAILED_DRAWER_UPDATE:
-      let offlineDrawers = state.offlineDrawers
-      offlineDrawers.push(action.drawer)
+      state.failedDrawers.filter(drawer => {
+        let drawerDate = moment(drawer.date).format('L')
+        let drawerDate2 = moment(action.drawer.date).format('L')
+        return drawerDate !== drawerDate2
+      })
+      state.failedDrawers.push(action.drawer)
       return Object.assign({}, state, {
-        offlineDrawers: offlineDrawers
+        failedDrawers: state.failedDrawers
       })
     case CLEAR_SAVED_RECEIPTS:
       return Object.assign({}, state, {

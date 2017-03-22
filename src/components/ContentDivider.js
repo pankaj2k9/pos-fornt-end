@@ -23,10 +23,11 @@ const ContentDivider = (props) => {
       {offset ? <div className={`column is-${offset}`} /> : null}
       {
         validatedContents.map(function (content, key) {
-          return (
-            <div key={key} className={`column is-${size} is-paddingless`} style={contentStyle}>
+          return (content
+            ? <div key={key} className={`column is-${size} is-paddingless`} style={contentStyle}>
               {content}
             </div>
+            : null
           )
         })
       }

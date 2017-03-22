@@ -11,7 +11,8 @@ import {
 } from '../actions/data/cashdrawers'
 
 import {
-  syncOfflineOrders
+  syncOfflineOrders,
+  clearSyncLog
 } from '../actions/data/offlineData'
 
 import ModalCard from '../components/ModalCard'
@@ -164,6 +165,14 @@ class ModalApp extends Component {
             </div>
           </ModalCard>
         )
+      case 'updateCashdrawerFailed':
+        return (
+          <ModalCard closeAction={e => this._closeModal()} retryAction={e => dispatch(setActiveModal('updateCashdrawer'))}>
+            <div className='has-text-centered'>
+              <p className='title'>Update Failed</p>
+            </div>
+          </ModalCard>
+        )
       case 'updateCashdrawer':
         return (
           <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer(e)}>
@@ -183,7 +192,7 @@ class ModalApp extends Component {
           </ModalCard>
         )
       case 'syncModal':
-        let { offlineOrders, failedOrders, offlineDrawers, failedDrawers } = offlineData
+        let { offlineOrders, failedOrders, offlineDrawers, failedDrawers, syncLog } = offlineData
         let haveDatatoSync = offlineOrders.length > 0 || failedOrders.length > 0 || offlineDrawers.length > 0 || failedDrawers.length > 0
         let container = (type, data, icon, lbl) => {
           return (
@@ -199,11 +208,15 @@ class ModalApp extends Component {
                 </div>
               </article>
             </div>
-            : null
+            : undefined
           )
         }
         return (
-          <ModalCard closeAction={e => this._closeModal()} title={lblTR('app.button.syncData')}>
+          <ModalCard title={lblTR('app.button.syncData')}
+            closeAction={e => {
+              this._closeModal()
+              dispatch(clearSyncLog())
+            }}>
             {haveDatatoSync
               ? <div className='has-text-centered'>
                 <ContentDivider contents={[
@@ -212,13 +225,33 @@ class ModalApp extends Component {
                   container('drawer', offlineDrawers, 'upload', 'notSynced'),
                   container('drawer', failedDrawers, 'close', 'syncFailed')
                 ]} size={6} />
-                <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => this._syncOrders()}>
-                  <span className='icon is-large'><i className={`fa fa-refresh ${isProcessing ? 'fa-spin fa-3x' : 'fa-2x'}`} /></span>
-                  <span>{isProcessing ? lblTR('app.lbl.syncing') : lblTR('app.button.syncOrders')}</span>
-                </a>
+                <div className='content'>
+                  <a className={`button is-large is-success ${isProcessing ? 'is-outlined' : ''}`} onClick={e => this._syncOrders()}>
+                    <span className='icon is-large'><i className={`fa fa-refresh ${isProcessing ? 'fa-spin fa-3x' : 'fa-2x'}`} /></span>
+                    <span>{isProcessing ? lblTR('app.lbl.syncing') : lblTR('app.button.syncOrders')}</span>
+                  </a>
+                </div>
               </div>
               : <p className='title has-text-centered'>{lblTR('app.lbl.noDataToSync')}</p>
             }
+            <div className='message' style={{marginTop: 20}}>
+              <div className='message-header'><p>Sync Log</p></div>
+              <div id='syncLog' className='message-body' style={{maxHeight: 70, overflowY: 'scroll'}}>
+                {syncLog.map((log, key) => {
+                  return (log.start
+                    ? <p style={{color: 'limegreen'}}>{log.start}</p>
+                    : log.end
+                      ? <p style={{color: 'limegreen'}}>{log.end}</p>
+                      : <p id={key}>
+                        {`Sync Order ${log.id}: `}
+                        <b style={{color: log.error ? 'red' : 'limegreen'}}>{log.error ? 'ERROR' : 'SUCCESS'}</b>
+                        {log.error ? log.error : ''}
+                      </p>
+                  )
+                }, this)
+                }
+              </div>
+            </div>
           </ModalCard>
         )
       case 'refundRemark':
