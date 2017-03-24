@@ -1,3 +1,5 @@
+import shortid from 'shortid'
+
 import {
   compItemsSum,
   processProducts,
@@ -55,7 +57,7 @@ export const SET_ORDER_INFO = 'SET_ORDER_INFO'
 export function setOrderInfo (data, otherData) {
   let { orderData, appData } = data
   let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote } = orderData
-  let { activeCashier, activeStore } = appData
+  let { activeCashier, activeStore, lastOrderId } = appData
   let { source, code, lastId } = activeStore
 
   let currency = (otherData && otherData.currency) || orderData.currency
@@ -73,7 +75,7 @@ export function setOrderInfo (data, otherData) {
 
   const orderInfo = {
     items: processProducts(orderItems, currency),
-    id: processOrdID(code, lastId),
+    id: processOrdID(code, lastOrderId),
     adminId: activeCashier.id,
     bonusPoints: bonusPoints,
     dateOrdered: new Date(),
@@ -84,6 +86,7 @@ export function setOrderInfo (data, otherData) {
     currency: currency,
     userPrevCoins: odbo && odbo.prevCoins,
     payments: processPayments(payments, currency),
+    randId: shortid.generate(),
     redemptionPoints: currency === 'sgd' ? odbo && odbo.earnedPts : undefined,
     pinCode: pincode,
     vouchers: currency === 'sgd' && processPayments(payments, 'voucher'),
@@ -96,6 +99,7 @@ export function setOrderInfo (data, otherData) {
     items: processReceiptProducts(orderItems, currency),
     extraInfo: {
       id: processOrdID(code, lastId),
+      randId: shortid.generate(),
       customer: activeCustomer,
       date: new Date(),
       staff: `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`

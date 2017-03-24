@@ -57,15 +57,13 @@ class ModalApp extends Component {
   _updateCashdrawer (e) {
     e.preventDefault()
     const { dispatch, mainUI } = this.props
-    let { activeDrawer, activeDrawerOffline, activeStore, posMode, networkStatus } = mainUI
+    let { activeDrawer, activeStore, posMode, networkStatus } = mainUI
     let amount = Number(document.getElementById('drawerAmtInput').value) || 0
     if (activeDrawer) {
-      dispatch(updateDailyData(activeDrawer, amount))
+      dispatch(updateDailyData(activeDrawer, amount, 'closeModal'))
     } else if (!activeDrawer) {
       if (posMode === 'online' || networkStatus === 'online') {
         dispatch(createDailyData(activeStore.source, amount))
-      } else {
-        dispatch(updateDailyData(activeDrawerOffline, amount, activeStore.source))
       }
     }
   }
@@ -93,7 +91,7 @@ class ModalApp extends Component {
   _refund () {
     const { dispatch, activeOD, mainUI, currentPath } = this.props
     let remark = document.getElementById('refundRemark').value
-    let refundId = processOrdID(mainUI.activeStore.code, mainUI.activeStore.lastId)
+    let refundId = processOrdID(mainUI.activeStore.code, mainUI.lastOrderId)
     let refundData = {id: activeOD.id || activeOD.extraInfo.id, refundRemarks: remark, refundId: refundId}
     dispatch(setActiveModal('orderDetails'))
     dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
@@ -107,6 +105,20 @@ class ModalApp extends Component {
       ? offlineOrders.concat(failedOrders)
       : offlineOrders
     dispatch(syncOfflineOrders(allOfflineOrders))
+  }
+
+  _printReceipt () {
+    const { dispatch, activeOD, mainUI } = this.props
+    if (!activeOD.storeAddress) {
+      let storeAddress = processStoreAddress(mainUI.activeStore)
+      let receipt = processOrderSearchReceipt('refund', activeOD, storeAddress, activeOD.refundId)
+      print(receipt)
+    } else {
+      print(activeOD)
+    }
+    setTimeout(() => {
+      dispatch(setActiveModal('orderDetails'))
+    }, 2000)
   }
 
   renderEmptyListLbl (lbl, isProcessing) {
@@ -268,6 +280,14 @@ class ModalApp extends Component {
               </div>
               : this.renderEmptyListLbl('refund is processing', hideCpnt)
             }
+          </ModalCard>
+        )
+      case 'refundSuccess':
+        return (
+          <ModalCard closeAction={e => this._printReceipt()} confirmAction={e => this.printReceipt()}>
+            <div className='content has-text-centered'>
+              <p className='title'>Refund Success</p>
+            </div>
           </ModalCard>
         )
       case 'customerDetails':

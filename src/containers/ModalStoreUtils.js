@@ -6,7 +6,11 @@ import ModalCard from '../components/ModalCard'
 import ContentDivider from '../components/ContentDivider'
 import LoadingScreen from '../components/LoadingScreen'
 
-import { closeActiveModal } from '../actions/app/mainUI'
+import {
+  setActiveModal,
+  closeActiveModal
+} from '../actions/app/mainUI'
+
 import {
   addOrderNote,
   setActiveCustomer,
@@ -50,10 +54,6 @@ class ModalStoreUtils extends Component {
     }
   }
 
-  _print () {
-    print(this.props.orderReceipt)
-  }
-
   _closeModal (e) {
     e && e.preventDefault()
     const { dispatch } = this.props
@@ -64,8 +64,12 @@ class ModalStoreUtils extends Component {
 
   _resetOrderData () {
     const { dispatch } = this.props
-    dispatch(resetOrderData())
-    dispatch(closeActiveModal())
+    this._printReceipt()
+    dispatch(setActiveModal('printingReceipt'))
+    setTimeout(() => {
+      dispatch(resetOrderData())
+      dispatch(closeActiveModal())
+    }, 2000)
   }
 
   _setOADisc (value) {
@@ -126,6 +130,10 @@ class ModalStoreUtils extends Component {
     dispatch(closeActiveModal())
   }
 
+  _printReceipt () {
+    print(this.props.orderReceipt)
+  }
+
   render () {
     const {
       dispatch,
@@ -135,7 +143,6 @@ class ModalStoreUtils extends Component {
       ordersOnHold,
       orderData,
       orderNote,
-      orderReceipt,
       intl
     } = this.props
 
@@ -246,18 +253,17 @@ class ModalStoreUtils extends Component {
           <ModalCard closeAction={e => this._resetOrderData()} confirmAction={e => this._resetOrderData()}>
             <div className='content has-text-centered'>
               <p className='title'>Order Success</p>
-              <a onClick={e => print(orderReceipt)}>Reprint Receipt</a>
             </div>
           </ModalCard>
         )
       case 'orderFailed':
         return (
-          <ModalCard closeAction={e => this._closeModal()} retryAction={e => this._processOrder}>
+          <ModalCard closeAction={e => this._closeModal()} retryAction={e => this._processOrder()}>
             <div className='content has-text-centered'>
               <p className='title'>Order Failed</p>
               <p className='subtitle'>Try Again</p>
               <p>or</p>
-              <a className='button is-info'>Process as Offline Order</a>
+              <a className='button is-info' onClick={e => this._processOfflineOrder()}>Process as Offline Order</a>
             </div>
           </ModalCard>
         )

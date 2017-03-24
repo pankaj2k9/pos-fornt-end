@@ -2,11 +2,13 @@ export const ORDER_REQUEST = 'ORDER_REQUEST'
 export const ORDER_SUCCESS = 'ORDER_SUCCESS'
 export const ORDER_FAILURE = 'ORDER_FAILURE'
 export const ORDER_STATE_RESET = 'ORDER_STATE_RESET'
-export const TEMPORARY_RECEIPT_DATA = 'TEMPORARY_RECEIPT_DATA'
-export const REPRINTING_RECEIPT = 'REPRINTING_RECEIPT'
+export const FETCH_LAST_ID_REQUEST = 'FETCH_LAST_ID_REQUEST'
+export const FETCH_LAST_ID_SUCCESS = 'FETCH_LAST_ID_SUCCESS'
+export const FETCH_LAST_ID_FAILURE = 'FETCH_LAST_ID_FAILURE'
 
 import {
   setActiveModal,
+  setLastID,
   setNewLastID
 } from './app/mainUI'
 
@@ -38,17 +40,53 @@ export function orderFailure (error) {
   }
 }
 
-export function temporaryReceiptData (receipt) {
+export function fetchLastIdRequest () {
   return {
-    type: TEMPORARY_RECEIPT_DATA,
-    receipt
+    type: FETCH_LAST_ID_REQUEST
+  }
+}
+export function fetchLastIdSuccess () {
+  return {
+    type: FETCH_LAST_ID_SUCCESS
   }
 }
 
-export function reprintingReceipt (reprint) {
+export function fetchLastIdFailure (error) {
   return {
-    type: REPRINTING_RECEIPT,
-    reprint
+    type: FETCH_LAST_ID_FAILURE,
+    error
+  }
+}
+
+export function fetchLastOrderId (storeId) {
+  return (dispatch) => {
+    // fetch and sort by orderId
+    const byOrderId = new Promise((resolve, reject) => {
+      ordersService.find({storeId: storeId, limit: 1, sort: {id: -1}})
+        .then((response) => {
+          let orderID = Number(response.data[0].id.replace(/[^\d.]/g, ''))
+          resolve(orderID)
+        }).catch(() => { reject('failed') })
+    })
+    // fetch and sort by refundId
+    const byRefundId = new Promise((resolve, reject) => {
+      ordersService.find({storeId: storeId, limit: 1, sort: {refundId: -1}, option: 'noNullRefundId'})
+        .then((response) => {
+          let refundId = Number(response.data[0].refundId.replace(/[^\d.]/g, ''))
+          resolve(refundId)
+        }).catch(() => { reject('failed') })
+    })
+    return global.Promise.all([byOrderId, byRefundId])
+      .then((response) => {
+        // compare orderId and refundId
+        // highest value is the lastId
+        let lastId = Math.max(...response)
+        dispatch(fetchLastIdSuccess())
+        dispatch(setLastID(lastId))
+      })
+      .catch(error => {
+        dispatch(fetchLastIdFailure(error))
+      })
   }
 }
 
@@ -61,7 +99,6 @@ export function orderStateReset () {
 export function processOrder (orderInfo, receipt, activeDrawer) {
   return (dispatch) => {
     dispatch(setActiveModal('processingOrder'))
-    dispatch(orderRequest())
     return ordersService.create(orderInfo)
     .then(order => {
       dispatch(setActiveModal('orderSuccess'))

@@ -9,13 +9,9 @@ import { updateSavedReceipt } from './data/offlineData'
 import { setActiveOrderDetails } from './settings'
 import { storeOrdersSetActiveOrder } from './reports'
 
-import print from '../utils/printReceipt/print'
+// import print from '../utils/printReceipt/print'
 
-import {
-  processOrderSearchReceipt,
-  processStoreAddress,
-  compPaymentsSum
-} from '../utils/computations'
+import { compPaymentsSum } from '../utils/computations'
 
 export const REFUND_REQUEST = 'REFUND REQUEST'
 export function refundRequest () {
@@ -50,21 +46,28 @@ export function refund (refundData, storeData, orderData, currentPath) {
         } else {
           dispatch(storeOrdersSetActiveOrder(orderData))
         }
-        dispatch(setActiveModal('orderDetails'))
+        dispatch(setActiveModal('refundSuccess'))
         dispatch(refundSuccess())
         dispatch(setNewLastID())
-        if (!orderData.storeAddress) {
-          let storeAddress = processStoreAddress(storeData)
-          let receipt = processOrderSearchReceipt('refund', orderData, storeAddress, refundData.refundId)
-          print(receipt)
-        } else {
+        if (orderData.storeAddress) {
           orderData.type = 'refund'
           orderData.paymentInfo.refundId = refundData.refundId
           orderData.paymentInfo.refundAmt = compPaymentsSum(orderData.paymentInfo.payments, 'noVoucher')
           orderData.paymentInfo.dataRefunded = new Date()
           dispatch(updateSavedReceipt(orderData))
-          print(orderData)
         }
+        // if (!orderData.storeAddress) {
+        //   let storeAddress = processStoreAddress(storeData)
+        //   let receipt = processOrderSearchReceipt('refund', orderData, storeAddress, refundData.refundId)
+        //   print(receipt)
+        // } else {
+        //   orderData.type = 'refund'
+        //   orderData.paymentInfo.refundId = refundData.refundId
+        //   orderData.paymentInfo.refundAmt = compPaymentsSum(orderData.paymentInfo.payments, 'noVoucher')
+        //   orderData.paymentInfo.dataRefunded = new Date()
+        //   dispatch(updateSavedReceipt(orderData))
+        //   print(orderData)
+        // }
       })
       .catch(error => {
         dispatch(refundFailure())

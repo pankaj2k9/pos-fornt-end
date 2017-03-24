@@ -47,7 +47,6 @@ class PanelOrderInfo extends Component {
       case 'pay':
         if (posMode === 'online') {
           if (currency === 'sgd') {
-            print(receipt)
             dispatch(processOrder(orderInfo, receipt, activeDrawer))
           } else {
             dispatch(setActiveModal('custPincode'))

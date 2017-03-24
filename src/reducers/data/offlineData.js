@@ -48,6 +48,7 @@ function offlineData (state = {
     case SYNC_ORDER_FAILED:
       let updatedFailedOrders = state.failedOrders.push(action.failedOrder)
       return Object.assign({}, state, {
+        isProcessing: false,
         failedOrders: updatedFailedOrders
       })
     case SYNC_ORDERS_DONE:
