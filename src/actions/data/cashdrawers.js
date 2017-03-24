@@ -73,7 +73,7 @@ export function dailyDataUpdateFailure (error) {
   }
 }
 
-export function updateDailyData (activeDrawer, amount) {
+export function updateDailyData (activeDrawer, amount, option) {
   return (dispatch) => {
     dispatch(dailyDataUpdateRequest())
     let updatedData = {
@@ -85,6 +85,7 @@ export function updateDailyData (activeDrawer, amount) {
       .then(response => {
         dispatch(dailyDataUpdateSuccess())
         dispatch(setActiveCashdrawer(response))
+        option === 'closeModal' && dispatch(closeActiveModal())
       })
       .catch(error => {
         dispatch(saveFailedDrawerUpdate(updatedData))

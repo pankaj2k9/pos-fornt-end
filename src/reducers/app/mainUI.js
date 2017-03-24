@@ -3,6 +3,7 @@ import {
   HAMBURGER_TOGGLE,
   SET_ACTIVE_MODAL,
   CLOSE_ACTIVE_MODAL,
+  SET_LAST_ID,
   SET_NEW_LAST_ID,
   SET_STAFF_LOGGED_IN,
   SET_ACTIVE_CASHDRAWER,
@@ -20,7 +21,11 @@ import {
 function mainUI (state = {
   activeCashier: null,
   activeDrawer: null,
-  activeDrawerOffline: null,
+  activeDrawerOffline: {
+    date: new Date().toISOString().slice(0, 10),
+    float: 0,
+    cashDrawerOpenCount: 0
+  },
   activeModalId: null,
   activeStaff: null,
   activeStore: null,
@@ -29,6 +34,7 @@ function mainUI (state = {
   error: null,
   isProcessing: false,
   isHamburgerOpen: false,
+  lastOrderId: null,
   networkStatus: 'online',
   posMode: 'online',
   shouldUpdate: false
@@ -58,10 +64,14 @@ function mainUI (state = {
         activeModalId: action.activeModalId,
         isEditing: true
       })
-    case SET_NEW_LAST_ID:
-      let lastId = state.activeStore['lastId'] += 1
+    case SET_LAST_ID:
       return Object.assign({}, state, {
-        activeStore: Object.assign(state.activeStore, {lastId: lastId})
+        lastOrderId: action.lastId
+      })
+    case SET_NEW_LAST_ID:
+      let lastId = state.lastOrderId += 1
+      return Object.assign({}, state, {
+        lastOrderId: lastId
       })
     case CLOSE_ACTIVE_MODAL:
       return Object.assign({}, state, {

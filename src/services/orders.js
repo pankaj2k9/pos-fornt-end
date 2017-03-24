@@ -24,6 +24,7 @@ const orders = {
       limit,
       skip,
       sort,
+      option,
       eager
     } = params
 
@@ -56,14 +57,16 @@ const orders = {
     query.$or = [
       {
         adminId: staff,
-        dateCreated: dateParam,
+        dateOrdered: dateParam,
         id: orderId,
+        refundId: option === 'noNullRefundId' ? { $ne: null } : undefined,
         source: store
       },
       {
         adminId: staff,
         dateRefunded: dateParam,
         id: orderId,
+        refundId: option === 'noNullRefundId' ? { $ne: null } : undefined,
         source: store
       }
     ]
@@ -73,6 +76,7 @@ const orders = {
       if (idFrom) { query.id.$gte = buildOrderId(storeId, idFrom, null, stores) }
       if (idTo) { query.id.$lte = buildOrderId(storeId, idTo, null, stores) }
     }
+
     return ordersService.find({ query })
   }
 }

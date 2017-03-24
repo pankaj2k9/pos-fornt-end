@@ -24,19 +24,15 @@ function requireAuth (nextState, replace, callback) {
 
   if (!token) {
     callback()
-  } else if (token && appState) {
-    if (netStat === 'online' && posMode === 'offline' && nextRoute !== 'store') {
-      replace({ pathname: 'store' })
-      callback()
-    } else if (netStat === 'offline' && posMode === 'offline' && nextRoute !== 'store') {
-      replace({ pathname: 'store' })
-      callback()
-    } else {
-      callback()
-    }
+  } else if (token && appState && netStat === 'offline' && posMode === 'offline' && nextRoute !== 'store') {
+    replace({ pathname: 'store' })
+    callback()
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
     .then(token => {
+      if (posMode === 'offline' && nextRoute !== 'store') {
+        replace({ pathname: 'store' })
+      }
       return api.authenticate({ strategy: 'jwt', store: token.storeId })
     }).then(response => {
       callback()

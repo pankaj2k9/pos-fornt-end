@@ -12,6 +12,7 @@ import ModalStoreUtils from './ModalStoreUtils'
 import { fetchAllProducts } from '../actions/data/products'
 import { fetchCustomers } from '../actions/data/customers'
 import { fetchCashdrawers } from '../actions/data/cashdrawers'
+import { fetchLastOrderId } from '../actions/orders'
 
 import { validateCashdrawers } from '../actions/helpers'
 
@@ -23,17 +24,16 @@ class Store extends Component {
     const {
       dispatch,
       locale,
-      posMode,
       storeId,
-      networkStatus,
-      cashdrawers
+      cashdrawers,
+      networkStatus
     } = this.props
-    if (posMode || networkStatus) {
+    dispatch(validateCashdrawers(cashdrawers))
+    if (networkStatus === 'online') {
       dispatch(fetchAllProducts(locale))
       dispatch(fetchCustomers())
       dispatch(fetchCashdrawers(storeId))
-    } else {
-      dispatch(validateCashdrawers(cashdrawers))
+      dispatch(fetchLastOrderId(storeId))
     }
   }
 

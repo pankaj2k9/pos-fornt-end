@@ -55,6 +55,14 @@ export function setError (error) {
   }
 }
 
+export const SET_LAST_ID = 'SET_LAST_ID'
+export function setLastID (lastId) {
+  return {
+    type: SET_LAST_ID,
+    lastId
+  }
+}
+
 export const SET_NEW_LAST_ID = 'SET_NEW_LAST_ID'
 export function setNewLastID () {
   return {

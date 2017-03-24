@@ -9,7 +9,9 @@ if (!global.fetch) {
 
 const api = (function () {
   let instance
-  const host = process.env.API_URL
+  // const host = process.env.API_URL
+  const host = 'https://uat-pos.theodbocare.com/api/'
+  // const host = 'http://192.168.0.103:3030'
   // setup feathers client
   function setupClient () {
     const app = feathers()
@@ -22,5 +24,7 @@ const api = (function () {
 
   return instance || setupClient()
 })()
+
+window.api = api
 
 export default api
