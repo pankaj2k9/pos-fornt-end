@@ -1,12 +1,9 @@
 import ordersService from '../../services/orders'
+import dailyDataService from '../../services/dailyData'
 
 import {
   updateDailyData
 } from './cashdrawers'
-
-import {
-  resetOrderData
-} from './orderData'
 
 import {
   setNewLastID,
@@ -29,8 +26,38 @@ export function makeOfflineOrder (orderInfo, receipt, activeDrawer) {
       dispatch(setActiveModal('orderSuccess'))
       dispatch(setNewLastID())
       dispatch(updateDailyData(activeDrawer))
-      dispatch(resetOrderData())
     }, 1000)
+  }
+}
+
+export const SYNC_CASHDRAWERS_REQUEST = 'SYNC_CASHDRAWERS_REQUEST'
+export function syncDrawersRequest () {
+  return {
+    type: SYNC_CASHDRAWERS_REQUEST
+  }
+}
+
+export const SYNC_CASHDRAWER_SUCCESS = 'SYNC_CASHDRAWER_SUCCESS'
+export function syncDrawerSuccess (successDrawer) {
+  return {
+    type: SYNC_CASHDRAWER_SUCCESS,
+    successDrawer
+  }
+}
+
+export const SYNC_CASHDRAWERS_DONE = 'SYNC_CASHDRAWERS_DONE'
+export function syncDrawersDone () {
+  return {
+    type: SYNC_CASHDRAWERS_DONE
+  }
+}
+
+export const SYNC_CASHDRAWER_FAILED = 'SYNC_CASHDRAWER_FAILED'
+export function syncDrawerFailed (error, failedOrder) {
+  return {
+    type: SYNC_CASHDRAWER_FAILED,
+    error,
+    failedOrder
   }
 }
 
@@ -42,9 +69,10 @@ export function syncOrdersRequest () {
 }
 
 export const SYNC_ORDER_SUCCESS = 'SYNC_ORDER_SUCCESS'
-export function syncOrderSuccess () {
+export function syncOrderSuccess (successOrder) {
   return {
-    type: SYNC_ORDER_SUCCESS
+    type: SYNC_ORDER_SUCCESS,
+    successOrder
   }
 }
 
@@ -97,10 +125,18 @@ export function clearSyncLog (syncLog) {
   }
 }
 
-export const SAVE_FAILED_DRAWER_UPDATE = 'SAVE_FAILED_DRAWER_UPDATE'
-export function saveFailedDrawerUpdate (drawer) {
+export const SAVE_UPDATE_FAILED_DRAWER = 'SAVE_UPDATE_FAILED_DRAWER'
+export function saveUpdateFailedDrawer (drawer) {
   return {
-    type: SAVE_FAILED_DRAWER_UPDATE,
+    type: SAVE_UPDATE_FAILED_DRAWER,
+    drawer
+  }
+}
+
+export const SAVE_CREATE_FAILED_DRAWER = 'SAVE_CREATE_FAILED_DRAWER'
+export function saveCreateFailedDrawer (drawer) {
+  return {
+    type: SAVE_CREATE_FAILED_DRAWER,
     drawer
   }
 }
@@ -119,27 +155,79 @@ export function clearMessages () {
   }
 }
 
-export function syncOfflineOrders (offlineOrders) {
+export function syncOfflineData (offlineOrders, offlineDrawers) {
   return (dispatch) => {
     dispatch(syncOrdersRequest())
-    dispatch(updateSyncLog({start: 'Syncing Orders Started'}))
-    let processCount = 0
-    offlineOrders.forEach(offlineOrder => {
-      return ordersService.create(offlineOrder)
-      .then(response => {
-        processCount++
-        dispatch(updateSyncLog({id: offlineOrder.id}))
-        dispatch(syncOrderSuccess(offlineOrder))
-        if (processCount === offlineOrders.length) {
-          setTimeout(function () {
-            dispatch(updateSyncLog({end: 'Syncing Orders Finished'}))
-            dispatch(syncOrdersDone())
-          }, 2000)
-        }
-      })
-      .catch(error => {
-        dispatch(syncOrderFailed(error.message, offlineOrder))
-      })
+    dispatch(updateSyncLog({start: 'Syncing Process Started'}))
+    const syncOrders = new Promise((resolve, reject) => {
+      let syncOrderCount = 0
+      let syncOrderSuccessCount = 0
+      if (offlineOrders.length > 0) {
+        offlineOrders.forEach(offlineOrder => {
+          return ordersService.create(offlineOrder)
+          .then(response => {
+            syncOrderCount++
+            syncOrderSuccessCount++
+            dispatch(updateSyncLog({type: 'Order', id: offlineOrder.id}))
+            dispatch(syncOrderSuccess(offlineOrder))
+            if (syncOrderCount === offlineOrders.length) {
+              resolve(syncOrderSuccessCount)
+            }
+          })
+          .catch(error => {
+            syncOrderCount++
+            dispatch(updateSyncLog({type: 'Order', id: offlineOrder.id, error: error.message}))
+            dispatch(syncOrderFailed(error.message, offlineOrder))
+            if (syncOrderCount === offlineOrders.length) {
+              resolve(syncOrderSuccessCount)
+            }
+          })
+        })
+      } else {
+        resolve(syncOrderSuccessCount)
+      }
     })
+    const syncDrawers = new Promise((resolve, reject) => {
+      let syncDrawerCount = 0
+      let syncDrawerSuccessCount = 0
+      if (offlineDrawers.length > 0) {
+        offlineDrawers.forEach(offlineDrawer => {
+          return dailyDataService.patch(offlineDrawer)
+          .then(response => {
+            syncDrawerCount++
+            syncDrawerSuccessCount++
+            dispatch(updateSyncLog({type: 'Drawer', id: offlineDrawer.id}))
+            dispatch(syncDrawerSuccess(offlineDrawer))
+            if (syncDrawerCount === offlineDrawers.length) {
+              resolve(syncDrawerSuccessCount)
+            }
+          })
+          .catch(error => {
+            syncDrawerCount++
+            dispatch(updateSyncLog({type: 'Drawer', id: offlineDrawer.id, error: error.message}))
+            dispatch(syncDrawerFailed(error.message, offlineDrawer))
+            if (syncDrawerCount === offlineDrawers.length) {
+              resolve(syncDrawerSuccessCount)
+            }
+          })
+        })
+      } else {
+        resolve(syncDrawerSuccessCount)
+      }
+    })
+    return global.Promise.all([syncOrders, syncDrawers])
+      .then((response) => {
+        let orderFailCount = offlineOrders.length - response[0]
+        let drawerFailCount = offlineDrawers.length - response[1]
+        dispatch(updateSyncLog({type: 'success', end: `${response[0]} orders synced`}))
+        dispatch(updateSyncLog({type: 'success', end: `${response[1]} drawers synced`}))
+        if (orderFailCount > 0 || drawerFailCount > 0) {
+          dispatch(updateSyncLog({type: 'failed', end: `${orderFailCount} orders failed`}))
+          dispatch(updateSyncLog({type: 'failed', end: `${drawerFailCount} drawers failed`}))
+        }
+        dispatch(syncOrdersDone())
+        dispatch(syncDrawersDone())
+        dispatch(updateSyncLog({type: 'success', end: 'Syncing Process Done'}))
+      })
   }
 }

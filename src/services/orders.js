@@ -24,7 +24,7 @@ const orders = {
       limit,
       skip,
       sort,
-      option,
+      noNullRefundId,
       eager
     } = params
 
@@ -39,6 +39,8 @@ const orders = {
     let staff
     let store
     let dateParam
+    let idRange = {}
+    let refundIdRange = {}
 
     if (id) { orderId = id }
     if (staffId) { staff = staffId }
@@ -54,27 +56,56 @@ const orders = {
       }
     }
 
-    query.$or = [
-      {
-        adminId: staff,
-        dateOrdered: dateParam,
-        id: orderId,
-        refundId: option === 'noNullRefundId' ? { $ne: null } : undefined,
-        source: store
-      },
-      {
-        adminId: staff,
-        dateRefunded: dateParam,
-        id: orderId,
-        refundId: option === 'noNullRefundId' ? { $ne: null } : undefined,
-        source: store
+    if (idFrom || idTo) {
+      if (idFrom) {
+        idRange.$gte = buildOrderId(storeId, idFrom, null, stores)
+        refundIdRange.$gte = buildOrderId(storeId, idFrom, null, stores)
       }
-    ]
+      if (idTo) {
+        idRange.$lte = buildOrderId(storeId, idTo, null, stores)
+        refundIdRange.$lte = buildOrderId(storeId, idTo, null, stores)
+      }
+    }
 
     if (idFrom || idTo) {
-      query.id = {}
-      if (idFrom) { query.id.$gte = buildOrderId(storeId, idFrom, null, stores) }
-      if (idTo) { query.id.$lte = buildOrderId(storeId, idTo, null, stores) }
+      query.$or = [
+        {
+          id: idRange,
+          source: store
+        },
+        {
+          refundId: refundIdRange,
+          source: store
+        }
+      ]
+    } else if (noNullRefundId) {
+      query.$or = [
+        {
+          refundId: { $ne: null },
+          source: store
+        }
+      ]
+    } else {
+      query.$or = [
+        {
+          adminId: staff,
+          dateOrdered: dateParam,
+          id: orderId,
+          source: store
+        },
+        {
+          adminId: staff,
+          dateRefunded: dateParam,
+          id: orderId,
+          source: store
+        },
+        {
+          adminId: staff,
+          dateRefunded: dateParam,
+          refundId: orderId,
+          source: store
+        }
+      ]
     }
 
     return ordersService.find({ query })

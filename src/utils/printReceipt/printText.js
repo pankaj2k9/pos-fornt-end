@@ -39,7 +39,7 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += receipt.headerText ? RECEIPT_DIVIDER : ''
 
   // build extra info
-  receiptHtmlString += buildExtraInfo(receipt.type, receipt.extraInfo)
+  receiptHtmlString += buildExtraInfo(receipt.type, receipt.extraInfo, receipt.duplicate)
   receiptHtmlString += receipt.info ? RECEIPT_DIVIDER : ''
 
   // build item list
@@ -71,21 +71,22 @@ export const buildHeader = (headerText) => {
  * Add staff, date, etc.
  * @param {Object} info of receipt
  */
-export const buildExtraInfo = (type, info) => {
+export const buildExtraInfo = (type, info, duplicate) => {
   let { staff, customer, id, randId, date, refundId, dateRefunded } = info
   let extra = ''
   let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[ID#${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
-  let orderId = type === 'reprint' && refundId
+  let orderId = type === 'reprint' && refundId && duplicate
     ? `<div style="${TOTAL_DIV_STYLE_1}">Refund ID : ${refundId}</div>`
     : id
       ? `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${id}</div>`
       : ''
+  let dateToShow = refundId && duplicate ? dateRefunded : !date ? null : date
   extra += `<div>
   ${RECEIPT_DIVIDER}
   ${orderId}
   <div>Unique ID : ${randId}</div>
   ${staff ? `<div>STAFF : ${staff}<div>` : ''}
-  <div>${formatDate((dateRefunded || date) || new Date())}</div>
+  <div>${formatDate(dateToShow || new Date())}</div>
   ${custLbl}
   ${RECEIPT_DIVIDER}
   </div>`

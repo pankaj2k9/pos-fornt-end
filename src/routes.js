@@ -22,7 +22,10 @@ function requireAuth (nextState, replace, callback) {
   const netStat = appState ? appState.app.mainUI.networkStatus : undefined
   const token = window.localStorage.getItem('feathers-jwt')
 
-  if (!token) {
+  if (!token && nextRoute !== '/') {
+    replace({ pathname: '/' })
+    callback()
+  } else if (!token && nextRoute === '/') {
     callback()
   } else if (token && appState && netStat === 'offline' && posMode === 'offline' && nextRoute !== 'store') {
     replace({ pathname: 'store' })
@@ -32,8 +35,11 @@ function requireAuth (nextState, replace, callback) {
     .then(token => {
       if (posMode === 'offline' && nextRoute !== 'store') {
         replace({ pathname: 'store' })
+      } else if (token && appState && netStat === 'offline' && posMode === 'offline') {
+        callback()
+      } else if (token && appState && netStat === 'online') {
+        return api.authenticate({ strategy: 'jwt', store: token.storeId })
       }
-      return api.authenticate({ strategy: 'jwt', store: token.storeId })
     }).then(response => {
       callback()
     }).catch(error => {

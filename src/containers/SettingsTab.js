@@ -186,7 +186,7 @@ class SettingsTab extends Component {
       return (
         <div className='box' key={key}>
           <ContentDivider contents={[
-            <p className='title'>{data.id || data.extraInfo.id}</p>,
+            <p className='title'>{data.duplicate ? data.refundId : data.id || data.extraInfo.id}</p>,
             <p className='title is-5'>{`${lblAC('app.modal.currency')}: ${currency}`}</p>,
             <p className='title is-5'>{`${lblAC('app.lbl.orderTotal')}: ${formatCurrency(data.total || data.paymentInfo.orderTotal, currency)}`}</p>,
             <a className='button is-medium is-info is-pulled-right' onClick={e => this._openOrderDetails(data)}>View Details</a>

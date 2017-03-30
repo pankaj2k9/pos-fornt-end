@@ -55,6 +55,14 @@ export function setError (error) {
   }
 }
 
+export const SET_CASHDRAWER_INPUT = 'SET_CASHDRAWER_INPUT'
+export function setCashdrawerInput (amount) {
+  return {
+    type: SET_CASHDRAWER_INPUT,
+    amount
+  }
+}
+
 export const SET_LAST_ID = 'SET_LAST_ID'
 export function setLastID (lastId) {
   return {

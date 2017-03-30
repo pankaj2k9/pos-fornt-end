@@ -164,8 +164,7 @@ class ViewBills extends React.Component {
   }
 
   render () {
-    const { reportType, orders, stores, isProcessing } = this.props
-
+    const { reportType, orders, stores, isProcessing, idTo, idFrom } = this.props
     return (
       <div className='tile is-ancestor'>
         <div className='tile is-vertical'>
@@ -211,7 +210,7 @@ class ViewBills extends React.Component {
             ? <div className='tile is-parent is-vertical'>
               <div className='tile is-child'>
                 {orders.length
-                  ? <ViewBillReceiptPreview orders={orders} stores={stores} />
+                  ? <ViewBillReceiptPreview orders={orders} idTo={idTo} idFrom={idFrom} stores={stores} />
                   : <FormattedMessage id='app.page.reports.noData' />
                 }
               </div>

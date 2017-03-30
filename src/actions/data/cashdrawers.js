@@ -1,16 +1,18 @@
-import {
-  closeActiveModal,
-  setActiveCashdrawer,
-  setTemporaryCashdrawer
-} from '../app/mainUI'
+// import moment from 'moment'
 
 import {
-  saveFailedDrawerUpdate
-} from './offlineData'
+  setActiveModal,
+  closeActiveModal,
+  setActiveCashdrawer
+} from '../app/mainUI'
 
 import {
   validateCashdrawers
 } from '../helpers'
+
+import {
+  saveUpdateFailedDrawer
+} from '../data/offlineData'
 
 import dailyDataService from '../../services/dailyData'
 
@@ -27,24 +29,27 @@ export function dailyDataCreateFailure (error) {
   return { type: DAILYDATA_CREATE_FAILURE, error }
 }
 
-export function createDailyData (storeId, amount) {
+export function createDailyData (storeId, amount, openCount, option) {
   return (dispatch) => {
     dispatch(dailyDataCreateRequest())
     let initial = {
       storeId: storeId,
       date: new Date().toISOString().slice(0, 10),
-      cashDrawerOpenCount: 1,
+      cashDrawerOpenCount: openCount || 1,
       float: amount
     }
     return dailyDataService.create(initial)
       .then(response => {
         dispatch(dailyDataCreateSuccess())
         dispatch(setActiveCashdrawer(response))
-        dispatch(setTemporaryCashdrawer(response))
         dispatch(closeActiveModal())
       })
       .catch(error => {
-        dispatch(setTemporaryCashdrawer(initial))
+        if (option === 'updateTempData') {
+          dispatch(setActiveCashdrawer(initial))
+        } else {
+          dispatch(setActiveModal('updateCDFailed'))
+        }
         dispatch(dailyDataCreateFailure(error))
       })
   }
@@ -75,22 +80,28 @@ export function dailyDataUpdateFailure (error) {
 
 export function updateDailyData (activeDrawer, amount, option) {
   return (dispatch) => {
-    dispatch(dailyDataUpdateRequest())
-    let updatedData = {
-      id: activeDrawer.id,
-      float: amount || Number(activeDrawer.float),
-      cashDrawerOpenCount: activeDrawer.cashDrawerOpenCount + 1
+    if (activeDrawer.id) {
+      dispatch(dailyDataUpdateRequest())
+      let updatedData = {
+        id: activeDrawer.id,
+        float: amount || Number(activeDrawer.float),
+        cashDrawerOpenCount: activeDrawer.cashDrawerOpenCount + 1
+      }
+      return dailyDataService.patch(updatedData)
+        .then(response => {
+          dispatch(dailyDataUpdateSuccess())
+          dispatch(setActiveCashdrawer(response))
+          option === 'closeModal' && dispatch(closeActiveModal())
+        })
+        .catch(error => {
+          option === 'updateCDModal' && dispatch(setActiveModal('updateCDFailed'))
+          dispatch(setActiveCashdrawer(Object.assign(activeDrawer, updatedData)))
+          dispatch(saveUpdateFailedDrawer(updatedData))
+          dispatch(dailyDataUpdateFailure(error))
+        })
+    } else {
+      dispatch(createDailyData(activeDrawer.storeId, activeDrawer.float, activeDrawer.cashDrawerOpenCount + 1, 'updateTempData'))
     }
-    return dailyDataService.patch(updatedData)
-      .then(response => {
-        dispatch(dailyDataUpdateSuccess())
-        dispatch(setActiveCashdrawer(response))
-        option === 'closeModal' && dispatch(closeActiveModal())
-      })
-      .catch(error => {
-        dispatch(saveFailedDrawerUpdate(updatedData))
-        dispatch(dailyDataUpdateFailure(error))
-      })
   }
 }
 
