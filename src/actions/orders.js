@@ -13,6 +13,11 @@ import {
 } from './app/mainUI'
 
 import {
+  setCashTendered,
+  setPaymentMode
+} from './app/storeUI'
+
+import {
   saveReceipt
 } from './data/offlineData'
 
@@ -66,15 +71,15 @@ export function fetchLastOrderId (storeId) {
         .then((response) => {
           let orderID = Number(response.data[0].id.replace(/[^\d.]/g, ''))
           resolve(orderID)
-        }).catch(() => { reject('failed') })
+        }).catch(error => { reject(error.message) })
     })
     // fetch and sort by refundId
     const byRefundId = new Promise((resolve, reject) => {
-      ordersService.find({storeId: storeId, limit: 1, sort: {refundId: -1}, option: 'noNullRefundId'})
+      ordersService.find({storeId: storeId, limit: 1, sort: {refundId: -1}, noNullRefundId: true})
         .then((response) => {
           let refundId = Number(response.data[0].refundId.replace(/[^\d.]/g, ''))
           resolve(refundId)
-        }).catch(() => { reject('failed') })
+        }).catch(error => { reject(error.message) })
     })
     return global.Promise.all([byOrderId, byRefundId])
       .then((response) => {
@@ -106,6 +111,8 @@ export function processOrder (orderInfo, receipt, activeDrawer) {
       dispatch(setNewLastID())
       dispatch(updateDailyData(activeDrawer))
       dispatch(saveReceipt(receipt))
+      dispatch(setCashTendered(0))
+      dispatch(setPaymentMode('cash'))
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))

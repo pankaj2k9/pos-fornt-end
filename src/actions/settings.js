@@ -100,7 +100,16 @@ export function storeOrderFetch (params) {
 
     return ordersService.find(params)
       .then(response => {
-        dispatch(storeOrderFetchSuccess(response.data))
+        let orderSearchResults = []
+        response.data.forEach(order => {
+          let original = order
+          orderSearchResults.push(original)
+          if (order.refundId) {
+            let duplicate = Object.assign({duplicate: true}, order)
+            orderSearchResults.push(duplicate)
+          }
+        })
+        dispatch(storeOrderFetchSuccess(orderSearchResults))
       })
       .catch(error => {
         dispatch(storeOrderFetchFailure(error))

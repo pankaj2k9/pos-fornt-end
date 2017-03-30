@@ -56,18 +56,6 @@ export function refund (refundData, storeData, orderData, currentPath) {
           orderData.paymentInfo.dataRefunded = new Date()
           dispatch(updateSavedReceipt(orderData))
         }
-        // if (!orderData.storeAddress) {
-        //   let storeAddress = processStoreAddress(storeData)
-        //   let receipt = processOrderSearchReceipt('refund', orderData, storeAddress, refundData.refundId)
-        //   print(receipt)
-        // } else {
-        //   orderData.type = 'refund'
-        //   orderData.paymentInfo.refundId = refundData.refundId
-        //   orderData.paymentInfo.refundAmt = compPaymentsSum(orderData.paymentInfo.payments, 'noVoucher')
-        //   orderData.paymentInfo.dataRefunded = new Date()
-        //   dispatch(updateSavedReceipt(orderData))
-        //   print(orderData)
-        // }
       })
       .catch(error => {
         dispatch(refundFailure())

@@ -11,7 +11,7 @@ import {
 } from '../actions/data/cashdrawers'
 
 import {
-  syncOfflineOrders,
+  syncOfflineData,
   clearSyncLog
 } from '../actions/data/offlineData'
 
@@ -21,6 +21,8 @@ import ContentDivider from '../components/ContentDivider'
 import {
   setCashierLoggedIn,
   setActiveModal,
+  setActiveCashdrawer,
+  setCashdrawerInput,
   closeActiveModal
 } from '../actions/app/mainUI'
 
@@ -59,6 +61,7 @@ class ModalApp extends Component {
     const { dispatch, mainUI } = this.props
     let { activeDrawer, activeStore, posMode, networkStatus } = mainUI
     let amount = Number(document.getElementById('drawerAmtInput').value) || 0
+    dispatch(setActiveModal('updateCDProcessing'))
     if (activeDrawer) {
       dispatch(updateDailyData(activeDrawer, amount, 'closeModal'))
     } else if (!activeDrawer) {
@@ -97,14 +100,32 @@ class ModalApp extends Component {
     dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
   }
 
+  _saveCreateCashdrawerFailed () {
+    const { dispatch, mainUI } = this.props
+    let { activeDrawer, activeStore, cashdrawerInput } = mainUI
+    if (!activeDrawer) {
+      let drawer = {
+        storeId: activeStore.source,
+        date: new Date().toISOString().slice(0, 10),
+        cashDrawerOpenCount: 1,
+        float: Number(cashdrawerInput)
+      }
+      dispatch(setActiveCashdrawer(drawer))
+    }
+  }
+
   _syncOrders () {
     const {dispatch, offlineData} = this.props
-    let { failedOrders, offlineOrders } = offlineData
+    let { failedOrders, offlineOrders, offlineDrawers, failedDrawers } = offlineData
 
     const allOfflineOrders = failedOrders.length > 0
       ? offlineOrders.concat(failedOrders)
       : offlineOrders
-    dispatch(syncOfflineOrders(allOfflineOrders))
+
+    const allOfflineDrawers = failedDrawers.length > 0
+      ? offlineDrawers.concat(failedDrawers)
+      : offlineDrawers
+    dispatch(syncOfflineData(allOfflineOrders, allOfflineDrawers))
   }
 
   _printReceipt () {
@@ -143,6 +164,10 @@ class ModalApp extends Component {
         return (
           <LoadingScreen loadingText={'ADJUSTING POINTS . . . '} />
         )
+      case 'updateCDProcessing':
+        return (
+          <LoadingScreen loadingText={'PROCESSING . . . '} />
+        )
       case 'chooseUser':
         let staffs = activeStaff.staffs
         let changeUser = (staffId) => {
@@ -177,11 +202,12 @@ class ModalApp extends Component {
             </div>
           </ModalCard>
         )
-      case 'updateCashdrawerFailed':
+      case 'updateCDFailed':
         return (
           <ModalCard closeAction={e => this._closeModal()} retryAction={e => dispatch(setActiveModal('updateCashdrawer'))}>
             <div className='has-text-centered'>
               <p className='title'>Update Failed</p>
+              <a onClick={e => this._saveCreateCashdrawerFailed()}>Save Now, Sync Later</a>
             </div>
           </ModalCard>
         )
@@ -192,7 +218,7 @@ class ModalApp extends Component {
               <div className='column is-4 is-offset-4 has-text-centered'>
                 <form onSubmit={e => this._updateCashdrawer(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='drawerAmtInput' className='input is-large' type='Number'
+                    <input id='drawerAmtInput' className='input is-large' type='Number' onChange={e => dispatch(setCashdrawerInput(e.target.value))}
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '1.5em'}} />
                     <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '3rem'}}>
                       <i className='fa fa-usd' />
@@ -248,16 +274,15 @@ class ModalApp extends Component {
             }
             <div className='message' style={{marginTop: 20}}>
               <div className='message-header'><p>Sync Log</p></div>
-              <div id='syncLog' className='message-body' style={{maxHeight: 70, overflowY: 'scroll'}}>
+              <div id='syncLog' className='message-body' style={{maxHeight: 100, overflowY: 'scroll'}}>
                 {syncLog.map((log, key) => {
                   return (log.start
                     ? <p style={{color: 'limegreen'}}>{log.start}</p>
                     : log.end
-                      ? <p style={{color: 'limegreen'}}>{log.end}</p>
+                      ? <b style={{color: log.type === 'success' ? 'limegreen' : 'red'}}>{log.end}<br /></b>
                       : <p id={key}>
-                        {`Sync Order ${log.id}: `}
-                        <b style={{color: log.error ? 'red' : 'limegreen'}}>{log.error ? 'ERROR' : 'SUCCESS'}</b>
-                        {log.error ? log.error : ''}
+                        {`Sync ${log.type} ${log.id}: `}
+                        <b style={{color: log.error ? 'red' : 'limegreen'}}>{log.error ? `ERROR: ${log.error}` : 'SUCCESS'}</b>
                       </p>
                   )
                 }, this)
@@ -347,6 +372,7 @@ class ModalApp extends Component {
           ? <ModalCard closeAction={e => this._closeModal()}>
             <div className='content'>
               <h1>{`${!refundId ? 'ORDER' : 'REFUNDED ORDER'} #${refundId || orderId}`}</h1>
+              {refundId && <p className='is-marginless'>Order ID: {orderId}</p>}
               <p className='is-marginless'>{`Date Ordered: ${moment(date).format('L')}`}</p>
               {refundId && <p>{`Date Refunded: ${moment(dateRefunded).format('L')}`}</p>}
               <ContentDivider contents={[

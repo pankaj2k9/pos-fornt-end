@@ -9,6 +9,7 @@ import {
   SET_ACTIVE_CASHDRAWER,
   SET_TEMPORARY_CASHDRAWER,
   SET_CASHIER_LOGGED_IN,
+  SET_CASHDRAWER_INPUT,
   SET_ERROR,
   STORE_SET_ACTIVE,
   RESET_STAFF_STATE,
@@ -30,6 +31,7 @@ function mainUI (state = {
   activeStaff: null,
   activeStore: null,
   adminToken: null,
+  cashdrawerInput: '',
   isEditing: false,
   error: null,
   isProcessing: false,
@@ -54,6 +56,11 @@ function mainUI (state = {
         activeDrawer: action.cashdrawer,
         isEditing: false
       })
+    case SET_CASHDRAWER_INPUT: {
+      return Object.assign({}, state, {
+        cashdrawerInput: action.amount
+      })
+    }
     case SET_TEMPORARY_CASHDRAWER:
       return Object.assign({}, state, {
         activeDrawerOffline: action.cashdrawer,

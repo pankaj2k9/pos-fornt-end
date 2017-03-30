@@ -21,7 +21,8 @@ import {
 
 import {
   setFieldsDefault,
-  setCashTendered
+  setCashTendered,
+  setPaymentMode
 } from './app/storeUI'
 
 import {
@@ -33,6 +34,7 @@ export function cancelOrder () {
     dispatch(resetOrderData())
     dispatch(setFieldsDefault())
     dispatch(setCashTendered(0))
+    dispatch(setPaymentMode('cash'))
   }
 }
 

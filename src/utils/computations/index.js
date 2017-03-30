@@ -151,6 +151,7 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
     }
   })
   return {
+    duplicate: data.duplicate,
     type: type,
     storeAddress,
     items: products,

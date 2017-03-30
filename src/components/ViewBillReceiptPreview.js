@@ -13,7 +13,7 @@ import { printReceiptFromString } from '../utils/receipt'
 
 import { compPaymentsSum } from '../utils/computations'
 
-import { formatCurrency, formatDate } from '../utils/string'
+import { formatCurrency, formatDate, formatNumber } from '../utils/string'
 
 export default class ViewBillReceiptPreview extends React.PureComponent {
   constructor (props) {
@@ -173,7 +173,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
   }
 
   renderNewViewBillReceipt () {
-    const { orders, stores } = this.props
+    const { orders, stores, idTo, idFrom } = this.props
     const dateOptions = {
       day: 'numeric',
       month: 'numeric',
@@ -182,14 +182,28 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
       minute: '2-digit'
     }
 
+    let modifiedOrdersList = []
+    orders.forEach((order) => {
+      let original = order
+      if (formatNumber(order.id) >= formatNumber(idFrom) || order.id <= formatNumber(idTo)) {
+        original.refId = formatNumber(order.id)
+        modifiedOrdersList.push(original)
+      }
+      if (order.refundId && formatNumber(order.refundId) <= formatNumber(idTo)) {
+        let duplicate = Object.assign({duplicate: true}, order)
+        duplicate.refId = formatNumber(order.refundId)
+        modifiedOrdersList.push(duplicate)
+      }
+    })
+    modifiedOrdersList.sort((a, b) => { return a.refId - b.refId })
     return (
       <span ref='preview'>
-        {orders.map((order) => {
+        {modifiedOrdersList.reverse().map((order) => {
           const addrList = this.splitAddr(order.source, stores)
           const staff = order.staff
           let orderSalesPerson = ''
           const refundAmt = compPaymentsSum(order.payments, 'noVoucher')
-          const deductSign = order.refundId ? '-' : ''
+          const deductSign = order.refundId && order.duplicate ? '-' : ''
 
           if (staff) {
             orderSalesPerson += staff.firstName && `${staff.firstName.toUpperCase()} `
@@ -200,7 +214,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
 
           const orderStore = stores.find((st) => st.source === order.source)
 
-          const keyPref = `rcptprev-vb-${order.id}-`
+          const keyPref = `rcptprev-vb-${order.duplicate ? order.refundId : order.id}-`
           return (
             <span key={`${keyPref}`}>
               {/* "The odbo" */}
@@ -231,7 +245,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
 
               {/* Order ID */}
               <span>
-                {order.refundId &&
+                {order.refundId && order.duplicate &&
                   <ReceiptPreviewRow
                     keyPrefix={`${keyPref}refund-id`}
                     rowType='is-bold'
@@ -249,7 +263,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               {/* Date */}
               <ReceiptPreviewRow
                 keyPrefix={`${keyPref}order-id`}
-                cols={[formatDate(new Date(!order.refundId ? order.dateOrdered : order.dateRefunded), dateOptions)]} />
+                cols={[formatDate(new Date(order.refundId && order.duplicate ? order.dateRefunded : order.dateOrdered), dateOptions)]} />
               <ReceiptRowDivider />
 
               {/* Items list */}
@@ -411,7 +425,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
               })}
 
               {/* Refund details */}
-              {order.refundId &&
+              {order.refundId && order.duplicate &&
                 <span>
                   <ReceiptRowDivider />
                   <ReceiptPreviewRow
