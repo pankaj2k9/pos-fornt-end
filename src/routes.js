@@ -4,7 +4,6 @@ import api from '../src/services/api'
 
 import App from './components/App'
 import Login from './containers/Login'
-import Loading from './containers/Loading'
 import NotFound from './components/NotFound'
 import Store from './containers/Store'
 import Settings from './containers/Settings'
@@ -85,7 +84,6 @@ export default (
     <Route path='store' component={Store} onEnter={requireAuth} />
     <Route path='settings' component={Settings} onEnter={requireAuth} />
     <Route path='reports' component={Reports} onEnter={requireAuth} />
-    <Route path='loading' component={Loading} />
     <Route path='*' component={NotFound} />
   </Route>
 )
