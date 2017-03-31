@@ -72,7 +72,7 @@ export const buildHeader = (headerText) => {
  * @param {Object} info of receipt
  */
 export const buildExtraInfo = (type, info, duplicate) => {
-  let { staff, customer, id, randId, date, refundId, dateRefunded } = info
+  let { staff, customer, id, date, refundId, dateRefunded } = info
   let extra = ''
   let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[ID#${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
   let orderId = type === 'reprint' && refundId && duplicate
@@ -84,7 +84,6 @@ export const buildExtraInfo = (type, info, duplicate) => {
   extra += `<div>
   ${RECEIPT_DIVIDER}
   ${orderId}
-  <div>Unique ID : ${randId || ''}</div>
   ${staff ? `<div>STAFF : ${staff}<div>` : ''}
   <div>${formatDate(dateToShow || new Date())}</div>
   ${custLbl}
