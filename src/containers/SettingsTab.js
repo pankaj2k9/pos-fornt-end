@@ -61,6 +61,7 @@ class SettingsTab extends Component {
     const {dispatch, settings, mainUI} = this.props
     let query = {
       id: settings.orderSearchKey,
+      randId: settings.orderSearchKeyAlt,
       storeId: mainUI.activeStore.source
     }
     dispatch(storeOrderFetch(query))
@@ -68,9 +69,10 @@ class SettingsTab extends Component {
 
   _setOrderSearchKey (key) {
     const { dispatch, mainUI } = this.props
+    let original = key
     let initial = key.replace(/[^\w\s]/gi, '') // removes any special character
     let searchKey = processOrdID(mainUI.activeStore.code, formatNumber(initial), 'normal')
-    dispatch(storeOrdersSetSearchKey(searchKey))
+    dispatch(storeOrdersSetSearchKey(searchKey, original))
   }
 
   _openOrderDetails (order) {

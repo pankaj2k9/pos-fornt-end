@@ -111,13 +111,23 @@ class Store extends Component {
   }
 
   render () {
-    const {activeCashier} = this.props
+    const {activeCashier, isFetching, netStat} = this.props
     return (
       <div>
-        {
-          !activeCashier
-          ? this.renderDisabledStore()
-          : this.renderStore()
+        {isFetching && netStat === 'online'
+          ? <section className='hero is-large'>
+            <div className='hero-body'>
+              <div className='container has-text-centered'>
+                <i className='fa fa-spinner fa-pulse fa-5x fa-fw' />
+                <h1 className='title'>
+                  Loading
+                </h1>
+              </div>
+            </div>
+          </section>
+          : !activeCashier
+            ? this.renderDisabledStore()
+            : this.renderStore()
         }
         {this.renderStoreModals()}
       </div>
@@ -126,9 +136,12 @@ class Store extends Component {
 }
 
 function mapStateToProps (state) {
+  const isFetching = state.data.products.isFetching || state.data.customers.isFetching || state.orders.isFetching || state.data.cashdrawers.isProcessing
+
   return {
     intl: state.intl,
     locale: state.intl.locale,
+    isFetching,
     activeModalId: state.app.mainUI.activeModalId,
     activeCashier: state.app.mainUI.activeCashier,
     cashdrawer: state.app.mainUI.activeDrawer,

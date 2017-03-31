@@ -28,8 +28,8 @@ export function settingsError () {
 }
 
 export const STOREORDER_SET_SEARCH_KEY = 'STOREORDER_SET_SEARCH_KEY'
-export function storeOrdersSetSearchKey (orderKey) {
-  return { type: STOREORDER_SET_SEARCH_KEY, orderKey }
+export function storeOrdersSetSearchKey (orderKey, altKey) {
+  return { type: STOREORDER_SET_SEARCH_KEY, orderKey, altKey }
 }
 
 export const SET_ACTIVE_ORDER_DETAILS = 'SET_ACTIVE_ORDER_DETAILS'

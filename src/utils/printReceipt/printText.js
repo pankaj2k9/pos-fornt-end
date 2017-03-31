@@ -47,7 +47,7 @@ export const buildReceipt = (receipt) => {
   receiptHtmlString += receipt.items ? RECEIPT_DIVIDER : ''
 
   // build price computation
-  receiptHtmlString += buildComputation(receipt.type, receipt.paymentInfo, receipt.extraInfo)
+  receiptHtmlString += buildComputation(receipt.type, receipt.paymentInfo, receipt.extraInfo, receipt.duplicate)
   receiptHtmlString += receipt.paymentInfo ? RECEIPT_DIVIDER : ''
 
   // build footer
@@ -84,7 +84,7 @@ export const buildExtraInfo = (type, info, duplicate) => {
   extra += `<div>
   ${RECEIPT_DIVIDER}
   ${orderId}
-  <div>Unique ID : ${randId}</div>
+  <div>Unique ID : ${randId || ''}</div>
   ${staff ? `<div>STAFF : ${staff}<div>` : ''}
   <div>${formatDate(dateToShow || new Date())}</div>
   ${custLbl}
@@ -166,12 +166,12 @@ export const buildFooter = (footerText) => {
  * Add purchase computation
  * @param {Object} info of receipt
  */
-export const buildComputation = (type, paymentInfo, extraInfo) => {
+export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
   let comp = ''
 
   if (paymentInfo) {
     const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, refundAmt, dateRefunded } = paymentInfo
-    let deductSign = refundId ? '-' : ''
+    let deductSign = refundId && duplicate ? '-' : ''
     comp += '<div>'
     if (currency === 'sgd') {
       comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>
@@ -248,7 +248,7 @@ export const buildComputation = (type, paymentInfo, extraInfo) => {
       })
     }
 
-    if (type === 'reprint' && refundId) {
+    if (type === 'reprint' && refundId && duplicate) {
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>`
     }

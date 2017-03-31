@@ -58,7 +58,7 @@ export function setOrderInfo (data, otherData) {
   let { orderData, appData } = data
   let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote } = orderData
   let { activeCashier, activeStore, lastOrderId } = appData
-  let { source, code, lastId } = activeStore
+  let { source, code } = activeStore
 
   let currency = (otherData && otherData.currency) || orderData.currency
   let activeCustomer = (otherData && otherData.customer) || orderData.activeCustomer
@@ -72,6 +72,7 @@ export function setOrderInfo (data, otherData) {
   let pincodeInput = document.getElementById('custCodeInput') || undefined
   let pincode = pincodeInput ? pincodeInput.value : undefined
   let odbo = processOdbo(activeCustomer, orderTotal, bonusPoints)
+  let randomId = shortid.generate()
 
   const orderInfo = {
     items: processProducts(orderItems, currency),
@@ -86,7 +87,7 @@ export function setOrderInfo (data, otherData) {
     currency: currency,
     userPrevCoins: odbo && odbo.prevCoins,
     payments: processPayments(payments, currency),
-    randId: shortid.generate(),
+    randId: randomId,
     redemptionPoints: currency === 'sgd' ? odbo && odbo.earnedPts : undefined,
     pinCode: pincode,
     vouchers: currency === 'sgd' && processPayments(payments, 'voucher'),
@@ -98,8 +99,8 @@ export function setOrderInfo (data, otherData) {
     storeAddress: processStoreAddress(activeStore),
     items: processReceiptProducts(orderItems, currency),
     extraInfo: {
-      id: processOrdID(code, lastId),
-      randId: shortid.generate(),
+      id: processOrdID(code, lastOrderId),
+      randId: randomId,
       customer: activeCustomer,
       date: new Date(),
       staff: `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`

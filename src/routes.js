@@ -4,6 +4,7 @@ import api from '../src/services/api'
 
 import App from './components/App'
 import Login from './containers/Login'
+import Loading from './containers/Loading'
 import NotFound from './components/NotFound'
 import Store from './containers/Store'
 import Settings from './containers/Settings'
@@ -33,14 +34,27 @@ function requireAuth (nextState, replace, callback) {
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
     .then(token => {
-      if (posMode === 'offline' && nextRoute !== 'store') {
-        replace({ pathname: 'store' })
-      } else if (token && appState && netStat === 'offline' && posMode === 'offline') {
+      if (token && appState && netStat === 'online') {
         callback()
-      } else if (token && appState && netStat === 'online') {
         return api.authenticate({ strategy: 'jwt', store: token.storeId })
+        .then(response => {
+          if (token && nextRoute === '/') {
+            replace({ pathname: 'store' })
+          } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
+            replace({ pathname: 'store' })
+          }
+          callback()
+        })
+      } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
+        replace({ pathname: 'store' })
+        callback()
       }
     }).then(response => {
+      if (token && nextRoute === '/') {
+        replace({ pathname: 'store' })
+      } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
+        replace({ pathname: 'store' })
+      }
       callback()
     }).catch(error => {
       let errorMsg = error.message
@@ -71,6 +85,7 @@ export default (
     <Route path='store' component={Store} onEnter={requireAuth} />
     <Route path='settings' component={Settings} onEnter={requireAuth} />
     <Route path='reports' component={Reports} onEnter={requireAuth} />
+    <Route path='loading' component={Loading} />
     <Route path='*' component={NotFound} />
   </Route>
 )
