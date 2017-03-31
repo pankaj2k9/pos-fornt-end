@@ -33,14 +33,27 @@ function requireAuth (nextState, replace, callback) {
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
     .then(token => {
-      if (posMode === 'offline' && nextRoute !== 'store') {
-        replace({ pathname: 'store' })
-      } else if (token && appState && netStat === 'offline' && posMode === 'offline') {
+      if (token && appState && netStat === 'online') {
         callback()
-      } else if (token && appState && netStat === 'online') {
         return api.authenticate({ strategy: 'jwt', store: token.storeId })
+        .then(response => {
+          if (token && nextRoute === '/') {
+            replace({ pathname: 'store' })
+          } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
+            replace({ pathname: 'store' })
+          }
+          callback()
+        })
+      } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
+        replace({ pathname: 'store' })
+        callback()
       }
     }).then(response => {
+      if (token && nextRoute === '/') {
+        replace({ pathname: 'store' })
+      } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
+        replace({ pathname: 'store' })
+      }
       callback()
     }).catch(error => {
       let errorMsg = error.message

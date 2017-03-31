@@ -95,6 +95,7 @@ function settings (state = {
   ],
   error: null,
   orderSearchKey: '',
+  orderSearchKeyAlt: '',
   customerSearchKey: '',
   customerSearchKeyOIDFR: '',
   customerSearchKeyOIDTO: '',
@@ -169,7 +170,8 @@ function settings (state = {
       })
     case STOREORDER_SET_SEARCH_KEY:
       return Object.assign({}, state, {
-        orderSearchKey: action.orderKey
+        orderSearchKey: action.orderKey,
+        orderSearchKeyAlt: action.altKey
       })
     case STOREORDER_FETCH_REQUEST:
       return Object.assign({}, state, {

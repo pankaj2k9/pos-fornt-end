@@ -20,11 +20,13 @@ function cashdrawers (state = {
       })
     case DAILYDATA_FETCH_SUCCESS:
       return Object.assign({}, state, {
+        isProcessing: false,
         cdList: action.cashdrawers,
         error: null
       })
     case DAILYDATA_FETCH_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         error: action.error
       })
     case DAILYDATA_CREATE_REQUEST:
@@ -34,10 +36,12 @@ function cashdrawers (state = {
       })
     case DAILYDATA_CREATE_SUCCESS:
       return Object.assign({}, state, {
+        isProcessing: false,
         error: null
       })
     case DAILYDATA_CREATE_FAILURE:
       return Object.assign({}, state, {
+        isProcessing: false,
         error: action.error
       })
     default:

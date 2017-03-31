@@ -18,6 +18,7 @@ const orders = {
       to,
       from,
       id,
+      randId,
       idTo,
       idFrom,
       dateCreated,
@@ -85,6 +86,13 @@ const orders = {
           source: store
         }
       ]
+    } else if (randId && isNaN(randId)) {
+      query.$or = [{
+        adminId: staff,
+        dateRefunded: dateParam,
+        randId: randId,
+        source: store
+      }]
     } else {
       query.$or = [
         {
