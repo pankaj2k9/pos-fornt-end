@@ -77,12 +77,17 @@ export function fetchLastOrderId (storeId) {
     const byRefundId = new Promise((resolve, reject) => {
       ordersService.find({storeId: storeId, limit: 1, sort: {refundId: -1}, noNullRefundId: true})
         .then((response) => {
-          let refundId = Number(response.data[0].refundId.replace(/[^\d.]/g, ''))
-          resolve(refundId)
+          if (response.data.length > 0) {
+            let refundId = Number(response.data[0].refundId.replace(/[^\d.]/g, ''))
+            resolve(refundId)
+          } else {
+            resolve(undefined)
+          }
         }).catch(error => { reject(error.message) })
     })
     return global.Promise.all([byOrderId, byRefundId])
       .then((response) => {
+        response = response.filter((value) => value !== undefined)
         // compare orderId and refundId
         // highest value is the lastId
         let lastId = Math.max(...response)

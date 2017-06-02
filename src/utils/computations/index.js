@@ -181,6 +181,9 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
 export const processOrdID = (str, lastId, normal) => {
   let zeroes = ''
   let id = !normal ? lastId + 1 : lastId
+  if (!normal) {
+    return String(id)
+  }
   for (var i = id.toString().length; i < 7; i++) {
     zeroes = zeroes + '0'
   }
