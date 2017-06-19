@@ -36,7 +36,7 @@ import { formatCurrency } from '../utils/string'
 import {
   processOrderSearchReceipt,
   processStoreAddress,
-  processOrdID,
+  getNextOrderId,
   processOdboID
 } from '../utils/computations'
 
@@ -94,7 +94,7 @@ class ModalApp extends Component {
   _refund () {
     const { dispatch, activeOD, mainUI, currentPath } = this.props
     let remark = document.getElementById('refundRemark').value
-    let refundId = processOrdID(mainUI.activeStore.code, mainUI.lastOrderId)
+    let refundId = getNextOrderId(mainUI.activeStore.code, mainUI.lastOrderId)
     let refundData = {id: activeOD.id || activeOD.extraInfo.id, refundRemarks: remark, refundId: refundId}
     dispatch(setActiveModal('orderDetails'))
     dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))

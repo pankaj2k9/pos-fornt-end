@@ -72,9 +72,21 @@ export function customersSetActiveId (odboId) {
 
 export const SET_SETTINGS_ACTIVE_TAB = 'SET_SETTINGS_ACTIVE_TAB'
 export function setSettingsActiveTab (tabName) {
-  return {
-    type: SET_SETTINGS_ACTIVE_TAB,
-    tabName
+  return (dispatch, getState) => {
+    dispatch({
+      type: SET_SETTINGS_ACTIVE_TAB,
+      tabName
+    })
+
+    switch (tabName) {
+      case 'orderSearch':
+        let state = getState()
+        let query = {
+          storeId: state.app.mainUI.activeStore.source
+        }
+        dispatch(storeOrderFetch(query))
+        break
+    }
   }
 }
 

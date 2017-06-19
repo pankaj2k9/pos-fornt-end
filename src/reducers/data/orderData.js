@@ -5,6 +5,7 @@ import {
   SET_ORDER_ITEM_QTY,
   SET_CUSTOM_DISCOUNT,
   SET_OVERALL_DISCOUNT,
+  SET_CURRENT_CASHIER,
   SET_ORDER_INFO,
   ADD_ORDER_ITEM,
   ADD_ORDER_NOTE,
@@ -49,6 +50,10 @@ function orderData (state = {
     case CURRENTLY_EDITING:
       return Object.assign({}, state, {
         isEditing: true
+      })
+    case SET_CURRENT_CASHIER:
+      return Object.assign({}, state, {
+        currentCashier: action.cashier
       })
     case SET_ACTIVE_CUSTOMER:
       return Object.assign({}, state, {

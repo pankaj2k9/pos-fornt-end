@@ -6,7 +6,7 @@ const products = {
   fetchAllProducts () {
     return productsService.find({
       query: {
-        $limit: 40,
+        $limit: 5000,
         $eager: '[stock]',
         enabled: true
       }

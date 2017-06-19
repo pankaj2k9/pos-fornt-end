@@ -15,7 +15,7 @@ import { loadState, saveState } from './utils/localStorage'
 
 import configureStore from './store/configureStore'
 import messages from './utils/i18n/en'
-
+console.log('API_URL = ' + process.env.API_URL)
 const persistedState = loadState()
 
 const intl = {

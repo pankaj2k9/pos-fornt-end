@@ -43,6 +43,7 @@ export function login (details) {
     dispatch(loginRequest())
     return loginService.login(details)
       .then(result => {
+        console.log('Login result', result)
         const role = result.user.role
         dispatch(loginSuccess())
         dispatch(setStaffLoggedIn(result))

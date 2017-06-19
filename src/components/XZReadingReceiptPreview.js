@@ -21,14 +21,25 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
 
     this.renderPrintBtn = this.renderPrintBtn.bind(this)
     this.handlePrint = this.handlePrint.bind(this)
+    this.handleCloseDay = this.handleCloseDay.bind(this)
   }
 
-  renderPrintBtn () {
+  handleCloseDay () {
+    this.props.handleCloseDay()
+  }
+
+  renderPrintBtn (isDayClosed) {
     return (
       <p className='control'>
         <button className='button is-primary is-inverted' onClick={this.handlePrint}>
           <FormattedMessage id='app.general.printReceipt' />
         </button>
+        {
+          !isDayClosed &&
+          <button className='button is-primary' onClick={this.handleCloseDay}>
+            <FormattedMessage id='app.general.closeDay' />
+          </button>
+        }
       </p>
     )
   }
@@ -167,6 +178,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
   render () {
     const { data } = this.props
 
+    const isDayClosed = !data || data.isDayClosed
     let summaryData = []
     let netSales = 0
     let netSalesOdbo = 0
@@ -234,7 +246,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
     let voucherSubtotal = 0
     return (
       <ReceiptPreview>
-        {this.renderPrintBtn()}
+        {this.renderPrintBtn(isDayClosed)}
 
         <span ref='preview'>
           {/* Header */}
@@ -582,7 +594,7 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
             cols={[`Date Printed : ${formatDate(new Date())}`]} />
         </span>
 
-        {this.renderPrintBtn()}
+        {this.renderPrintBtn(isDayClosed)}
       </ReceiptPreview>
     )
   }

@@ -5,10 +5,16 @@ import { injectIntl } from 'react-intl'
 import ModalCard from '../components/ModalCard'
 import ContentDivider from '../components/ContentDivider'
 import LoadingScreen from '../components/LoadingScreen'
+import CustomerList from '../components/CustomerList'
+import POSButtons from '../components/POSButtons'
 
 import {
   setActiveModal,
-  closeActiveModal
+  closeActiveModal,
+  toggleCashierWorkStatus,
+  setQuickLoginPinCode,
+  setInvalidQuickLoginPinCode,
+  setQuickLoginCashier
 } from '../actions/app/mainUI'
 
 import {
@@ -18,16 +24,20 @@ import {
   setOrderInfo,
   resetOrderData,
   recallOrder,
-  removeNote
+  removeNote,
+  setCurrentCashier
 } from '../actions/data/orderData'
 
 import {
-  makeOfflineOrder
+  setCashierNotSelectedWarning
+} from '../actions/app/storeUI'
+
+import {
+  makeOfflineOrder,
+  offlineToggleWorkState
 } from '../actions/data/offlineData'
 
 import {
-  customersSetFilter,
-  fetchCustomerByFilter,
   customersResetState
 } from '../actions/data/customers'
 
@@ -39,9 +49,52 @@ import {
   removeOrderOnHold
 } from '../actions/ordersOnHold'
 
-import { formatCurrency, formatDate } from '../utils/string'
-import { processOdboID, processCustomers } from '../utils/computations'
+import { formatCurrency } from '../utils/string'
 import print from '../utils/printReceipt/print'
+
+const styles = {
+  center: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'column'
+  },
+  input: {
+    height: 'inherit',
+    fontSize: '2.1rem',
+    fontWeight: 600,
+    paddingTop: ' 0.0em',
+    textAlign: 'center'
+  },
+  btnStyle: {
+    height: 60,
+    padding: 10
+  },
+  btnCtnr: { margin: 10 },
+  cardCtnr: { margin: 10 },
+  cardProv: {
+    opacity: 0.2,
+    padding: 0
+  }
+}
+
+class NumberInput extends Component {
+  componentDidMount () {
+    const numberInput = jQuery('#' + this.props.id)
+    if (numberInput && numberInput.length > 0) {
+      numberInput[0].select()
+    }
+  }
+
+  render () {
+    const { id, value, onChange } = this.props
+    return (
+      <input id={id} className='input is-large' type='Number'
+        style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}}
+        value={value}
+        onChange={onChange} />
+    )
+  }
+}
 
 class ModalStoreUtils extends Component {
   componentDidUpdate () {
@@ -57,6 +110,9 @@ class ModalStoreUtils extends Component {
   _closeModal (e) {
     e && e.preventDefault()
     const { dispatch } = this.props
+    dispatch(setQuickLoginPinCode(undefined))
+    dispatch(setInvalidQuickLoginPinCode(false))
+    dispatch(setQuickLoginCashier(undefined))
     dispatch(closeActiveModal())
     dispatch(customersResetState())
     document.getElementById('barcodeInput').focus()
@@ -77,13 +133,6 @@ class ModalStoreUtils extends Component {
     dispatch(setOverallDiscount(value > 100 ? 100 : value))
   }
 
-  _searchCustomer (e) {
-    e && e.preventDefault()
-    const { dispatch, custData } = this.props
-    let { customerFilter, customerSearchKey } = custData
-    dispatch(fetchCustomerByFilter(customerFilter, customerSearchKey))
-  }
-
   _setActiveCustomer (customer) {
     const {dispatch, orderData, mainUI} = this.props
     dispatch(setActiveCustomer(customer))
@@ -97,13 +146,6 @@ class ModalStoreUtils extends Component {
     let note = document.getElementById('noteInput').value
     dispatch(addOrderNote(note))
     document.getElementById('note').reset()
-  }
-
-  _setSearchCustFilters () {
-    const { dispatch } = this.props
-    let filter = document.getElementById('custFilter').value
-    let searchKey = document.getElementById('custSearchKey').value
-    dispatch(customersSetFilter(filter, searchKey))
   }
 
   _setOdboOrderInfo () {
@@ -134,20 +176,39 @@ class ModalStoreUtils extends Component {
     print(this.props.orderReceipt)
   }
 
+  _onConfirmQuickLoginPinCode () {
+    const { dispatch, master, quickLoginPinCode, quickLoginCashier, storeId, posMode } = this.props
+    if (!quickLoginPinCode) {
+      dispatch(setInvalidQuickLoginPinCode(true))
+    } else {
+      if (posMode === 'online') {
+        dispatch(toggleCashierWorkStatus(master.id, quickLoginCashier, storeId, quickLoginPinCode))
+      } else {
+        dispatch(offlineToggleWorkState(master.id, quickLoginCashier, storeId, quickLoginPinCode))
+      }
+    }
+  }
+
+  _setQuickLoginPinCode (value) {
+    const {dispatch} = this.props
+    dispatch(setQuickLoginPinCode(value))
+  }
+
   render () {
     const {
       dispatch,
-      custData,
       activeModalId,
       overallDiscount,
+      quickLoginPinCode,
       ordersOnHold,
-      orderData,
       orderNote,
-      intl
+      intl,
+      cashiers,
+      currentCashier,
+      cashierNotSelectedWarning
     } = this.props
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
-    let bold = (txt) => { return <strong>{txt}</strong> }
     let emptyListLbl = (data, lbl) => {
       if (data.length === 0) {
         return (
@@ -159,14 +220,20 @@ class ModalStoreUtils extends Component {
       }
     }
 
-    let isFetchingLbl = (lbl) => {
-      return (
-        <div className='box has-text-centered'>
-          <span className='icon is-large'><i className='fa fa-spinner fa-pulse fa-fw' /></span>
-          <p className='title'>{lbl ? lblTR(lbl) : 'Searching . . .'}</p>
-        </div>
-      )
-    }
+    let cashiersButtons = []
+
+    let isActive = true
+    cashiers.forEach((cashier) => {
+      let button = {
+        name: cashier.id,
+        label: cashier.firstName,
+        isActive,
+        color: 'blue',
+        size: 'is-3',
+        inverted: (currentCashier && currentCashier.id === cashier.id)
+      }
+      cashiersButtons.push(button)
+    })
 
     switch (activeModalId) {
       case 'overallDiscount':
@@ -176,13 +243,27 @@ class ModalStoreUtils extends Component {
               <div className='column is-4 is-offset-4 has-text-centered'>
                 <form onSubmit={e => this._closeModal(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='discountInput' className='input is-large' type='Number'
-                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}}
-                      value={overallDiscount}
-                      onChange={e => this._setOADisc(e.target.value)} />
+                    <NumberInput id='discountInput' value={overallDiscount} onChange={e => this._setOADisc(e.target.value)} />
                     <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '4.75rem'}}>
                       <i className='fa fa-percent' />
                     </span>
+                  </p>
+                </form>
+              </div>
+            </div>
+          </ModalCard>
+        )
+      case 'quickLoginPinCode':
+        return (
+          <ModalCard closeAction={e => this._closeModal(e)} title={'PIN CODE'} confirmAction={e => this._onConfirmQuickLoginPinCode()}>
+            <div className='content columns is-mobile has-text-centered'>
+              <div className='column is-4 is-offset-4 has-text-centered' style={{width: '300px', margin: '0 auto'}}>
+                <form onSubmit={e => this._onConfirmQuickLoginPinCode()} >
+                  <p className='control is-marginless'>
+                    <input id='quickLoginPinCodeInput' className={this.props.invalidQuickLoginPinCode ? 'input is-large red-border' : 'input is-large'} type='password'
+                      style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}}
+                      value={quickLoginPinCode}
+                      onChange={e => { this._setQuickLoginPinCode(e.target.value) }} />
                   </p>
                 </form>
               </div>
@@ -268,75 +349,9 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
       case 'searchCustomer':
-        let { isFetching, customersArray, customerFilter, customerSearchKey, customerSearch } = custData
-        let fromFetched = processCustomers(customersArray, customerFilter, customerSearchKey)
-        let fromSearch = customerSearch
-        let customers = fromFetched.length > 0 ? fromFetched : fromSearch
-        let activeCustomer = orderData.activeCustomer
         return (
           <ModalCard closeAction={e => this._closeModal()}>
-            <form id='searchCust' onSubmit={e => this._searchCustomer(e)}>
-              <p className='control has-addons'>
-                <span className='select is-large'>
-                  <select id='custFilter'>
-                    <option value='byId'>odbo ID</option>
-                    <option value='byName'>First Name</option>
-                    <option value='bySurName'>Last Name</option>
-                    <option value='byContactNum'>phone number</option>
-                  </select>
-                </span>
-                <input id='custSearchKey' className='input is-large is-expanded'
-                  type='text' placeholder={lblTR('app.ph.keyword')}
-                  value={customerSearchKey} onChange={e => this._setSearchCustFilters()} />
-                {customers.length === 0 && <a className='button is-large is-success' onClick={e => this._searchCustomer()}>{lblTR('app.button.search')}</a>}
-              </p>
-            </form>
-            <div>
-              {activeCustomer &&
-                <div className='box is-clearfix'>
-                  <p className='is-pulled-left title is-marginless'>
-                    <strong>Current Customer: </strong>
-                    {`${activeCustomer.firstName} ${activeCustomer.lastName}`}
-                  </p>
-                  <a className='button is-danger is-pulled-right' onClick={e => dispatch(setActiveCustomer(null))}>REMOVE</a>
-                </div>
-              }
-              {!isFetching
-                ? customers.map((customer, key) => {
-                  let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
-                  return (
-                    <div className='box is-clearfix' key={key}>
-                      <div className='media-content is-clearfix'>
-                        <p className='is-pulled-left title is-4'>
-                          {bold(`[ID#${processOdboID(odboId)}] `)}
-                          {`< ${firstName} ${lastName || ''} >`}
-                        </p>
-                        <a className='button is-success is-pulled-right'
-                          onClick={e => { this._setActiveCustomer(customer) }}>
-                          Add Customer
-                        </a>
-                        <ContentDivider contents={[
-                          <div>
-                            <p>{bold('membership:')} {membership}</p>
-                            <p>{bold('odbo coins:')} {odboCoins || 0}</p>
-                            <p>{bold('contact number:')} {phoneNumber || 'N/A'}</p>
-                          </div>,
-                          <div>
-                            <p>{bold('status:')} {status}</p>
-                            <p>{bold('last update:')} {formatDate(dateUpdated)}</p>
-                          </div>
-                        ]} size={6} />
-                      </div>
-                    </div>
-                  )
-                })
-                : null
-              }
-              {isFetching
-                ? isFetchingLbl()
-                : emptyListLbl(customers, 'app.lbl.noCustomers')
-              }
-            </div>
+            <CustomerList showActiveCustomer customerButtonText='Add Customer' onClickCustomerButton={this._setActiveCustomer.bind(this)} />
           </ModalCard>
         )
 
@@ -355,6 +370,25 @@ class ModalStoreUtils extends Component {
                   </p>
                 </form>
               </div>
+              <ContentDivider offset={1} size={10}
+                contents={[
+                  <div className={'has-text-centered' + (cashierNotSelectedWarning ? ' red-border' : '')} >
+                    <POSButtons
+                      buttonStyle={styles.btnStyle}
+                      buttons={cashiersButtons}
+                      onClickButton={(cashierId) => {
+                        let currentCashier
+                        cashiers.forEach((cashier) => {
+                          if (cashier.id === cashierId) {
+                            currentCashier = cashier
+                          }
+                        })
+                        dispatch(setCashierNotSelectedWarning(false))
+                        dispatch(setCurrentCashier(currentCashier))
+                      }} />
+                  </div>
+                ]}
+              />
             </div>
           </ModalCard>
         )
@@ -369,13 +403,21 @@ function mapStateToProps (state) {
   let mainUI = state.app.mainUI
   let orderData = state.data.orderData
   let custData = state.data.customers
+  let storeUI = state.app.storeUI
   return {
     mainUI,
     orderData,
     custData,
+    cashiers: mainUI.activeStaff ? mainUI.activeStaff.staffs : [],
+    currentCashier: orderData.currentCashier,
+    cashierNotSelectedWarning: storeUI.cashierNotSelectedWarning,
     customerSearchKey: custData.customerSearchKey,
     customerFilter: custData.customerFilter,
     activeModalId: mainUI.activeModalId,
+    quickLoginCashier: mainUI.quickLoginCashier,
+    quickLoginPinCode: mainUI.quickLoginPinCode,
+    invalidQuickLoginPinCode: mainUI.invalidQuickLoginPinCode,
+    master: mainUI.activeStaff,
     posMode: mainUI.posMode,
     networkStatus: mainUI.networkStatus,
     overallDiscount: orderData.overallDiscount,

@@ -63,14 +63,18 @@ export function fetchLastIdFailure (error) {
   }
 }
 
-export function fetchLastOrderId (storeId) {
+export function fetchLastOrderId (storeId, storeCode) {
   return (dispatch) => {
     // fetch and sort by orderId
     const byOrderId = new Promise((resolve, reject) => {
       ordersService.find({storeId: storeId, limit: 1, sort: {id: -1}})
         .then((response) => {
-          let orderID = Number(response.data[0].id.replace(/[^\d.]/g, ''))
-          resolve(orderID)
+          if (response.data.length > 0) {
+            let orderID = Number(response.data[0].id.replace(/[^\d.]/g, ''))
+            resolve(orderID)
+          } else {
+            resolve(0)
+          }
         }).catch(error => { reject(error.message) })
     })
     // fetch and sort by refundId
@@ -81,7 +85,7 @@ export function fetchLastOrderId (storeId) {
             let refundId = Number(response.data[0].refundId.replace(/[^\d.]/g, ''))
             resolve(refundId)
           } else {
-            resolve(undefined)
+            resolve(0)
           }
         }).catch(error => { reject(error.message) })
     })
@@ -90,7 +94,10 @@ export function fetchLastOrderId (storeId) {
         response = response.filter((value) => value !== undefined)
         // compare orderId and refundId
         // highest value is the lastId
-        let lastId = Math.max(...response)
+        let lastId
+        if (response.length > 0) {
+          lastId = Math.max(...response)
+        }
         dispatch(fetchLastIdSuccess())
         dispatch(setLastID(lastId))
       })

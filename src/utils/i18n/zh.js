@@ -81,6 +81,7 @@ const zh = {
   'app.general.exportSales': '出口',
   'app.general.outletStock': '商店股票',
   'app.general.updateCD': '更新钱箱？',
+  'app.general.closeDay': 'Close day',
 
   'app.general.cashDrawerEmpty': '钱箱空物',
   'app.general.initCashDrawer': '初始确认金额',

@@ -189,11 +189,17 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
         original.refId = formatNumber(order.id)
         modifiedOrdersList.push(original)
       }
-      if (order.refundId && formatNumber(order.refundId) <= formatNumber(idTo)) {
+      if (!idTo && order.refundId || order.refundId && formatNumber(order.refundId) <= formatNumber(idTo)) {
         let duplicate = Object.assign({duplicate: true}, order)
         duplicate.refId = formatNumber(order.refundId)
         modifiedOrdersList.push(duplicate)
       }
+
+      // if (order.refundId) {
+      //   let refund = Object.assign({}, order)
+      //   refund.isRefund = true
+      //   modifiedOrdersList.push(refund)
+      // }
     })
     modifiedOrdersList.sort((a, b) => { return a.refId - b.refId })
     return (

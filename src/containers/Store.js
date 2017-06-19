@@ -25,6 +25,7 @@ class Store extends Component {
       dispatch,
       locale,
       storeId,
+      storeCode,
       cashdrawers,
       networkStatus
     } = this.props
@@ -33,7 +34,7 @@ class Store extends Component {
       dispatch(fetchAllProducts(locale))
       dispatch(fetchCustomers())
       dispatch(fetchCashdrawers(storeId))
-      dispatch(fetchLastOrderId(storeId))
+      dispatch(fetchLastOrderId(storeId, storeCode))
     }
   }
 
@@ -72,9 +73,9 @@ class Store extends Component {
       activeModalId
     } = this.props
     if (activeModalId === 'productsList') {
-      return (
-        <ModalProductList />
-      )
+      // return (
+      //   <ModalProductList />
+      // )
     } else if (activeModalId === 'payments') {
       return <ModalSetPayments />
     } else if (activeModalId === 'recallOrder' || 'overallDiscount' || 'notes') {
@@ -89,7 +90,11 @@ class Store extends Component {
           <div className='tile is-ancestor is-fullwidth'>
             <div className='tile is-parent is-6 is-vertical'>
               <div className='tile is-child'>
-                <PanelButtons />
+                {
+                  this.props.activeModalId === 'productsList'
+                    ? <ModalProductList /> : <PanelButtons />
+                }
+
               </div>
             </div>
             <div className='tile is-parent is-vertical'>
@@ -111,7 +116,7 @@ class Store extends Component {
   }
 
   render () {
-    const {activeCashier, isFetching, netStat} = this.props
+    const {staff, isFetching, netStat} = this.props
     return (
       <div>
         {isFetching && netStat === 'online'
@@ -125,7 +130,7 @@ class Store extends Component {
               </div>
             </div>
           </section>
-          : !activeCashier
+          : !staff
             ? this.renderDisabledStore()
             : this.renderStore()
         }
@@ -143,7 +148,6 @@ function mapStateToProps (state) {
     locale: state.intl.locale,
     isFetching,
     activeModalId: state.app.mainUI.activeModalId,
-    activeCashier: state.app.mainUI.activeCashier,
     cashdrawer: state.app.mainUI.activeDrawer,
     cashdrawers: state.data.cashdrawers.cdList,
     adminToken: state.app.mainUI.adminToken,
@@ -152,6 +156,7 @@ function mapStateToProps (state) {
     posMode: state.app.mainUI.posMode,
     networkStatus: state.app.mainUI.networkStatus,
     storeId: state.app.mainUI.activeStore.source,
+    storeCode: state.app.mainUI.activeStore.code,
     store: state.app.mainUI.store,
     staff: state.app.mainUI.activeStaff,
     customersArefetching: state.data.customers.isFetching,

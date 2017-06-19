@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router'
 import { FormattedMessage } from 'react-intl'
 import LanguageToggle from './LanguageToggle'
-import Truncate from '../components/Truncate'
+import CashiersSelector from '../components/CashierSelector'
 
 const NavLink = (props) => {
   return <Link {...props} className='nav-item' activeClassName='is-active' style={{fontSize: 16}} />
@@ -23,9 +23,9 @@ const NavBar = ({
   openChooseUser
 }) => {
   const toggleClass = isHamburgerOpen ? 'is-active' : null
-  let staffName = !activeCashier
-    ? null
-    : `${activeCashier.firstName} ${!activeCashier.lastName ? '' : activeCashier.lastName}`
+  // let staffName = !activeCashier
+  //   ? null
+  //   : `${activeCashier.firstName} ${!activeCashier.lastName ? '' : activeCashier.lastName}`
 
   const userIconStyle = {
     textAlign: 'center',
@@ -62,28 +62,7 @@ const NavBar = ({
                   style={userIconStyle} />
               </span>
               {staff && staff.role === 'master'
-                ? <div>
-                  {!activeCashier
-                    ? <a className={`button is-light is-outlined ${authProcessing
-                      ? 'is-loading' : null}`} onClick={openChooseUser}>
-                      <span><FormattedMessage id='app.button.logCashier' /></span>
-                      <span className='icon'>
-                        <i className='fa fa-user' />
-                      </span>
-                    </a>
-                    : activeCashier === null
-                      ? null
-                      : <p className={`st-name ${staffColor}`} style={userNameStyle}>
-                        <Truncate text={staffName} maxLength={12} />
-                        <br />
-                        <em style={{fontSize: 14}}>
-                          <a onClick={openChooseUser}>
-                            <FormattedMessage id='app.button.changeCashier' />
-                          </a>
-                        </em>
-                      </p>
-                  }
-                </div>
+                ? <div />
                 : !staff
                   ? null
                   : <p style={userNameStyle}>
@@ -94,6 +73,7 @@ const NavBar = ({
                   </p>
               }
             </div>
+            <CashiersSelector />
             <span className='nav-item' style={{ paddingRight: 10 }}>
               <a className={`button is-light is-outlined ${authProcessing
                 ? 'is-loading' : null}`}

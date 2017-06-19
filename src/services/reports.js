@@ -15,6 +15,15 @@ const reports = {
 
   findCompleteSales (source, date) {
     return reportsService.find({ query: {type: 'order.sales.endOfDay', date, source} })
+  },
+
+  sendXZReport (date, storeId, masterId) {
+    let _date = new Date(date)
+    _date.setMilliseconds(0)
+    _date.setSeconds(0)
+    _date.set
+    _date.setHours(0)
+    return reportsService.find({ query: {type: 'order.sales.sendXZReport', date, source: storeId, masterId} })
   }
 }
 

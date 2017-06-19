@@ -105,7 +105,7 @@ class PanelButtons extends Component {
         browserHistory.push('reports')
         break
       case 'admin':
-        return window.open('https://uat-admin.theodbocare.com/', '_blank')
+        return window.open('http://admin.theodbopos.com/', '_blank')
       case 'cancelOrderBtn1':
         return dispatch(cancelOrder())
       default:

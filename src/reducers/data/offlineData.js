@@ -15,7 +15,9 @@ import {
   SAVE_UPDATE_FAILED_DRAWER,
   UPDATE_SAVED_RECEIPT,
   CLEAR_SAVED_RECEIPTS,
-  CLEAR_MESSAGES
+  CLEAR_MESSAGES,
+  OFFLINE_TOGGLE_WORK_STATE
+
 } from '../../actions/data/offlineData'
 
 function offlineData (state = {
@@ -30,7 +32,8 @@ function offlineData (state = {
   syncOrderSuccess: null,
   syncDrawerSuccess: null,
   syncLog: [],
-  isProcessing: false
+  isProcessing: false,
+  workHistory: []
 }, action) {
   let printedReceipts = state.printedReceipts
   switch (action.type) {
@@ -66,6 +69,12 @@ function offlineData (state = {
     case SYNC_CASHDRAWERS_REQUEST:
       return Object.assign({}, state, {
         isProcessing: true
+      })
+    case OFFLINE_TOGGLE_WORK_STATE:
+      const newWorkHistory = state.workHistory.slice()
+      newWorkHistory.push(action.newItem)
+      return Object.assign({}, state, {
+        workHistory: newWorkHistory
       })
     case SYNC_CASHDRAWER_SUCCESS:
       state.successDrawers.push(action.successOrder)

@@ -4,7 +4,7 @@ import {
   compItemsSum,
   processProducts,
   processReceiptProducts,
-  processOrdID,
+  getNextOrderId,
   processPayments,
   processStoreAddress,
   processOdbo
@@ -28,7 +28,6 @@ export function setCurrencyType (currency) {
 
 export const SET_ORDER_ITEM_QTY = 'SET_ORDER_ITEM_QTY'
 export function setOrderItemQty (orderItemID, opperand) {
-  document.getElementById('barcodeInput').focus()
   return {
     type: SET_ORDER_ITEM_QTY,
     orderItemID,
@@ -53,11 +52,19 @@ export function setOverallDiscount (discount) {
   }
 }
 
+export const SET_CURRENT_CASHIER = 'SET_CURRENT_CACHIER'
+export function setCurrentCashier (cashier) {
+  return {
+    type: SET_CURRENT_CASHIER,
+    cashier: cashier
+  }
+}
+
 export const SET_ORDER_INFO = 'SET_ORDER_INFO'
 export function setOrderInfo (data, otherData) {
   let { orderData, appData } = data
-  let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote } = orderData
-  let { activeCashier, activeStore, lastOrderId } = appData
+  let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote, currentCashier } = orderData
+  let { activeStore, lastOrderId } = appData
   let { source, code } = activeStore
 
   let currency = (otherData && otherData.currency) || orderData.currency
@@ -76,8 +83,8 @@ export function setOrderInfo (data, otherData) {
 
   const orderInfo = {
     items: processProducts(orderItems, currency),
-    id: processOrdID(code, lastOrderId),
-    adminId: activeCashier.id,
+    id: getNextOrderId(code, lastOrderId),
+    adminId: currentCashier ? currentCashier.id : undefined,
     bonusPoints: bonusPoints,
     dateOrdered: new Date(),
     source: source,
@@ -99,11 +106,11 @@ export function setOrderInfo (data, otherData) {
     storeAddress: processStoreAddress(activeStore),
     items: processReceiptProducts(orderItems, currency),
     extraInfo: {
-      id: processOrdID(code, lastOrderId),
+      id: getNextOrderId(code, lastOrderId),
       randId: randomId,
       customer: activeCustomer,
       date: new Date(),
-      staff: `${activeCashier.firstName || ''} ${activeCashier.lastName || ''}`
+      staff: currentCashier ? `${currentCashier.firstName || ''} ${currentCashier.lastName || ''}` : undefined
     },
     paymentInfo: {
       currency: currency,
@@ -189,7 +196,7 @@ export function removePaymentByKey (key) {
 
 export const REMOVE_ORDER_ITEM = 'REMOVE_ORDER_ITEM'
 export function removeOrderItem (orderItemID) {
-  document.getElementById('barcodeInput').focus()
+  // document.getElementById('barcodeInput').focus()
   return {
     type: REMOVE_ORDER_ITEM,
     orderItemID

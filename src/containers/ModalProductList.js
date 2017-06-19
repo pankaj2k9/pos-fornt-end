@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import ModalCard from '../components/ModalCard'
-
 import {
   addOrderItem
 } from '../actions/data/orderData'
@@ -17,13 +15,12 @@ class ModalProductList extends Component {
     const {dispatch, productsById} = this.props
     const product = productsById[productId]
     dispatch(addOrderItem(product))
-    this._closeModal()
   }
 
   _closeModal (event) {
     const { dispatch } = this.props
     dispatch(closeActiveModal())
-    document.getElementById('barcodeInput').focus()
+    // document.getElementById('barcodeInput').focus()
   }
 
   renderProductItems () {
@@ -88,11 +85,27 @@ class ModalProductList extends Component {
 
   render () {
     return (
-      <ModalCard closeAction={this._closeModal.bind(this)}>
-        <div className='columns is-multiline is-mobile'>
-          {this.renderProductItems()}
+      <div style={{border: '1px solid #dbdbdb', borderRadius: '2px'}}>
+        <div style={{
+          height: '637px',
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          padding: '10px',
+          borderBottom: '1px solid #dbdbdb'
+        }}>
+          <div className='columns is-multiline is-mobile'>
+            {this.renderProductItems()}
+          </div>
         </div>
-      </ModalCard>
+        <div style={{height: '70px',
+          backgroundColor: '#23d160',
+          borderRadius: '5px',
+          margin: '10px',
+          textAlign: 'center',
+          boxShadow: '0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1)',
+          color: '#363636',
+          lineHeight: '70px'}} onClick={this._closeModal.bind(this)}><strong>BACK</strong></div>
+      </div>
     )
   }
 }

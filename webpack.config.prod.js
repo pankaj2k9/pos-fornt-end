@@ -10,12 +10,12 @@ import OfflinePlugin from 'offline-plugin'
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production'),
   __DEV__: false,
-  'process.env.API_URL': JSON.stringify(process.env.API_URL)
+  'process.env.API_URL': JSON.stringify(process.env.POS_API_URL)
 }
 
 export default {
   debug: true,
-  devtool: 'source-map', // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
+  devtool: 'cheap-module-eval-source-map', // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
   noInfo: true, // set to false to see a list of every file being bundled.
   entry: [
     './src/index',

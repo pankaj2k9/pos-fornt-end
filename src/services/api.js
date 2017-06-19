@@ -10,6 +10,7 @@ if (!global.fetch) {
 const api = (function () {
   let instance
   const host = process.env.API_URL
+  console.log('API_URL' + host)
   // setup feathers client
   function setupClient () {
     const app = feathers()

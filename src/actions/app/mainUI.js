@@ -1,8 +1,91 @@
+import workHistoryService from '../../services/workHistory'
+import {syncWorkHistory} from '../data/offlineData'
+
 export const SET_CASHIER_LOGGED_IN = 'SET_CASHIER_LOGGED_IN'
 export function setCashierLoggedIn (cashier) {
   return {
     type: SET_CASHIER_LOGGED_IN,
     cashier
+  }
+}
+
+export const START_QUICK_LOGIN = 'START_QUICK_LOGIN'
+export function startQuickLogin (cashier) {
+  return (dispatch) => {
+    dispatch(setQuickLoginCashier(cashier))
+    dispatch(setActiveModal('quickLoginPinCode'))
+  }
+}
+
+export const SET_QUICK_LOGIN_CASHIER = 'SET_QUICK_LOGIN_CASHIER'
+export function setQuickLoginCashier (cashier) {
+  return { type: SET_QUICK_LOGIN_CASHIER, cashier }
+}
+
+export const SET_QUICK_LOGIN_PIN_CODE = 'SET_QUICK_LOGIN_PIN_CODE'
+export function setQuickLoginPinCode (pinCode) {
+  return { type: SET_QUICK_LOGIN_PIN_CODE, pinCode }
+}
+
+export const SET_INVALID_QUICK_LOGIN_PIN_CODE = 'SET_INVALID_QUICK_LOGIN_PIN_CODE'
+export function setInvalidQuickLoginPinCode (value) {
+  return { type: SET_INVALID_QUICK_LOGIN_PIN_CODE, value }
+}
+
+export const TOGGLE_CASHIER_WORK_STATUS_REQUEST = 'TOGGLE_CASHIER_WORK_STATUS_REQUEST'
+export const TOGGLE_CASHIER_WORK_STATUS_SUCCESS = 'TOGGLE_CASHIER_WORK_STATUS_SUCCESS'
+export const TOGGLE_CASHIER_WORK_STATUS_ERROR = 'TOGGLE_CASHIER_WORK_STATUS_ERROR'
+
+export function toggleCashierWorkStatusRequest () {
+  return { type: TOGGLE_CASHIER_WORK_STATUS_REQUEST }
+}
+export function toggleCashierWorkStatusSuccess () {
+  return { type: TOGGLE_CASHIER_WORK_STATUS_SUCCESS }
+}
+export function toggleCashierWorkStatusError (error) {
+  return { type: TOGGLE_CASHIER_WORK_STATUS_ERROR, error }
+}
+
+export function toggleCashierWorkStatus (masterId, cashierId, storeId, pinCode) {
+  return (dispatch, getState) => {
+    return syncWorkHistory()(dispatch, getState).then(() => {
+      dispatch(toggleCashierWorkStatusRequest())
+      return workHistoryService.toggleWorkStatus(masterId, cashierId, storeId, pinCode)
+        .then(result => {
+          if (result.resultCode === 'ok') {
+            dispatch(setStoreCashiers(result.cashiers))
+            dispatch(setQuickLoginPinCode(undefined))
+            dispatch(setQuickLoginCashier(undefined))
+            dispatch(setInvalidQuickLoginPinCode(false))
+            dispatch(closeActiveModal())
+          } else {
+            dispatch(toggleCashierWorkStatusError('Invalid pin code'))
+            dispatch(setInvalidQuickLoginPinCode(true))
+          }
+        })
+        .catch(error => {
+          if (error) {
+            dispatch(toggleCashierWorkStatusError('Can\'t connect to server'))
+          }
+        })
+    })
+  }
+}
+
+export const SET_STORE_CASHIERS = 'SET_STORE_CASHIERS'
+export function setStoreCashiers (result) {
+  return {
+    type: SET_STORE_CASHIERS,
+    cashiers: result
+  }
+}
+
+export const UPDATE_CASHIER_WORK_STATUS = 'UPDATE_CASHIER_WORK_STATUS'
+export function updateCashierWorkStatus (cashierId, newWorkStatus) {
+  return {
+    type: UPDATE_CASHIER_WORK_STATUS,
+    cashierId,
+    newWorkStatus
   }
 }
 

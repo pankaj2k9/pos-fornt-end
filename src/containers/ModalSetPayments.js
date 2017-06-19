@@ -19,14 +19,16 @@ import {
   setFieldsDefault,
   setTransCode,
   setFinalValue,
-  setCashTendered
+  setCashTendered,
+  setCashierNotSelectedWarning
 } from '../actions/app/storeUI'
 
 import {
   addPaymentType,
   removePaymentType,
   removePaymentByKey,
-  setOrderInfo
+  setOrderInfo,
+  setCurrentCashier
 } from '../actions/data/orderData'
 
 import { formatCurrency, formatNumber, formatDecimalStr } from '../utils/string'
@@ -35,11 +37,17 @@ import { compPaymentsSum } from '../utils/computations'
 class ModalSetPayments extends Component {
 
   componentDidMount () {
+    const { dispatch } = this.props
+    dispatch(setCashierNotSelectedWarning(false))
     document.getElementById('payInput').focus()
   }
 
   _confirm () {
-    const { dispatch, mainUI, orderData } = this.props
+    const { dispatch, mainUI, orderData, currentCashier } = this.props
+    if (currentCashier === undefined) {
+      dispatch(setCashierNotSelectedWarning(true))
+      return
+    }
     dispatch(setOrderInfo({ orderData: orderData, appData: mainUI }))
     dispatch(setFieldsDefault())
     dispatch(closeActiveModal())
@@ -92,7 +100,7 @@ class ModalSetPayments extends Component {
   }
 
   render () {
-    const { dispatch, intl, cashTendered, paymentMode, card, amountToPay, total, payments } = this.props
+    const { dispatch, intl, cashTendered, paymentMode, card, amountToPay, total, payments, cashiers, currentCashier, cashierNotSelectedWarning } = this.props
 
     // Labels, Placeholders and Titles
 
@@ -124,6 +132,20 @@ class ModalSetPayments extends Component {
       {name: '100', label: '$100', isActive, color: 'blue', size: 'is-2'},
       {name: 'clear', label: 'CLEAR', isActive, color: 'pink', size: 'is-2'}
     ]
+
+    let cashiersButtons = []
+
+    cashiers.forEach((cashier) => {
+      let button = {
+        name: cashier.id,
+        label: cashier.firstName,
+        isActive,
+        color: 'blue',
+        size: 'is-3',
+        inverted: (currentCashier && currentCashier.id === cashier.id)
+      }
+      cashiersButtons.push(button)
+    })
 
     let cardSLCTD = (name) => { return name === card.provider }
 
@@ -304,6 +326,25 @@ class ModalSetPayments extends Component {
             </div>
           ]}
         />
+        <ContentDivider offset={1} size={10}
+          contents={[
+            <div className={'has-text-centered' + (cashierNotSelectedWarning ? ' red-border' : '')} >
+              <POSButtons
+                buttonStyle={styles.btnStyle}
+                buttons={cashiersButtons}
+                onClickButton={(cashierId) => {
+                  let currentCashier
+                  cashiers.forEach((cashier) => {
+                    if (cashier.id === cashierId) {
+                      currentCashier = cashier
+                    }
+                  })
+                  dispatch(setCashierNotSelectedWarning(false))
+                  dispatch(setCurrentCashier(currentCashier))
+                }} />
+            </div>
+          ]}
+        />
       </ModalCard>
     )
   }
@@ -342,6 +383,9 @@ function mapStateToProps (state) {
     mainUI,
     orderData,
     storeUI,
+    cashiers: mainUI.activeStaff ? mainUI.activeStaff.staffs : [],
+    currentCashier: orderData.currentCashier,
+    cashierNotSelectedWarning: storeUI.cashierNotSelectedWarning,
     payments: orderData.payments,
     total: orderData.total,
     totalDisc: orderData.totalDisc,

@@ -2,6 +2,8 @@ export const CUSTOMERS_FETCH_REQUEST = 'CUSTOMERS_FETCH_REQUEST'
 export const CUSTOMERS_FETCH_SUCCESS = 'CUSTOMERS_FETCH_SUCCESS'
 export const CUSTOMERS_FETCH_FAILURE = 'CUSTOMERS_FETCH_FAILURE'
 
+export const CUSTOMERS_SET_ACTIVE_PAGE = 'CUSTOMERS_SET_ACTIVE_PAGE'
+
 export const CUSTOMER_SEARCH_REQUEST = 'CUSTOMER_SEARCH_REQUEST'
 export const CUSTOMER_SEARCH_SUCCESS = 'CUSTOMER_SEARCH_SUCCESS'
 export const CUSTOMER_SEARCH_FAILURE = 'CUSTOMER_SEARCH_FAILURE'
@@ -31,10 +33,10 @@ export function customersFetchRequest () {
   }
 }
 
-export function customersFetchSuccess (customers) {
+export function customersFetchSuccess (response) {
   return {
     type: CUSTOMERS_FETCH_SUCCESS,
-    customers
+    response
   }
 }
 
@@ -65,54 +67,49 @@ export function customerSearchFailure (error) {
   }
 }
 
-export function fetchCustomers (query) {
+export function customersSetActivePage (page) {
   return (dispatch) => {
+    dispatch({ type: CUSTOMERS_SET_ACTIVE_PAGE, page })
+    dispatch(fetchCustomers())
+  }
+}
+
+export function fetchCustomers () {
+  return (dispatch, getState) => {
     dispatch(customersFetchRequest())
-    return customerService.fetch(query)
-      .then(customers => {
-        const { total, data, limit } = customers
 
-        // Store first fetch
-        let allCust = [...data]
-
-        const firstResponseCount = data.length
-        const goal = Number(total)
-
-        // If not all customers are fetched, run server queries until complete
-        if (goal > firstResponseCount) {
-          const firstLimit = limit
-          let custFetchArray = []
-          let newSkip = firstResponseCount
-
-          while (newSkip < goal) {
-            const nextParams = query || {}
-
-            nextParams.limit = firstLimit
-            nextParams.skip = newSkip
-            newSkip += firstLimit
-
-            const custFetch = new Promise((resolve, reject) => {
-              return customerService.fetch(nextParams)
-                .then((response) => { resolve(response) })
-                .catch(() => { reject('Failed fetching all customers') })
-            })
-            custFetchArray.push(custFetch)
-          }
-
-          // Run all cust fetch
-          global.Promise.all(custFetchArray)
-            .then((response) => {
-              response.forEach((fetchResponse) => {
-                allCust = [...allCust, ...fetchResponse.data]
-              })
-              dispatch(customersFetchSuccess(allCust))
-            })
-            .catch((error) => {
-              dispatch(customersFetchFailure(error))
-            })
-        } else {
-          dispatch(customersFetchSuccess(allCust))
+    const state = getState()
+    const page = state.data.customers.page
+    const limit = state.data.customers.limit
+    const skip = (page - 1) * limit
+    const params = {
+      query: {
+        $skip: skip,
+        $limit: limit,
+        $sort: {
+          odboID: 1
         }
+      }
+    }
+
+    const filter = state.data.customers.customerFilter
+    const searchKey = state.data.customers.customerSearchKey
+    let filterData = {}
+
+    if (filter === 'byId') {
+      filterData.odboID = Number(searchKey)
+    } else if (filter === 'byName') {
+      filterData.firstName = { $like: `%${searchKey}%` }
+    } else if (filter === 'bySurName') {
+      filterData.lastName = { $like: `%${searchKey}%` }
+    } else if (filter === 'byContactNum') {
+      filterData.phoneNumber = { $like: `%${searchKey}%` }
+    }
+
+    params.query = Object.assign({}, params.query, filterData)
+    return customerService.fetch(params)
+      .then(customers => {
+        dispatch(customersFetchSuccess(customers))
       })
       .catch(error => {
         dispatch(customersFetchFailure(error))

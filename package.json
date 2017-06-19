@@ -28,6 +28,7 @@
     "test:watch": "npm run test -- --watch"
   },
   "dependencies": {
+    "bcryptjs": "2.4.3",
     "bulma": "^0.3.1",
     "feathers-authentication-client": "^0.1.6",
     "feathers-client": "^1.9.0",
@@ -41,7 +42,7 @@
     "react-dom": "^15.4.2",
     "react-input-enhancements": "0.5.3",
     "react-intl": "^2.2.3",
-    "react-intl-redux": "^0.3.0",
+    "react-intl-redux": "0.5.0",
     "react-redux": "^5.0.2",
     "react-router": "2.8.1",
     "react-router-redux": "^4.0.7",
@@ -105,6 +106,9 @@
   },
   "pre-commit": "lint:staged",
   "eslintConfig": {
+    "env": {
+      "jquery": true
+    },
     "extends": [
       "standard",
       "standard-jsx"

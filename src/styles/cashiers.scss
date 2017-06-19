@@ -1,0 +1,48 @@
+.cashier-selector {
+  display: table;
+  height: 100%;
+
+  > div {
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .cashier-button {
+    $font-size: 12px;
+
+    float: left;
+    text-align: center;
+    background: white;
+    height: 30px;
+    width: 100px;
+    color: black;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: $font-size;
+    margin: 2px;
+    line-height: 30px;
+    border-radius: 2px;
+    user-select: none;
+    cursor: pointer;
+
+    &.logout {
+      $color: white;
+      background: $color;
+      &:hover {
+        background: $color - #202020;
+      }
+    }
+
+    &.login {
+      $color: #00d1b2;
+      background: $color;
+      &:hover {
+        background: $color - #202020;
+      }
+    }
+  }
+}
+
+.red-border {
+  border-radius: 5px !important;
+  border: 2px solid red !important;
+}

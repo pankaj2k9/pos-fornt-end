@@ -4,7 +4,8 @@ import {
   SET_AMOUNT_TENDERED,
   SET_CASH_TENDERED,
   SET_TRANS_CODE,
-  SET_FIELDS_DEFAULT
+  SET_FIELDS_DEFAULT,
+  SET_CASHIER_NOT_SELECTED_WARNING
 } from '../../actions/app/storeUI'
 
 function storeUI (state = {
@@ -28,6 +29,10 @@ function storeUI (state = {
   paymentMode: 'cash'
 }, action) {
   switch (action.type) {
+    case SET_CASHIER_NOT_SELECTED_WARNING:
+      return Object.assign({}, state, {
+        cashierNotSelectedWarning: action.show
+      })
     case SET_PAYMENT_MODE:
       return Object.assign({}, state, {
         paymentMode: action.mode

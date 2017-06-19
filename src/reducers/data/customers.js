@@ -6,7 +6,8 @@ import {
   CUSTOMER_SEARCH_SUCCESS,
   CUSTOMER_SEARCH_FAILURE,
   CUSTOMERS_SET_FILTER,
-  CUSTOMERS_RESET_STATE
+  CUSTOMERS_RESET_STATE,
+  CUSTOMERS_SET_ACTIVE_PAGE
 } from '../../actions/data/customers'
 
 function customers (state = {
@@ -18,18 +19,26 @@ function customers (state = {
   customerSearchById: {},
   isFetching: false,
   shouldUpdate: false,
+  page: 1,
+  limit: 7,
+  total: 0,
   error: null
 }, action) {
   switch (action.type) {
+    case CUSTOMERS_SET_ACTIVE_PAGE:
+      return Object.assign({}, state, {
+        page: action.page
+      })
     case CUSTOMERS_FETCH_REQUEST:
       return Object.assign({}, state, {
         isFetching: true,
         shouldUpdate: false
       })
     case CUSTOMERS_FETCH_SUCCESS:
+      const { data, limit, skip, total } = action.response
       const customerById = {}
       let customers = []
-      action.customers.forEach(customer => {
+      data.forEach(customer => {
         customerById[customer.odboId] = customer
         let cName = `${customer.firstName} ${customer.lastName || ''}`.toLowerCase()
         customer.combinedName = cName.replace(/\s+/g, '')
@@ -38,7 +47,10 @@ function customers (state = {
       return Object.assign({}, state, {
         customersArray: customers,
         customersById: customerById,
-        isFetching: false
+        isFetching: false,
+        total: Number(total),
+        skip: skip,
+        limit: limit
       })
     case CUSTOMERS_FETCH_FAILURE:
       return Object.assign({}, state, {

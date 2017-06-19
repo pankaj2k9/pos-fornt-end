@@ -8,7 +8,8 @@ import StoresDropdown from '../components/StoresDropdown'
 import XZReadingReceiptPreview from '../components/XZReadingReceiptPreview'
 import {
   completeSalesFetch,
-  completeSalesChSource
+  completeSalesChSource,
+  sendXZReport
 } from '../actions/reports'
 
 class SalesReportComplete extends React.Component {
@@ -16,6 +17,7 @@ class SalesReportComplete extends React.Component {
     super(props)
 
     this.getCompleteSalesData = this.getCompleteSalesData.bind(this)
+    this.handleCloseDay = this.handleCloseDay.bind(this)
   }
   componentWillMount () {
     const { dispatch, storeId, selectedDate } = this.props
@@ -73,6 +75,11 @@ class SalesReportComplete extends React.Component {
     dispatch(completeSalesFetch(event.target.value || storeId, selectedDate))
   }
 
+  handleCloseDay () {
+    const { dispatch, storeId, master } = this.props
+    dispatch(sendXZReport(new Date(), storeId, master.id))
+  }
+
   render () {
     const { isLoading, storeId, storeIds, selectedStore } = this.props
     const drawerData = {
@@ -99,7 +106,7 @@ class SalesReportComplete extends React.Component {
 
           {reportCanBeGenerated
             ? <div className='tile is-child'>
-              <XZReadingReceiptPreview data={salesData} />
+              <XZReadingReceiptPreview data={salesData} handleCloseDay={this.handleCloseDay} />
             </div>
             : <div className='tile is-child'>
               <FormattedMessage id='app.page.reports.noData' />
@@ -119,6 +126,7 @@ function mapStateToProps (state) {
     csDate: state.reports.completeSales.date,
     completeSales: state.reports.completeSales.completeSales,
     store: state.app.mainUI.activeStore,
+    master: state.app.mainUI.activeStaff,
     cashier: state.app.mainUI.activeCashier &&
       state.app.mainUI.activeCashier.firstName ||
       state.app.mainUI.activeStaff.username,

@@ -69,8 +69,7 @@ class PanelOrderInfo extends Component {
       dispatch,
       orderItems,
       currency,
-      locale,
-      isEditing
+      locale
     } = this.props
     const notEmpty = (orderItems !== null || undefined)
     return orderItems.map(function (item, key) {
@@ -127,7 +126,7 @@ class PanelOrderInfo extends Component {
             </form>
           </td>
           <td>
-            <p>{!isEditing ? subtotal : 0}</p>
+            <p>{subtotal}</p>
           </td>
           <td className='is-icon'>
             <a
@@ -199,7 +198,7 @@ class PanelOrderInfo extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isEditing ? this.renderOrderItems() : <tr />}
+                { this.renderOrderItems() }
               </tbody>
             </table>
           </div>

@@ -3,12 +3,16 @@ import {
   HAMBURGER_TOGGLE,
   SET_ACTIVE_MODAL,
   CLOSE_ACTIVE_MODAL,
+  SET_QUICK_LOGIN_PIN_CODE,
+  SET_QUICK_LOGIN_CASHIER,
+  SET_INVALID_QUICK_LOGIN_PIN_CODE,
+  UPDATE_CASHIER_WORK_STATUS,
   SET_LAST_ID,
   SET_NEW_LAST_ID,
   SET_STAFF_LOGGED_IN,
   SET_ACTIVE_CASHDRAWER,
   SET_TEMPORARY_CASHDRAWER,
-  SET_CASHIER_LOGGED_IN,
+  SET_STORE_CASHIERS,
   SET_CASHDRAWER_INPUT,
   SET_ERROR,
   STORE_SET_ACTIVE,
@@ -20,7 +24,6 @@ import {
 } from '../../actions/app/mainUI'
 
 function mainUI (state = {
-  activeCashier: null,
   activeDrawer: null,
   activeDrawerOffline: {
     date: new Date().toISOString().slice(0, 10),
@@ -39,17 +42,54 @@ function mainUI (state = {
   lastOrderId: null,
   networkStatus: 'online',
   posMode: 'online',
-  shouldUpdate: false
+  shouldUpdate: false,
+  quickLoginPinCode: undefined,
+  quickLoginCashier: undefined,
+  invalidQuickLoginPinCode: false
 }, action) {
   switch (action.type) {
     case CURRENTLY_EDITING:
       return Object.assign({}, state, {
         isEditing: true
       })
-    case SET_CASHIER_LOGGED_IN:
+    case SET_STORE_CASHIERS:
       return Object.assign({}, state, {
-        activeCashier: action.cashier,
-        isEditing: false
+        activeStaff: Object.assign({}, state.activeStaff, {
+          staffs: action.cashiers
+        })
+      })
+    case UPDATE_CASHIER_WORK_STATUS:
+      const cashierId = action.cashierId
+      const newWorkStatus = action.newWorkStatus
+
+      let staffs = state.activeStaff ? state.activeStaff.staffs : []
+      let newStaffs = []
+      staffs.forEach((staff) => {
+        if (staff.id !== cashierId) {
+          newStaffs.push(staff)
+        } else {
+          let newStaff = Object.assign({}, staff, {
+            workStatus: newWorkStatus
+          })
+          return newStaffs.push(newStaff)
+        }
+      })
+      return Object.assign({}, state, {
+        activeStaff: Object.assign({}, state.activeStaff, {
+          staffs: newStaffs
+        })
+      })
+    case SET_INVALID_QUICK_LOGIN_PIN_CODE:
+      return Object.assign({}, state, {
+        invalidQuickLoginPinCode: action.value
+      })
+    case SET_QUICK_LOGIN_PIN_CODE:
+      return Object.assign({}, state, {
+        quickLoginPinCode: action.pinCode
+      })
+    case SET_QUICK_LOGIN_CASHIER:
+      return Object.assign({}, state, {
+        quickLoginCashier: action.cashier
       })
     case SET_ACTIVE_CASHDRAWER:
       return Object.assign({}, state, {
@@ -127,7 +167,6 @@ function mainUI (state = {
         shouldUpdate: false,
         error: null,
         adminToken: null,
-        activeCashier: null,
         isEditing: false
       })
     case RESET_ERROR_STATE:
@@ -139,7 +178,6 @@ function mainUI (state = {
       })
     case RESET_APP_STATE:
       return Object.assign({}, state, {
-        activeCashier: null,
         activeDrawer: null,
         activeDrawerOffline: null,
         activeModalId: null,

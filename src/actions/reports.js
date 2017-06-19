@@ -411,3 +411,33 @@ const allOrdersFetch = (params, cbSuccess, cbFailure) => {
       cbFailure(error)
     })
 }
+
+export const SEND_XZ_REPORT_SUCCESS = 'SEND_XZ_REPORT_SUCCESS'
+export const SEND_XZ_REPORT_REQUEST = 'SEND_XZ_REPORT_REQUEST'
+export const SEND_XZ_REPORT_ERROR = 'SEND_XZ_REPORT_ERROR'
+
+export function sendXZReportRequest () {
+  return { type: SEND_XZ_REPORT_REQUEST }
+}
+export function sendXZReportSuccess () {
+  return { type: SEND_XZ_REPORT_SUCCESS }
+}
+export function sendXZReportError (error) {
+  return { type: SEND_XZ_REPORT_ERROR, error }
+}
+
+export function sendXZReport (date, storeId, masterId) {
+  return (dispatch) => {
+    dispatch(sendXZReportRequest())
+    return reportsService.sendXZReport(date, storeId, masterId)
+      .then(result => {
+        dispatch(sendXZReportSuccess())
+        dispatch(completeSalesChSource(storeId))
+      })
+      .catch(error => {
+        if (error) {
+          dispatch(sendXZReportError('Can\'t send report. Try again'))
+        }
+      })
+  }
+}

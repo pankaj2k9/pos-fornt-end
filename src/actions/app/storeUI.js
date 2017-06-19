@@ -1,5 +1,13 @@
 // import { formatDecimalStr } from '../../utils/string'
 
+export const SET_CASHIER_NOT_SELECTED_WARNING = 'SET_CASHIER_NOT_SELECTED_WARNING'
+export function setCashierNotSelectedWarning (show) {
+  return {
+    type: SET_CASHIER_NOT_SELECTED_WARNING,
+    show
+  }
+}
+
 export const SET_PAYMENT_MODE = 'SET_PAYMENT_MODE'
 export function setPaymentMode (mode) {
   return {

@@ -1,5 +1,6 @@
 import ordersService from '../../services/orders'
 import dailyDataService from '../../services/dailyData'
+import workHistoryService from '../../services/workHistory'
 
 import {
   updateDailyData
@@ -7,8 +8,54 @@ import {
 
 import {
   setNewLastID,
-  setActiveModal
+  setActiveModal,
+  updateCashierWorkStatus,
+  setQuickLoginPinCode,
+  setQuickLoginCashier,
+  setInvalidQuickLoginPinCode,
+  closeActiveModal
 } from '../app/mainUI'
+
+export const OFFLINE_TOGGLE_WORK_STATE = 'OFFLINE_TOGGLE_WORK_STATE'
+export function offlineToggleWorkState (masterId, cashierId, storeId, pinCode) {
+  return (dispatch, getState) => {
+    const state = getState()
+    const cashiers = state.app.mainUI.activeStaff ? state.app.mainUI.activeStaff.staffs : []
+
+    let isPinCodeRight = false
+    let cashierData
+    cashiers.forEach((cashier) => {
+      if (cashier.id === cashierId &&
+          cashier.pinCode === pinCode) {
+        isPinCodeRight = true
+        cashierData = cashier
+      }
+    })
+
+    const newStatus = cashierData.workStatus === 'logout' ? 'login' : 'logout'
+
+    if (isPinCodeRight) {
+      dispatch({
+        type: OFFLINE_TOGGLE_WORK_STATE,
+        newItem: {
+          date: new Date(),
+          storeId,
+          masterId,
+          cashierId,
+          action: newStatus
+        }
+      })
+
+      dispatch(updateCashierWorkStatus(cashierId, newStatus))
+      dispatch(setQuickLoginPinCode(undefined))
+      dispatch(setQuickLoginCashier(undefined))
+      dispatch(setInvalidQuickLoginPinCode(false))
+      dispatch(closeActiveModal())
+    } else {
+      dispatch(setInvalidQuickLoginPinCode(true))
+    }
+  }
+}
 
 export const PROCESS_OFFLINE_ORDER = 'PROCESS_OFFLINE_ORDER'
 export function processOfflineOrder (orderInfo) {
@@ -73,6 +120,14 @@ export function syncOrderSuccess (successOrder) {
   return {
     type: SYNC_ORDER_SUCCESS,
     successOrder
+  }
+}
+
+export const SYNC_WORK_HISTORY_ITEM_DONE = 'SYNC_WORK_HISTORY_ITEM_DONE'
+export function syncWorkHistoryItemDone (item) {
+  return {
+    type: SYNC_WORK_HISTORY_ITEM_DONE,
+    item
   }
 }
 
@@ -155,10 +210,44 @@ export function clearMessages () {
   }
 }
 
+export function syncWorkHistory () {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      const state = getState()
+      const workHistory = state.data.offlineData.workHistory
+
+      if (workHistory.length === 0) {
+        return resolve()
+      }
+
+      const promises = []
+      workHistory.forEach((item) => {
+        const promise = workHistoryService.create({
+          date: item.date,
+          master_id: item.masterId,
+          cashier_id: item.cashierId,
+          source_id: item.storeId,
+          action: item.action
+        })
+          .then(response => {
+            dispatch(syncWorkHistoryItemDone(item))
+            resolve()
+          })
+          .catch(() => {
+            reject()
+          })
+        promises.push(promise)
+      })
+
+      return Promise.all(promises)
+    })
+  }
+}
 export function syncOfflineData (offlineOrders, offlineDrawers) {
   return (dispatch) => {
     dispatch(syncOrdersRequest())
     dispatch(updateSyncLog({start: 'Syncing Process Started'}))
+    dispatch(syncWorkHistory())
     const syncOrders = new Promise((resolve, reject) => {
       let syncOrderCount = 0
       let syncOrderSuccessCount = 0

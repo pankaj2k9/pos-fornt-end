@@ -72,7 +72,6 @@ class App extends React.Component {
       networkStatus,
       posMode,
       staff,
-      activeCashier,
       adminToken
     } = this.props
 
@@ -99,7 +98,6 @@ class App extends React.Component {
           onLogoutCashier={this._logoutCashier.bind(this)}
           onHamburgerToggle={this._hamburgerToggle.bind(this)}
           staff={userLogedIn}
-          activeCashier={activeCashier}
           adminToken={adminToken}
           authProcessing={authProcessing}
           openChooseUser={this._chooseUser.bind(this)} />
@@ -153,7 +151,6 @@ function mapStateToProps (state) {
     error: mainUI.error,
     activeModalId: mainUI.activeModalId,
     activeDrawer,
-    activeCashier: mainUI.activeCashier,
     adminToken: mainUI.adminToken,
     authProcessing: state.login.isProcessing
   }
