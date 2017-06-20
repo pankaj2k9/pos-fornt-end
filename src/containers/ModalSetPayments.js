@@ -42,6 +42,12 @@ class ModalSetPayments extends Component {
     document.getElementById('payInput').focus()
   }
 
+  _close () {
+    const { dispatch } = this.props
+    dispatch(closeActiveModal())
+    document.getElementById('barcodeInput').focus()
+  }
+
   _confirm () {
     const { dispatch, mainUI, orderData, currentCashier } = this.props
     if (currentCashier === undefined) {
@@ -255,7 +261,7 @@ class ModalSetPayments extends Component {
 
     return (
       <ModalCard title={'app.modal.payment'}
-        closeAction={e => this._confirm()}
+        closeAction={e => this._close()}
         confirmAction={e => this._confirm()} >
         <ContentDivider offset={2} size={8}
           contents={[
