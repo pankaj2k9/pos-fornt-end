@@ -19,7 +19,7 @@ export const compItemsSum = (data) => {
 export const compDiscount = (pct, amount) => {
   let price = Number(amount)
   let discPCT = Number(pct || 0)
-  return price - (discPCT / 100) * price
+  return price - Math.floor((discPCT / 100) * price)
 }
 
 export const compDiscSum = (data) => {
@@ -36,8 +36,8 @@ export const compDiscSum = (data) => {
         ? x.odboPriceDiscount // isDiscounted ? then use odboPriceDiscount
         : x.customDiscount // not discounted ? then use custom if there is
       : x.overallDiscount // use overallDiscount
-    totalDisc = totalDisc + (discPCT / 100) * (Number(x.price) * x.qty)
-    totalOdboDisc = totalOdboDisc + (odboDiscPCT / 100) * (Number(x.odboPrice) * x.qty)
+    totalDisc = totalDisc + compDiscount(discPCT, x.price) * x.qty
+    totalOdboDisc = totalOdboDisc + compDiscount(odboDiscPCT, Number(x.odboPrice)) * x.qty
   })
   return {
     totalDisc: totalDisc,
@@ -183,6 +183,14 @@ export const getNextOrderId = (prefix, lastId) => {
     return `${prefix}0000001`
   }
   let newId = String(lastId + 1)
+  return formatOrderId(prefix, newId)
+}
+
+export const formatOrderId = (prefix, id) => {
+  if (!id) {
+    return undefined
+  }
+  let newId = String(id)
   while (newId.length !== 7) {
     newId = '0' + newId
   }
