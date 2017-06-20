@@ -309,7 +309,7 @@ class ModalApp extends Component {
         )
       case 'refundSuccess':
         return (
-          <ModalCard closeAction={e => this._printReceipt()} confirmAction={e => this.printReceipt()}>
+          <ModalCard closeAction={e => this._printReceipt()} confirmAction={e => this._printReceipt()}>
             <div className='content has-text-centered'>
               <p className='title'>Refund Success</p>
             </div>
