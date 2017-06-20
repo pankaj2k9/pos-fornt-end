@@ -121,6 +121,20 @@ export function storeOrderFetch (params) {
             orderSearchResults.push(duplicate)
           }
         })
+        orderSearchResults.sort(function (a, b) {
+          let aValue = a.duplicate ? a.refundId : a.id
+          let bValue = b.duplicate ? b.refundId : b.id
+
+          if (aValue > bValue) {
+            return -1
+          }
+
+          if (aValue < bValue) {
+            return 1
+          }
+
+          return 0
+        })
         dispatch(storeOrderFetchSuccess(orderSearchResults))
       })
       .catch(error => {
