@@ -24,7 +24,7 @@ import {
   fetchCustomerByFilter
 } from '../actions/data/customers'
 
-import { getNextOrderId } from '../utils/computations'
+import { formatOrderId } from '../utils/computations'
 import { formatCurrency, formatNumber } from '../utils/string'
 
 class SettingsTab extends Component {
@@ -60,7 +60,7 @@ class SettingsTab extends Component {
     const {dispatch, settings, mainUI} = this.props
     let query = {
       id: settings.orderSearchKey,
-      randId: settings.orderSearchKeyAlt,
+      refundId: settings.orderSearchKey,
       storeId: mainUI.activeStore.source
     }
     dispatch(storeOrderFetch(query))
@@ -70,7 +70,7 @@ class SettingsTab extends Component {
     const { dispatch, mainUI } = this.props
     let original = key
     let initial = key.replace(/[^\w\s]/gi, '') // removes any special character
-    let searchKey = getNextOrderId(mainUI.activeStore.code, formatNumber(initial), 'normal')
+    let searchKey = formatOrderId(mainUI.activeStore.code, formatNumber(initial))
     dispatch(storeOrdersSetSearchKey(searchKey, original))
   }
 
