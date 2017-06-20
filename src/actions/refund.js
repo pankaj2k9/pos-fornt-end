@@ -41,7 +41,7 @@ export function refund (refundData, storeData, orderData, currentPath) {
       .then(response => {
         orderData.refundId = response.refundId
         orderData.dateRefunded = response.dateRefunded
-        if (currentPath === '/settings') {
+        if (currentPath === 'settings') {
           dispatch(setActiveOrderDetails(orderData))
         } else {
           dispatch(storeOrdersSetActiveOrder(orderData))
