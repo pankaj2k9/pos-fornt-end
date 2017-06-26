@@ -51,9 +51,9 @@ export const compPaymentsSum = (data, noVoucher) => {
     data.forEach(x => {
       if (x.type !== 'odbo') {
         if (x.type === 'voucher' && !noVoucher) {
-          totalPayments = totalPayments + x.deduction
+          totalPayments = totalPayments + Number(x.deduction)
         } else {
-          totalPayments = totalPayments + x.amount
+          totalPayments = totalPayments + Number(x.amount)
         }
       }
     })
