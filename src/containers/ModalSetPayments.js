@@ -32,7 +32,7 @@ import {
 } from '../actions/data/orderData'
 
 import { formatCurrency, formatNumber, formatDecimalStr } from '../utils/string'
-import { compPaymentsSum } from '../utils/computations'
+import { compCashChange } from '../utils/computations'
 
 class ModalSetPayments extends Component {
 
@@ -111,9 +111,7 @@ class ModalSetPayments extends Component {
     // Labels, Placeholders and Titles
 
     let totalLbl = formatCurrency(total)
-    let paymentBal = total - compPaymentsSum(payments) < 0
-      ? formatCurrency(0)
-      : formatCurrency(total - compPaymentsSum(payments))
+    let paymentBal = formatCurrency(compCashChange(payments) * -1)
     let payInput = paymentMode === 'cash'
       ? cashTendered
       : amountToPay
