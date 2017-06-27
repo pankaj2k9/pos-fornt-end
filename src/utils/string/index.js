@@ -6,10 +6,17 @@
  * @returns {array} of strings split from str that is below
  */
 export const formatCurrency = (number, currency) => {
+  number = Number(number)
   if (currency === 'odbo') {
-    return String(Number(number))
+    return String(number)
   } else if (currency === 'sgd' || !currency) {
-    return `$${Number(number).toLocaleString('en', {
+    if (number < 0) {
+      return `-$${Math.abs(number).toLocaleString('en', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`
+    }
+    return `$${number.toLocaleString('en', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })}`
