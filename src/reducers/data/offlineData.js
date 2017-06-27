@@ -33,7 +33,8 @@ function offlineData (state = {
   syncDrawerSuccess: null,
   syncLog: [],
   isProcessing: false,
-  workHistory: []
+  workHistory: [],
+  ordersHistory: []
 }, action) {
   let printedReceipts = state.printedReceipts
   switch (action.type) {
