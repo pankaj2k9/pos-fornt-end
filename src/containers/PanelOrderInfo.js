@@ -170,7 +170,7 @@ class PanelOrderInfo extends Component {
     let creditSum = formatCurrency(compPaymentsSumByType(payments, 'credit'))
     let netsSum = formatCurrency(compPaymentsSumByType(payments, 'nets'))
     let voucherSum = formatCurrency(compPaymentsSumByType(payments, 'voucher'))
-    let cashChange = formatCurrency(compCashChange(payments))
+    let cashChange = formatCurrency(compCashChange(payments) * -1)
     let custName = activeCustomer ? activeCustomer.firstName : 'N/A'
     let odbo = processOdbo(activeCustomer, orderTotal, bonusPoints)
     let intFrameHeight = window.innerHeight
