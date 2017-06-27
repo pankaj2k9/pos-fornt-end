@@ -84,7 +84,7 @@ export const compCashChange = (data) => {
   if (data && data.length > 0) {
     data.forEach(x => {
       if (x.type === 'cash') {
-        cashChange = x.change
+        cashChange = Number(x.change)
       }
     })
   }
@@ -237,8 +237,8 @@ export const processOdbo = (customer, orderTotal, multiplier) => {
     ? {
       prevCoins: customer.odboCoins,
       earnedPts: bonus,
-      newCoins: customer.odboCoins + orderTotal,
-      newCoins2: customer.odboCoins - orderTotal,
+      newCoins: customer.odboCoins + bonus,
+      newCoins2: customer.odboCoins - bonus,
       bonus: multiplier ? `x${1 + (multiplier / 100)}` : null
     }
     : undefined
