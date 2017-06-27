@@ -303,9 +303,15 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
 
           {/* XZ Reading refund summary */}
           {Object.keys(processedRefundSummary).map((item, i) => {
+            let refundType = processedRefundSummary[item].type.toUpperCase()
+
+            if (refundType === 'ODBO') {
+              return null
+            }
+
             const key = `${keyPref}-refsummary-${i}`
 
-            const sumType = `${processedRefundSummary[item].type.toUpperCase()} [REFUND]`
+            const sumType = `${refundType} [REFUND]`
             const sumCount = 'x' + processedRefundSummary[item].count
             const sumSubtotal = '- ' + formatCurrency(processedRefundSummary[item].subtotal)
 
