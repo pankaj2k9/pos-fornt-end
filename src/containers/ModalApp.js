@@ -315,6 +315,14 @@ class ModalApp extends Component {
             </div>
           </ModalCard>
         )
+      case 'promptToLogoutAllCashiers':
+        return (
+          <ModalCard closeAction={e => this._closeModal()} confirmAction={e => this._closeModal()}>
+            <div className='content has-text-centered'>
+              <p className='title'>User is still logged in, kindly time out before logging out.</p>
+            </div>
+          </ModalCard>
+        )
       case 'customerDetails':
         let { activeCustomer, updateSuccess, error } = settings
         let { id, firstName, lastName, odboCoins, membershipPoints, membership,
