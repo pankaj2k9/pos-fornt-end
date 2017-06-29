@@ -25,6 +25,10 @@ import {
   updateDailyData
 } from './data/cashdrawers'
 
+import {
+  productsDecrease
+} from '../actions/data/products'
+
 import ordersService from '../services/orders'
 
 export function orderRequest () {
@@ -118,6 +122,7 @@ export function processOrder (orderInfo, receipt, activeDrawer) {
     dispatch(setActiveModal('processingOrder'))
     return ordersService.create(orderInfo)
     .then(order => {
+      console.log('order', order)
       dispatch(setActiveModal('orderSuccess'))
       dispatch(orderSuccess())
       dispatch(setNewLastID())
@@ -125,6 +130,7 @@ export function processOrder (orderInfo, receipt, activeDrawer) {
       dispatch(saveReceipt(receipt))
       dispatch(setCashTendered(0))
       dispatch(setPaymentMode('cash'))
+      dispatch(productsDecrease(order.source, order.items))
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))

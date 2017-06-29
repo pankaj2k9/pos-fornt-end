@@ -14,6 +14,14 @@ import {
 import {
   customersSetActivePage
 } from '../actions/data/customers'
+
+import {
+  transactionsSetOdboId
+} from '../actions/transactionHistory'
+
+import {
+  setActiveModal
+} from '../actions/app/mainUI'
 import SimplePagination from '../components/SimplePagination'
 const PAGINATION_MARGIN_BOTTOM = 10
 
@@ -21,7 +29,7 @@ const bold = (txt) => { return <strong>{txt}</strong> }
 
 class CustomerListItem extends React.Component {
   render () {
-    const { customer, key, buttonText, onClickButton } = this.props
+    const { customer, key, buttonText, onClickButton, onClickHistoryButton } = this.props
     let {firstName, lastName, odboCoins, odboId, membership, status, dateUpdated, phoneNumber} = customer
     return (
       <div className='box is-clearfix' key={key}>
@@ -37,6 +45,11 @@ class CustomerListItem extends React.Component {
               {buttonText}
             </a>
           }
+          <a className='button is-success is-pulled-right'
+            style={{marginRight: '10px'}}
+            onClick={e => { onClickHistoryButton(customer) }}>
+            History
+          </a>
 
           <ContentDivider contents={[
             <div>
@@ -60,6 +73,7 @@ class CustomerList extends React.Component {
     super(props)
     this._renderPagination = this._renderPagination.bind(this)
     this.setActivePage = this.setActivePage.bind(this)
+    this.onClickCustomerHistoryButton = this.onClickCustomerHistoryButton.bind(this)
   }
 
   componentWillMount () {
@@ -85,8 +99,23 @@ class CustomerList extends React.Component {
     )
   }
 
+  onClickCustomerHistoryButton (customer) {
+    const { dispatch, isModal } = this.props
+
+    let onBack
+    if (isModal) {
+      onBack = 'searchCustomer'
+    }
+
+    dispatch(transactionsSetOdboId(customer.odboId))
+    dispatch(setActiveModal('transactionHistory', undefined, {
+      customer,
+      onBack
+    }))
+  }
+
   render () {
-    const {activeCustomer, dispatch, custData, range, intl, customerButtonText, onClickCustomerButton, showActiveCustomer} = this.props
+    const {activeCustomer, dispatch, custData, range, intl, customerButtonText, onClickCustomerButton, showActiveCustomer, isModal} = this.props
     const {isFetching, customersArray, customerFilter, customerSearchKey, customerSearch} = custData
     let fromFetched = processCustomers(customersArray, customerFilter, customerSearchKey)
     let fromSearch = customerSearch
@@ -136,7 +165,13 @@ class CustomerList extends React.Component {
           !isFetching &&
           customers.length > 0 &&
           customers.slice(0, range).map((customer, key) => {
-            return <CustomerListItem customer={customer} key={key} buttonText={customerButtonText} onClickButton={onClickCustomerButton} />
+            return <CustomerListItem
+              customer={customer}
+              key={key}
+              buttonText={customerButtonText}
+              onClickButton={onClickCustomerButton}
+              isModal={isModal}
+              onClickHistoryButton={this.onClickCustomerHistoryButton} />
           })
         }
         {isFetching

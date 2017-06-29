@@ -78,8 +78,8 @@ function orderData (state = {
           let odboDiscPCT = customDiscount === 0
             ? item.isDiscounted ? item.odboPriceDiscount : 0
             : item.customDiscount
-          const finalPR = compDiscount(discPCT, itemPR)
-          const finalOdboPR = compDiscount(odboDiscPCT, itemOdboPR)
+          const finalPR = itemPR - compDiscount(discPCT, itemPR)
+          const finalOdboPR = itemOdboPR - compDiscount(odboDiscPCT, itemOdboPR, true)
 
           item.finalPR = item.finalPR + finalPR
           item.finalOdboPR = item.finalOdboPR + finalOdboPR
@@ -108,8 +108,8 @@ function orderData (state = {
           ? item.isDiscounted ? item.odboPriceDiscount
             : item.customDiscount === 0 ? 0 : item.customDiscount
           : oaDiscFrmAtn
-        const finalPR = compDiscount(discPCT, itemPR)
-        const finalOdboPR = compDiscount(odboDiscPCT, itemOdboPR)
+        const finalPR = itemPR - compDiscount(discPCT, itemPR)
+        const finalOdboPR = itemOdboPR - compDiscount(odboDiscPCT, itemOdboPR, true)
 
         item.overallDiscount = oaDiscFrmAtn
         item.finalPR = finalPR
@@ -130,14 +130,32 @@ function orderData (state = {
       let itemToAdd = [action.product]
       itemToAdd.forEach(function (newItem) {
         let existing = orderItems.filter((oldItem) => { return oldItem.id === newItem.id })
-        let discPCT = oaDisc === 0
-          ? newItem.isDiscounted ? newItem.priceDiscount
-            : newItem.customDiscount === 0 ? 0 : newItem.customDiscount
-          : oaDisc
-        let odboDiscPCT = oaDisc === 0
-          ? newItem.isDiscounted ? newItem.odboPriceDiscount
-            : newItem.customDiscount === 0 ? 0 : newItem.customDiscount
-          : oaDisc
+
+        let discPCT = 0
+        if (oaDisc === 0) {
+          if (newItem.isDiscounted) {
+            discPCT = newItem.priceDiscount
+          } else if (newItem.customDiscount === 0) {
+            discPCT = 0
+          } else {
+            discPCT = newItem.customDiscount
+          }
+        } else {
+          discPCT = oaDisc
+        }
+
+        let odboDiscPCT = 0
+        if (oaDisc === 0) {
+          if (newItem.isDiscounted) {
+            odboDiscPCT = newItem.odboPriceDiscount
+          } else if (newItem.customDiscount === 0) {
+            odboDiscPCT = 0
+          } else {
+            odboDiscPCT = newItem.customDiscount
+          }
+        } else {
+          odboDiscPCT = oaDisc
+        }
         if (existing.length) {
           let x = orderItems.indexOf(existing[0]) // index
           orderItems[x].qty = orderItems[x].qty + 1
@@ -146,10 +164,10 @@ function orderData (state = {
         } else {
           const qtyAndTotal = {
             qty: 1,
-            finalPR: compDiscount(discPCT, newItem.price),
-            finalOdboPR: compDiscount(odboDiscPCT, newItem.odboPrice),
-            subTotalPrice: compDiscount(discPCT, newItem.price),
-            subTotalOdboPrice: compDiscount(odboDiscPCT, newItem.odboPrice),
+            finalPR: newItem.price - compDiscount(discPCT, newItem.price),
+            finalOdboPR: newItem.odboPrice - compDiscount(odboDiscPCT, newItem.odboPrice, true),
+            subTotalPrice: newItem.price - compDiscount(discPCT, newItem.price),
+            subTotalOdboPrice: newItem.odboPrice - compDiscount(odboDiscPCT, newItem.odboPrice, true),
             customDiscount: 0,
             overallDiscount: oaDisc === 0 ? 0 : oaDisc
           }

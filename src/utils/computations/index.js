@@ -16,28 +16,51 @@ export const compItemsSum = (data) => {
   }
 }
 
-export const compDiscount = (pct, amount) => {
+export const compDiscount = (pct, amount, roundResult) => {
   let price = Number(amount)
   let discPCT = Number(pct || 0)
-  return price - Math.floor((discPCT / 100) * price)
+
+  if (roundResult) {
+    return Math.floor(discPCT * price / 100)
+  } else {
+    let value = discPCT * price / 100
+    value = Number(value.toFixed(2))
+
+    return value
+  }
 }
 
 export const compDiscSum = (data) => {
   let totalDisc = 0
   let totalOdboDisc = 0
   data.forEach(x => {
-    let discPCT = x.overallDiscount === 0
-      ? x.isDiscounted
-        ? x.priceDiscount // isDiscounted, then use priceDiscount
-        : x.customDiscount // not discounted, use custom if there is
-      : x.overallDiscount // use overallDiscount
-    let odboDiscPCT = x.overallDiscount === 0
-      ? x.isDiscounted
-        ? x.odboPriceDiscount // isDiscounted ? then use odboPriceDiscount
-        : x.customDiscount // not discounted ? then use custom if there is
-      : x.overallDiscount // use overallDiscount
+    let discPCT = 0
+    if (x.overallDiscount === 0) {
+      if (x.isDiscounted) {
+        discPCT = x.priceDiscount
+      } else if (x.customDiscount === 0) {
+        discPCT = 0
+      } else {
+        discPCT = x.customDiscount
+      }
+    } else {
+      discPCT = x.overallDiscount
+    }
+
+    let odboDiscPCT = 0
+    if (x.overallDiscount === 0) {
+      if (x.isDiscounted) {
+        odboDiscPCT = x.odboPriceDiscount
+      } else if (x.customDiscount === 0) {
+        odboDiscPCT = 0
+      } else {
+        odboDiscPCT = x.customDiscount
+      }
+    } else {
+      odboDiscPCT = x.overallDiscount
+    }
     totalDisc = totalDisc + compDiscount(discPCT, x.price) * x.qty
-    totalOdboDisc = totalOdboDisc + compDiscount(odboDiscPCT, Number(x.odboPrice)) * x.qty
+    totalOdboDisc = totalOdboDisc + compDiscount(odboDiscPCT, Number(x.odboPrice), true) * x.qty
   })
   return {
     totalDisc: totalDisc,

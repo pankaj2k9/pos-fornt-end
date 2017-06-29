@@ -15,13 +15,21 @@ const dailyData = {
 
   find (query) {
     return dailyDataService.find(query || {})
+      .then((response) => {
+        response.data.forEach((item) => {
+          item.float = Number(item.float)
+        })
+        return Promise.resolve(response)
+      })
   },
 
   get (storeId) {
     const query = {
       storeId: storeId
     }
-    return dailyDataService.find({ query })
+    return dailyDataService.find({ query }).then((response) => {
+      console.log('response2', response)
+    })
   }
 }
 

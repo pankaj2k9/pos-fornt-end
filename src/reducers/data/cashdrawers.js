@@ -10,7 +10,8 @@ import {
 function cashdrawers (state = {
   cdList: [],
   isProcessing: false,
-  error: null
+  error: null,
+  lastDailyDataUpdate: undefined
 }, action) {
   switch (action.type) {
     case DAILYDATA_FETCH_REQUEST:
@@ -22,7 +23,8 @@ function cashdrawers (state = {
       return Object.assign({}, state, {
         isProcessing: false,
         cdList: action.cashdrawers,
-        error: null
+        error: null,
+        lastDailyDataUpdate: new Date().toISOString().slice(0, 10)
       })
     case DAILYDATA_FETCH_FAILURE:
       return Object.assign({}, state, {

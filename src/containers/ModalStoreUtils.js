@@ -351,7 +351,11 @@ class ModalStoreUtils extends Component {
       case 'searchCustomer':
         return (
           <ModalCard closeAction={e => this._closeModal()}>
-            <CustomerList showActiveCustomer customerButtonText='Add Customer' onClickCustomerButton={this._setActiveCustomer.bind(this)} />
+            <CustomerList
+              showActiveCustomer
+              customerButtonText='Add Customer'
+              onClickCustomerButton={this._setActiveCustomer.bind(this)}
+              isModal />
           </ModalCard>
         )
 

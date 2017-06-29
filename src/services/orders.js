@@ -26,7 +26,8 @@ const orders = {
       skip,
       sort,
       noNullRefundId,
-      eager
+      eager,
+      odboId
     } = params
 
     const query = {
@@ -114,6 +115,10 @@ const orders = {
           source: store
         }
       ]
+    }
+
+    if (odboId) {
+      query.odboId = odboId
     }
 
     return ordersService.find({ query })

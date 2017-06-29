@@ -41,6 +41,7 @@ import {
 } from '../utils/computations'
 
 import print from '../utils/printReceipt/print'
+import TransactionHistory from '../components/TransactionHistory'
 
 class ModalApp extends Component {
   _closeModal () {
@@ -155,7 +156,7 @@ class ModalApp extends Component {
 
   render () {
     const { intl, dispatch, mainUI, offlineData, activeOD, settings, isProcessing } = this.props
-    let { activeModalId, activeStaff } = mainUI
+    let { activeModalId, activeStaff, options } = mainUI
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
 
@@ -200,6 +201,13 @@ class ModalApp extends Component {
                 </span>
               </div>
             </div>
+          </ModalCard>
+        )
+      case 'transactionHistory':
+        return (
+          <ModalCard closeAction={options.onBack ? () => { dispatch(setActiveModal(options.onBack)) } : e => this._closeModal()}
+            title={'Transaction history'} >
+            <TransactionHistory />
           </ModalCard>
         )
       case 'updateCDFailed':

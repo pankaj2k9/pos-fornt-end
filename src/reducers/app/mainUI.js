@@ -45,7 +45,8 @@ function mainUI (state = {
   shouldUpdate: false,
   quickLoginPinCode: undefined,
   quickLoginCashier: undefined,
-  invalidQuickLoginPinCode: false
+  invalidQuickLoginPinCode: false,
+  options: undefined
 }, action) {
   switch (action.type) {
     case CURRENTLY_EDITING:
@@ -109,6 +110,7 @@ function mainUI (state = {
     case SET_ACTIVE_MODAL:
       return Object.assign({}, state, {
         activeModalId: action.activeModalId,
+        options: action.options,
         isEditing: true
       })
     case SET_LAST_ID:

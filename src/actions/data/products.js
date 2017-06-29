@@ -4,8 +4,26 @@ export const PRODUCTS_FETCH_SUCCESS = 'PRODUCTS_FETCH_SUCCESS'
 export const PRODUCTS_FETCH_FAILURE = 'PRODUCTS_FETCH_FAILURE'
 export const PRODUCTS_SHOULD_UPDATE = 'PRODUCTS_SHOULD_UPDATE'
 export const PRODUCTS_SET_DATA = 'PRODUCTS_SET_DATA'
+export const PRODUCTS_DECREASE = 'PRODUCTS_DECREASE'
+export const PRODUCTS_INCREASE = 'PRODUCTS_INCREASE'
 
 import productsService from '../../services/products'
+
+export function productsDecrease (storeId, products) {
+  return {
+    type: PRODUCTS_DECREASE,
+    storeId,
+    products
+  }
+}
+
+export function productsIncrease (storeId, products) {
+  return {
+    type: PRODUCTS_INCREASE,
+    storeId,
+    products
+  }
+}
 
 export function productsFetchRequest () {
   return {

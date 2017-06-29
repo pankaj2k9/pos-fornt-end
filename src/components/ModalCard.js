@@ -28,7 +28,7 @@ const ModalCard = (props) => {
         <section className='modal-card-body'>
           {children}
         </section>
-        {confirmAction || cancelAction || retryAction
+        {confirmAction || cancelAction || retryAction || cancelAction
           ? <footer className='modal-card-foot is-paddingless'>
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
               {cancelAction

@@ -316,7 +316,18 @@ const en = {
   'app.page.settings.to': 'To',
   'app.page.settings.transFrom': 'From (Transaction ID)',
   'app.page.settings.transTo': 'To (Transaction ID)',
-  'app.page.settings.process': 'Process'
+  'app.page.settings.process': 'Process',
+
+  'app.transactionHistory.orderId': 'Order ID',
+  'app.transactionHistory.date': 'Date',
+  'app.transactionHistory.total': 'Total',
+  'app.transactionHistory.currency': 'Currency',
+
+  'app.transactionHistory.sgd': 'SGD',
+  'app.transactionHistory.odbo': 'ODBO',
+
+  'app.button.back': 'BACK'
+
 }
 
 export default en

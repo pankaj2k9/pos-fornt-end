@@ -114,11 +114,12 @@ export function setTemporaryCashdrawer (cashdrawer) {
 }
 
 export const SET_ACTIVE_MODAL = 'SET_ACTIVE_MODAL'
-export function setActiveModal (activeModalId, inputToFocus) {
+export function setActiveModal (activeModalId, inputToFocus, options) {
   return {
     type: SET_ACTIVE_MODAL,
     activeModalId,
-    inputToFocus
+    inputToFocus,
+    options
   }
 }
 
