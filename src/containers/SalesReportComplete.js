@@ -12,7 +12,8 @@ import {
   sendXZReport
 } from '../actions/reports'
 
-import { setActiveModal } from '../actions/app/mainUI'
+import { logoutAllCashiers } from '../actions/app/mainUI'
+import { offlineLogoutAllCashiers } from '../actions/data/offlineData'
 
 class SalesReportComplete extends React.Component {
   constructor (props) {
@@ -77,29 +78,15 @@ class SalesReportComplete extends React.Component {
     dispatch(completeSalesFetch(event.target.value || storeId, selectedDate))
   }
 
-  isAllCashiersLogout () {
-    const {cashiers, store} = this.props
-    const activeStore = store.source
-    let isAllCashiersLogout = true
-
-    cashiers.forEach((cashier) => {
-      if (cashier !== 'deleted' && cashier.storePermissions.includes(activeStore)) {
-        if (cashier.workStatus === 'login') {
-          isAllCashiersLogout = false
-        }
-      }
-    })
-
-    return isAllCashiersLogout
-  }
-
   handleCloseDay () {
-    const { dispatch, storeId, master } = this.props
-    if (this.isAllCashiersLogout()) {
-      dispatch(sendXZReport(new Date(), storeId, master.id))
+    const { dispatch, storeId, master, posMode } = this.props
+
+    if (posMode !== 'online') {
+      dispatch(offlineLogoutAllCashiers())
     } else {
-      dispatch(setActiveModal('promptToLogoutAllCashiers'))
+      dispatch(logoutAllCashiers())
     }
+    dispatch(sendXZReport(new Date(), storeId, master.id))
   }
 
   render () {
@@ -159,6 +146,7 @@ function mapStateToProps (state) {
     storeId: state.app.mainUI.activeStore.source,
     storeIds: state.data.stores.stores,
     selectedStore: state.reports.completeSales.source,
+    posMode: state.app.mainUI.posMode,
     selectedDate: state.reports.date
   }
 }

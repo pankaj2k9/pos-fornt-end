@@ -43,10 +43,32 @@ class App extends React.Component {
     }
   }
 
+  isAllCashiersLogout () {
+    const {staff, storeId} = this.props
+    const cashiers = staff ? staff.staffs : []
+
+    let isAllCashiersLogout = true
+
+    cashiers.forEach((cashier) => {
+      if (cashier.status !== 'deleted' && cashier.storePermissions.includes(storeId)) {
+        if (cashier.workStatus === 'login') {
+          isAllCashiersLogout = false
+        }
+      }
+    })
+
+    return isAllCashiersLogout
+  }
+
   _logout () {
     const { dispatch } = this.props
-    dispatch(logout())
-    dispatch(onLogout())
+
+    if (this.isAllCashiersLogout()) {
+      dispatch(logout())
+      dispatch(onLogout())
+    } else {
+      dispatch(setActiveModal('promptToLogoutAllCashiers'))
+    }
   }
 
   _logoutCashier () {
@@ -146,7 +168,7 @@ function mapStateToProps (state) {
     networkStatus: mainUI.networkStatus,
     posMode: mainUI.posMode,
     staff: mainUI.activeStaff,
-    storeId: mainUI.storeId,
+    storeId: mainUI.activeStore ? mainUI.activeStore.source : undefined,
     shouldUpdate: mainUI.shouldUpdate,
     error: mainUI.error,
     activeModalId: mainUI.activeModalId,

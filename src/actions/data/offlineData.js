@@ -16,6 +16,35 @@ import {
   closeActiveModal
 } from '../app/mainUI'
 
+export const OFFLINE_LOGOUT_ALL_CASHIERS = 'OFFLINE_LOGOUT_ALL_CASHIERS'
+export function offlineLogoutAllCashiers () {
+  return (dispatch, getState) => {
+    const state = getState()
+    const mainUI = state.app.mainUI
+    const master = mainUI.activeStaff
+    const cashiers = master ? master.staffs : []
+    const storeId = mainUI.activeStore.source
+    cashiers.forEach((cashier) => {
+      if (cashier.workStatus === 'logout') {
+        return
+      }
+
+      dispatch({
+        type: OFFLINE_TOGGLE_WORK_STATE,
+        newItem: {
+          date: new Date(),
+          storeId,
+          masterId: master.id,
+          cashierId: cashier.id,
+          action: 'logout'
+        }
+      })
+
+      dispatch(updateCashierWorkStatus(cashier.id, 'logout'))
+    })
+  }
+}
+
 export const OFFLINE_TOGGLE_WORK_STATE = 'OFFLINE_TOGGLE_WORK_STATE'
 export function offlineToggleWorkState (masterId, cashierId, storeId, pinCode) {
   return (dispatch, getState) => {

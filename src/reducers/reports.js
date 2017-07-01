@@ -1,6 +1,8 @@
 import moment from 'moment'
 
 import {
+  SEND_XZ_REPORT_SUCCESS,
+
   REPORTS_SET_TAB,
   REPORTS_SET_DATE,
 
@@ -209,6 +211,12 @@ function productSales (state, action) {
 
 function completeSales (state, action) {
   switch (action.type) {
+    case SEND_XZ_REPORT_SUCCESS:
+      return Object.assign({}, state, {
+        completeSales: Object.assign({}, state.completeSales, {
+          lastClosedDay: new Date().toISOString().slice(0, 10)
+        })
+      })
     case COMPLETESALES_FETCH_REQUEST:
       return Object.assign({}, state, {
         isLoading: true
@@ -355,6 +363,7 @@ function report (state = {
       return Object.assign({}, state, {
         productSales: productSales(state.productSales, action)
       })
+    case SEND_XZ_REPORT_SUCCESS:
     case COMPLETESALES_FETCH_REQUEST:
     case COMPLETESALES_FETCH_SUCCESS:
     case COMPLETESALES_FETCH_FAILURE:

@@ -177,11 +177,12 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
 
   render () {
     const { data } = this.props
-
-    const isDayClosed = !data || data.isDayClosed
+    const currentDay = new Date().toISOString().slice(0, 10)
+    const isDayClosed = !data || (data.lastClosedDay === currentDay)
     let summaryData = []
     let netSales = 0
     let netSalesOdbo = 0
+
     data.orders.forEach(order => {
       if (order.currency === 'sgd' && order.payments.length > 0) {
         netSales += Number(order.total || 0)
@@ -305,17 +306,15 @@ export default class XZReadingReceiptPreview extends React.PureComponent {
           {Object.keys(processedRefundSummary).map((item, i) => {
             let refundType = processedRefundSummary[item].type.toUpperCase()
 
-            if (refundType === 'ODBO') {
-              return null
-            }
-
             const key = `${keyPref}-refsummary-${i}`
 
             const sumType = `${refundType} [REFUND]`
             const sumCount = 'x' + processedRefundSummary[item].count
             const sumSubtotal = '- ' + formatCurrency(processedRefundSummary[item].subtotal)
 
-            totalRefund += Number(processedRefundSummary[item].subtotal)
+            if (refundType !== 'ODBO') {
+              totalRefund += Number(processedRefundSummary[item].subtotal)
+            }
 
             return (
               <ReceiptPreviewRow
