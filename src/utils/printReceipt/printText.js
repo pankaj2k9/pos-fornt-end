@@ -212,7 +212,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
         if (payment.amount) {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>
                    <div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${odbo.prevCoins}</div>
-                   <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${orderTotal}</div>
+                   <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${formatCurrency(orderTotal, 'odbo')}</div>
                    <div style="${TOTAL_DIV_STYLE_1}"><div>REMAINING BALANCE: </div>${odbo.newCoins2}</div>`
         }
       }

@@ -172,7 +172,7 @@ class PanelOrderInfo extends Component {
     let voucherSum = formatCurrency(compPaymentsSumByType(payments, 'voucher'))
     let cashChange = formatCurrency(compCashChange(payments) * -1)
     let custName = activeCustomer ? activeCustomer.firstName : 'N/A'
-    let odbo = processOdbo(activeCustomer, orderTotal, bonusPoints)
+    let odbo = processOdbo(currency, activeCustomer, orderTotal, bonusPoints, activeCustomer ? activeCustomer.odboCoins : 0)
     let intFrameHeight = window.innerHeight
     let itemsNotEmpty = currency === 'sgd' && orderItems.length > 0
     let activePrintAndTotal = currency === 'sgd'

@@ -41,12 +41,7 @@ export function refund (refundData, storeData, orderData, currentPath) {
       .then(response => {
         orderData.refundId = response.refundId
         orderData.dateRefunded = response.dateRefunded
-        if (currentPath === 'settings') {
-          dispatch(setActiveOrderDetails(orderData))
-        } else {
-          dispatch(storeOrdersSetActiveOrder(orderData))
-        }
-        dispatch(setActiveModal('refundSuccess'))
+
         dispatch(refundSuccess())
         dispatch(setNewLastID())
         if (orderData.storeAddress) {
@@ -56,6 +51,13 @@ export function refund (refundData, storeData, orderData, currentPath) {
           orderData.paymentInfo.dataRefunded = new Date()
           dispatch(updateSavedReceipt(orderData))
         }
+
+        if (currentPath === 'settings') {
+          dispatch(setActiveOrderDetails(orderData))
+        } else {
+          dispatch(storeOrdersSetActiveOrder(orderData))
+        }
+        dispatch(setActiveModal('refundSuccess'))
       })
       .catch(error => {
         dispatch(refundFailure())

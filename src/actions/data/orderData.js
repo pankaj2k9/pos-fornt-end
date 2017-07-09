@@ -78,7 +78,7 @@ export function setOrderInfo (data, otherData) {
   let orderDisccount = currency === 'sgd' ? totalDisc : totalOdboDisc
   let pincodeInput = document.getElementById('custCodeInput') || undefined
   let pincode = pincodeInput ? pincodeInput.value : undefined
-  let odbo = processOdbo(activeCustomer, orderTotal, bonusPoints)
+  let odbo = processOdbo(currency, activeCustomer, orderTotal, bonusPoints, activeCustomer ? activeCustomer.odboCoins : 0)
   let randomId = shortid.generate()
 
   const orderInfo = {

@@ -173,6 +173,11 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
       totalCost: currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
     }
   })
+
+  let isRefund = false
+  if (data.duplicate && data.refundId) {
+    isRefund = true
+  }
   return {
     duplicate: data.duplicate,
     type: type,
@@ -195,7 +200,8 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
       refundId: lastId || data.refundId,
       refundAmt: compPaymentsSum(data.payments, 'noVoucher'),
       dateRefunded: data.dateRefunded || undefined,
-      odbo: processOdbo(data.users, data.total, data.bonusPoints),
+      odbo: isRefund ? processRefundOdbo(data.currency, data.users, data.total, data.bonusPoints, data.userPrevCoins)
+            : processOdbo(data.currency, data.users, data.total, data.bonusPoints, data.userPrevCoins),
       notes: data.remarks
     }
   }
@@ -254,18 +260,58 @@ export const processStoreAddress = (data) => {
   return storeAddress
 }
 
-export const processOdbo = (customer, orderTotal, multiplier) => {
-  let bonus = multiplier ? orderTotal + (orderTotal * multiplier / 100) : orderTotal
-  let odbo = customer
-    ? {
-      prevCoins: customer.odboCoins,
-      earnedPts: bonus,
-      newCoins: customer.odboCoins + bonus,
-      newCoins2: customer.odboCoins - bonus,
-      bonus: multiplier ? `x${1 + (multiplier / 100)}` : null
+export const processRefundOdbo = (currency, customer, orderTotal, multiplier, userPrevCoins) => {
+  orderTotal = Number(orderTotal)
+  if (!customer) {
+    return undefined
+  }
+
+  if (currency.toUpperCase() === 'SGD') {
+    const earnedPoints = multiplier ? (orderTotal + orderTotal * multiplier / 100) : orderTotal
+
+    return {
+      prevCoins: userPrevCoins + earnedPoints,
+      earnedPts: earnedPoints,
+      bonus: multiplier ? `x${1 + (multiplier / 100)}` : null,
+      newCoins: userPrevCoins,
+      newCoins2: userPrevCoins
     }
-    : undefined
-  return odbo
+  } else {
+    return {
+      prevCoins: userPrevCoins - orderTotal,
+      earnedPts: 0,
+      bonus: null,
+      newCoins: userPrevCoins,
+      newCoins2: userPrevCoins
+    }
+  }
+}
+
+export const processOdbo = (currency, customer, orderTotal, multiplier, userPrevCoins) => {
+  orderTotal = Number(orderTotal)
+  if (!customer) {
+    return undefined
+  }
+
+  if (currency.toUpperCase() === 'SGD') {
+    const earnedPoints = multiplier ? (orderTotal + orderTotal * multiplier / 100) : orderTotal
+
+    return {
+      prevCoins: userPrevCoins,
+      earnedPts: earnedPoints,
+      bonus: multiplier ? `x${1 + (multiplier / 100)}` : null,
+      newCoins: userPrevCoins + earnedPoints,
+      newCoins2: userPrevCoins + earnedPoints
+    }
+  } else {
+    return {
+      prevCoins: userPrevCoins,
+      earnedPts: 0,
+      bonus: null,
+      newCoins: userPrevCoins - orderTotal,
+      newCoins2: userPrevCoins - orderTotal
+    }
+  }
 }
 
 export const processCustomers = (data, filterKey, searchKey) => {
