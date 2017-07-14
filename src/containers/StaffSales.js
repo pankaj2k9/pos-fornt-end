@@ -14,6 +14,10 @@ import {
   staffSalesStaff
 } from '../actions/reports'
 
+import {
+  staffSalesFetchOffline
+} from '../actions/data/offlineData'
+
 class StaffSales extends React.Component {
   constructor (props) {
     super(props)
@@ -27,10 +31,14 @@ class StaffSales extends React.Component {
   componentDidMount () { this.startFetch() }
   handleSearchOrders () { this.startFetch() }
   startFetch () {
-    const { dispatch, activeCashier, selectedStaffId, from, to, staffs } = this.props
+    const { dispatch, activeCashier, selectedStaffId, from, to, staffs, posMode } = this.props
     const searchStaffId = this.getSelectedStaff(selectedStaffId, activeCashier, staffs).id
 
-    dispatch(staffSalesFetch(searchStaffId, from, to))
+    if (posMode === 'offline') {
+      dispatch(staffSalesFetchOffline(searchStaffId, from, to))
+    } else {
+      dispatch(staffSalesFetch(searchStaffId, from, to))
+    }
   }
 
   getSelectedStaff (selected, active, staffs) {
@@ -176,6 +184,7 @@ const mapStateToProps = (state) => {
   return {
     isProcessing: staffSales.isProcessing,
     activeCashier: state.app.mainUI.activeCashier,
+    posMode: state.app.mainUI.posMode,
     selectedStaffId: staffSales.staffId,
     from: staffSales.from,
     to: staffSales.to,

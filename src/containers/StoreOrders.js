@@ -15,6 +15,9 @@ import {
   storeOrdersSetPage,
   storeOrdersSetActiveId
 } from '../actions/reports'
+import {
+  storeOrdersFetchOffline
+} from '../actions/data/offlineData'
 
 class StoreOrders extends React.Component {
   constructor (props) {
@@ -37,7 +40,7 @@ class StoreOrders extends React.Component {
   }
 
   _fetchOrdersToday (query) {
-    const { dispatch, store, limit, date } = this.props
+    const { dispatch, store, limit, date, posMode } = this.props
     let storeId = store.source
     // get sales today
     const from = date || new Date()
@@ -55,7 +58,11 @@ class StoreOrders extends React.Component {
       skip: newSkip
     }
 
-    dispatch(storeOrdersFetch(params))
+    if (posMode === 'offline') {
+      dispatch(storeOrdersFetchOffline(params))
+    } else {
+      dispatch(storeOrdersFetch(params))
+    }
   }
 
   _handleOrderClick (orderId) {
@@ -286,6 +293,7 @@ function mapStateToProps (state) {
   return {
     locale: state.intl.locale,
     activeModalId: state.app.mainUI.activeModalId,
+    posMode: state.app.mainUI.posMode,
     store: state.app.mainUI.activeStore,
     date: state.reports.date,
     isLoading: state.reports.storeOrders.isLoading,

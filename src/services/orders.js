@@ -7,7 +7,15 @@ const ordersService = api.service('/orders')
 
 const orders = {
   create (orderData) {
-    return ordersService.create(orderData)
+    const orderCopy = Object.assign({}, orderData, {
+      items: orderData.items.map((item) => {
+        const itemCopy = Object.assign({}, item)
+        delete itemCopy.product
+        return itemCopy
+      })
+    })
+
+    return ordersService.create(orderCopy)
   },
 
   find (params) {
@@ -122,6 +130,10 @@ const orders = {
     }
 
     return ordersService.find({ query })
+  },
+
+  findDirect (query) {
+    return ordersService.find({query})
   }
 }
 

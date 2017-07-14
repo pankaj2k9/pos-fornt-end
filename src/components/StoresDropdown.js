@@ -2,7 +2,7 @@ import React from 'react'
 
 export default class StoresDropdown extends React.PureComponent {
   render () {
-    const { storeIds, selectedStore, onChange } = this.props
+    const { storeIds, selectedStore, onChange, disabled } = this.props
 
     // Extract store id array
     const storeSrcList = storeIds.map((store) => {
@@ -16,6 +16,7 @@ export default class StoresDropdown extends React.PureComponent {
       <p className='control'>
         <span className='select'>
           <select
+            disabled={!!disabled}
             value={selectedStore}
             onChange={onChange}>
             {storeSrcList.map((storeSrc) => {

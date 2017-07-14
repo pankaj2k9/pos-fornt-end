@@ -107,7 +107,7 @@ class PanelOrderInfo extends Component {
         ? <tr key={key}>
           <td className='is-icon'>
             <Counter
-              size='small'
+              size='big'
               count={item.qty}
               plus={plus}
               minus={minus} />
@@ -118,10 +118,10 @@ class PanelOrderInfo extends Component {
               e.preventDefault()
             }}>
               <p className='control has-addons' style={{width: 50}}>
-                <input id='itemDiscount' className='input is-small' type='Number'
+                <input id='itemDiscount' className='input is-big' type='Number'
                   placeholder={discountVal} value={discountVal}
                   onChange={e => { !disabled && setDiscount(e.target.value) }} />
-                <a className='button is-small'>%</a>
+                <a className='button is-big'>%</a>
               </p>
             </form>
           </td>
@@ -130,7 +130,7 @@ class PanelOrderInfo extends Component {
           </td>
           <td className='is-icon'>
             <a
-              className='button is-inverted is-danger is-small'
+              className='button is-inverted is-danger is-big'
               style={{padding: 0}}
               onClick={remove}>
               <span className='icon'><i className='fa fa-times' /></span>

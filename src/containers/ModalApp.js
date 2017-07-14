@@ -12,7 +12,8 @@ import {
 
 import {
   syncOfflineData,
-  clearSyncLog
+  clearSyncLog,
+  refundOffline
 } from '../actions/data/offlineData'
 
 import ModalCard from '../components/ModalCard'
@@ -93,12 +94,16 @@ class ModalApp extends Component {
   }
 
   _refund () {
-    const { dispatch, activeOD, mainUI, currentPath } = this.props
+    const { dispatch, activeOD, mainUI, currentPath, posMode } = this.props
     let remark = document.getElementById('refundRemark').value
     let refundId = getNextOrderId(mainUI.activeStore.code, mainUI.lastOrderId)
     let refundData = {id: activeOD.id || activeOD.extraInfo.id, refundRemarks: remark, refundId: refundId}
     dispatch(setActiveModal('orderDetails'))
-    dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
+    if (posMode === 'offline') {
+      dispatch(refundOffline(refundData, mainUI.activeStore, activeOD, currentPath))
+    } else {
+      dispatch(refund(refundData, mainUI.activeStore, activeOD, currentPath))
+    }
   }
 
   _saveCreateCashdrawerFailed () {
@@ -437,6 +442,7 @@ function mapStateToProps (state) {
     settings,
     offlineData,
     mainUI: state.app.mainUI,
+    posMode: state.app.mainUI.posMode,
     orderData: state.data.orderData,
     activeOD: activeOD1 || activeOD2,
     isProcessing: settings.isProcessing || offlineData.isProcessing,

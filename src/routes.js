@@ -22,13 +22,18 @@ function requireAuth (nextState, replace, callback) {
   const netStat = appState ? appState.app.mainUI.networkStatus : undefined
   const token = window.localStorage.getItem('feathers-jwt')
 
+  let activeStaff
+  if (appState && appState.app && appState.app.mainUI) {
+    activeStaff = appState.app.mainUI.activeStaff
+  }
+
   if (!token && nextRoute !== '/') {
     replace({ pathname: '/' })
     callback()
   } else if (!token && nextRoute === '/') {
     callback()
   } else if (token && appState && netStat === 'offline' && posMode === 'offline' && nextRoute !== 'store') {
-    replace({ pathname: 'store' })
+    // replace({ pathname: 'store' })
     callback()
   } else if (!api.get('token')) {
     api.passport.verifyJWT(token)
@@ -40,19 +45,25 @@ function requireAuth (nextState, replace, callback) {
           if (token && nextRoute === '/') {
             replace({ pathname: 'store' })
           } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
-            replace({ pathname: 'store' })
+            if (!activeStaff) {
+              replace({pathname: 'store'})
+            }
           }
           callback()
         })
       } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
-        replace({ pathname: 'store' })
+        if (!activeStaff) {
+          replace({pathname: 'store'})
+        }
         callback()
       }
     }).then(response => {
       if (token && nextRoute === '/') {
         replace({ pathname: 'store' })
       } else if (token && appState && posMode === 'offline' && nextRoute !== 'store') {
-        replace({ pathname: 'store' })
+        if (!activeStaff) {
+          replace({ pathname: 'store' })
+        }
       }
       callback()
     }).catch(error => {

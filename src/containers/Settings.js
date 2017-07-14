@@ -36,7 +36,7 @@ class Settings extends Component {
   }
 
   render () {
-    const {activeTab} = this.props
+    const {activeTab, posMode} = this.props
     return (
       <div className='hero'>
         <div className='section' style={{padding: 10}}>
@@ -72,16 +72,22 @@ class Settings extends Component {
                       </li>
                     </ul>
                   </li>
-                  <li>
-                    <a className={activeTab === 'customers' && 'is-active'} onClick={this.onClickOption.bind(this, 'customers')}>
-                      <FormattedMessage id={'app.page.settings.customers'} />
-                    </a>
-                  </li>
-                  <li>
-                    <a className={activeTab === 'account' && 'is-active'} onClick={this.onClickOption.bind(this, 'account')}>
-                      <FormattedMessage id={'app.page.settings.account'} />
-                    </a>
-                  </li>
+                  {
+                    posMode !== 'offline' &&
+                    <li>
+                      <a className={activeTab === 'customers' && 'is-active'} onClick={this.onClickOption.bind(this, 'customers')}>
+                        <FormattedMessage id={'app.page.settings.customers'} />
+                      </a>
+                    </li>
+                  }
+                  {
+                    posMode !== 'offline' &&
+                    <li>
+                      <a className={activeTab === 'account' && 'is-active'} onClick={this.onClickOption.bind(this, 'account')}>
+                        <FormattedMessage id={'app.page.settings.account'} />
+                      </a>
+                    </li>
+                  }
                 </ul>
               </aside>
             </div>
@@ -98,6 +104,7 @@ class Settings extends Component {
 function mapStateToProps (state) {
   return {
     activeModalId: state.app.mainUI.activeModalId,
+    posMode: state.app.mainUI.posMode,
     storeId: state.app.mainUI.storeId,
     activeTab: state.settings.activeTab,
     tabs: state.settings.tabs,

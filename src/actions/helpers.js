@@ -52,7 +52,6 @@ export function validateCashdrawers (cashdrawers) {
       dispatch(setActiveCashdrawer(matchedDrawer))
     } else if (matchedDrawer && Number(matchedDrawer.float) === 0) {
       dispatch(setActiveCashdrawer(matchedDrawer))
-      dispatch(setActiveModal('updateCashdrawer'))
     } else if (!matchedDrawer) {
       dispatch(setActiveModal('updateCashdrawer'))
     }

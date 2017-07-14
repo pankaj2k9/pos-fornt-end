@@ -3,6 +3,8 @@ import usersService from '../services/users'
 import noSalesService from '../services/noSales'
 import customers from '../services/customers'
 
+import {storeOrderFetchOffline} from './data/offlineData'
+
 import {
   setActiveModal,
   addCashdrawerOpenCount,
@@ -84,7 +86,11 @@ export function setSettingsActiveTab (tabName) {
         let query = {
           storeId: state.app.mainUI.activeStore.source
         }
-        dispatch(storeOrderFetch(query))
+        if (state.app.mainUI.posMode === 'offline') {
+          dispatch(storeOrderFetchOffline(query))
+        } else {
+          dispatch(storeOrderFetch(query))
+        }
         break
     }
   }
@@ -107,7 +113,7 @@ export function storeOrderFetchFailure (error) {
   return { type: STOREORDER_FETCH_FAILURE, error }
 }
 export function storeOrderFetch (params) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(storeOrderFetchRequest())
 
     return ordersService.find(params)

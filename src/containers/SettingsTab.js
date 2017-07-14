@@ -20,6 +20,10 @@ import {
 } from '../actions/settings'
 
 import {
+  storeOrderFetchOffline
+} from '../actions/data/offlineData'
+
+import {
   customersSetFilter,
   fetchCustomerByFilter
 } from '../actions/data/customers'
@@ -57,13 +61,18 @@ class SettingsTab extends Component {
 
   _searchOrder (e) {
     e.preventDefault()
-    const {dispatch, settings, mainUI} = this.props
+    const {dispatch, settings, mainUI, posMode} = this.props
     let query = {
       id: settings.orderSearchKey,
       refundId: settings.orderSearchKey,
       storeId: mainUI.activeStore.source
     }
-    dispatch(storeOrderFetch(query))
+
+    if (posMode === 'offline') {
+      dispatch(storeOrderFetchOffline(query))
+    } else {
+      dispatch(storeOrderFetch(query))
+    }
   }
 
   _setOrderSearchKey (key) {
@@ -99,7 +108,8 @@ class SettingsTab extends Component {
     dispatch(setActiveCustomer(customer))
   }
 
-  renderMainTab () {
+  renderMainTab (props) {
+    const {posMode} = props
     return (
       <div>
         <div className='columns is-multiline is-mobile is-fullwidth'>
@@ -136,40 +146,46 @@ class SettingsTab extends Component {
               </a>
             </div>
           </div>
-          <div className='column is-4'>
-            <div className='box has-text-centered'>
-              <span>
-                <i className='fa fa-users fa-4x' />
-              </span>
-              <p className='title'>
-                <FormattedMessage id={'app.page.settings.customers'} />
-              </p>
-              <p className='subtitle'>
-                <FormattedMessage id={'app.page.settings.customersDesc'} />
-              </p>
-              <a className='button is-info'
-                onClick={this.onClickOption.bind(this, 'customers')}>
-                <FormattedMessage id={'app.page.settings.customers'} />
-              </a>
+          {
+            posMode !== 'offline' &&
+            <div className='column is-4'>
+              <div className='box has-text-centered'>
+                <span>
+                  <i className='fa fa-users fa-4x' />
+                </span>
+                <p className='title'>
+                  <FormattedMessage id={'app.page.settings.customers'} />
+                </p>
+                <p className='subtitle'>
+                  <FormattedMessage id={'app.page.settings.customersDesc'} />
+                </p>
+                <a className='button is-info'
+                  onClick={this.onClickOption.bind(this, 'customers')}>
+                  <FormattedMessage id={'app.page.settings.customers'} />
+                </a>
+              </div>
             </div>
-          </div>
-          <div className='column is-4'>
-            <div className='box has-text-centered'>
-              <span>
-                <i className='fa fa-user fa-4x' />
-              </span>
-              <p className='title'>
-                <FormattedMessage id={'app.page.settings.account'} />
-              </p>
-              <p className='subtitle'>
-                <FormattedMessage id={'app.page.settings.accountDesc'} />
-              </p>
-              <a className='button is-info'
-                onClick={this.onClickOption.bind(this, 'account')}>
-                <FormattedMessage id={'app.page.settings.account'} />
-              </a>
+          }
+          {
+            posMode !== 'offline' &&
+            <div className='column is-4'>
+              <div className='box has-text-centered'>
+                <span>
+                  <i className='fa fa-user fa-4x' />
+                </span>
+                <p className='title'>
+                  <FormattedMessage id={'app.page.settings.account'} />
+                </p>
+                <p className='subtitle'>
+                  <FormattedMessage id={'app.page.settings.accountDesc'} />
+                </p>
+                <a className='button is-info'
+                  onClick={this.onClickOption.bind(this, 'account')}>
+                  <FormattedMessage id={'app.page.settings.account'} />
+                </a>
+              </div>
             </div>
-          </div>
+          }
         </div>
       </div>
     )
@@ -241,7 +257,7 @@ class SettingsTab extends Component {
     const { settings } = this.props
     const {activeTab} = settings
 
-    let visibleContent = this.renderMainTab()
+    let visibleContent = this.renderMainTab(this.props)
 
     switch (activeTab) {
       case 'orderSearch':
@@ -276,6 +292,7 @@ function mapStateToProps (state) {
     settings,
     printedReceipts: state.data.offlineData.printedReceipts,
     locale: state.intl.locale,
+    posMode: state.app.mainUI.posMode,
     intl: state.intl
   }
 }

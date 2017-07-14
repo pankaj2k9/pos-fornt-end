@@ -22,11 +22,14 @@ import {
   setActiveCustomer,
   setOverallDiscount,
   setOrderInfo,
-  resetOrderData,
   recallOrder,
   removeNote,
   setCurrentCashier
 } from '../actions/data/orderData'
+
+import {
+  cancelOrder
+} from '../actions/helpers'
 
 import {
   setCashierNotSelectedWarning
@@ -123,7 +126,7 @@ class ModalStoreUtils extends Component {
     this._printReceipt()
     dispatch(setActiveModal('printingReceipt'))
     setTimeout(() => {
-      dispatch(resetOrderData())
+      dispatch(cancelOrder())
       dispatch(closeActiveModal())
     }, 2000)
   }

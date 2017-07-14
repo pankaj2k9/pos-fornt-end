@@ -11,9 +11,11 @@ import { formatDate } from '../utils/string'
 
 class ProductsStock extends React.Component {
   componentWillMount () {
-    const { dispatch, locale } = this.props
+    const { dispatch, locale, posMode } = this.props
 
-    dispatch(fetchAllProducts(locale))
+    if (posMode !== 'offline') {
+      dispatch(fetchAllProducts(locale))
+    }
   }
 
   _handleSourceChange (event) {
@@ -23,7 +25,7 @@ class ProductsStock extends React.Component {
   }
 
   render () {
-    const { locale, storeId, storeIds, selectedStore, products, isLoading } = this.props
+    const { locale, storeId, storeIds, selectedStore, products, isLoading, posMode } = this.props
 
     // Filter products by source
     const filterSource = selectedStore || storeId
@@ -33,6 +35,7 @@ class ProductsStock extends React.Component {
         headerMessage={<FormattedMessage id='app.page.products.loadingProd' />} />
       : <div className='container'>
         <StoresDropdown
+          disabled={posMode === 'offline'}
           storeIds={storeIds}
           selectedStore={filterSource}
           onChange={this._handleSourceChange.bind(this)} />
@@ -80,7 +83,8 @@ const mapStateToProps = (state) => {
     storeIds: state.data.stores.stores,
     selectedStore: state.reports.outletStocks.source,
     products: state.data.products.productsArray,
-    isLoading: state.data.products.isFetching
+    isLoading: state.data.products.isFetching,
+    posMode: state.app.mainUI.posMode
   }
 }
 

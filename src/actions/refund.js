@@ -5,7 +5,7 @@ import {
   setActiveModal,
   setNewLastID
 } from './app/mainUI'
-import { updateSavedReceipt } from './data/offlineData'
+import { updateSavedReceipt, updateSavedOrders } from './data/offlineData'
 import { setActiveOrderDetails } from './settings'
 import { storeOrdersSetActiveOrder } from './reports'
 
@@ -52,12 +52,14 @@ export function refund (refundData, storeData, orderData, currentPath) {
           dispatch(updateSavedReceipt(orderData))
         }
 
-        if (currentPath === 'settings') {
+        if (currentPath === 'settings' ||
+            currentPath === '/settings') {
           dispatch(setActiveOrderDetails(orderData))
         } else {
           dispatch(storeOrdersSetActiveOrder(orderData))
         }
         dispatch(setActiveModal('refundSuccess'))
+        dispatch(updateSavedOrders())
       })
       .catch(error => {
         dispatch(refundFailure())

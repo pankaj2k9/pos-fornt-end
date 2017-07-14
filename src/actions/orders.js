@@ -18,7 +18,8 @@ import {
 } from './app/storeUI'
 
 import {
-  saveReceipt
+  saveReceipt,
+  updateSavedOrders
 } from './data/offlineData'
 
 import {
@@ -131,6 +132,7 @@ export function processOrder (orderInfo, receipt, activeDrawer) {
       dispatch(setCashTendered(0))
       dispatch(setPaymentMode('cash'))
       dispatch(productsDecrease(order.source, order.items))
+      dispatch(updateSavedOrders())
     })
     .catch(error => {
       dispatch(setActiveModal('orderFailed'))

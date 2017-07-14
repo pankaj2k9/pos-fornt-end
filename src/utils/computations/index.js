@@ -117,6 +117,8 @@ export const compCashChange = (data) => {
 export const processProducts = (data, currency) => {
   let products = data.map(item => {
     return {
+      product: item,
+      barcodeInfo: item.barcodeInfo,
       productId: Number(item.id),
       quantity: item.qty,
       itemCost: currency === 'sgd' ? item.finalPR : item.finalOdboPR,

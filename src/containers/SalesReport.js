@@ -4,16 +4,21 @@ import { FormattedMessage } from 'react-intl'
 
 import Table from '../components/Table'
 import LoadingPane from '../components/LoadingPane'
+import { productSalesFetchOffline } from '../actions/data/offlineData'
 import { productSalesFetch } from '../actions/reports'
 
 class SalesReport extends React.Component {
   componentDidMount () {
-    const { dispatch, storeId, date } = this.props
+    const { dispatch, storeId, date, posMode } = this.props
 
     // get sales today
     const today = date || new Date()
 
-    dispatch(productSalesFetch(storeId, today, today))
+    if (posMode === 'offline') {
+      dispatch(productSalesFetchOffline(storeId, today, today))
+    } else {
+      dispatch(productSalesFetch(storeId, today, today))
+    }
   }
 
   _constructSalesItems () {
@@ -72,7 +77,8 @@ function mapStateToProps (state) {
     productSales: state.reports.productSales.productSales,
     storeId: state.app.mainUI.activeStore.source,
     from: state.reports.productSales.from,
-    to: state.reports.productSales.to
+    to: state.reports.productSales.to,
+    posMode: state.app.mainUI.posMode
   }
 }
 

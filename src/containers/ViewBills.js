@@ -6,6 +6,7 @@ import { DatePicker } from 'react-input-enhancements'
 import ViewBillReceiptPreview from '../components/ViewBillReceiptPreview'
 
 // import { completeSalesFetch } from '../actions/reports'
+import { viewBillsFetchOffline } from '../actions/data/offlineData'
 import {
   viewBillsFetch,
   changeDatepickerTo,
@@ -29,15 +30,26 @@ class ViewBills extends React.Component {
   componentDidMount () { this.startFetch() }
   handleSearchOrders () { this.startFetch() }
   startFetch () {
-    const { dispatch, stores, store, from, to, idFrom, idTo, reportType } = this.props
+    const { dispatch, stores, store, from, to, idFrom, idTo, reportType, posMode } = this.props
 
-    switch (reportType) {
-      case 'id':
-        dispatch(viewBillsFetch(store.source, null, null, idFrom, idTo, stores))
-        break
-      case 'date':
-        dispatch(viewBillsFetch(store.source, from, to, null, null, stores))
-        break
+    if (posMode === 'offline') {
+      switch (reportType) {
+        case 'id':
+          dispatch(viewBillsFetchOffline(store.source, null, null, idFrom, idTo, stores))
+          break
+        case 'date':
+          dispatch(viewBillsFetchOffline(store.source, from, to, null, null, stores))
+          break
+      }
+    } else {
+      switch (reportType) {
+        case 'id':
+          dispatch(viewBillsFetch(store.source, null, null, idFrom, idTo, stores))
+          break
+        case 'date':
+          dispatch(viewBillsFetch(store.source, from, to, null, null, stores))
+          break
+      }
     }
   }
 
@@ -238,6 +250,7 @@ function mapStateToProps (state) {
     intl: state.intl,
     stores: state.data.stores.stores,
     store: state.app.mainUI.activeStore,
+    posMode: state.app.mainUI.posMode,
     from,
     to,
     idFrom,

@@ -103,6 +103,12 @@ const NavBar = ({
             <span />
           </span>
 
+          {
+            posMode === 'offline' &&
+            <NavLink to='/reports'>
+              <FormattedMessage id='app.navBar.reports.title' />
+            </NavLink>
+          }
           {posMode === 'online'
             ? <div className={`nav-right nav-menu ${toggleClass}`}>
               {staff && staff.role === 'master'

@@ -16,7 +16,9 @@ import {
   UPDATE_SAVED_RECEIPT,
   CLEAR_SAVED_RECEIPTS,
   CLEAR_MESSAGES,
-  OFFLINE_TOGGLE_WORK_STATE
+  UPDATE_SAVED_ORDERS_SUCCESS,
+  OFFLINE_TOGGLE_WORK_STATE,
+  CLOSE_DAY_OFFLINE
 
 } from '../../actions/data/offlineData'
 
@@ -34,14 +36,36 @@ function offlineData (state = {
   syncLog: [],
   isProcessing: false,
   workHistory: [],
-  ordersHistory: []
+  ordersHistory: [],
+  savedOfflineOrders: [],
+  closedDays: []
 }, action) {
   let printedReceipts = state.printedReceipts
   switch (action.type) {
-    case PROCESS_OFFLINE_ORDER:
-      state.offlineOrders.push(action.orderInfo)
+    case CLOSE_DAY_OFFLINE:
+      const closedDaysCopy = state.closedDays.slice()
+      closedDaysCopy.unshift({
+        date: action.date,
+        source: action.source,
+        masterId: action.masterId
+      })
       return Object.assign({}, state, {
-        offlineOrders: state.offlineOrders
+        closedDays: closedDaysCopy
+      })
+    case UPDATE_SAVED_ORDERS_SUCCESS:
+      return Object.assign({}, state, {
+        savedOfflineOrders: action.savedOrders
+      })
+    case PROCESS_OFFLINE_ORDER:
+      const orderInfo = action.orderInfo
+      state.offlineOrders.push(orderInfo)
+      const newSavedOrders = state.savedOfflineOrders.slice()
+      newSavedOrders.push(Object.assign({}, Object.assign({}, orderInfo, {
+        dateCreated: orderInfo.dateOrdered
+      })))
+      return Object.assign({}, state, {
+        offlineOrders: state.offlineOrders,
+        savedOfflineOrders: newSavedOrders
       })
     case SYNC_ORDERS_REQUEST:
       return Object.assign({}, state, {

@@ -13,7 +13,11 @@ import {
 } from '../actions/reports'
 
 import { logoutAllCashiers } from '../actions/app/mainUI'
-import { offlineLogoutAllCashiers } from '../actions/data/offlineData'
+import {
+  offlineLogoutAllCashiers,
+  completeSalesFetchOffline,
+  sendXZReportOffline
+} from '../actions/data/offlineData'
 
 class SalesReportComplete extends React.Component {
   constructor (props) {
@@ -23,9 +27,13 @@ class SalesReportComplete extends React.Component {
     this.handleCloseDay = this.handleCloseDay.bind(this)
   }
   componentWillMount () {
-    const { dispatch, storeId, selectedDate } = this.props
+    const { dispatch, storeId, selectedDate, posMode } = this.props
     dispatch(completeSalesChSource(storeId))
-    dispatch(completeSalesFetch(storeId, selectedDate))
+    if (posMode === 'offline') {
+      dispatch(completeSalesFetchOffline(storeId, selectedDate))
+    } else {
+      dispatch(completeSalesFetch(storeId, selectedDate))
+    }
   }
 
   getCompleteSalesData () {
@@ -83,14 +91,15 @@ class SalesReportComplete extends React.Component {
 
     if (posMode !== 'online') {
       dispatch(offlineLogoutAllCashiers())
+      dispatch(sendXZReportOffline(new Date(), storeId, master.id))
     } else {
       dispatch(logoutAllCashiers())
+      dispatch(sendXZReport(new Date(), storeId, master.id))
     }
-    dispatch(sendXZReport(new Date(), storeId, master.id))
   }
 
   render () {
-    const { isLoading, storeId, storeIds, selectedStore } = this.props
+    const { isLoading, storeId, storeIds, selectedStore, posMode } = this.props
     const drawerData = {
       date: new Date(),
       float: 0,
@@ -109,6 +118,7 @@ class SalesReportComplete extends React.Component {
       : <div className='tile is-ancestor'>
         <div className='tile is-parent is-vertical'>
           <StoresDropdown
+            disabled={posMode === 'offline'}
             storeIds={storeIds}
             selectedStore={filterSource}
             onChange={this._handleSourceChange.bind(this)} />

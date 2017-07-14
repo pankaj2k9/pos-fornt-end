@@ -1,4 +1,4 @@
-import {syncWorkHistory, offlineLogoutAllCashiers, offlineToggleWorkState} from '../data/offlineData'
+import {syncWorkHistory, offlineLogoutAllCashiers, offlineToggleWorkState, updateSavedOrders} from '../data/offlineData'
 
 export const SET_CASHIER_LOGGED_IN = 'SET_CASHIER_LOGGED_IN'
 export function setCashierLoggedIn (cashier) {
@@ -112,9 +112,12 @@ export function setActiveModal (activeModalId, inputToFocus, options) {
 
 export const STORE_SET_ACTIVE = 'STORE_SET_ACTIVE'
 export function storeSetActive (store) {
-  return {
-    type: STORE_SET_ACTIVE,
-    store
+  return (dispatch) => {
+    dispatch({
+      type: STORE_SET_ACTIVE,
+      store
+    })
+    dispatch(updateSavedOrders())
   }
 }
 
@@ -182,8 +185,12 @@ export function resetStaffState () {
 
 export const RESET_ERROR_STATE = 'RESET_ERROR_STATE'
 export function resetErrorState () {
-  return {
-    type: RESET_ERROR_STATE
+  return (dispatch, getState) => {
+    dispatch({
+      type: RESET_ERROR_STATE
+    })
+
+    dispatch(updateSavedOrders())
   }
 }
 

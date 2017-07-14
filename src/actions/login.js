@@ -1,5 +1,5 @@
 import { browserHistory } from 'react-router'
-
+import { updateSavedOrders } from './data/offlineData'
 import loginService from '../services/login'
 
 import {
@@ -52,6 +52,7 @@ export function login (details) {
         } else {
           browserHistory.push('store')
         }
+        dispatch(updateSavedOrders())
       })
       .catch(error => {
         if (error) {
