@@ -200,12 +200,16 @@ class SettingsTab extends Component {
 
     let orderCPNT = (key, data) => {
       let currency = data.currency || data.paymentInfo.currency
+      let total = data.total || data.paymentInfo.orderTotal
+      if (data.duplicate) {
+        total = total * -1
+      }
       return (
         <div className='box' key={key}>
           <ContentDivider contents={[
             <p className='title'>{data.duplicate ? data.refundId : data.id || data.extraInfo.id}</p>,
             <p className='title is-5'>{`${lblAC('app.modal.currency')}: ${currency}`}</p>,
-            <p className='title is-5'>{`${lblAC('app.lbl.orderTotal')}: ${formatCurrency(data.total || data.paymentInfo.orderTotal, currency)}`}</p>,
+            <p className='title is-5'>{`${lblAC('app.lbl.orderTotal')}: ${formatCurrency(total, currency)}`}</p>,
             <a className='button is-medium is-info is-pulled-right' onClick={e => this._openOrderDetails(data)}>View Details</a>
           ]} size={3} />
         </div>
