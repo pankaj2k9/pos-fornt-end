@@ -388,7 +388,7 @@ export function syncOfflineData (offlineOrders, offlineDrawers) {
 
         return Promise.all(closeDayPromises)
           .then((response) => {
-            state.app.data.offlineData.closedDays = []
+            state.data.offlineData.closedDays = []
           })
       })
   }
