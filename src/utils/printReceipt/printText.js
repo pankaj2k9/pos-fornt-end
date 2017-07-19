@@ -221,7 +221,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
     if (vouchers.length > 0) {
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>VOUCHER PAYMENT</div></div>`
       vouchers.map(voucher => {
-        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>voucher [${voucher.remarks || '###'}] : </div>${formatCurrency(voucher.deduction)}</div>`
+        comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>voucher [${voucher.remarks || '###'}] : </div>${formatCurrency(duplicate ? -voucher.deduction : voucher.deduction)}</div>`
       })
     }
 
