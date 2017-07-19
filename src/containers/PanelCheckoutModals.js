@@ -187,7 +187,7 @@ class PanelCheckoutModals extends Component {
   }
 
   renderPaymentListModal () {
-    const {dispatch, payments, activeModalId, cpShouldUpdate, closeModal} = this.props
+    const {dispatch, payments, activeModalId, cpShouldUpdate, closeModal, orderTotal} = this.props
     const active = activeModalId === 'paymentListModal' ? 'is-active' : ''
     return (
       <div id='paymentListModal' className={`modal ${active}`}>
@@ -208,7 +208,7 @@ class PanelCheckoutModals extends Component {
                     : payments.map(function (item, key) {
                       function remove () {
                         dispatch(panelCheckoutShouldUpdate(true))
-                        dispatch(removePaymentType(item.type, key))
+                        dispatch(removePaymentType(orderTotal, item.type, key))
                       }
                       return (
                         <div className='content' key={key}>

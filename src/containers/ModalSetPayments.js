@@ -64,7 +64,7 @@ class ModalSetPayments extends Component {
     const { dispatch, card, cash, nets, voucher, amountToPay, total } = this.props
     let change = formatNumber(amount) > total ? formatNumber(amount) - total : 0
     let cashAmountPaid = formatNumber(amount) > total ? total : formatNumber(amount)
-    let paymentAmt = mode === 'cash'
+    let paymentAmt = (mode === 'cash')
       ? {amount: cashAmountPaid, cash: formatNumber(amount), change: change}
       : mode === 'voucher'
         ? {deduction: formatNumber(amountToPay)}
@@ -75,8 +75,31 @@ class ModalSetPayments extends Component {
       'nets': nets,
       'voucher': voucher
     }
+
+    // let paymentAmt
+
+    // switch (mode) {
+    //   case 'cash':
+    //     paymentAmt = {
+    //       amount: cashAmountPaid,
+    //       cash: formatNumber(amount),
+    //       change: change
+    //     }
+    //     break
+    //   case 'voucher':
+    //     paymentAmt = {
+    //       deduction: formatNumber(amountToPay)
+    //     }
+    //     break
+    //   default:
+    //     paymentAmt = {
+    //       amount: formatNumber(amountToPay),
+    //       change: formatNumber(amountToPay) > total ? formatNumber(amountToPay) - total : 0
+    //     }
+    // }
+
     let payment = Object.assign({}, paymentAmt, options[mode])
-    dispatch(addPaymentType(payment))
+    dispatch(addPaymentType(total, payment))
     if (mode !== 'cash') {
       dispatch(setFieldsDefault())
       document.getElementById('transID').value = ''
@@ -100,9 +123,9 @@ class ModalSetPayments extends Component {
   }
 
   _removePayment (mode) {
-    const { dispatch } = this.props
+    const { dispatch, total } = this.props
     dispatch(setFieldsDefault())
-    dispatch(removePaymentType(mode))
+    dispatch(removePaymentType(total, mode))
   }
 
   render () {
@@ -243,7 +266,7 @@ class ModalSetPayments extends Component {
                       return (
                         <span className='tag is-medium' key={key} style={{margin: 5}}>
                           {`${payment.provider || payment.type}:  ${formatCurrency(payment.deduction || payment.amount)}`}
-                          <button className='delete' onClick={e => dispatch(removePaymentByKey(key))} />
+                          <button className='delete' onClick={e => dispatch(removePaymentByKey(total, key))} />
                         </span>
                       )
                     }

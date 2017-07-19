@@ -156,10 +156,11 @@ export function addOrderNote (note) {
 }
 
 export const ADD_PAYMENT_TYPE = 'ADD_PAYMENT_TYPE'
-export function addPaymentType (payment) {
+export function addPaymentType (total, payment) {
   return {
     type: ADD_PAYMENT_TYPE,
-    payment
+    payment,
+    total
   }
 }
 export const REMOVE_NOTE = 'REMOVE_NOTE'
@@ -178,19 +179,21 @@ export function removeBonusMultiplier () {
 }
 
 export const REMOVE_PAYMENT_TYPE = 'REMOVE_PAYMENT_TYPE'
-export function removePaymentType (paymentType, key) {
+export function removePaymentType (total, paymentType, key) {
   return {
     type: REMOVE_PAYMENT_TYPE,
     paymentType,
-    key
+    key,
+    total
   }
 }
 
 export const REMOVE_PAYMENT_BYKEY = 'REMOVE_PAYMENT_BYKEY'
-export function removePaymentByKey (key) {
+export function removePaymentByKey (total, key) {
   return {
     type: REMOVE_PAYMENT_BYKEY,
-    key
+    key,
+    total
   }
 }
 

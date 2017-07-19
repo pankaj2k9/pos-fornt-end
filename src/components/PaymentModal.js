@@ -69,7 +69,7 @@ class PaymentModal extends Component {
       payment = { deduction: paymentValue, remarks: voucherCode }
     }
     if (paymentMode === 'voucher') {
-      dispatch(addPaymentType(payment))
+      dispatch(addPaymentType(orderTotal, payment))
       dispatch(closeActiveModal(focusProductSearch))
       dispatch(panelCartShouldUpdate(false))
     } else {
@@ -80,11 +80,11 @@ class PaymentModal extends Component {
           let okayToAddCredit = card.provider && transNumber
           let okayToAddNets = transNumber !== '' || transNumber
           if (paymentMode === 'credit' && okayToAddCredit) {
-            dispatch(addPaymentType(payment))
+            dispatch(addPaymentType(orderTotal, payment))
             dispatch(closeActiveModal(focusProductSearch))
             dispatch(panelCartShouldUpdate(false))
           } else if (paymentMode === 'nets' && okayToAddNets) {
-            dispatch(addPaymentType(payment))
+            dispatch(addPaymentType(orderTotal, payment))
             dispatch(closeActiveModal(focusProductSearch))
             dispatch(panelCartShouldUpdate(false))
           } else {
@@ -97,7 +97,7 @@ class PaymentModal extends Component {
         } else if (paymentMode === 'cash') {
           let okayToAddCash = cashTendered - paymentValue >= 0
           if (okayToAddCash) {
-            dispatch(addPaymentType(payment))
+            dispatch(addPaymentType(orderTotal, payment))
             dispatch(closeActiveModal(focusProductSearch))
             dispatch(panelCartShouldUpdate(false))
           } else {
@@ -109,8 +109,8 @@ class PaymentModal extends Component {
   }
 
   _removePayment (type) {
-    const { dispatch } = this.props
-    dispatch(removePaymentType(type))
+    const { dispatch, orderTotal } = this.props
+    dispatch(removePaymentType(orderTotal, type))
   }
 
   _changeInputValue (value) {

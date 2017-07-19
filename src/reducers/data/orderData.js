@@ -23,7 +23,8 @@ import {
 import {
   compDiscount,
   compItemsSum,
-  compDiscSum
+  compDiscSum,
+  compPaymentsSum
 } from '../../utils/computations'
 
 function orderData (state = {
@@ -65,7 +66,7 @@ function orderData (state = {
         isEditing: false,
         currency: action.currency
       })
-    case SET_CUSTOM_DISCOUNT:
+    case SET_CUSTOM_DISCOUNT: {
       let customDiscount = action.discount
       orderItems.forEach(item => {
         if (item.id === action.orderItemID) {
@@ -87,15 +88,22 @@ function orderData (state = {
           item.subTotalOdboPrice = finalOdboPR * item.qty
         }
       })
+
+      const newTotal = compItemsSum(orderItems).total
+      const newPayments = state.payments.map((payment) => Object.assign({}, payment))
+      recalculateChange(newTotal, newPayments)
+
       return Object.assign({}, state, {
+        payments: newPayments,
         isEditing: false,
         orderItems,
-        total: compItemsSum(orderItems).total,
+        total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
         totalOdboDisc: compDiscSum(orderItems).totalOdboDisc
       })
-    case SET_OVERALL_DISCOUNT:
+    }
+    case SET_OVERALL_DISCOUNT: {
       let oaDiscFrmAtn = action.discount
       orderItems.forEach(item => {
         let itemPR = Number(item.price || 0)
@@ -117,16 +125,23 @@ function orderData (state = {
         item.subTotalPrice = finalPR * item.qty
         item.subTotalOdboPrice = finalOdboPR * item.qty
       })
+
+      const newTotal = compItemsSum(orderItems).total
+      const newPayments = state.payments.map((payment) => Object.assign({}, payment))
+      recalculateChange(newTotal, newPayments)
+
       return Object.assign({}, state, {
+        payments: newPayments,
         isEditing: false,
         items: orderItems,
         overallDiscount: oaDiscFrmAtn,
-        total: compItemsSum(orderItems).total,
+        total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
         totalOdboDisc: compDiscSum(orderItems).totalOdboDisc
       })
-    case ADD_ORDER_ITEM:
+    }
+    case ADD_ORDER_ITEM: {
       let itemToAdd = [action.product]
       itemToAdd.forEach(function (newItem) {
         let existing = orderItems.filter((oldItem) => { return oldItem.id === newItem.id })
@@ -175,16 +190,23 @@ function orderData (state = {
           orderItems.push(item)
         }
       })
+
+      const newTotal = compItemsSum(orderItems).total
+      const newPayments = state.payments.map((payment) => Object.assign({}, payment))
+      recalculateChange(newTotal, newPayments)
+
       return Object.assign({}, state, {
+        payments: newPayments,
         isEditing: false,
         orderItems,
         overallDiscount: oaDisc,
-        total: compItemsSum(orderItems).total,
+        total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
         totalOdboDisc: compDiscSum(orderItems).totalOdboDisc
       })
-    case SET_ORDER_ITEM_QTY:
+    }
+    case SET_ORDER_ITEM_QTY: {
       orderItems.forEach(item => {
         let {
           qty,
@@ -208,57 +230,84 @@ function orderData (state = {
           }
         }
       })
+
+      const newTotal = compItemsSum(orderItems).total
+      const newPayments = state.payments.map((payment) => Object.assign({}, payment))
+      recalculateChange(newTotal, newPayments)
+
       return Object.assign({}, state, {
         isEditing: false,
         orderItems,
-        total: compItemsSum(orderItems).total,
+        total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
-        totalOdboDisc: compDiscSum(orderItems).totalOdboDisc
+        totalOdboDisc: compDiscSum(orderItems).totalOdboDisc,
+        payments: newPayments
       })
+    }
     case SET_ORDER_INFO:
       return Object.assign({}, state, {
         orderInfo: action.orderInfo,
         receipt: action.receipt
       })
-    case REMOVE_ORDER_ITEM:
+    case REMOVE_ORDER_ITEM: {
       orderItems.forEach(function (item, index, object) {
         if (item.id === action.orderItemID) {
           object.splice(index, 1)
         }
       })
+
+      const newTotal = compItemsSum(orderItems).total
+      const newPayments = state.payments.map((payment) => Object.assign({}, payment))
+      recalculateChange(newTotal, newPayments)
+
       return Object.assign({}, state, {
+        payments: newPayments,
         orderItems,
         isEditing: false,
-        total: compItemsSum(orderItems).total,
+        total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
         totalOdboDisc: compDiscSum(orderItems).totalOdboDisc
       })
+    }
     case ADD_PAYMENT_TYPE:
       let payment = action.payment
-      let payments = state.payments
-      if (payments.length > 0) {
+      let prevPayments = state.payments
+      let newPayments = prevPayments.slice()
+
+      if (prevPayments.length > 0) {
         if (payment.type === 'cash') {
-          payments.forEach(prevPay => {
+          let isPutted = false
+          prevPayments.forEach((prevPay, index) => {
+            const newPayment = Object.assign({}, prevPayments[index])
+            newPayments[index] = newPayment
+
             if (payment.type === 'cash' && prevPay.type === 'cash') {
-              prevPay.amount = payment.amount
-              prevPay.cash = payment.cash
-              prevPay.change = payment.change
+              newPayment.amount = payment.amount
+              newPayment.cash = payment.cash
+              newPayment.change = payment.change
+              isPutted = true
             } else if (payment.type === 'odbo') {
-              prevPay.amount = payment.amount
+              newPayment.amount = payment.amount
             }
           })
+
+          if (!isPutted) {
+            newPayments.push(payment)
+          }
         }
-        if (payment.type !== 'cash' && payment.type !== 'odbo') { payments.push(payment) }
+        if (payment.type !== 'cash' && payment.type !== 'odbo') { newPayments.push(payment) }
       } else {
-        payments.push(payment)
+        newPayments.push(payment)
       }
+
+      recalculateChange(action.total, newPayments)
       return Object.assign({}, state, {
-        payments: payments,
+        payments: newPayments,
         isEditing: false
       })
-    case REMOVE_PAYMENT_TYPE:
+    case REMOVE_PAYMENT_TYPE: {
       var filteredPayments = state.payments.filter(payment => {
         if (action.key) {
           return state.payments.indexOf(payment) !== action.key
@@ -268,16 +317,23 @@ function orderData (state = {
           return !payment.deduction
         }
       })
+
+      recalculateChange(action.total, filteredPayments)
       return Object.assign({}, state, {
         payments: filteredPayments
       })
-    case REMOVE_PAYMENT_BYKEY:
+    }
+    case REMOVE_PAYMENT_BYKEY: {
       let updatedPayments = state.payments.filter((payment, index, arr) => {
         return arr.indexOf(payment) !== action.key
       })
+
+      recalculateChange(action.total, updatedPayments)
+
       return Object.assign({}, state, {
         payments: updatedPayments
       })
+    }
     case ADD_ORDER_NOTE:
       let orderNote = state.orderNote
       orderNote.push(action.note)
@@ -327,6 +383,24 @@ function orderData (state = {
       return state
     default:
       return state
+  }
+}
+
+function recalculateChange (orderTotal, payments) {
+  const totalPayment = compPaymentsSum(payments)
+
+  payments.forEach((payment) => {
+    if (payment.change > 0) {
+      payment.change = 0
+    }
+  })
+
+  if (totalPayment > orderTotal) {
+    payments.forEach((payment) => {
+      if (payment.type === 'cash') {
+        payment.change = totalPayment - orderTotal
+      }
+    })
   }
 }
 

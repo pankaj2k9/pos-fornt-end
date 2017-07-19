@@ -75,6 +75,8 @@ export const compPaymentsSum = (data, noVoucher) => {
       if (x.type !== 'odbo') {
         if (x.type === 'voucher' && !noVoucher) {
           totalPayments = totalPayments + Number(x.deduction)
+        } else if (x.type === 'cash') {
+          totalPayments = totalPayments + Number(x.cash)
         } else {
           totalPayments = totalPayments + Number(x.amount)
         }
