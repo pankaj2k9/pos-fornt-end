@@ -1,4 +1,5 @@
 import {syncWorkHistory, offlineLogoutAllCashiers, offlineToggleWorkState, updateSavedOrders} from '../data/offlineData'
+import {customerAddResetData} from '../data/customers'
 
 export const SET_CASHIER_LOGGED_IN = 'SET_CASHIER_LOGGED_IN'
 export function setCashierLoggedIn (cashier) {
@@ -102,11 +103,14 @@ export function setTemporaryCashdrawer (cashdrawer) {
 
 export const SET_ACTIVE_MODAL = 'SET_ACTIVE_MODAL'
 export function setActiveModal (activeModalId, inputToFocus, options) {
-  return {
-    type: SET_ACTIVE_MODAL,
-    activeModalId,
-    inputToFocus,
-    options
+  return (dispatch) => {
+    dispatch(customerAddResetData())
+    dispatch({
+      type: SET_ACTIVE_MODAL,
+      activeModalId,
+      inputToFocus,
+      options
+    })
   }
 }
 
