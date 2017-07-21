@@ -17,5 +17,8 @@ export default {
   },
   patch (id, data) {
     return customers.patch(id, data)
+  },
+  create (params) {
+    return customers.create(params)
   }
 }

@@ -7,7 +7,12 @@ import {
   CUSTOMER_SEARCH_FAILURE,
   CUSTOMERS_SET_FILTER,
   CUSTOMERS_RESET_STATE,
-  CUSTOMERS_SET_ACTIVE_PAGE
+  CUSTOMERS_SET_ACTIVE_PAGE,
+  CUSTOMER_ADD_FAILURE,
+  CUSTOMER_ADD_SUCCESS,
+  CUSTOMER_ADD_REQUEST,
+  CUSTOMER_ADD_RESET_DATA,
+  CUSTOMER_ADD_SET_DATA
 } from '../../actions/data/customers'
 
 function customers (state = {
@@ -22,9 +27,58 @@ function customers (state = {
   page: 1,
   limit: 7,
   total: 0,
-  error: null
+  error: null,
+  isProccessAddCustomer: false,
+  addCustomerData: {
+    gender: undefined,
+    membership: undefined,
+    firstName: undefined,
+    lastName: undefined,
+    birthDay: undefined,
+    email: undefined,
+    homeNumber: undefined,
+    workNumber: undefined,
+    address1: undefined,
+    address2: undefined,
+    postalCode: undefined,
+    errorFields: []
+  }
 }, action) {
   switch (action.type) {
+    case CUSTOMER_ADD_RESET_DATA:
+      return Object.assign({}, state, {
+        isProccessAddCustomer: false,
+        addCustomerData: {
+          gender: undefined,
+          membership: undefined,
+          firstName: undefined,
+          lastName: undefined,
+          birthDay: undefined,
+          email: undefined,
+          homeNumber: undefined,
+          workNumber: undefined,
+          address1: undefined,
+          address2: undefined,
+          postalCode: undefined,
+          errorFields: []
+        }
+      })
+    case CUSTOMER_ADD_SET_DATA:
+      return Object.assign({}, state, {
+        addCustomerData: action.data
+      })
+    case CUSTOMER_ADD_FAILURE:
+      return Object.assign({}, state, {
+        isProccessAddCustomer: false
+      })
+    case CUSTOMER_ADD_SUCCESS:
+      return Object.assign({}, state, {
+        isProccessAddCustomer: false
+      })
+    case CUSTOMER_ADD_REQUEST:
+      return Object.assign({}, state, {
+        isProccessAddCustomer: true
+      })
     case CUSTOMERS_SET_ACTIVE_PAGE:
       return Object.assign({}, state, {
         page: action.page
