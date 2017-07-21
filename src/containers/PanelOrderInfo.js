@@ -117,7 +117,7 @@ class PanelOrderInfo extends Component {
             <form onSubmit={e => {
               e.preventDefault()
             }}>
-              <p className='control has-addons' style={{width: 50}}>
+              <p className='control has-addons' style={{width: 60}}>
                 <input id='itemDiscount' className='input is-big' type='Number'
                   placeholder={discountVal} value={discountVal}
                   onChange={e => { !disabled && setDiscount(e.target.value) }} />
