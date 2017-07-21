@@ -156,7 +156,7 @@ class CustomerList extends React.Component {
           <div className='box is-clearfix'>
             <p className='is-pulled-left title is-marginless'>
               <strong>Current Customer: </strong>
-              {`${activeCustomer.firstName} ${activeCustomer.lastName}`}
+              {`${activeCustomer.firstName} ${activeCustomer.lastName || ''}`}
             </p>
             <a className='button is-danger is-pulled-right' onClick={e => dispatch(setActiveCustomer(null))}>REMOVE</a>
           </div>
