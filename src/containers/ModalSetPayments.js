@@ -136,9 +136,9 @@ class ModalSetPayments extends Component {
     let totalLbl = formatCurrency(total)
     let paymentBal = compCashChange(payments) === 0 ? formatCurrency(total - compPaymentsSum(payments)) : formatCurrency(compCashChange(payments) * -1)
     let payInput = paymentMode === 'cash'
-      ? cashTendered
+      ? (cashTendered === 0 ? '' : cashTendered)
       : amountToPay
-    let cashInputPH = paymentMode === 'cash' && (cashTendered !== '' || cashTendered !== '$0.00')
+    let cashInputPH = paymentMode === 'cash' && !(cashTendered === '' || cashTendered !== '$0.00' || cashTendered !== 0)
       ? cashTendered
       : '$0.00'
     if (document.getElementById('payInput')) {
