@@ -1,3 +1,5 @@
+import {closeActiveModal} from '../app/mainUI'
+
 export const CUSTOMERS_FETCH_REQUEST = 'CUSTOMERS_FETCH_REQUEST'
 export const CUSTOMERS_FETCH_SUCCESS = 'CUSTOMERS_FETCH_SUCCESS'
 export const CUSTOMERS_FETCH_FAILURE = 'CUSTOMERS_FETCH_FAILURE'
@@ -138,5 +140,58 @@ export function fetchCustomerByFilter (filter, key) {
     .catch(error => {
       dispatch(customerSearchFailure(error.message))
     })
+  }
+}
+
+export const CUSTOMER_ADD_SET_DATA = 'CUSTOMER_ADD_SET_DATA'
+export function customerAddSetData (data) {
+  return {
+    type: CUSTOMER_ADD_SET_DATA,
+    data
+  }
+}
+
+export const CUSTOMER_ADD_RESET_DATA = 'CUSTOMER_ADD_RESET_DATA'
+export function customerAddResetData (data) {
+  return {
+    type: CUSTOMER_ADD_RESET_DATA
+  }
+}
+
+export const CUSTOMER_ADD_REQUEST = 'CUSTOMER_ADD_REQUEST'
+export function customerAddRequest () {
+  return {
+    type: CUSTOMER_ADD_REQUEST
+  }
+}
+
+export const CUSTOMER_ADD_SUCCESS = 'CUSTOMER_ADD_SUCCESS'
+export function customerAddSuccess (response) {
+  return {
+    type: CUSTOMER_ADD_SUCCESS,
+    response
+  }
+}
+
+export const CUSTOMER_ADD_FAILURE = 'CUSTOMER_ADD_FAILURE'
+export function customerAddFailure (error) {
+  return {
+    type: CUSTOMER_ADD_FAILURE,
+    error
+  }
+}
+
+export function addCustomer (data) {
+  return (dispatch) => {
+    dispatch(customerAddRequest())
+    return customerService.create(data)
+      .then(response => {
+        dispatch(customerAddSuccess(response))
+        dispatch(closeActiveModal())
+      })
+      .catch(error => {
+        dispatch(customerAddFailure(error))
+        // return error.response.json()
+      })
   }
 }
