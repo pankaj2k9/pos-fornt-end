@@ -12,3 +12,19 @@
 .black-color {
     color: black !important;
 }
+
+.product-list-item {
+    padding: 20px;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-list-item .title {
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+
+.product-list-item .stock {
+    flex-grow: 0;
+}

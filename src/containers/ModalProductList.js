@@ -9,6 +9,41 @@ import {
   closeActiveModal
 } from '../actions/app/mainUI'
 
+class ProductListItem extends Component {
+  render () {
+    return (
+      <div
+        key={this.props.key}
+        className={`column is-4`}
+        onClick={this.props.onClick}>
+        <div className='card  product-list-item' style={{height: 140}}>
+          <div className='title is-5'>
+            {this.props.name}
+          </div>
+          <div className='stock'>
+            { this.props.stock === undefined
+              ? <p style={{
+                color: 'red',
+                fontSize: 16 }}>
+                update stock on admin
+              </p>
+              : <div>
+                {'stock: '}
+                <span
+                  style={{fontSize: 18}}>
+                  <strong style={this.props.tag}>
+                    {this.props.stock}
+                  </strong>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
 class ModalProductList extends Component {
 
   _chooseProduct (productId) {
@@ -48,37 +83,18 @@ class ModalProductList extends Component {
       })
       let tag = productStock.tag
       let productName = locale === 'en' ? product.nameEn : product.nameZh
+      let stock
+
+      if (!(product.stock.length === 0 || Object.keys(productStock).length === 0)) {
+        stock = productStock.stock
+      }
 
       return (
-        <div
-          key={key}
-          className={`column is-4`}
-          onClick={this._chooseProduct.bind(this, product.id)}>
-          <div className='card' style={{height: 140}}>
-            <div className='section' style={{padding: 20, backgroundColor: 'transparent'}}>
-              <div className='title is-5'>
-                {productName}
-              </div>
-
-              {product.stock.length === 0 || Object.keys(productStock).length === 0
-                ? <p style={{
-                  color: 'red',
-                  fontSize: 16 }}>
-                  update stock on admin
-                </p>
-                : <div>
-                  {'stock: '}
-                  <span
-                    style={{fontSize: 18}}>
-                    <strong style={tag}>
-                      {productStock.stock}
-                    </strong>
-                  </span>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
+        <ProductListItem key={key}
+          onClick={this._chooseProduct.bind(this, product.id)}
+          name={productName}
+          stock={stock}
+          tag={tag} />
       )
     }, this)
   }
