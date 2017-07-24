@@ -30,12 +30,14 @@ class Store extends Component {
       cashdrawers,
       networkStatus
     } = this.props
-    dispatch(validateCashdrawers(cashdrawers))
+
     if (networkStatus === 'online') {
       dispatch(fetchAllProducts(locale))
       dispatch(fetchCustomers())
       dispatch(fetchCashdrawers(storeId))
       dispatch(fetchLastOrderId(storeId, storeCode))
+    } else {
+      dispatch(validateCashdrawers(cashdrawers))
     }
   }
 

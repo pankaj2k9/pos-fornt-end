@@ -226,7 +226,7 @@ class ModalApp extends Component {
         )
       case 'updateCashdrawer':
         return (
-          <ModalCard closeAction={e => this._closeModal()} title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer(e)}>
+          <ModalCard title={'Update Cashdrawer'} confirmAction={e => this._updateCashdrawer(e)}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-4 is-offset-4 has-text-centered'>
                 <form onSubmit={e => this._updateCashdrawer(e)} >
