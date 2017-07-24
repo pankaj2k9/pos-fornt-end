@@ -93,6 +93,10 @@ class SettingsTab extends Component {
     const { dispatch } = this.props
     let filter = document.getElementById('custFilter').value
     let searchKey = document.getElementById('custSearchKey').value
+    if (searchKey) {
+      searchKey = searchKey.toUpperCase()
+      document.getElementById('custSearchKey').value = searchKey
+    }
     dispatch(customersSetFilter(filter, searchKey))
   }
 

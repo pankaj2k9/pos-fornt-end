@@ -38,18 +38,20 @@ class CustomerListItem extends React.Component {
             {bold(`[ID#${processOdboID(odboId)}] `)}
             {`< ${firstName} ${lastName || ''} >`}
           </p>
-          {
-            buttonText &&
+          <div style={{float: 'right', marginBottom: '10px'}}>
+            {
+              buttonText &&
+              <a className='button is-success is-pulled-right'
+                onClick={e => { onClickButton(customer) }}>
+                {buttonText}
+              </a>
+            }
             <a className='button is-success is-pulled-right'
-              onClick={e => { onClickButton(customer) }}>
-              {buttonText}
+              style={{marginRight: '10px'}}
+              onClick={e => { onClickHistoryButton(customer) }}>
+              History
             </a>
-          }
-          <a className='button is-success is-pulled-right'
-            style={{marginRight: '10px'}}
-            onClick={e => { onClickHistoryButton(customer) }}>
-            History
-          </a>
+          </div>
 
           <ContentDivider contents={[
             <div>

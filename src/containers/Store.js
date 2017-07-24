@@ -7,6 +7,7 @@ import PanelOrderInfo from './PanelOrderInfo'
 
 import ModalProductList from './ModalProductList'
 import ModalSetPayments from './ModalSetPayments'
+import ModalAddMember from './ModalAddMember'
 import ModalStoreUtils from './ModalStoreUtils'
 
 import { fetchAllProducts } from '../actions/data/products'
@@ -76,6 +77,8 @@ class Store extends Component {
       // return (
       //   <ModalProductList />
       // )
+    } else if (activeModalId === 'addMember') {
+      return <ModalAddMember />
     } else if (activeModalId === 'payments') {
       return <ModalSetPayments />
     } else if (activeModalId === 'recallOrder' || 'overallDiscount' || 'notes') {
