@@ -104,7 +104,7 @@ class ModalStoreUtils extends Component {
     switch (this.props.activeModalId) {
       case 'searchCustomer': return document.getElementById('custSearchKey').focus()
       case 'notes': return document.getElementById('noteInput').focus()
-      case 'custPincode': return document.getElementById('custCodeInput').focus()
+      case 'custPincodeWrong': case 'custPincode': return document.getElementById('custCodeInput').focus()
       case 'overallDiscount': return document.getElementById('discountInput').focus()
       default: null
     }
@@ -362,6 +362,7 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
 
+      case 'custPincodeWrong':
       case 'custPincode':
         return (
           <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOrder()}>
@@ -369,7 +370,7 @@ class ModalStoreUtils extends Component {
               <div className='column is-6 is-offset-3 has-text-centered'>
                 <form onSubmit={e => this._processOrder(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='custCodeInput' className='input is-large' type='password' onChange={e => this._setOdboOrderInfo()}
+                    <input id='custCodeInput' className={'input is-large' + (activeModalId === 'custPincodeWrong' ? ' is-danger' : '')} type='password' onChange={e => this._setOdboOrderInfo()}
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}} />
                     <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '4.75rem'}}>
                       <i className='fa fa-lock' />

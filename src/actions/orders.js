@@ -135,8 +135,12 @@ export function processOrder (orderInfo, receipt, activeDrawer) {
       dispatch(updateSavedOrders())
     })
     .catch(error => {
-      dispatch(setActiveModal('orderFailed'))
-      dispatch(orderFailure(error.message))
+      if (error && error.message === 'Pin code does not match.') {
+        dispatch(setActiveModal('custPincodeWrong'))
+      } else {
+        dispatch(setActiveModal('orderFailed'))
+        dispatch(orderFailure(error.message))
+      }
     })
   }
 }
