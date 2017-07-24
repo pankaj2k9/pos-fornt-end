@@ -80,6 +80,10 @@ export const compPaymentsSum = (data, noVoucher) => {
         } else {
           totalPayments = totalPayments + Number(x.amount)
         }
+
+        if (x.change) {
+          totalPayments = totalPayments - Number(x.change)
+        }
       }
     })
   }
