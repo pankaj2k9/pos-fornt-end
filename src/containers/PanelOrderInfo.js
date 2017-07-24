@@ -112,7 +112,7 @@ class PanelOrderInfo extends Component {
               plus={plus}
               minus={minus} />
           </td>
-          <td><Truncate text={productName} maxLength={26} /></td>
+          <td className='item-name-col'><Truncate text={productName} maxLength={26} /></td>
           <td>
             <form onSubmit={e => {
               e.preventDefault()
@@ -125,7 +125,7 @@ class PanelOrderInfo extends Component {
               </p>
             </form>
           </td>
-          <td>
+          <td className='item-subtotal-col'>
             <p>{subtotal}</p>
           </td>
           <td className='is-icon'>
@@ -185,7 +185,7 @@ class PanelOrderInfo extends Component {
 
     return (
       <div>
-        <div className='panel'>
+        <div className='panel order-info'>
           <div className='panel-block' style={{height: intFrameHeight / 2.5, overflowY: 'scroll', width: '100%'}}>
             <table className='table' style={{alignSelf: 'flex-start'}}>
               <thead>
@@ -206,12 +206,23 @@ class PanelOrderInfo extends Component {
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
               <div className='column is-8 is-paddingless'>
                 <ContentDivider contents={[
-                  <strong>{currency === 'sgd' ? `GST: ${formatCurrency(0, currency)}` : lblTR('app.page.reports.odbo')}</strong>,
-                  <strong>{`${lblTR('app.modal.subtotal')}: ${formatCurrency(subtotal, currency)}`}</strong> ]}
+                  <span>
+                    {currency === 'sgd'
+                      ? <span>
+                        <strong>GST: </strong>{currency === 'sgd' ? formatCurrency(0, currency) : ''}
+                      </span>
+                      : <strong>{lblTR('app.page.reports.odbo')}</strong>
+                    }
+                  </span>,
+                  <span>
+                    <strong style={{display: 'inline-block', width: '6.5rem'}}>{lblTR('app.modal.subtotal')}: </strong> {formatCurrency(subtotal, currency)}
+                  </span> ]}
                   size={6} />
                 <ContentDivider contents={[
                   ' ',
-                  <strong>{`${lblTR('app.general.discount')}: ${formatCurrency(orderDisc, currency)}`}</strong> ]}
+                  <span>
+                    <strong style={{display: 'inline-block', width: '6.5rem'}}>{lblTR('app.general.discount')}: </strong> {formatCurrency(orderDisc, currency)}
+                  </span> ]}
                   size={6} />
               </div>
               <div className='column is-4 is-paddingless has-text-centered'>
@@ -225,22 +236,22 @@ class PanelOrderInfo extends Component {
               {currency === 'sgd'
                 ? <div className='column is-8 is-paddingless'>
                   <ContentDivider contents={[
-                    <p><strong>{lblTR('app.general.cash')}</strong>: {cashSum}</p>,
-                    <p><strong>{lblTR('app.button.credit')}</strong>: {creditSum}</p>
+                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.general.cash')}:</strong> {cashSum}</p>,
+                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.credit')}:</strong> {creditSum}</p>
                   ]} size={6} />
                   <ContentDivider contents={[
-                    <p><strong>{lblTR('app.button.voucher')}</strong>: {voucherSum}</p>,
-                    <p><strong>{lblTR('app.button.debit')}</strong>: {netsSum}</p>
+                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.voucher')}:</strong> {voucherSum}</p>,
+                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.debit')}:</strong> {netsSum}</p>
                   ]} size={6} />
                 </div>
                 : <div className='column is-8 is-paddingless'>
                   <ContentDivider contents={[
                     <strong>{lblTR('app.general.odboPay')}</strong>,
                     <div>
-                      <strong>COINS</strong>: {odbo.prevCoins}<br />
+                      <strong style={{display: 'inline-block', width: '6.5rem'}}>COINS:</strong> {odbo.prevCoins}<br />
                       {odbo.newCoins2 < 0
                         ? <p style={{color: 'red'}}>{lblTR('app.general.ib')}</p>
-                        : <p><strong>REMAINING</strong>: {odbo.newCoins2}</p>}
+                        : <p><strong style={{display: 'inline-block', width: '6.5rem'}}>REMAINING:</strong> {odbo.newCoins2}</p>}
                     </div>
                   ]} size={6} />
                 </div>
@@ -252,21 +263,27 @@ class PanelOrderInfo extends Component {
             </div>
           </div>
           <div className='panel-block' style={{flexDirection: 'column'}}>
-            <h1>Order Summary</h1>
+            <h1><strong>ORDER SUMMARY</strong></h1>
             <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
-              <div className='column is-3 is-paddingless'>
-                Notes
-                <a onClick={this._onClickViewNotes.bind(this)}> ( {lblTR('app.button.view')} )</a>
+              <div className='column is-3 is-paddingless' >
+                <p>
+                  <strong style={{display: 'inline-block', width: '8rem'}}>NOTES</strong>
+                  <a onClick={this._onClickViewNotes.bind(this)}>({lblTR('app.button.view')})</a>
+                </p>
+                {
+                  activeCustomer &&
+                  <p><strong style={{display: 'inline-block', width: '8rem'}}>CUST. POINTS:</strong> {activeCustomer.odboCoins ? formatCurrency(activeCustomer.odboCoins, 'odbo') : 0 }</p>
+                }
               </div>
               <div className='column is-5 is-paddingless'>
-                <p>{`customer: ${custName}`}</p>
-                <p>bonus points: {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : activeCustomer ? '(1x)' : 'N/A'}</p>
-                <p>{`order points: ${currency === 'sgd' ? odbo ? odbo.earnedPts + 'pts' : 'N/A' : 'N/A'}`}</p>
+                <p><strong style={{display: 'inline-block', width: '8rem'}}>CUSTOMER:</strong> {custName}</p>
+                <p><strong style={{display: 'inline-block', width: '8rem'}}>BONUS POINTS:</strong> {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : activeCustomer ? '(1x)' : 'N/A'}</p>
+                <p><strong style={{display: 'inline-block', width: '8rem'}}>ORDER POINTS:</strong> {currency === 'sgd' ? odbo ? odbo.earnedPts + 'pts' : 'N/A' : 'N/A'}</p>
               </div>
               <div className='column is-4 is-paddingless'>
-                <p>{`payment total: ${paymentsSum}`}</p>
-                <p>{`order total: ${formatCurrency(orderTotal, currency)}`}</p>
-                {currency === 'sgd' ? <p>{`cash change: ${cashChange}`}</p> : null}
+                <p><strong style={{display: 'inline-block', width: '9rem'}}>PAYMENT TOTAL:</strong> {paymentsSum}</p>
+                <p><strong style={{display: 'inline-block', width: '9rem'}}>ORDER TOTAL:</strong> {formatCurrency(orderTotal, currency)}</p>
+                {currency === 'sgd' ? <p><strong style={{display: 'inline-block', width: '9rem'}}>CASH CHANGE:</strong> {cashChange}</p> : null}
               </div>
             </div>
           </div>

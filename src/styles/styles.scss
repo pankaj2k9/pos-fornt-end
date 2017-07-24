@@ -28,3 +28,15 @@
 .product-list-item .stock {
     flex-grow: 0;
 }
+
+.panel.order-info .item-name-col {
+    font-weight: bold;
+    vertical-align: middle;
+    font-size: 1.2rem;
+}
+
+.panel.order-info .item-subtotal-col {
+    font-weight: bold;
+    vertical-align: middle;
+    font-size: 1.2rem;
+}
