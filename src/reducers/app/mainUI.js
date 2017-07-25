@@ -183,6 +183,7 @@ function mainUI (state = {
         activeDrawer: null,
         activeDrawerOffline: null,
         activeModalId: null,
+        options: undefined,
         activeStaff: null,
         adminToken: null,
         isEditing: false,

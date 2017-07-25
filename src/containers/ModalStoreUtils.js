@@ -104,7 +104,7 @@ class ModalStoreUtils extends Component {
     switch (this.props.activeModalId) {
       case 'searchCustomer': return document.getElementById('custSearchKey').focus()
       case 'notes': return document.getElementById('noteInput').focus()
-      case 'custPincodeWrong': case 'custPincode': return document.getElementById('custCodeInput').focus()
+      case 'custPincode': return document.getElementById('custCodeInput').focus()
       case 'overallDiscount': return document.getElementById('discountInput').focus()
       default: null
     }
@@ -201,14 +201,14 @@ class ModalStoreUtils extends Component {
     const {
       dispatch,
       activeModalId,
+      options,
       overallDiscount,
       quickLoginPinCode,
       ordersOnHold,
       orderNote,
       intl,
       cashiers,
-      currentCashier,
-      cashierNotSelectedWarning
+      currentCashier
     } = this.props
 
     let lblTR = (id) => { return (intl.formatMessage({id: id})).toUpperCase() }
@@ -362,15 +362,18 @@ class ModalStoreUtils extends Component {
           </ModalCard>
         )
 
-      case 'custPincodeWrong':
       case 'custPincode':
+        let isPincodeFormatWrong = options && options.errors && options.errors.indexOf('WrongPincodeFormat') !== -1
+        let isNoCashier = options && options.errors && options.errors.indexOf('NoCashier') !== -1
+        let isPincodeWrong = options && options.errors && options.errors.indexOf('WrongPincode') !== -1
+
         return (
           <ModalCard closeAction={e => this._closeModal()} title={'Customer Pincode'} confirmAction={e => this._processOrder()}>
             <div className='content columns is-mobile is-multiline has-text-centered'>
               <div className='column is-6 is-offset-3 has-text-centered'>
                 <form onSubmit={e => this._processOrder(e)} >
                   <p className='control has-icon has-icon-right is-marginless'>
-                    <input id='custCodeInput' className={'input is-large' + (activeModalId === 'custPincodeWrong' ? ' is-danger' : '')} type='password' onChange={e => this._setOdboOrderInfo()}
+                    <input id='custCodeInput' className={'input is-large' + (isPincodeWrong || isPincodeFormatWrong ? ' is-danger' : '')} autoComplete='off' type='password' onChange={e => this._setOdboOrderInfo()}
                       style={{fontSize: '2.75rem', textAlign: 'right', paddingLeft: '0em', paddingRight: '2em'}} />
                     <span className='icon' style={{fontSize: '5rem', top: '3rem', right: '4.75rem'}}>
                       <i className='fa fa-lock' />
@@ -378,9 +381,21 @@ class ModalStoreUtils extends Component {
                   </p>
                 </form>
               </div>
+              {
+                isPincodeWrong &&
+                <div className='column is-6 is-offset-3 has-text-centered'>
+                  <p className='red-color'>Wrong pincode, please try again.</p>
+                </div>
+              }
+              {
+                isPincodeFormatWrong &&
+                <div className='column is-6 is-offset-3 has-text-centered'>
+                  <p className='red-color'>Pincode must be 4 digit, please try again.</p>
+                </div>
+              }
               <ContentDivider offset={1} size={10}
                 contents={[
-                  <div className={'has-text-centered' + (cashierNotSelectedWarning ? ' red-border' : '')} >
+                  <div className={'has-text-centered' + (isNoCashier ? ' red-border' : '')} >
                     <POSButtons
                       buttonStyle={styles.btnStyle}
                       buttons={cashiersButtons}
@@ -422,6 +437,7 @@ function mapStateToProps (state) {
     customerSearchKey: custData.customerSearchKey,
     customerFilter: custData.customerFilter,
     activeModalId: mainUI.activeModalId,
+    options: mainUI.options,
     quickLoginCashier: mainUI.quickLoginCashier,
     quickLoginPinCode: mainUI.quickLoginPinCode,
     invalidQuickLoginPinCode: mainUI.invalidQuickLoginPinCode,

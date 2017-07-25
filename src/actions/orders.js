@@ -120,6 +120,23 @@ export function orderStateReset () {
 
 export function processOrder (orderInfo, receipt, activeDrawer) {
   return (dispatch) => {
+    const errors = []
+    if (orderInfo.currency === 'odbo') {
+      const pinCode = orderInfo.pinCode
+
+      if (!pinCode || pinCode.length !== 4 || pinCode.match(/^[0-9]+$/) === null) {
+        errors.push('WrongPincodeFormat')
+      }
+    }
+    if (!orderInfo.adminId) {
+      errors.push('NoCashier')
+    }
+    if (errors.length > 0) {
+      dispatch(setActiveModal('custPincode', undefined, {
+        errors
+      }))
+      return
+    }
     dispatch(setActiveModal('processingOrder'))
     return ordersService.create(orderInfo)
     .then(order => {
@@ -136,7 +153,9 @@ export function processOrder (orderInfo, receipt, activeDrawer) {
     })
     .catch(error => {
       if (error && error.message === 'Pin code does not match.') {
-        dispatch(setActiveModal('custPincodeWrong'))
+        dispatch(setActiveModal('custPincode', undefined, {
+          errors: ['WrongPincode']
+        }))
       } else {
         dispatch(setActiveModal('orderFailed'))
         dispatch(orderFailure(error.message))
