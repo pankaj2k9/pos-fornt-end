@@ -48,6 +48,7 @@ class CustomerListHeader extends React.Component {
             </select>
           </span>
           <input id='custSearchKey' className='input is-large is-expanded'
+            autoComplete='off'
             type='text' placeholder={lblTR('app.ph.keyword')}
             value={customerSearchKey} onChange={e => this._setSearchCustFilters()} />
         </p>
