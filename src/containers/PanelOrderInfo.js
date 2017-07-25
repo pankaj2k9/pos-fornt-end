@@ -187,7 +187,7 @@ class PanelOrderInfo extends Component {
       <div>
         <div className='panel order-info'>
           <div className='panel-block' style={{height: intFrameHeight / 2.5, overflowY: 'scroll', width: '100%'}}>
-            <table className='table' style={{alignSelf: 'flex-start'}}>
+            <table className='table product-list' style={{alignSelf: 'flex-start'}}>
               <thead>
                 <tr>
                   <th>{`${lblTR('app.general.qty')}`}</th>
