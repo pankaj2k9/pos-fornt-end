@@ -2,7 +2,8 @@ import React from 'react'
 import moment from 'moment'
 import { connect } from 'react-redux'
 import { FormattedMessage } from 'react-intl'
-import { DatePicker } from 'react-input-enhancements'
+import { SingleDatePicker } from 'react-dates'
+import 'react-dates/lib/css/_datepicker.css'
 import FileSaver from 'file-saver'
 
 import DataList from '../components/DataList'
@@ -20,6 +21,10 @@ class ExportSales extends React.Component {
     this.handleChangeDate = this.handleChangeDate.bind(this)
     this.handleClickGenerate = this.handleClickGenerate.bind(this)
     this.handleClickExport = this.handleClickExport.bind(this)
+
+    this.state = {
+      focused: false
+    }
   }
 
   componentDidMount () { this.fetchTransactions() }
@@ -83,19 +88,14 @@ class ExportSales extends React.Component {
                   <FormattedMessage id='app.page.reports.salesDate' />
                 </label>
 
-                <DatePicker
-                  value={moment(date).format('ddd DD/MM/YYYY')}
-                  pattern='ddd DD/MM/YYYY'
-                  onChange={this.handleChangeDate.bind(this)}
-                  onValuePreUpdate={v => parseInt(v, 10) > 1e8
-                    ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
-                  }>
-                  {(inputProps, { registerInput }) =>
-                    <p className='control'>
-                      <input {...inputProps} className='input' type='text' />
-                    </p>
-                  }
-                </DatePicker>
+                <SingleDatePicker
+                  date={moment(date)}
+                  onDateChange={this.handleChangeDate.bind(this)}
+                  focused={this.state.focused}
+                  onFocusChange={({ focused }) => this.setState({ focused })}
+                  displayFormat='DD/MM/YYYY'
+                  numberOfMonths={1}
+                  autoFocus />
               </div>
 
               <div className='tile is-child'>

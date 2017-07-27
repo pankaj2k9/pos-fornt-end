@@ -29,15 +29,78 @@ class TextInputLabel extends Component {
   }
 }
 
+function isDateStringCorrect (str) {
+  if (!str || str.length !== 10) {
+    return false
+  }
+
+  const [day, month, year] = str.split('/')
+  if (!day || !month || !year) {
+    return false
+  }
+
+  try {
+    let date = new Date(`${year}-${month}-${day}`)
+    if (isNaN(date.getTime())) {
+      return false
+    }
+  } catch (e) {
+    return false
+  }
+
+  return true
+}
+
 class DateInput extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      focused: false
+    }
+  }
+
+  setDelimeters (str) {
+    let cleanedStr = str.split('/').join('')
+    let result = ''
+
+    if (cleanedStr.length >= 2) {
+      result = cleanedStr.substring(0, 2) + '/'
+    } else {
+      result = cleanedStr
+    }
+
+    if (cleanedStr.length >= 4) {
+      result += cleanedStr.substring(2, 4) + '/'
+    } else {
+      result += cleanedStr.substring(2)
+    }
+
+    if (cleanedStr.length >= 6) {
+      result += cleanedStr.substring(4)
+    } else {
+      result += cleanedStr.substring(4)
+    }
+
+    return result
+  }
+
   render () {
     return (
       <div className='column is-8'>
         <form onSubmit={e => this._setFinalValue(e)}>
           <p className='control has-addons'>
-            <input id={this.props.id} className='input is-large is-success' style={styles.input} type='date'
+            <input id={this.props.id}
+              maxLength={10}
+              placeholder='DD/MM/YYYY'
+              className={'input is-large is-success' + (!this.props.value || isDateStringCorrect(this.props.value) ? '' : ' is-danger')}
+              style={styles.input} type='text'
               onChange={e => {
-                this.props.onChange(this.props.fieldName, e.target.value)
+                let str = e.target.value
+                if (this.props.value && str.length < this.props.value.length) {
+                  this.props.onChange(this.props.fieldName, str)
+                } else {
+                  this.props.onChange(this.props.fieldName, this.setDelimeters(str))
+                }
               }} value={this.props.value} />
           </p>
         </form>
@@ -71,7 +134,7 @@ class ModalAddMember extends Component {
   }
 
   _onChangeField (fieldName, value) {
-    const {dispatch, data} = this.props
+    const { dispatch, data } = this.props
     const newState = {}
     if (value && value.trim().length === 0) {
       value = undefined
@@ -114,6 +177,10 @@ class ModalAddMember extends Component {
       errorFields.push('postalCode')
     }
 
+    if (data.birthDate && !isDateStringCorrect(data.birthDate)) {
+      errorFields.push('birthDate')
+    }
+
     if (!data.password || data.password.trim().length < 8 ||
       !(data.password.match(/[A-Z]/) !== null && data.password.match(/[a-z]/) !== null && data.password.match(/[0-9]/) !== null)) {
       errorFields.push('password')
@@ -142,7 +209,7 @@ class ModalAddMember extends Component {
         homeNumber: s.homeNumber,
         phoneNumber: s.phoneNumber,
         workNumber: s.workNumber,
-        address: s.address1 ? {lineAddress1: s.address1, lineAddress2: s.address2, postalCode: s.postalCode} : null,
+        address: s.address1 ? { lineAddress1: s.address1, lineAddress2: s.address2, postalCode: s.postalCode } : null,
         membership: s.membership
       }))
     }
@@ -158,23 +225,24 @@ class ModalAddMember extends Component {
     const isPasswordError = data.errorFields.indexOf('password') !== -1
     const isPincodeError = data.errorFields.indexOf('pincode') !== -1
     const isPostalCodeError = data.errorFields.indexOf('postalCode') !== -1
+    const isBirthDateError = data.errorFields.indexOf('birthDate') !== -1
 
     let genderBtns = [
-      {name: 'Male', label: 'Male', isActive: true, inverted: data.gender === 'male', color: 'blue', size: 'is-6'},
-      {name: 'Female', label: 'Female', isActive: true, inverted: data.gender === 'female', color: 'pink', size: 'is-6'}
+      { name: 'Male', label: 'Male', isActive: true, inverted: data.gender === 'male', color: 'blue', size: 'is-6' },
+      { name: 'Female', label: 'Female', isActive: true, inverted: data.gender === 'female', color: 'pink', size: 'is-6' }
     ]
 
     let membershipBtns = [
-      {name: 'Bronze', label: 'Bronze', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'bronze'},
-      {name: 'Silver', label: 'Silver', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'silver'},
-      {name: 'Gold', label: 'Gold', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'gold'},
-      {name: 'Platinum', label: 'Platinum', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'platinum'}
+      { name: 'Bronze', label: 'Bronze', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'bronze' },
+      { name: 'Silver', label: 'Silver', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'silver' },
+      { name: 'Gold', label: 'Gold', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'gold' },
+      { name: 'Platinum', label: 'Platinum', isActive: true, color: 'blue', size: 'is-3', inverted: data.membership === 'platinum' }
     ]
 
     // Buttons
 
     // let lbl = (id) => { return intl.formatMessage({id: id}) } // translated lbl
-    let lblAC = (id) => { return (intl.formatMessage({id: id})).toUpperCase() } // lbl all caps
+    let lblAC = (id) => { return (intl.formatMessage({ id: id })).toUpperCase() } // lbl all caps
 
     return (
       <ModalCard title={'app.modal.addMember'}
@@ -200,13 +268,13 @@ class ModalAddMember extends Component {
                 buttonStyle={styles.btnStyle}
                 buttons={genderBtns}
                 onClickButton={(value) => {
-                  const newState = Object.assign({}, data, {gender: value.toLowerCase()})
+                  const newState = Object.assign({}, data, { gender: value.toLowerCase() })
                   dispatch(customerAddSetData(newState))
                 }}
               />
             </div>
 
-            <TextInputLabel title={lblAC('app.lbl.birthDay')} />
+            <TextInputLabel title={lblAC('app.lbl.birthDay')} isError={isBirthDateError} />
             <DateInput id='birthDayInput' onChange={this._onChangeField} fieldName='birthDate' value={data.birthDate} />
 
             <TextInputLabel title={lblAC('app.lbl.email')} isError={isEmailError} />
@@ -237,7 +305,7 @@ class ModalAddMember extends Component {
                 buttonStyle={styles.btnStyle}
                 buttons={membershipBtns}
                 onClickButton={(value) => {
-                  const newState = Object.assign({}, data, {membership: value.toLowerCase()})
+                  const newState = Object.assign({}, data, { membership: value.toLowerCase() })
                   dispatch(customerAddSetData(newState))
                 }} />
             </div>
@@ -251,7 +319,7 @@ class ModalAddMember extends Component {
             {
               isPasswordError &&
               <div className='column is-8'>
-                <p style={{color: 'red'}}>The password must contain: upper case letter, lower case letter and number and be at least eight 8 characters.</p>
+                <p style={{ color: 'red' }}>The password must contain: upper case letter, lower case letter and number and be at least eight 8 characters.</p>
               </div>
             }
 
@@ -264,7 +332,7 @@ class ModalAddMember extends Component {
             {
               isPincodeError &&
               <div className='column is-8'>
-                <p style={{color: 'red'}}>The pincode must contain only 4 digits</p>
+                <p style={{ color: 'red' }}>The pincode must contain only 4 digits</p>
               </div>
             }
 

@@ -2,7 +2,8 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { injectIntl, FormattedMessage } from 'react-intl'
 import moment from 'moment'
-import { DatePicker } from 'react-input-enhancements'
+import { DateRangePicker } from 'react-dates'
+import 'react-dates/lib/css/_datepicker.css'
 import ViewBillReceiptPreview from '../components/ViewBillReceiptPreview'
 
 // import { completeSalesFetch } from '../actions/reports'
@@ -25,6 +26,11 @@ class ViewBills extends React.Component {
     this.handleChangeRadio = this.handleChangeRadio.bind(this)
     this.handleSearchOrders = this.handleSearchOrders.bind(this)
     this.startFetch = this.startFetch.bind(this)
+    this.handleChangeDatePicker = this.handleChangeDatePicker.bind(this)
+
+    this.state = {
+      focusedInput: 'START_DATE'
+    }
   }
 
   componentDidMount () { this.startFetch() }
@@ -53,28 +59,19 @@ class ViewBills extends React.Component {
     }
   }
 
-  handleChangeDatePicker (picker, value) {
-    const { dispatch, from, to } = this.props
-    const date = value.toDate()
+  handleChangeDatePicker ({startDate, endDate}) {
+    const { dispatch } = this.props
 
-    switch (picker) {
-      case 'from':
-        // set from to start of day
-        const newFrom = moment(date).startOf('day').toDate()
+    if (startDate) {
+      dispatch(changeDatepickerFr(startDate.startOf('day').toDate()))
+    } else {
+      dispatch(changeDatepickerFr(undefined))
+    }
 
-        if (newFrom > to) {
-          global.alert('from cannot be ahead to')
-        }
-
-        dispatch(changeDatepickerFr(newFrom))
-        break
-      case 'to':
-        if (date < from) {
-          global.alert('to cannot be behind from')
-        }
-
-        dispatch(changeDatepickerTo(date))
-        break
+    if (endDate) {
+      dispatch(changeDatepickerTo(endDate.startOf('day').toDate()))
+    } else {
+      dispatch(changeDatepickerTo(undefined))
     }
   }
 
@@ -104,39 +101,19 @@ class ViewBills extends React.Component {
     return (
       <div id='trans-report-date' className='tile is-child is-primary is-6'>
         <label className='label'>
-          <FormattedMessage id='app.page.settings.from' />
+          <FormattedMessage id='app.page.settings.from' /> - <FormattedMessage id='app.page.settings.to' />
         </label>
-        <DatePicker
-          value={moment(from).format('ddd DD/MM/YYYY')}
-          pattern='ddd DD/MM/YYYY'
-          onChange={this.handleChangeDatePicker.bind(this, 'from')}
-          onValuePreUpdate={v => parseInt(v, 10) > 1e8
-            ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
-          }>
-          {(inputProps, { registerInput }) =>
-            <p className='control'>
-              <input {...inputProps} className='input' type='text' />
-            </p>
-          }
-        </DatePicker>
-
-        <label className='label'>
-          <FormattedMessage id='app.page.settings.to' />
-        </label>
-        <DatePicker
-          style={{ display: 'block' }}
-          value={moment(to).format('ddd DD/MM/YYYY')}
-          pattern='ddd DD/MM/YYYY'
-          onChange={this.handleChangeDatePicker.bind(this, 'to')}
-          onValuePreUpdate={v => parseInt(v, 10) > 1e8
-            ? moment(parseInt(v, 10)).format('ddd DD/MM/YYYY') : v
-          }>
-          {(inputProps, { registerInput }) =>
-            <p className='control'>
-              <input {...inputProps} className='input' type='text' />
-            </p>
-          }
-        </DatePicker>
+        <DateRangePicker
+          startDate={from ? moment(from) : undefined} // momentPropTypes.momentObj or null,
+          endDate={to ? moment(to) : undefined} // momentPropTypes.momentObj or null,
+          onDatesChange={this.handleChangeDatePicker} // PropTypes.func.isRequired,
+          focusedInput={this.state.focusedInput}
+          onFocusChange={focusedInput => this.setState({ focusedInput })}
+          isOutsideRange={() => false}
+          minimumNights={0}
+          displayFormat='DD/MM/YYYY'
+          showClearDates
+        />
       </div>
     )
   }
