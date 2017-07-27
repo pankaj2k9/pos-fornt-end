@@ -226,7 +226,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
     }
 
     if (currency === 'sgd' && payments.length > 1) {
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${deductSign}${formatCurrency(compPaymentsSum(payments))}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${deductSign}${formatCurrency(compPaymentsSum(payments, false, vouchers))}</div>`
     }
 
     if (currency === 'sgd') {

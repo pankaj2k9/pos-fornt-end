@@ -385,6 +385,7 @@ class ModalApp extends Component {
         let date = activeOD && (activeOD.dateCreated || activeOD.extraInfo.date)
         let total = activeOD && (activeOD.total || activeOD.paymentInfo.orderTotal)
         let payments = activeOD && (activeOD.payments || activeOD.paymentInfo.payments)
+        let vouchers = activeOD && (activeOD.vouchers || activeOD.paymentInfo.vouchers)
         let orderId = activeOD && (activeOD.id || activeOD.extraInfo && activeOD.extraInfo.id)
         let refundId = activeOD && (activeOD.refundId || activeOD.paymentInfo && activeOD.paymentInfo.refundId)
         let dateRefunded = activeOD && (activeOD.dateRefunded || activeOD.paymentInfo && activeOD.paymentInfo.dateRefunded)
@@ -409,6 +410,7 @@ class ModalApp extends Component {
                 <div><p className='is-marginless'>PAYMENTS:</p>
                   <ul style={{marginTop: 0}}>
                     {payments.map((x, key) => { return <li key={key}>{`${x.type}: ${formatCurrency(x.amount, currency)}`}</li> })}
+                    {vouchers.map((x, key) => { return <li key={key}>{`voucher: ${formatCurrency(x.deduction, 'sgd')}`}</li> })}
                   </ul>
                 </div>
               ]} size={4} />
