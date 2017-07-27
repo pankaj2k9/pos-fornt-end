@@ -31,7 +31,7 @@ import {
   refundRequest,
   storeOrdersSetActiveOrder
 } from '../refund'
-import { compPaymentsSum } from '../../utils/computations'
+import { compPaymentsSum, compCashChange } from '../../utils/computations'
 import { buildOrderId } from '../../utils/string'
 
 import {
@@ -574,7 +574,7 @@ export function refundOffline (refundParams, storeData, activeOrder, currentPath
     if (refundData.storeAddress) {
       refundData.type = 'refund'
       refundData.paymentInfo.refundId = refundData.refundId
-      refundData.paymentInfo.refundAmt = compPaymentsSum(refundData.paymentInfo.payments, 'noVoucher')
+      refundData.paymentInfo.refundAmt = compPaymentsSum(refundData.paymentInfo.payments, false, refundData.vouchers) - compCashChange(refundData.paymentInfo.payments)
       refundData.paymentInfo.dataRefunded = new Date()
       dispatch(updateSavedReceipt(refundData))
     }
@@ -588,7 +588,7 @@ export function refundOffline (refundParams, storeData, activeOrder, currentPath
       if (offlineOrder.storeAddress) {
         offlineOrder.type = 'refund'
         offlineOrder.paymentInfo.refundId = offlineOrder.refundId
-        offlineOrder.paymentInfo.refundAmt = compPaymentsSum(offlineOrder.paymentInfo.payments, 'noVoucher')
+        offlineOrder.paymentInfo.refundAmt = compPaymentsSum(offlineOrder.paymentInfo.payments, false, offlineOrder.vouchers) - compCashChange(refundData.paymentInfo.payments)
         offlineOrder.paymentInfo.dataRefunded = new Date()
         dispatch(updateSavedReceipt(offlineOrder))
       }

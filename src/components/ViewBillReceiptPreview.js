@@ -11,7 +11,7 @@ import ReceiptPreviewRow, {
 
 import { printReceiptFromString } from '../utils/receipt'
 
-import { compPaymentsSum } from '../utils/computations'
+import { compPaymentsSum, compCashChange } from '../utils/computations'
 
 import { formatCurrency, formatDate, formatNumber } from '../utils/string'
 
@@ -208,7 +208,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
           const addrList = this.splitAddr(order.source, stores)
           const staff = order.staff
           let orderSalesPerson = ''
-          const refundAmt = compPaymentsSum(order.payments, 'noVoucher')
+          const refundAmt = compPaymentsSum(order.payments, false, order.vouchers) - compCashChange(order.payments)
           const deductSign = order.refundId && order.duplicate ? '-' : ''
 
           if (staff) {

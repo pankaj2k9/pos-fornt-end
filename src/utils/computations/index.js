@@ -68,23 +68,27 @@ export const compDiscSum = (data) => {
   }
 }
 
-export const compPaymentsSum = (data, noVoucher) => {
+export const compPaymentsSum = (data, noVoucher, vouchers) => {
   let totalPayments = 0
+  let isVoucherExist = false
   if (data && data.length > 0) {
     data.forEach(x => {
       if (x.type !== 'odbo') {
         if (x.type === 'voucher' && !noVoucher) {
+          isVoucherExist = true
           totalPayments = totalPayments + Number(x.deduction)
         } else if (x.type === 'cash') {
           totalPayments = totalPayments + Number(x.cash)
         } else {
           totalPayments = totalPayments + Number(x.amount)
         }
-
-        if (x.change) {
-          totalPayments = totalPayments - Number(x.change)
-        }
       }
+    })
+  }
+
+  if (!isVoucherExist && vouchers) {
+    vouchers.forEach(x => {
+      totalPayments += Number(x.deduction)
     })
   }
   return totalPayments
@@ -206,7 +210,7 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
       vouchers: data.vouchers,
       orderTotal: data.total,
       refundId: lastId || data.refundId,
-      refundAmt: compPaymentsSum(data.payments, 'noVoucher'),
+      refundAmt: compPaymentsSum(data.payments, false, data.vouchers) - compCashChange(data.payments),
       dateRefunded: data.dateRefunded || undefined,
       odbo: isRefund ? processRefundOdbo(data.currency, data.users, data.total, data.bonusPoints, data.userPrevCoins)
             : processOdbo(data.currency, data.users, data.total, data.bonusPoints, data.userPrevCoins),

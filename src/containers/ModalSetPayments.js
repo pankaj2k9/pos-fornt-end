@@ -129,12 +129,12 @@ class ModalSetPayments extends Component {
   }
 
   render () {
-    const { dispatch, intl, cashTendered, paymentMode, card, amountToPay, total, payments, cashiers, currentCashier, cashierNotSelectedWarning } = this.props
+    const { dispatch, intl, cashTendered, paymentMode, card, amountToPay, total, payments, vouchers, cashiers, currentCashier, cashierNotSelectedWarning } = this.props
 
     // Labels, Placeholders and Titles
 
     let totalLbl = formatCurrency(total)
-    let paymentBal = compCashChange(payments) === 0 ? formatCurrency(total - compPaymentsSum(payments)) : formatCurrency(compCashChange(payments) * -1)
+    let paymentBal = compCashChange(payments) === 0 ? formatCurrency(total - compPaymentsSum(payments, false, vouchers)) : formatCurrency(compCashChange(payments) * -1)
     let payInput = paymentMode === 'cash'
       ? (cashTendered === 0 ? '' : cashTendered)
       : amountToPay
@@ -414,6 +414,7 @@ function mapStateToProps (state) {
     currentCashier: orderData.currentCashier,
     cashierNotSelectedWarning: storeUI.cashierNotSelectedWarning,
     payments: orderData.payments,
+    vouchers: orderData.vouchers,
     total: orderData.total,
     totalDisc: orderData.totalDisc,
     amountToPay: storeUI.amountToPay,
