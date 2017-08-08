@@ -1,5 +1,7 @@
 import reportsService from '../services/reports'
 import ordersService from '../services/orders'
+import {setActiveCashdrawer} from '../actions/app/mainUI'
+import {dailyDataFetchDataSuccess} from '../actions/data/cashdrawers'
 
 export const REPORTS_SET_TAB = 'REPORTS_SET_TAB'
 export function reportsSetTab (tab) {
@@ -427,12 +429,18 @@ export function sendXZReportError (error) {
 }
 
 export function sendXZReport (date, storeId, masterId) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(sendXZReportRequest())
     return reportsService.sendXZReport(date, storeId, masterId)
       .then(result => {
+        const state = getState()
+        const cashdrawers = state.data.cashdrawers.cdList
+
         dispatch(sendXZReportSuccess())
         dispatch(completeSalesChSource(storeId))
+        dispatch(setActiveCashdrawer(null))
+        dispatch(dailyDataFetchDataSuccess(cashdrawers, date))
+        dispatch(reportsSetDate(new Date()))
       })
       .catch(error => {
         if (error) {
@@ -440,4 +448,14 @@ export function sendXZReport (date, storeId, masterId) {
         }
       })
   }
+}
+
+export const COMPLETE_SALES_START_CLOSE_DAY = 'COMPLETE_SALES_START_CLOSE_DAY'
+export function reportsStartCloseDay (date) {
+  return { type: COMPLETE_SALES_START_CLOSE_DAY }
+}
+
+export const COMPLETE_SALES_CANCEL_CLOSE_DAY = 'COMPLETE_SALES_CANCEL_CLOSE_DAY'
+export function reportsCancelCloseDay (date) {
+  return { type: COMPLETE_SALES_CANCEL_CLOSE_DAY }
 }

@@ -82,6 +82,8 @@ const en = {
   'app.general.outletStock': 'Outlet Stock',
   'app.general.updateCD': 'Update Cash Drawer？',
   'app.general.closeDay': 'Close day',
+  'app.general.closeEndOfDaySales': 'Close end of day sales',
+  'app.general.cancel': 'Cancel',
 
   'app.general.cashDrawerEmpty': 'Cash Drawer Empty',
   'app.general.initCashDrawer': 'Initial Amount of Cash drawer',

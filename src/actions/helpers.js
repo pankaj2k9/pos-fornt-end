@@ -1,5 +1,4 @@
 import moment from 'moment'
-
 import {
   resetOrderData
 } from './data/orderData'
@@ -38,21 +37,28 @@ export function cancelOrder () {
   }
 }
 
-export function validateCashdrawers (cashdrawers) {
-  return (dispatch) => {
+export function validateCashdrawers (cashdrawers, lastClosedDay) {
+  return (dispatch, getState) => {
     let matchedDrawer
+    let currentDateStr = moment(new Date()).format('L')
+
     cashdrawers.forEach(drawer => {
-      let drawerDate = moment(drawer.date).format('L')
-      let currentDate = moment(new Date()).format('L')
-      if (drawerDate === currentDate) {
-        matchedDrawer = drawer
+      let drawerDate = new Date(drawer.dateCreated)
+      let drawerDateStr = moment(drawer.date).format('L')
+
+      if (lastClosedDay) {
+        if (drawerDateStr === currentDateStr && drawerDate > lastClosedDay) {
+          matchedDrawer = drawer
+        }
+      } else {
+        if (drawerDateStr === currentDateStr) {
+          matchedDrawer = drawer
+        }
       }
     })
-    if (matchedDrawer && Number(matchedDrawer.float) > 0) {
+    if (matchedDrawer) {
       dispatch(setActiveCashdrawer(matchedDrawer))
-    } else if (matchedDrawer && Number(matchedDrawer.float) === 0) {
-      dispatch(setActiveCashdrawer(matchedDrawer))
-    } else if (!matchedDrawer) {
+    } else {
       dispatch(setActiveModal('updateCashdrawer'))
     }
   }

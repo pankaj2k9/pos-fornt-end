@@ -14,6 +14,8 @@ import {
   COMPLETESALES_FETCH_SUCCESS,
   COMPLETESALES_FETCH_FAILURE,
   COMPLETESALES_CH_SOURCE,
+  COMPLETE_SALES_START_CLOSE_DAY,
+  COMPLETE_SALES_CANCEL_CLOSE_DAY,
 
   STOREORDERS_SET_ACTIVE_ID,
   STOREORDERS_SET_PAGE,
@@ -214,7 +216,19 @@ function completeSales (state, action) {
     case SEND_XZ_REPORT_SUCCESS:
       return Object.assign({}, state, {
         completeSales: Object.assign({}, state.completeSales, {
-          lastClosedDay: new Date().toISOString().slice(0, 10)
+          lastClosedDay: new Date().toISOString()
+        })
+      })
+    case COMPLETE_SALES_START_CLOSE_DAY:
+      return Object.assign({}, state, {
+        completeSales: Object.assign({}, state.completeSales, {
+          isDayCloseStarting: true
+        })
+      })
+    case COMPLETE_SALES_CANCEL_CLOSE_DAY:
+      return Object.assign({}, state, {
+        completeSales: Object.assign({}, state.completeSales, {
+          isDayCloseStarting: false
         })
       })
     case COMPLETESALES_FETCH_REQUEST:
@@ -297,7 +311,8 @@ function report (state = {
     isLoading: false,
     completeSales: null,
     date: new Date(),
-    source: undefined
+    source: undefined,
+    isDayCloseStarting: false
   },
   storeOrders: {
     isLoading: false,
@@ -368,6 +383,8 @@ function report (state = {
     case COMPLETESALES_FETCH_SUCCESS:
     case COMPLETESALES_FETCH_FAILURE:
     case COMPLETESALES_CH_SOURCE:
+    case COMPLETE_SALES_START_CLOSE_DAY:
+    case COMPLETE_SALES_CANCEL_CLOSE_DAY:
       return Object.assign({}, state, {
         completeSales: completeSales(state.completeSales, action)
       })

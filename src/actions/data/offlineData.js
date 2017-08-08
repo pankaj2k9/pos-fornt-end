@@ -15,6 +15,7 @@ import {
   completeSalesFetchRequest,
   sendXZReportRequest,
   sendXZReportSuccess,
+  reportsSetDate,
   completeSalesChSource
 } from '../reports'
 import ordersService from '../../services/orders'
@@ -35,7 +36,8 @@ import { compPaymentsSum, compCashChange } from '../../utils/computations'
 import { buildOrderId } from '../../utils/string'
 
 import {
-  updateDailyData
+  updateDailyData,
+  dailyDataFetchDataSuccess
 } from './cashdrawers'
 
 import {
@@ -45,7 +47,8 @@ import {
   setQuickLoginPinCode,
   setQuickLoginCashier,
   setInvalidQuickLoginPinCode,
-  closeActiveModal
+  closeActiveModal,
+  setActiveCashdrawer
 } from '../app/mainUI'
 
 export const OFFLINE_LOGOUT_ALL_CASHIERS = 'OFFLINE_LOGOUT_ALL_CASHIERS'
@@ -746,7 +749,7 @@ export function completeSalesFetchOffline (source, date) {
       orders: endOfDayOrders(savedOfflineOrders, source, date),
       staffs: endOfDayStaffs(savedOfflineOrders, source, date),
       isDayClosed: isDayClosed(closedDays, date),
-      lastClosedDay: closedDays.length > 0 ? new Date(closedDays[0].date).toISOString().slice(0, 10) : undefined
+      lastClosedDay: closedDays.length > 0 ? new Date(closedDays[0].date) : undefined
     }
 
     dispatch(completeSalesFetchSuccess(response, date))
@@ -783,11 +786,9 @@ function endOfDayOrders (orders, source, date) {
 }
 
 function endOfDayRefunds (orders, source, date) {
-  const dateStart = moment(date).startOf('day').toISOString()
-  const dateEnd = moment(date).endOf('day').toISOString()
   return orders.filter((order) => {
-    if (order.dateOrdered >= dateStart &&
-      order.dateOrdered <= dateEnd &&
+    const dateOrdered = new Date(order.dateOrdered)
+    if (dateOrdered >= date &&
       order.source === source &&
       order.isRefunded) {
       return true
@@ -827,11 +828,9 @@ function endOfDayStaffs (savedOrders, source, date) {
 }
 
 function endOfDaySummary (savedOrders, source, date) {
-  const dateStart = moment(date).startOf('day').toISOString()
-  const dateEnd = moment(date).endOf('day').toISOString()
   const filteredOrders = savedOrders.filter((order) => {
-    if (order.dateOrdered >= dateStart &&
-      order.dateOrdered <= dateEnd &&
+    const dateOrdered = new Date(order.dateOrdered)
+    if (dateOrdered >= date &&
       order.source === source) {
       return true
     }
@@ -871,11 +870,9 @@ function endOfDaySummary (savedOrders, source, date) {
 }
 
 function endOfDayVoucherSummary (savedOrders, source, date) {
-  const dateStart = moment(date).startOf('day').toISOString()
-  const dateEnd = moment(date).endOf('day').toISOString()
   const filteredOrders = savedOrders.filter((order) => {
-    if (order.dateOrdered >= dateStart &&
-      order.dateOrdered <= dateEnd &&
+    const dateOrdered = new Date(order.dateOrdered)
+    if (dateOrdered >= date &&
       order.source === source) {
       return true
     }
@@ -900,30 +897,39 @@ function endOfDayVoucherSummary (savedOrders, source, date) {
 
 export const CLOSE_DAY_OFFLINE = 'CLOSE_DAY_OFFLINE'
 function closeDayOffline (date, source, masterId) {
-  return {
-    type: CLOSE_DAY_OFFLINE,
-    date,
-    source,
-    masterId
+  return (dispatch, getState) => {
+    const state = getState()
+    const cashdrawers = state.data.cashdrawers.cdList
+    dispatch(dailyDataFetchDataSuccess(cashdrawers, date))
+    return {
+      type: CLOSE_DAY_OFFLINE,
+      date,
+      source,
+      masterId
+    }
   }
 }
 
 export function sendXZReportOffline (date, source, masterId) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const cashdrawers = state.data.cashdrawers.cdList
+
     dispatch(sendXZReportRequest())
     dispatch(closeDayOffline(date, source, masterId))
     dispatch(sendXZReportSuccess())
     dispatch(completeSalesChSource(source))
+    dispatch(setActiveCashdrawer(null))
+    dispatch(dailyDataFetchDataSuccess(cashdrawers, date))
+    dispatch(reportsSetDate(new Date()))
   }
 }
 
 function endOfDayRefundSummary (savedOrders, source, date) {
-  const dateStart = moment(date).startOf('day').toISOString()
-  const dateEnd = moment(date).endOf('day').toISOString()
   const filteredOrders = savedOrders.filter((order) => {
+    const dateRefunded = new Date(order.dateRefunded)
     if (order.isRefunded &&
-        order.dateRefunded >= dateStart &&
-        order.dateRefunded <= dateEnd &&
+        dateRefunded >= date &&
         order.source === source) {
       return true
     }

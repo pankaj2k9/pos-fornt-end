@@ -15,6 +15,7 @@ import {
 } from '../data/offlineData'
 
 import dailyDataService from '../../services/dailyData'
+import reportsService from '../../services/reports'
 
 export const DAILYDATA_CREATE_REQUEST = 'DAILYDATA_CREATE_REQUEST'
 export const DAILYDATA_CREATE_SUCCESS = 'DAILYDATA_CREATE_SUCCESS'
@@ -112,8 +113,8 @@ export function dailyDataFetchDataRequest () {
   return { type: DAILYDATA_FETCH_REQUEST }
 }
 
-export function dailyDataFetchDataSuccess (cashdrawers) {
-  return { type: DAILYDATA_FETCH_SUCCESS, cashdrawers }
+export function dailyDataFetchDataSuccess (cashdrawers, lastClosedDay) {
+  return { type: DAILYDATA_FETCH_SUCCESS, cashdrawers, lastClosedDay }
 }
 
 export function dailyDataFetchDataFailure (error) {
@@ -128,8 +129,17 @@ export function fetchCashdrawers (storeId) {
       date: new Date().toISOString().slice(0, 10)
     }})
       .then(response => {
-        dispatch(dailyDataFetchDataSuccess(response.data))
-        dispatch(validateCashdrawers(response.data))
+        const dailyData = response.data
+
+        return reportsService.findCompleteSales(storeId, new Date())
+        .then((response) => {
+          let lastClosedDay
+          if (response.lastClosedDay) {
+            lastClosedDay = new Date(response.lastClosedDay)
+          }
+          dispatch(dailyDataFetchDataSuccess(dailyData, lastClosedDay))
+          dispatch(validateCashdrawers(dailyData, lastClosedDay))
+        })
       })
       .catch(error => {
         dispatch(dailyDataFetchDataFailure(error))

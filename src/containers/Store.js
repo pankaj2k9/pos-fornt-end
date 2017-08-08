@@ -28,6 +28,7 @@ class Store extends Component {
       storeId,
       storeCode,
       cashdrawers,
+      lastClosedDay,
       networkStatus
     } = this.props
 
@@ -37,7 +38,7 @@ class Store extends Component {
       dispatch(fetchCashdrawers(storeId))
       dispatch(fetchLastOrderId(storeId, storeCode))
     } else {
-      dispatch(validateCashdrawers(cashdrawers))
+      dispatch(validateCashdrawers(cashdrawers, lastClosedDay))
     }
   }
 
@@ -155,6 +156,7 @@ function mapStateToProps (state) {
     activeModalId: state.app.mainUI.activeModalId,
     cashdrawer: state.app.mainUI.activeDrawer,
     cashdrawers: state.data.cashdrawers.cdList,
+    lastClosedDay: state.data.cashdrawers.lastClosedDay,
     adminToken: state.app.mainUI.adminToken,
     shouldUpdate: state.app.mainUI.shouldUpdate,
     error: state.app.mainUI.error,

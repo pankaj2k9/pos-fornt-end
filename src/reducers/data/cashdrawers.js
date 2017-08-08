@@ -11,6 +11,7 @@ function cashdrawers (state = {
   cdList: [],
   isProcessing: false,
   error: null,
+  lastClosedDay: undefined,
   lastDailyDataUpdate: undefined
 }, action) {
   switch (action.type) {
@@ -23,6 +24,7 @@ function cashdrawers (state = {
       return Object.assign({}, state, {
         isProcessing: false,
         cdList: action.cashdrawers,
+        lastClosedDay: action.lastClosedDay,
         error: null,
         lastDailyDataUpdate: new Date().toISOString().slice(0, 10)
       })

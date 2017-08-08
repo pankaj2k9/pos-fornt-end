@@ -26,7 +26,8 @@ class SalesReportComplete extends React.Component {
     this.getCompleteSalesData = this.getCompleteSalesData.bind(this)
     this.handleCloseDay = this.handleCloseDay.bind(this)
   }
-  componentWillMount () {
+
+  componentDidMount () {
     const { dispatch, storeId, selectedDate, posMode } = this.props
     dispatch(completeSalesChSource(storeId))
     if (posMode === 'offline') {
@@ -36,8 +37,42 @@ class SalesReportComplete extends React.Component {
     }
   }
 
+  componentWillReceiveProps (nextProps) {
+    let isNeedUpdate = false
+
+    if (!nextProps.selectedDate || !this.props.selectedDate) {
+      if (nextProps.selectedDate !== this.props.selectedDate) {
+        isNeedUpdate = true
+      }
+    } else {
+      if (nextProps.selectedDate.getTime() !== this.props.selectedDate.getTime()) {
+        isNeedUpdate = true
+      }
+    }
+
+    if (isNeedUpdate) {
+      const { dispatch, storeId, posMode } = this.props
+
+      dispatch(completeSalesChSource(storeId))
+      if (posMode === 'offline') {
+        dispatch(completeSalesFetchOffline(storeId, nextProps.selectedDate))
+      } else {
+        dispatch(completeSalesFetch(storeId, nextProps.selectedDate))
+      }
+    }
+  }
+
   getCompleteSalesData () {
-    const { completeSales, store, cashier, activeDrawer } = this.props
+    let { completeSales, store, cashier, activeDrawer } = this.props
+
+    if (!activeDrawer) {
+      activeDrawer = {
+        date: new Date(),
+        float: 0,
+        initialAmount: 0,
+        cashDrawerOpenCount: 0
+      }
+    }
     let { cashDrawerOpenCount, float } = activeDrawer
 
     if (completeSales && activeDrawer) {
@@ -138,6 +173,22 @@ class SalesReportComplete extends React.Component {
 }
 
 function mapStateToProps (state) {
+  let selectedDate
+  const currentDateStr = moment(new Date()).format('L')
+  const lastClosedDay = state.data.cashdrawers.lastClosedDay
+
+  if (lastClosedDay) {
+    let lastClosedDayStr = moment(lastClosedDay).format('L')
+
+    if (currentDateStr === lastClosedDayStr) {
+      selectedDate = new Date(lastClosedDay)
+    } else {
+      selectedDate = moment(new Date()).startOf('day').toDate()
+    }
+  } else {
+    selectedDate = moment(new Date()).startOf('day').toDate()
+  }
+
   return {
     locale: state.intl.locale,
     isLoading: state.reports.completeSales.isLoading,
@@ -157,7 +208,7 @@ function mapStateToProps (state) {
     storeIds: state.data.stores.stores,
     selectedStore: state.reports.completeSales.source,
     posMode: state.app.mainUI.posMode,
-    selectedDate: state.reports.date
+    selectedDate
   }
 }
 
