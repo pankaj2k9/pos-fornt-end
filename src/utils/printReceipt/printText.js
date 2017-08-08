@@ -204,8 +204,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH PAYMENT</div></div>
                      <div style="${TOTAL_DIV_STYLE_2}"><div>CASH GIVEN: </div>${formatCurrency(payment.cash)}</div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${deductSign}${formatCurrency(payment.amount)}</div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>CASH CHANGE : </div>${formatCurrency(payment.change * (duplicate ? 1 : -1))}</div>`
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${deductSign}${formatCurrency(payment.amount)}</div>`
           }
         }
       } else if (currency === 'odbo') {
@@ -226,7 +225,12 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
     }
 
     if (currency === 'sgd' && payments.length > 1) {
+      comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL PAYMENT: </div>${deductSign}${formatCurrency(compPaymentsSum(payments, false, vouchers))}</div>`
+
+      const cashPayment = payments.filter(payment => payment.type === 'cash')[0]
+      let cashChangeSum = `${formatCurrency(cashPayment ? cashPayment.change * (duplicate ? 1 : 1) : 0)}`
+      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH CHANGE: </div>${cashChangeSum}</div>`
     }
 
     if (currency === 'sgd') {
