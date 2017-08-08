@@ -238,7 +238,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
         comp += RECEIPT_DIVIDER
         comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>---- THE ODBO COIN BALANCE ----</div></div>
                  <div style="${TOTAL_DIV_STYLE_2}"><div>PREVIOUS BALANCE : </div>${odbo.prevCoins}</div>
-                 <div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS ${odbo.bonus ? odbo.bonus : ''} : </div>${odbo.earnedPts}</div>
+                 <div style="${TOTAL_DIV_STYLE_2}"><div>EARNED POINTS ${odbo.bonus ? odbo.bonus : ''} : </div>${deductSign}${odbo.earnedPts}</div>
                  <div style="${TOTAL_DIV_STYLE_1}"><div>NEW BALANCE : </div>${odbo.newCoins}<br/></div>`
       }
     }
