@@ -18,6 +18,8 @@
     background-color: transparent;
     display: flex;
     flex-direction: column;
+    user-select: none;
+    cursor: pointer;
 }
 
 .product-list-item .title {
