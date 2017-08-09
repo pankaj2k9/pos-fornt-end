@@ -14,37 +14,41 @@
 }
 
 .product-list-item {
-    padding: 20px;
+    padding: 15px;
     background-color: transparent;
     display: flex;
     flex-direction: column;
     user-select: none;
     cursor: pointer;
+
+    .title {
+        flex-grow: 1;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+
+    .stock {
+        flex-grow: 0;
+    }
 }
 
-.product-list-item .title {
-    flex-grow: 1;
-    margin-bottom: 0;
-}
+.panel.order-info { 
 
-.product-list-item .stock {
-    flex-grow: 0;
-}
+    .item-name-col {
+        font-weight: bold;
+        vertical-align: middle;
+        font-size: 1.2rem;
+    }
 
-.panel.order-info .item-name-col {
-    font-weight: bold;
-    vertical-align: middle;
-    font-size: 1.2rem;
-}
+    .item-subtotal-col {
+        font-weight: bold;
+        vertical-align: middle;
+        font-size: 1.2rem;
+    }
 
-.panel.order-info .item-subtotal-col {
-    font-weight: bold;
-    vertical-align: middle;
-    font-size: 1.2rem;
-}
-
-.panel.order-info .table.product-list  td {
-    vertical-align: middle;
+    .table.product-list  td {
+        vertical-align: middle;
+    }
 }
 
 .close-button {
@@ -52,6 +56,9 @@
     $dimension-large: roundToEvenNumber(2 * removeUnit($size-6) * removeUnit($size-large)) * 1px;
     height: $dimension-large !important;
     width: $dimension-large !important;
+    user-select: none;
+    cursor: pointer;
+
     &::before {
         background-color: red;
     }

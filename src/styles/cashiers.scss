@@ -7,19 +7,19 @@
     vertical-align: middle;
   }
   .cashier-button {
-    $font-size: 12px;
+    $font-size: 18px;
 
     float: left;
     text-align: center;
     background: white;
-    height: 30px;
-    width: 100px;
+    height: 38px;
+    width: 150px;
     color: black;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: $font-size;
     margin: 2px;
-    line-height: 30px;
+    line-height: 38px;
     border-radius: 2px;
     user-select: none;
     cursor: pointer;

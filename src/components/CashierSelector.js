@@ -25,7 +25,7 @@ class CashierButton extends React.Component {
 const CashierSelector = ({master, cashiers, activeStore, handleToggleWorkStatus}) => {
   let style = {}
   if (cashiers.length > 1) {
-    style = {maxWidth: 105 * ((cashiers.length % 2 === 0) ? cashiers.length / 2 : (cashiers.length + 1) / 2)}
+    style = {maxWidth: 155 * ((cashiers.length % 2 === 0) ? cashiers.length / 2 : (cashiers.length + 1) / 2)}
   }
   return (
     <div className='cashier-selector' style={style}>

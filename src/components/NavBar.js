@@ -5,7 +5,7 @@ import LanguageToggle from './LanguageToggle'
 import CashiersSelector from '../components/CashierSelector'
 
 const NavLink = (props) => {
-  return <Link {...props} className='nav-item' activeClassName='is-active' style={{fontSize: 16}} />
+  return <Link {...props} className='nav-item' activeClassName='is-active' style={{fontSize: 18}} />
 }
 
 const NavBar = ({

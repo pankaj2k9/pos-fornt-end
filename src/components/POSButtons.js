@@ -90,8 +90,9 @@ const POSButtons = (props) => {
 
 POSButtons.defaultProps = {
   buttonStyle: {
-    height: 90,
-    padding: 10
+    height: 100,
+    padding: 10,
+    fontSize: 18
   },
   containerStyle: {},
   onClickButton: () => {}
