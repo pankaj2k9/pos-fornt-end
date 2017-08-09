@@ -116,6 +116,7 @@ const en = {
   'app.lbl.lastName': 'LAST NAME',
   'app.lbl.email': 'EMAIL',
   'app.lbl.phoneNumber': 'PHONE NUMBER',
+  'app.lbl.mobileNumber': 'MOBILE NUMBER',
   'app.lbl.homeNumber': 'HOME NUMBER',
   'app.lbl.workNumber': 'WORK NUMBER',
   'app.lbl.postalCode': 'POSTAL CODE',

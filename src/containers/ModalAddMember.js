@@ -85,6 +85,7 @@ class DateInput extends Component {
   }
 
   render () {
+    const {fieldName, value, isError} = this.props
     return (
       <div className='column is-8'>
         <form onSubmit={e => this._setFinalValue(e)}>
@@ -92,16 +93,16 @@ class DateInput extends Component {
             <input id={this.props.id}
               maxLength={10}
               placeholder='DD/MM/YYYY'
-              className={'input is-large is-success' + (!this.props.value || isDateStringCorrect(this.props.value) ? '' : ' is-danger')}
+              className={'input is-large ' + (!isError && (!value || isDateStringCorrect(value)) ? 'is-success' : ' is-danger')}
               style={styles.input} type='text'
               onChange={e => {
                 let str = e.target.value
-                if (this.props.value && str.length < this.props.value.length) {
-                  this.props.onChange(this.props.fieldName, str)
+                if (value && str.length < value.length) {
+                  this.props.onChange(fieldName, str)
                 } else {
-                  this.props.onChange(this.props.fieldName, this.setDelimeters(str))
+                  this.props.onChange(fieldName, this.setDelimeters(str))
                 }
-              }} value={this.props.value} />
+              }} value={value} />
           </p>
         </form>
       </div>
@@ -169,15 +170,19 @@ class ModalAddMember extends Component {
       errorFields.push('gender')
     }
 
-    if (!data.email || !isEmailValid(data.email)) {
+    if (data.email && !isEmailValid(data.email)) {
       errorFields.push('email')
     }
 
-    if (data.address1 && !data.postalCode) {
+    if (!data.address1) {
+      errorFields.push('address1')
+    }
+
+    if (!data.postalCode) {
       errorFields.push('postalCode')
     }
 
-    if (data.birthDate && !isDateStringCorrect(data.birthDate)) {
+    if (!data.birthDate || !isDateStringCorrect(data.birthDate)) {
       errorFields.push('birthDate')
     }
 
@@ -188,6 +193,10 @@ class ModalAddMember extends Component {
 
     if (!data.pincode || data.pincode.length !== 4 || data.pincode.match(/^[0-9]+$/) === null) {
       errorFields.push('pincode')
+    }
+
+    if (!data.phoneNumber) {
+      errorFields.push('phoneNumber')
     }
 
     if (errorFields.length > 0) {
@@ -224,8 +233,10 @@ class ModalAddMember extends Component {
     const isEmailError = data.errorFields.indexOf('email') !== -1
     const isPasswordError = data.errorFields.indexOf('password') !== -1
     const isPincodeError = data.errorFields.indexOf('pincode') !== -1
+    const isAddress1Error = data.errorFields.indexOf('address1') !== -1
     const isPostalCodeError = data.errorFields.indexOf('postalCode') !== -1
     const isBirthDateError = data.errorFields.indexOf('birthDate') !== -1
+    const isPhoneNumberError = data.errorFields.indexOf('phoneNumber') !== -1
 
     let genderBtns = [
       { name: 'Male', label: 'Male', isActive: true, inverted: data.gender === 'male', color: 'blue', size: 'is-6' },
@@ -243,7 +254,7 @@ class ModalAddMember extends Component {
 
     // let lbl = (id) => { return intl.formatMessage({id: id}) } // translated lbl
     let lblAC = (id) => { return (intl.formatMessage({ id: id })).toUpperCase() } // lbl all caps
-
+    const requiredFieldSign = '* '
     return (
       <ModalCard title={'app.modal.addMember'}
         closeAction={e => this._close()}
@@ -255,13 +266,13 @@ class ModalAddMember extends Component {
         {
           !isLoading &&
           <div className='columns is-multiline is-mobile is-fullwidth is-marginless'>
-            <TextInputLabel title={lblAC('app.lbl.firstName')} isError={isFirstNameError} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.firstName')} isError={isFirstNameError} />
             <TextInput fieldName='firstName' id='firstNameInput' isError={isFirstNameError} onChange={this._onChangeField} value={data.firstName} />
 
             <TextInputLabel title={lblAC('app.lbl.lastName')} />
             <TextInput id='lastNameInput' fieldName='lastName' onChange={this._onChangeField} value={data.lastName} />
 
-            <TextInputLabel title={lblAC('app.lbl.gender')} isError={isGenderError} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.gender')} isError={isGenderError} />
             <div className='column is-8 has-text-centered'>
               <POSButtons
                 containerStyle={styles.btnCtnr}
@@ -274,8 +285,8 @@ class ModalAddMember extends Component {
               />
             </div>
 
-            <TextInputLabel title={lblAC('app.lbl.birthDay')} isError={isBirthDateError} />
-            <DateInput id='birthDayInput' onChange={this._onChangeField} fieldName='birthDate' value={data.birthDate} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.birthDay')} isError={isBirthDateError} />
+            <DateInput id='birthDayInput' onChange={this._onChangeField} fieldName='birthDate' value={data.birthDate} isError={isBirthDateError} />
 
             <TextInputLabel title={lblAC('app.lbl.email')} isError={isEmailError} />
             <TextInput id='emailInput' fieldName='email' onChange={this._onChangeField} isError={isEmailError} value={data.email} />
@@ -283,22 +294,22 @@ class ModalAddMember extends Component {
             <TextInputLabel title={lblAC('app.lbl.homeNumber')} />
             <TextInput id='homeNumberInput' fieldName='homeNumber' onChange={this._onChangeField} value={data.homeNumber} />
 
-            <TextInputLabel title={lblAC('app.lbl.phoneNumber')} />
-            <TextInput id='phoneNumberInput' fieldName='phoneNumber' onChange={this._onChangeField} value={data.phoneNumber} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.mobileNumber')} isError={isPhoneNumberError} />
+            <TextInput id='phoneNumberInput' fieldName='phoneNumber' onChange={this._onChangeField} value={data.phoneNumber} isError={isPhoneNumberError} />
 
             <TextInputLabel title={lblAC('app.lbl.workNumber')} />
             <TextInput id='workNumberInput' fieldName='workNumber' onChange={this._onChangeField} value={data.workNumber} />
 
-            <TextInputLabel title={lblAC('app.lbl.address1')} />
-            <TextInput id='address1Input' fieldName='address1' onChange={this._onChangeField} value={data.address1} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.address1')} isError={isAddress1Error} />
+            <TextInput id='address1Input' fieldName='address1' onChange={this._onChangeField} value={data.address1} isError={isAddress1Error} />
 
             <TextInputLabel title={lblAC('app.lbl.address2')} />
             <TextInput id='address2Input' fieldName='address2' onChange={this._onChangeField} value={data.address2} />
 
-            <TextInputLabel title={lblAC('app.lbl.postalCode')} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.postalCode')} isError={isPostalCodeError} />
             <TextInput id='postalCodeInput' fieldName='postalCode' onChange={this._onChangeField} isError={isPostalCodeError} value={data.postalCode} />
 
-            <TextInputLabel title={lblAC('app.lbl.membership')} isError={isMembershipError} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.membership')} isError={isMembershipError} />
             <div className='column is-8 has-text-centered'>
               <POSButtons
                 containerStyle={styles.btnCtnr}
@@ -310,7 +321,7 @@ class ModalAddMember extends Component {
                 }} />
             </div>
 
-            <TextInputLabel title={lblAC('app.lbl.password')} isError={isPasswordError} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.password')} isError={isPasswordError} />
             <TextInput id='passwordInput' fieldName='password' onChange={this._onChangeField} isPassword isError={isPasswordError} value={data.password} />
             {
               isPasswordError &&
@@ -323,7 +334,7 @@ class ModalAddMember extends Component {
               </div>
             }
 
-            <TextInputLabel title={lblAC('app.lbl.pincode')} isError={isPincodeError} />
+            <TextInputLabel title={requiredFieldSign + lblAC('app.lbl.pincode')} isError={isPincodeError} />
             <TextInput id='pincodeInput' fieldName='pincode' onChange={this._onChangeField} isPassword isError={isPincodeError} value={data.pincode} />
             {
               isPincodeError &&
