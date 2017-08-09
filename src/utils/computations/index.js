@@ -59,7 +59,7 @@ export const compDiscSum = (data) => {
     } else {
       odboDiscPCT = x.overallDiscount
     }
-    totalDisc = totalDisc + compDiscount(discPCT, x.price) * x.qty
+    totalDisc = totalDisc + compDiscount(discPCT, Number(x.price)) * x.qty
     totalOdboDisc = totalOdboDisc + compDiscount(odboDiscPCT, Number(x.odboPrice), true) * x.qty
   })
   return {
@@ -129,21 +129,14 @@ export const compCashChange = (data) => {
 export const processProducts = (data, currency) => {
   let products = data.map(item => {
     return {
+      discount: item.discount,
+      discountPercent: item.discountPercent,
       product: item,
       barcodeInfo: item.barcodeInfo,
       productId: Number(item.id),
       quantity: item.qty,
-      itemCost: currency === 'sgd' ? item.finalPR : item.finalOdboPR,
-      totalCost: currency === 'sgd' ? item.subTotalPrice : item.subTotalOdboPrice,
-      discount: item.overallDiscount === 0
-        ? item.customDiscount === 0
-          ? item.isDiscounted
-            ? currency === 'sgd'
-              ? item.priceDiscount // isDiscounted and sgd
-              : item.odboPriceDiscount // isDiscounted and odbo
-            : 0 // overall and item is not discount
-          : item.customDiscount // customDiscount is not 0
-        : item.overallDiscount // overallDiscount is not 0
+      itemCost: currency === 'sgd' ? Number(item.price) : Number(item.odboPrice),
+      totalCost: currency === 'sgd' ? item.subTotalPrice : item.subTotalOdboPrice
     }
   })
   return products
@@ -206,6 +199,7 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
       staff: `STAFF ID#${data.adminId}`
     },
     paymentInfo: {
+      orderDisccount: data.discount || 0,
       currency: data.currency,
       payments: data.payments,
       subtotal: data.total,

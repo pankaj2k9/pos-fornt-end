@@ -63,7 +63,7 @@ export function setCurrentCashier (cashier) {
 export const SET_ORDER_INFO = 'SET_ORDER_INFO'
 export function setOrderInfo (data, otherData) {
   let { orderData, appData } = data
-  let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote, currentCashier } = orderData
+  let { total, totalOdbo, totalDisc, totalOdboDisc, orderItems, orderNote, currentCashier, overallDiscount } = orderData
   let { activeStore, lastOrderId } = appData
   let { source, code } = activeStore
 
@@ -98,7 +98,9 @@ export function setOrderInfo (data, otherData) {
     redemptionPoints: currency === 'sgd' ? odbo && odbo.earnedPts : undefined,
     pinCode: pincode,
     vouchers: currency === 'sgd' && processPayments(payments, 'voucher'),
-    odboId: activeCustomer ? activeCustomer.odboId : undefined
+    odboId: activeCustomer ? activeCustomer.odboId : undefined,
+    discountPercentOverall: overallDiscount || 0,
+    discount: orderDisccount
   }
 
   const receipt = {

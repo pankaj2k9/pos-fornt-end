@@ -27,6 +27,56 @@ import {
   compPaymentsSum
 } from '../../utils/computations'
 
+function recalculateOrderItem (currency, item, newOverallDiscount, newCustomDiscount, newQuantity) {
+  const price = Number(item.price || 0)
+  const odboPrice = Number(item.odboPrice || 0)
+
+  let discountPercentSGD
+  let discountPercentODBO
+
+  if (newOverallDiscount === 0) {
+    if (item.isDiscounted) {
+      discountPercentSGD = item.priceDiscount
+      discountPercentODBO = item.odboPriceDiscount
+    } else {
+      discountPercentSGD = newCustomDiscount
+      discountPercentODBO = newCustomDiscount
+    }
+  } else {
+    discountPercentSGD = newOverallDiscount
+    discountPercentODBO = newOverallDiscount
+  }
+
+  const finalPR = price - compDiscount(discountPercentSGD, price)
+  const finalOdboPR = odboPrice - compDiscount(discountPercentODBO, odboPrice, true)
+
+  const subTotalPrice = finalPR * newQuantity
+  const subTotalOdboPrice = finalOdboPR * newQuantity
+
+  let discount
+  let discountPercent
+  if (newOverallDiscount > 0) {
+    discount = 0
+    discountPercent = 0
+  } else if (currency === 'sgd') {
+    discount = compDiscount(discountPercentSGD, price) * newQuantity
+    discountPercent = discountPercentSGD
+  } else {
+    discount = compDiscount(discountPercentODBO, odboPrice) * newQuantity
+    discountPercent = discountPercentODBO
+  }
+
+  item.overallDiscount = newOverallDiscount
+  item.customDiscount = newCustomDiscount
+  item.finalPR = finalPR
+  item.finalOdboPR = finalOdboPR
+  item.subTotalPrice = subTotalPrice
+  item.subTotalOdboPrice = subTotalOdboPrice
+  item.discount = discount
+  item.discountPercent = discountPercent
+  item.qty = newQuantity
+}
+
 function orderData (state = {
   activeCustomer: null,
   currency: 'sgd',
@@ -46,7 +96,9 @@ function orderData (state = {
   isProcessing: false
 }, action) {
   let orderItems = state.orderItems
-  let oaDisc = state.overallDiscount || 0
+  let currency = state.currency
+  let overallDiscount = Number(state.overallDiscount || 0)
+
   switch (action.type) {
     case CURRENTLY_EDITING:
       return Object.assign({}, state, {
@@ -70,22 +122,7 @@ function orderData (state = {
       let customDiscount = action.discount
       orderItems.forEach(item => {
         if (item.id === action.orderItemID) {
-          item.customDiscount = customDiscount
-          let itemPR = Number(item.price || 0)
-          let itemOdboPR = Number(item.odboPrice || 0)
-          let discPCT = customDiscount === 0
-            ? item.isDiscounted ? item.priceDiscount : 0
-            : item.customDiscount
-          let odboDiscPCT = customDiscount === 0
-            ? item.isDiscounted ? item.odboPriceDiscount : 0
-            : item.customDiscount
-          const finalPR = itemPR - compDiscount(discPCT, itemPR)
-          const finalOdboPR = itemOdboPR - compDiscount(odboDiscPCT, itemOdboPR, true)
-
-          item.finalPR = item.finalPR + finalPR
-          item.finalOdboPR = item.finalOdboPR + finalOdboPR
-          item.subTotalPrice = finalPR * item.qty
-          item.subTotalOdboPrice = finalOdboPR * item.qty
+          recalculateOrderItem(currency, item, overallDiscount, customDiscount, item.qty)
         }
       })
 
@@ -104,26 +141,9 @@ function orderData (state = {
       })
     }
     case SET_OVERALL_DISCOUNT: {
-      let oaDiscFrmAtn = action.discount
+      let newOverallDiscount = action.discount
       orderItems.forEach(item => {
-        let itemPR = Number(item.price || 0)
-        let itemOdboPR = Number(item.odboPrice || 0)
-        let discPCT = oaDiscFrmAtn === 0
-          ? item.isDiscounted ? item.priceDiscount
-            : item.customDiscount === 0 ? 0 : item.customDiscount
-          : oaDiscFrmAtn
-        let odboDiscPCT = oaDiscFrmAtn === 0
-          ? item.isDiscounted ? item.odboPriceDiscount
-            : item.customDiscount === 0 ? 0 : item.customDiscount
-          : oaDiscFrmAtn
-        const finalPR = itemPR - compDiscount(discPCT, itemPR)
-        const finalOdboPR = itemOdboPR - compDiscount(odboDiscPCT, itemOdboPR, true)
-
-        item.overallDiscount = oaDiscFrmAtn
-        item.finalPR = finalPR
-        item.finalOdboPR = finalOdboPR
-        item.subTotalPrice = finalPR * item.qty
-        item.subTotalOdboPrice = finalOdboPR * item.qty
+        recalculateOrderItem(currency, item, newOverallDiscount, item.customDiscount, item.qty)
       })
 
       const newTotal = compItemsSum(orderItems).total
@@ -134,7 +154,7 @@ function orderData (state = {
         payments: newPayments,
         isEditing: false,
         items: orderItems,
-        overallDiscount: oaDiscFrmAtn,
+        overallDiscount: newOverallDiscount,
         total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
@@ -146,48 +166,13 @@ function orderData (state = {
       itemToAdd.forEach(function (newItem) {
         let existing = orderItems.filter((oldItem) => { return oldItem.id === newItem.id })
 
-        let discPCT = 0
-        if (oaDisc === 0) {
-          if (newItem.isDiscounted) {
-            discPCT = newItem.priceDiscount
-          } else if (newItem.customDiscount === 0) {
-            discPCT = 0
-          } else {
-            discPCT = newItem.customDiscount
-          }
-        } else {
-          discPCT = oaDisc
-        }
-
-        let odboDiscPCT = 0
-        if (oaDisc === 0) {
-          if (newItem.isDiscounted) {
-            odboDiscPCT = newItem.odboPriceDiscount
-          } else if (newItem.customDiscount === 0) {
-            odboDiscPCT = 0
-          } else {
-            odboDiscPCT = newItem.customDiscount
-          }
-        } else {
-          odboDiscPCT = oaDisc
-        }
         if (existing.length) {
-          let x = orderItems.indexOf(existing[0]) // index
-          orderItems[x].qty = orderItems[x].qty + 1
-          orderItems[x].subTotalPrice = orderItems[x].subTotalPrice + newItem.finalPR
-          orderItems[x].subTotalOdboPrice = orderItems[x].subTotalOdboPrice + newItem.finalOdboPR
+          const existItem = existing[0]
+          recalculateOrderItem(currency, existItem, overallDiscount, existItem.customDiscount, existItem.qty + 1)
         } else {
-          const qtyAndTotal = {
-            qty: 1,
-            finalPR: newItem.price - compDiscount(discPCT, newItem.price),
-            finalOdboPR: newItem.odboPrice - compDiscount(odboDiscPCT, newItem.odboPrice, true),
-            subTotalPrice: newItem.price - compDiscount(discPCT, newItem.price),
-            subTotalOdboPrice: newItem.odboPrice - compDiscount(odboDiscPCT, newItem.odboPrice, true),
-            customDiscount: 0,
-            overallDiscount: oaDisc === 0 ? 0 : oaDisc
-          }
-          let item = Object.assign(newItem, qtyAndTotal)
-          orderItems.push(item)
+          let itemCopy = Object.assign({}, newItem)
+          recalculateOrderItem(currency, itemCopy, overallDiscount, 0, 1)
+          orderItems.push(itemCopy)
         }
       })
 
@@ -199,7 +184,7 @@ function orderData (state = {
         payments: newPayments,
         isEditing: false,
         orderItems,
-        overallDiscount: oaDisc,
+        overallDiscount,
         total: newTotal,
         totalDisc: compDiscSum(orderItems).totalDisc,
         totalOdbo: compItemsSum(orderItems).totalOdbo,
@@ -208,24 +193,12 @@ function orderData (state = {
     }
     case SET_ORDER_ITEM_QTY: {
       orderItems.forEach(item => {
-        let {
-          qty,
-          subTotalPrice,
-          subTotalOdboPrice,
-          finalPR,
-          finalOdboPR
-        } = item
-
         if (item.id === action.orderItemID) {
           if (action.opperand === 'plus') {
-            item.qty = qty + 1
-            item.subTotalPrice = subTotalPrice + finalPR
-            item.subTotalOdboPrice = subTotalOdboPrice + finalPR
+            recalculateOrderItem(currency, item, overallDiscount, item.customDiscount, item.qty + 1)
           } else {
-            if (qty > 1) {
-              item.qty = qty - 1
-              item.subTotalPrice = subTotalPrice - finalPR
-              item.subTotalOdboPrice = subTotalOdboPrice - finalOdboPR
+            if (item.qty > 1) {
+              recalculateOrderItem(currency, item, overallDiscount, item.customDiscount, item.qty - 1)
             }
           }
         }
