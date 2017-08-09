@@ -55,7 +55,7 @@ class PanelCheckoutModals extends Component {
             <p className='modal-card-title is-marginless has-text-centered'>
               Odbo User Pincode
             </p>
-            <button className='delete' onClick={closeModal} />
+            <button className='close-button' onClick={closeModal} />
           </header>
           <div className='modal-card-body'>
             <div className='content columns is-mobile is-multiline has-text-centered'>
@@ -145,7 +145,7 @@ class PanelCheckoutModals extends Component {
             <p className='modal-card-title is-marginless has-text-centered'>
               Order Processed
             </p>
-            <button className='delete' onClick={closeModal} />
+            <button className='close-button' onClick={closeModal} />
           </header>
           <div className='modal-card-body'>
             <div className='content columns is-mobile is-multiline has-text-centered'>
@@ -197,7 +197,7 @@ class PanelCheckoutModals extends Component {
             <p className='modal-card-title is-marginless has-text-centered'>
               Payments
             </p>
-            <button className='delete' onClick={closeModal} />
+            <button className='close-button' onClick={closeModal} />
           </header>
           <div className='modal-card-body'>
             <div className='content'>
@@ -250,7 +250,7 @@ class PanelCheckoutModals extends Component {
             <p className='modal-card-title is-marginless has-text-centered'>
               <FormattedMessage id='app.general.notes' />
             </p>
-            <button className='delete' onClick={closeModal} />
+            <button className='close-button' onClick={closeModal} />
           </header>
           <div className='modal-card-body'>
             <div className='content'>
@@ -268,7 +268,7 @@ class PanelCheckoutModals extends Component {
                           {`${item.message} `}
                           <span className='tag is-danger' style={{marginLeft: 10}}>
                             <FormattedMessage id='app.button.removeNote' />
-                            <button className='delete' onClick={remove} />
+                            <button className='close-button' onClick={remove} />
                           </span>
                         </li>
                       )

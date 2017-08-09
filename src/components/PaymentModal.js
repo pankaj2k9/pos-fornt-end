@@ -156,7 +156,7 @@ class PaymentModal extends Component {
             <p className='modal-card-title is-marginless has-text-centered'>
               Payment
             </p>
-            <button className='delete' onClick={this._closeModal.bind(this)} />
+            <button className='close-button' onClick={this._closeModal.bind(this)} />
           </header>
           <section className='modal-card-body'>
             <div className='content has-text-centered'>

@@ -266,7 +266,7 @@ class ModalSetPayments extends Component {
                       return (
                         <span className='tag is-medium' key={key} style={{margin: 5}}>
                           {`${payment.provider || payment.type}:  ${formatCurrency(payment.deduction || payment.amount)}`}
-                          <button className='delete' onClick={e => dispatch(removePaymentByKey(total, key))} />
+                          <button className='close-button' onClick={e => dispatch(removePaymentByKey(total, key))} />
                         </span>
                       )
                     }

@@ -25,7 +25,7 @@ const ModalCard = (props) => {
           </p>
           {
             closeAction &&
-            <button className='delete' onClick={closeAction} />
+            <button className='close-button' onClick={closeAction} />
           }
         </header>
         <section className='modal-card-body'>

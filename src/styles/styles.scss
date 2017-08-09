@@ -46,3 +46,16 @@
 .panel.order-info .table.product-list  td {
     vertical-align: middle;
 }
+
+.close-button {
+    @include delete;
+    $dimension-large: roundToEvenNumber(2 * removeUnit($size-6) * removeUnit($size-large)) * 1px;
+    height: $dimension-large !important;
+    width: $dimension-large !important;
+    &::before {
+        background-color: red;
+    }
+    &::after {
+        background-color: red;
+    }
+}

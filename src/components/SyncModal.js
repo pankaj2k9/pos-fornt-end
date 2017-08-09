@@ -34,7 +34,7 @@ const SyncModal = (props) => {
           <p className='modal-card-title'>
             <FormattedMessage id='app.button.syncData' />
           </p>
-          <button className='delete' onClick={onClose.bind(this)} />
+          <button className='close-button' onClick={onClose.bind(this)} />
         </header>
         <section className='modal-card-body'>
           <div className='box'>
