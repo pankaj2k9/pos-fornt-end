@@ -370,7 +370,8 @@ const styles = {
   },
   btnStyle: {
     height: 60,
-    padding: 10
+    padding: 10,
+    fontSize: 18
   },
   btnCtnr: { margin: 10 },
   cardCtnr: { margin: 10 },
