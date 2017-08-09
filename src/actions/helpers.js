@@ -59,6 +59,7 @@ export function validateCashdrawers (cashdrawers, lastClosedDay) {
     if (matchedDrawer) {
       dispatch(setActiveCashdrawer(matchedDrawer))
     } else {
+      dispatch(setActiveCashdrawer(undefined))
       dispatch(setActiveModal('updateCashdrawer'))
     }
   }
