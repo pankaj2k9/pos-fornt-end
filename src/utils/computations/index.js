@@ -276,8 +276,8 @@ export const processRefundOdbo = (currency, customer, orderTotal, multiplier, us
   }
 
   if (currency.toUpperCase() === 'SGD') {
-    const earnedPoints = multiplier ? (orderTotal + orderTotal * multiplier / 100) : orderTotal
-
+    let earnedPoints = multiplier ? (orderTotal + orderTotal * multiplier / 100) : orderTotal
+    earnedPoints = Math.floor(earnedPoints)
     return {
       prevCoins: userPrevCoins + earnedPoints,
       earnedPts: earnedPoints,
