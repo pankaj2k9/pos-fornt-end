@@ -600,11 +600,13 @@ export function refundOffline (refundParams, storeData, activeOrder, currentPath
       dispatch(processOfflineOrder(offlineOrder))
     }
 
+    const duplicateOrder = Object.assign({}, refundData, {duplicate: true})
+
     if (currentPath === 'settings' ||
         currentPath === '/settings') {
-      dispatch(setActiveOrderDetails(refundData))
+      dispatch(setActiveOrderDetails(duplicateOrder))
     } else {
-      dispatch(storeOrdersSetActiveOrder(refundData))
+      dispatch(storeOrdersSetActiveOrder(duplicateOrder))
     }
 
     const orderSearchResults = processOrders(savedOrdersCopy)

@@ -28,7 +28,8 @@ import {
 } from '../actions/app/mainUI'
 
 import {
-  updateCustomer
+  updateCustomer,
+  setProcessingStatus
 } from '../actions/settings'
 
 import { refund } from '../actions/refund'
@@ -98,7 +99,7 @@ class ModalApp extends Component {
     let remark = document.getElementById('refundRemark').value
     let refundId = getNextOrderId(mainUI.activeStore.code, mainUI.lastOrderId)
     let refundData = {id: activeOD.id || activeOD.extraInfo.id, refundRemarks: remark, refundId: refundId}
-    dispatch(setActiveModal('orderDetails'))
+    dispatch(setProcessingStatus(true))
     if (posMode === 'offline') {
       dispatch(refundOffline(refundData, mainUI.activeStore, activeOD, currentPath))
     } else {
@@ -135,7 +136,7 @@ class ModalApp extends Component {
   }
 
   _printReceipt () {
-    const { dispatch, activeOD, mainUI } = this.props
+    const { activeOD, mainUI } = this.props
     if (!activeOD.storeAddress) {
       let storeAddress = processStoreAddress(mainUI.activeStore)
       let receipt = processOrderSearchReceipt('refund', activeOD, storeAddress, activeOD.refundId)
@@ -143,9 +144,6 @@ class ModalApp extends Component {
     } else {
       print(activeOD)
     }
-    setTimeout(() => {
-      dispatch(setActiveModal('orderDetails'))
-    }, 2000)
   }
 
   renderEmptyListLbl (lbl, isProcessing) {
@@ -322,7 +320,7 @@ class ModalApp extends Component {
         )
       case 'refundSuccess':
         return (
-          <ModalCard closeAction={e => this._printReceipt()} confirmAction={e => this._printReceipt()}>
+          <ModalCard closeAction={e => dispatch(closeActiveModal())} confirmAction={e => this._printReceipt()}>
             <div className='content has-text-centered'>
               <p className='title'>Refund Success</p>
             </div>

@@ -6,7 +6,7 @@ import {
   setNewLastID
 } from './app/mainUI'
 import { updateSavedReceipt, updateSavedOrders } from './data/offlineData'
-import { setActiveOrderDetails } from './settings'
+import { setActiveOrderDetails, storeOrderFetch } from './settings'
 import { storeOrdersSetActiveOrder } from './reports'
 
 // import print from '../utils/printReceipt/print'
@@ -35,7 +35,7 @@ export function refundFailure () {
 }
 
 export function refund (refundData, storeData, orderData, currentPath) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(refundRequest())
     return refundService.create(refundData)
       .then(response => {
@@ -52,14 +52,27 @@ export function refund (refundData, storeData, orderData, currentPath) {
           dispatch(updateSavedReceipt(orderData))
         }
 
+        const duplicateOrder = Object.assign({}, orderData, {duplicate: true})
         if (currentPath === 'settings' ||
             currentPath === '/settings') {
-          dispatch(setActiveOrderDetails(orderData))
+          dispatch(setActiveOrderDetails(duplicateOrder))
         } else {
-          dispatch(storeOrdersSetActiveOrder(orderData))
+          dispatch(storeOrdersSetActiveOrder(duplicateOrder))
         }
         dispatch(setActiveModal('refundSuccess'))
         dispatch(updateSavedOrders())
+
+        const state = getState()
+        const mainUI = state.app.mainUI
+        const settings = state.settings
+
+        let query = {
+          id: settings.orderSearchKey,
+          refundId: settings.orderSearchKey,
+          storeId: mainUI.activeStore.source
+        }
+
+        dispatch(storeOrderFetch(query))
       })
       .catch(error => {
         dispatch(refundFailure())

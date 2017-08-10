@@ -75,7 +75,7 @@ export const buildExtraInfo = (type, info, duplicate) => {
   let { staff, customer, id, date, refundId, dateRefunded } = info
   let extra = ''
   let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[ID#${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
-  let orderId = type === 'reprint' && refundId && duplicate
+  let orderId = (type === 'reprint' || type === 'refund') && refundId && duplicate
     ? `<div style="${TOTAL_DIV_STYLE_1}">REFUND ID: ${refundId}</div>` + `<div style="${TOTAL_DIV_STYLE_1}">ORDER ID: ${id}</div>`
     : id
       ? `<div style="${TOTAL_DIV_STYLE_1}">ORDER ID: ${id}</div>`
@@ -169,7 +169,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
   let comp = ''
 
   if (paymentInfo) {
-    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, orderId, refundAmt, dateRefunded } = paymentInfo
+    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, refundAmt } = paymentInfo
     let deductSign = refundId && duplicate ? '-' : ''
     comp += '<div>'
     if (currency === 'sgd') {
@@ -265,20 +265,20 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
       })
     }
 
-    if (type === 'reprint' && refundId && duplicate) {
+    if ((type === 'reprint' || type === 'refund') && refundId && duplicate) {
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>`
     }
 
-    if (type === 'refund' && refundId) {
-      comp += RECEIPT_DIVIDER
-      comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED ORDER: </div></div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>ORDER ID: </div> ${orderId}</div>
-              <div style="${TOTAL_DIV_STYLE_2}">${formatDate(dateRefunded)}</div>
-              <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>
-              </div>`
-    }
+    // if (type === 'refund' && refundId) {
+    //   comp += RECEIPT_DIVIDER
+    //   comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED ORDER: </div></div>
+    //           <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>
+    //           <div style="${TOTAL_DIV_STYLE_1}"><div>ORDER ID: </div> ${orderId}</div>
+    //           <div style="${TOTAL_DIV_STYLE_2}">${formatDate(dateRefunded)}</div>
+    //           <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>
+    //           </div>`
+    // }
 
     if (type === 'reprint') {
       comp += RECEIPT_DIVIDER
