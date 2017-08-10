@@ -147,7 +147,7 @@ class PanelButtons extends Component {
       {name: 'sync', isActive: true, color: 'yellow', label: 'SYNC OFFLINE DATA', altLbl: '同步与数据库', size: 'is-3'},
       {name: 'addMember', isActive, color: 'blue', label: 'ADD MEMBER', altLbl: '', size: 'is-3'},
       {name: 'holdOrderBtn1', isActive: orderData.orderItems.length > 0, color: 'purple', label: 'HOLD ORDER', altLbl: '锁住订单', size: 'is-3'},
-      {name: 'recallOrder', isActive: true, color: 'purple', label: 'RECALL_ORDER', altLbl: '找回订单', size: 'is-3'},
+      {name: 'recallOrder', isActive: true, color: 'purple', label: 'RECALL ORDER', altLbl: '找回订单', size: 'is-3'},
       {name: 'outletStock', isActive: true, color: 'blue', label: 'OUTLET STOCK', altLbl: '各分店库存', size: 'is-3'},
       {name: 'outletSales', isActive: true, color: 'blue', label: 'OUTLET SALES', altLbl: '各分店业绩', size: 'is-3'},
       {name: 'viewBill', isActive: true, color: 'blue', label: 'VIEW BILL', altLbl: '历史账单', size: 'is-3'},
@@ -162,8 +162,8 @@ class PanelButtons extends Component {
       {name: 'cancelOrderBtn1', isActive: true, color: 'pink', label: 'CANCEL ORDER', altLbl: '取消订单', size: 'is-3'}
     ]
     return (
-      <div className='panel'>
-        <POSButtons buttons={buttons} onClickButton={this._onClickPanelButtons.bind(this)} />
+      <div className='panel' style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch'}}>
+        <POSButtons buttons={buttons} containerStyle={{flexGrow: 1}} onClickButton={this._onClickPanelButtons.bind(this)} />
         <div style={{padding: 10, paddingTop: 30}}>
           <form id='barcode' onSubmit={e => this._barcodeSearch(e)}>
             <p className='control has-addons'>

@@ -6,7 +6,7 @@ export class ToggleButton extends React.Component {
   render () {
     const active = this.props.isActive ? 'is-active' : 'is-inverted'
     return (
-      <a className={`button is-small is-dark is-marginless ${active}`}
+      <a className={`button is-large is-dark is-marginless language-toggle ${active}`}
         onClick={this.props.onClick.bind(null, this.props.locale)}>
         <span>
           {this.props.children}

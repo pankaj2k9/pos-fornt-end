@@ -34,6 +34,16 @@
 
 .panel.order-info { 
 
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    .panel-block {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
     .item-name-col {
         font-weight: bold;
         vertical-align: middle;
@@ -65,4 +75,8 @@
     &::after {
         background-color: red;
     }
+}
+
+.button.is-active.language-toggle {
+    background-color: gray !important;
 }

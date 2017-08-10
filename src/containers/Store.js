@@ -95,7 +95,14 @@ class Store extends Component {
         <div className='hero-body' style={{padding: 0}}>
           <div className='tile is-ancestor is-fullwidth'>
             <div className='tile is-parent is-6 is-vertical'>
-              <div className='tile is-child'>
+              <div className='tile is-child' style={{
+                // paddingTop: 15,
+                display: 'flex',
+                flexGrow: 1,
+                alignItems: 'stretch',
+                justifyContent: 'center',
+                flexDirection: 'column'
+              }}>
                 {
                   this.props.activeModalId === 'productsList'
                     ? <ModalProductList /> : <PanelButtons />
@@ -104,15 +111,13 @@ class Store extends Component {
               </div>
             </div>
             <div className='tile is-parent is-vertical'>
-              <div>
-                <div className='tile is-child' style={{
-                  // paddingTop: 15,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  flexDirection: 'column'
-                }}>
-                  <PanelOrderInfo />
-                </div>
+              <div className='tile is-child' style={{
+                // paddingTop: 15,
+                display: 'flex',
+                justifyContent: 'center',
+                flexDirection: 'column'
+              }}>
+                <PanelOrderInfo />
               </div>
             </div>
           </div>

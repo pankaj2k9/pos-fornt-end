@@ -184,115 +184,114 @@ class PanelOrderInfo extends Component {
     ]
 
     return (
-      <div>
-        <div className='panel order-info'>
-          <div className='panel-block' style={{height: intFrameHeight / 2.5, overflowY: 'scroll', width: '100%'}}>
-            <table className='table product-list' style={{alignSelf: 'flex-start'}}>
-              <thead>
-                <tr>
-                  <th>{`${lblTR('app.general.qty')}`}</th>
-                  <th>{`${lblTR('app.general.product')}`}</th>
-                  <th>{`${lblTR('app.general.discount')}`}</th>
-                  <th>{`${lblTR('app.general.subtotal')}`}</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                { this.renderOrderItems() }
-              </tbody>
-            </table>
-          </div>
-          <div className='panel-block' style={{flexDirection: 'column'}}>
-            <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
-              <div className='column is-8 is-paddingless'>
-                <ContentDivider contents={[
-                  <span>
-                    {currency === 'sgd'
-                      ? <span>
-                        <strong>GST: </strong>{currency === 'sgd' ? formatCurrency(0, currency) : ''}
-                      </span>
-                      : <strong>{lblTR('app.page.reports.odbo')}</strong>
-                    }
-                  </span>,
-                  <span>
-                    <strong style={{display: 'inline-block', width: '6.5rem'}}>{lblTR('app.modal.subtotal')}: </strong> {formatCurrency(subtotal, currency)}
-                  </span> ]}
-                  size={6} />
-                <ContentDivider contents={[
-                  ' ',
-                  <span>
-                    <strong style={{display: 'inline-block', width: '6.5rem'}}>{lblTR('app.general.discount')}: </strong> {formatCurrency(orderDisc, currency)}
-                  </span> ]}
-                  size={6} />
-              </div>
-              <div className='column is-4 is-paddingless has-text-centered'>
-                <strong>{lblTR('app.lbl.orderTotal')}</strong>
-                <p>{formatCurrency(orderTotal, currency)}</p>
-              </div>
+      <div className='panel order-info'>
+        <div className='panel-block' style={{height: intFrameHeight / 2.5, overflowY: 'scroll', width: '100%'}}>
+          <table className='table product-list' style={{alignSelf: 'flex-start'}}>
+            <thead>
+              <tr>
+                <th>{`${lblTR('app.general.qty')}`}</th>
+                <th>{`${lblTR('app.general.product')}`}</th>
+                <th>{`${lblTR('app.general.discount')}`}</th>
+                <th>{`${lblTR('app.general.subtotal')}`}</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              { this.renderOrderItems() }
+            </tbody>
+          </table>
+        </div>
+        <div className='panel-block' style={{flexDirection: 'column'}}>
+          <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
+            <div className='column is-8 is-paddingless'>
+              <ContentDivider contents={[
+                <span>
+                  {currency === 'sgd'
+                    ? <span>
+                      <strong>GST: </strong>{currency === 'sgd' ? formatCurrency(0, currency) : ''}
+                    </span>
+                    : <strong>{lblTR('app.page.reports.odbo')}</strong>
+                  }
+                </span>,
+                <span>
+                  <strong style={{display: 'inline-block', width: '6.5rem'}}>{lblTR('app.modal.subtotal')}: </strong> {formatCurrency(subtotal, currency)}
+                </span> ]}
+                size={6} />
+              <ContentDivider contents={[
+                ' ',
+                <span>
+                  <strong style={{display: 'inline-block', width: '6.5rem'}}>{lblTR('app.general.discount')}: </strong> {formatCurrency(orderDisc, currency)}
+                </span> ]}
+                size={6} />
+            </div>
+            <div className='column is-4 is-paddingless has-text-centered'>
+              <strong>{lblTR('app.lbl.orderTotal')}</strong>
+              <p>{formatCurrency(orderTotal, currency)}</p>
             </div>
           </div>
-          <div className='panel-block'>
-            <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
-              {currency === 'sgd'
-                ? <div className='column is-8 is-paddingless'>
-                  <ContentDivider contents={[
-                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.general.cash')}:</strong> {cashSum}</p>,
-                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.credit')}:</strong> {creditSum}</p>
-                  ]} size={6} />
-                  <ContentDivider contents={[
-                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.voucher')}:</strong> {voucherSum}</p>,
-                    <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.debit')}:</strong> {netsSum}</p>
-                  ]} size={6} />
-                </div>
-                : <div className='column is-8 is-paddingless'>
-                  <ContentDivider contents={[
-                    <strong>{lblTR('app.general.odboPay')}</strong>,
-                    <div>
-                      <strong style={{display: 'inline-block', width: '6.5rem'}}>COINS:</strong> {odbo.prevCoins}<br />
-                      {odbo.newCoins2 < 0
-                        ? <p style={{color: 'red'}}>{lblTR('app.general.ib')}</p>
-                        : <p><strong style={{display: 'inline-block', width: '6.5rem'}}>REMAINING:</strong> {odbo.newCoins2}</p>}
-                    </div>
-                  ]} size={6} />
-                </div>
+        </div>
+        <div className='panel-block'>
+          <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
+            {currency === 'sgd'
+              ? <div className='column is-8 is-paddingless'>
+                <ContentDivider contents={[
+                  <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.general.cash')}:</strong> {cashSum}</p>,
+                  <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.credit')}:</strong> {creditSum}</p>
+                ]} size={6} />
+                <ContentDivider contents={[
+                  <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.voucher')}:</strong> {voucherSum}</p>,
+                  <p><strong style={{display: 'inline-block', width: '5.5rem'}}>{lblTR('app.button.debit')}:</strong> {netsSum}</p>
+                ]} size={6} />
+              </div>
+              : <div className='column is-8 is-paddingless'>
+                <ContentDivider contents={[
+                  <strong>{lblTR('app.general.odboPay')}</strong>,
+                  <div>
+                    <strong style={{display: 'inline-block', width: '6.5rem'}}>COINS:</strong> {odbo.prevCoins}<br />
+                    {odbo.newCoins2 < 0
+                      ? <p style={{color: 'red'}}>{lblTR('app.general.ib')}</p>
+                      : <p><strong style={{display: 'inline-block', width: '6.5rem'}}>REMAINING:</strong> {odbo.newCoins2}</p>}
+                  </div>
+                ]} size={6} />
+              </div>
+            }
+            <div className='column is-4 is-paddingless has-text-centered'>
+              <strong>{lblTR('app.lbl.payTotal')}</strong>
+              <p>{!isEditing ? paymentsSum : null}</p>
+            </div>
+          </div>
+        </div>
+        <div className='panel-block' style={{flexDirection: 'column'}}>
+          <h1><strong>ORDER SUMMARY</strong></h1>
+          <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
+            <div className='column is-3 is-paddingless' >
+              <p>
+                <strong style={{display: 'inline-block', width: '8rem'}}>NOTES</strong>
+                <a onClick={this._onClickViewNotes.bind(this)}>({lblTR('app.button.view')})</a>
+              </p>
+              {
+                activeCustomer &&
+                <p><strong style={{display: 'inline-block', width: '8rem'}}>CUST. POINTS:</strong> {activeCustomer.odboCoins ? formatCurrency(activeCustomer.odboCoins, 'odbo') : 0 }</p>
               }
-              <div className='column is-4 is-paddingless has-text-centered'>
-                <strong>{lblTR('app.lbl.payTotal')}</strong>
-                <p>{!isEditing ? paymentsSum : null}</p>
-              </div>
+            </div>
+            <div className='column is-5 is-paddingless'>
+              <p><strong style={{display: 'inline-block', width: '8rem'}}>CUSTOMER:</strong> {custName}</p>
+              <p><strong style={{display: 'inline-block', width: '8rem'}}>BONUS POINTS:</strong> {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : activeCustomer ? '(1x)' : 'N/A'}</p>
+              <p><strong style={{display: 'inline-block', width: '8rem'}}>ORDER POINTS:</strong> {currency === 'sgd' ? odbo ? odbo.earnedPts + 'pts' : 'N/A' : 'N/A'}</p>
+            </div>
+            <div className='column is-4 is-paddingless'>
+              <p><strong style={{display: 'inline-block', width: '9rem'}}>PAYMENT TOTAL:</strong> {paymentsSum}</p>
+              <p><strong style={{display: 'inline-block', width: '9rem'}}>ORDER TOTAL:</strong> {formatCurrency(orderTotal, currency)}</p>
+              {currency === 'sgd' ? <p><strong style={{display: 'inline-block', width: '9rem'}}>CASH CHANGE:</strong> {cashChange}</p> : null}
             </div>
           </div>
-          <div className='panel-block' style={{flexDirection: 'column'}}>
-            <h1><strong>ORDER SUMMARY</strong></h1>
-            <div className='columns is-multilines is-mobile is-fullwidth is-marginless' style={{width: '100%'}}>
-              <div className='column is-3 is-paddingless' >
-                <p>
-                  <strong style={{display: 'inline-block', width: '8rem'}}>NOTES</strong>
-                  <a onClick={this._onClickViewNotes.bind(this)}>({lblTR('app.button.view')})</a>
-                </p>
-                {
-                  activeCustomer &&
-                  <p><strong style={{display: 'inline-block', width: '8rem'}}>CUST. POINTS:</strong> {activeCustomer.odboCoins ? formatCurrency(activeCustomer.odboCoins, 'odbo') : 0 }</p>
-                }
-              </div>
-              <div className='column is-5 is-paddingless'>
-                <p><strong style={{display: 'inline-block', width: '8rem'}}>CUSTOMER:</strong> {custName}</p>
-                <p><strong style={{display: 'inline-block', width: '8rem'}}>BONUS POINTS:</strong> {bonusPoints ? <strong style={{color: 'green'}}>(2x)</strong> : activeCustomer ? '(1x)' : 'N/A'}</p>
-                <p><strong style={{display: 'inline-block', width: '8rem'}}>ORDER POINTS:</strong> {currency === 'sgd' ? odbo ? odbo.earnedPts + 'pts' : 'N/A' : 'N/A'}</p>
-              </div>
-              <div className='column is-4 is-paddingless'>
-                <p><strong style={{display: 'inline-block', width: '9rem'}}>PAYMENT TOTAL:</strong> {paymentsSum}</p>
-                <p><strong style={{display: 'inline-block', width: '9rem'}}>ORDER TOTAL:</strong> {formatCurrency(orderTotal, currency)}</p>
-                {currency === 'sgd' ? <p><strong style={{display: 'inline-block', width: '9rem'}}>CASH CHANGE:</strong> {cashChange}</p> : null}
-              </div>
-            </div>
-          </div>
-          <div className='panel-block'>
-            <div style={{width: '100%'}}>
-              <POSButtons
-                buttons={buttons}
-                onClickButton={this._onClickPanelButtons.bind(this)} />
-            </div>
+        </div>
+        <div className='panel-block' style={{display: 'flex', flexGrow: 1, alignItems: 'stretch', flexBasis: 85}} >
+          <div style={{display: 'flex', flexGrow: 1, alignItems: 'stretch', flexDirection: 'column'}}>
+            <POSButtons
+              buttons={buttons}
+              containerStyle={{flexGrow: 1}}
+              onClickButton={this._onClickPanelButtons.bind(this)} />
           </div>
         </div>
       </div>

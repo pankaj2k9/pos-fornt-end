@@ -19,19 +19,20 @@ const POSButtons = (props) => {
   let defaultBtn = {
     display: 'flex',
     justifyContent: 'center',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    boxSizinig: 'border-box'
   }
 
   let imgBtn = { height: 40 }
 
-  function onHover (key) { document.getElementById(key).style.borderStyle = 'outset' }
-  function onHoverOut (key) { document.getElementById(key).style.borderStyle = 'none' }
+  function onHover (key) { document.getElementById(key).style.borderColor = '#b5b5b5' }
+  function onHoverOut (key) { document.getElementById(key).style.borderColor = 'transparent' }
   function onPress (key) {
-    document.getElementById(key).style.borderStyle = 'outset'
+    document.getElementById(key).style.borderColor = '#b5b5b5'
     document.getElementById(key).style.opacity = '0.5'
   }
   function onRelease (key) {
-    document.getElementById(key).style.borderStyle = 'none'
+    document.getElementById(key).style.borderColor = 'transparent'
     document.getElementById(key).style.opacity = '1'
   }
 
@@ -63,10 +64,10 @@ const POSButtons = (props) => {
             ? label.match('app') ? <FormattedMessage id={label} /> : label
             : imgUrl
           let finalBtnStyle = imgUrl
-            ? Object.assign({}, buttonStyle, btnColor, imgBtn, imgBtnSLC)
-            : Object.assign({}, buttonStyle, btnColor, defaultBtn, imgBtnSLC)
+            ? Object.assign({}, buttonStyle, btnColor, imgBtn, imgBtnSLC, {flexGrow: 1, boxSizinig: 'border-box', borderStyle: 'outset', borderColor: 'transparent'})
+            : Object.assign({}, buttonStyle, btnColor, defaultBtn, imgBtnSLC, {flexGrow: 1, boxSizinig: 'border-box', borderStyle: 'outset', borderColor: 'transparent'})
           return (
-            <div key={key} className={`column ${size}`} style={{padding: 7}} onClick={bountItemClick}>
+            <div key={key} className={`column ${size}`} style={{padding: 7, display: 'flex', flexGrow: 1}} onClick={bountItemClick}>
               <div id={btnKey} className={!blank ? !imgUrl ? 'box' : '' : ''} style={finalBtnStyle}
                 onMouseOver={e => onHover(btnKey)} onMouseOut={e => onHoverOut(btnKey)}
                 onTouchStart={e => onPress(btnKey)} onTouchEnd={e => onRelease(btnKey)}>
@@ -90,7 +91,6 @@ const POSButtons = (props) => {
 
 POSButtons.defaultProps = {
   buttonStyle: {
-    height: 100,
     padding: 10,
     fontSize: 18
   },
