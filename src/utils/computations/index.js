@@ -202,10 +202,11 @@ export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
       orderDisccount: data.discount || 0,
       currency: data.currency,
       payments: data.payments,
-      subtotal: data.total,
+      subtotal: Number(data.total) + Number(data.discount || 0),
       vouchers: data.vouchers,
       orderTotal: data.total,
       refundId: lastId || data.refundId,
+      orderId: data.id,
       refundAmt: compPaymentsSum(data.payments, false, data.vouchers) - compCashChange(data.payments),
       dateRefunded: data.dateRefunded || undefined,
       odbo: isRefund ? processRefundOdbo(data.currency, data.users, data.total, data.bonusPoints, data.userPrevCoins)

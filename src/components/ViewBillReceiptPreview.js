@@ -5,13 +5,18 @@ import { FormattedMessage } from 'react-intl'
 import ReceiptPreview from './ReceiptPreview'
 import ReceiptPreviewRow, {
   ReceiptRowDivider,
-  ReceiptRowDividerDbl,
   ReceiptRowNewLine
 } from './ReceiptPreviewRow'
 
 import { printReceiptFromString } from '../utils/receipt'
 
-import { compPaymentsSum, compCashChange } from '../utils/computations'
+import {
+  compPaymentsSum,
+  compCashChange,
+  processOdboID,
+  processRefundOdbo,
+  processOdbo
+} from '../utils/computations'
 
 import { formatCurrency, formatDate, formatNumber } from '../utils/string'
 
@@ -22,7 +27,6 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
     this.renderPrintBtn = this.renderPrintBtn.bind(this)
     this.handlePrint = this.handlePrint.bind(this)
 
-    this.renderOldViewBillReceipt = this.renderOldViewBillReceipt.bind(this)
     this.renderNewViewBillReceipt = this.renderNewViewBillReceipt.bind(this)
   }
 
@@ -51,8 +55,41 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
     printReceiptFromString(receiptContent)
   }
 
-  renderOldViewBillReceipt () {
-    const { orders, stores } = this.props
+  renderReceiptHeader (keyPref, order, stores) {
+    const addrList = this.splitAddr(order.source, stores)
+    const orderStore = stores.find((st) => st.source === order.source)
+
+    return (
+      <span key={`${keyPref}-header-section`}>
+        {/* "The odbo" */}
+        <ReceiptPreviewRow
+          key={`${keyPref}-header`}
+          keyPrefix={`${keyPref}-header`}
+          rowType='centered is-title'
+          cols={['The odbo']} />
+
+        {/* Store name */}
+        <ReceiptPreviewRow
+          key={`${keyPref}-stname`}
+          keyPrefix={`${keyPref}-stname`}
+          rowType='centered'
+          cols={[orderStore.name]} />
+
+        {/* Address */}
+        {addrList.map((addr, i) => {
+          const key = `${keyPref}addr-${i}`
+
+          return <ReceiptPreviewRow
+            key={key}
+            keyPrefix={key}
+            rowType='centered'
+            cols={[addr]} />
+        })}
+      </span>
+    )
+  }
+
+  renderOrderNumberSection (keyPref, order) {
     const dateOptions = {
       day: 'numeric',
       month: 'numeric',
@@ -60,111 +97,81 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
       hour: '2-digit',
       minute: '2-digit'
     }
+    const staff = order.staff
+    let orderSalesPerson = ''
+
+    if (staff) {
+      orderSalesPerson += staff.firstName && `${staff.firstName.toUpperCase()} `
+      orderSalesPerson += staff.lastName && `${staff.lastName.toUpperCase()}` || ''
+    } else {
+      orderSalesPerson = 'N/A'
+    }
+
+    const customer = order.users
 
     return (
-      <span ref='preview'>
-        {orders.map((order) => {
-          const addrList = this.splitAddr(order.source, stores)
-          const cust = order.users
-            ? `${order.users.firstName} ${order.users.lastName}`.toUpperCase()
-            : 'N/A'
-          const itemCount = order.items.length
-          const orderSalesPerson = order.staff && order.staff.username
-            ? order.staff.username.toUpperCase() : 'N/A'
+      <span key={`${keyPref}-order-number-section`}>
+        {/* Order ID */}
+        <span>
+          {order.refundId && order.duplicate &&
+            <ReceiptPreviewRow
+              keyPrefix={`${keyPref}refund-id`}
+              rowType='is-bold'
+              cols={[`REFUND ID: ${order.refundId}`]} />}
+          <ReceiptPreviewRow
+            keyPrefix={`${keyPref}order-id`}
+            rowType='is-bold'
+            cols={[`ORDER ID: ${order.id}`]} />
+        </span>
 
-          const keyPref = `rcptprev-vb-${order.id}-`
+        {/* Order sales person */}
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}sales-person`}
+          cols={[`STAFF: ${orderSalesPerson}`]} />
+
+        {/* Date */}
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}order-id`}
+          cols={[formatDate(new Date(order.refundId && order.duplicate ? order.dateRefunded : order.dateOrdered), dateOptions)]} />
+
+        {/* Customer name */}
+        {
+          customer &&
+          <ReceiptPreviewRow
+            key={`${keyPref}-customername}`}
+            keyPrefix={`${keyPref}-customername`}
+            cols={[`CUSTOMER[ID#${processOdboID(customer.odboId)}] :`, `${customer.firstName || ''} ${customer.lastName || ''}`]} />
+        }
+      </span>
+    )
+  }
+
+  renderItemsListSection (keyPref, order) {
+    return (
+      <span key={`${keyPref}-items-section`}>
+        {/* Items list */}
+        {order.items.map((item, i) => {
+          const key = `${keyPref}item-${item.id || i}`
+          const discountLabel = item.product.isDiscounted
+            ? order.currency === 'sgd'
+              ? item.product.priceDiscount !== 0 ? `[less %${item.product.priceDiscount}]` : ''
+              : item.product.odboPriceDiscount !== 0 ? `[less %${item.product.odboPriceDiscount}]` : ''
+            : ''
           return (
-            <span key={`${keyPref}`}>
-              {/* Address */}
-              {addrList.map((addr, i) => {
-                const key = `${keyPref}addr-${i}`
-
-                return <ReceiptPreviewRow
-                  key={key}
-                  keyPrefix={key}
-                  cols={[addr]} />
-              })}
-
-              {/* Customer name */}
+            <span key={key} className='item'>
               <ReceiptPreviewRow
-                keyPrefix={`${keyPref}cust`}
-                cols={[`CUSTOMER: ${cust}`]} />
-              <ReceiptRowDivider />
-
-              {/* Date and order ID */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}date-id`}
+                keyPrefix={key}
+                rowType='qty-name-total'
                 cols={[
-                  formatDate(new Date(order.dateOrdered), dateOptions),
-                  order.id
+                  `${item.quantity}x`,
+                  `${item.product.nameEn} ${discountLabel}`,
+                  order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
                 ]} />
 
-              {/* Order sales person */}
               <ReceiptPreviewRow
-                keyPrefix={`${keyPref}sales-person`}
-                cols={[`SALES PERSON: ${orderSalesPerson}`]} />
-              <ReceiptRowDivider />
-
-              {/* Items list */}
-              {order.items.map((item, i) => {
-                const key = `${keyPref}item-${item.id || i}`
-
-                return (
-                  <span key={key} className='item'>
-                    <ReceiptPreviewRow
-                      keyPrefix={key}
-                      cols={[item.product.nameEn]} />
-                    <ReceiptPreviewRow cols={[
-                      item.product.barcodeInfo,
-                      `${item.quantity}x`,
-                      order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
-                    ]} />
-                  </span>
-                )
-              })}
-
-              {/* Items list info */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}item-list-info`}
-                cols={[
-                  `Total (${itemCount}) item${itemCount === 1 ? '' : 's'}.`
-                ]} />
-              <ReceiptRowDivider />
-
-              {/* Totals */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}subtotal`}
-                cols={['Sub-TOTAL S$', order.currency === 'sgd' ? formatCurrency(order.subtotal) : order.subtotal]} />
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}total`}
-                cols={['TOTAL S$', formatCurrency(order.total)]} />
-
-              {/* Payments */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}payments`}
-                cols={['PAYMENT(S):']} />
-
-              {order.payments.map((payment, i) => {
-                let type = ''
-                const key = `${keyPref}payment-${payment.id || i}`
-
-                // Figure out the type of payment
-                if (payment.provider && payment.type === 'debit') {
-                  type = 'NETS'
-                } else if (payment.provider && payment.type === 'credit') {
-                  type = payment.provider.toUpperCase()
-                } else {
-                  type = payment.type && payment.type.toUpperCase()
-                }
-
-                return <ReceiptPreviewRow
-                  key={key}
-                  keyPrefix={key}
-                  cols={[type, order.currency === 'sgd' ? formatCurrency(payment.amount) : payment.amount]} />
-              })}
-
-              <ReceiptRowDividerDbl />
-              <ReceiptRowNewLine />
+                keyPrefix={key}
+                rowType='qty-name-total'
+                cols={['', item.product.barcodeInfo, '']} />
             </span>
           )
         })}
@@ -172,15 +179,248 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
     )
   }
 
+  renderSubtotalSection (keyPref, order) {
+    const subtotal = Number(order.subtotal) + Number(order.discount)
+    return (
+      <span key={`${keyPref}-subtotal-section`}>
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}gst`}
+          cols={['GST:', formatCurrency(0)]} />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}subtotal`}
+          cols={['SUBTOTAL:', order.currency === 'sgd' ? formatCurrency(Number(subtotal)) : subtotal.toFixed(0)]} />
+      </span>
+    )
+  }
+
+  renderTotalSection (keyPref, order) {
+    return (
+      <span key={`${keyPref}-total-section`}>
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}discount`}
+          cols={['DISCOUNTS:', order.currency === 'sgd' ? formatCurrency(order.discount) : order.discount]} />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}total`}
+          rowType='is-bold'
+          cols={['TOTAL:', order.currency === 'sgd' ? formatCurrency(order.total) : order.total]} />
+      </span>
+    )
+  }
+
+  renderPaymentsSection (keyPref, order) {
+    const deductSign = order.refundId && order.duplicate ? '-' : ''
+    const netPayments = order.payments.filter(payment => payment.type === 'nets')
+    const creditPayments = order.payments.filter(payment => payment.type === 'credit' || payment.type === 'debit')
+    const odboPayment = order.payments.filter(payment => payment.type === 'odbo')[0]
+    const cashPayment = order.payments.filter(payment => payment.type === 'cash')[0]
+
+    if (order.currency === 'odbo') {
+      return (
+        <span key={`${keyPref}-payments-section`}>
+          {
+            this.renderOdboPayment(keyPref, order.users, odboPayment)
+          }
+        </span>
+      )
+    }
+
+    return (
+      <span key={`${keyPref}-payments-section`}>
+        {
+          netPayments.length > 0 &&
+          this.renderNetsPayments(keyPref, netPayments)
+        }
+        {
+          creditPayments.length > 0 &&
+          this.renderCreditPayments(keyPref, creditPayments, deductSign)
+        }
+        {
+          cashPayment &&
+          this.renderCashPayment(keyPref, cashPayment, deductSign)
+        }
+        {
+          order.vouchers && order.vouchers.length > 0 &&
+          this.renderVouchersPayment(keyPref, order.vouchers, deductSign)
+        }
+        <ReceiptRowDivider />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}total`}
+          rowType='is-bold'
+          cols={['TOTAL PAYMENT:', formatCurrency(compPaymentsSum(order.payments, false, order.vouchers))]} />
+        <ReceiptPreviewRow
+          key={`${200}-change`}
+          keyPrefix={`${keyPref}-change`}
+          rowType='is-bold'
+          cols={['CASH CHANGE:', formatCurrency(cashPayment ? cashPayment.change : 0)]} />
+      </span>
+    )
+  }
+
+  renderNetsPayments (keyPref, nets) {
+    return (
+      <span key={`nets-cont`}>
+        {
+          nets.map((payment, index) => {
+            const key = `${keyPref}payment-${payment.id || index + 0}`
+
+            return (
+              <span>
+                <ReceiptPreviewRow
+                  key={`${key}-header-type-nets`}
+                  keyPrefix={`header-type-nets`}
+                  rowType='is-bold'
+                  cols={['NETS PAYMENT']} />
+                <ReceiptPreviewRow
+                  key={`${key}-amount`}
+                  keyPrefix={`${key}-amount`}
+                  cols={['AMOUNT PAID:', formatCurrency(Number(payment.amount).toFixed(0))]} />
+                <ReceiptPreviewRow
+                  key={`${key}-transnum`}
+                  keyPrefix={`${key}-transnum`}
+                  cols={['TRANS#:', payment.transNumber]} />
+              </span>
+            )
+          })
+        }
+      </span>
+    )
+  }
+
+  renderCreditPayments (keyPref, credits, deductSign) {
+    return (
+      <span key={`credit-cont`}>
+        <ReceiptPreviewRow
+          key={`header-type-credit`}
+          keyPrefix={`header-type-credit`}
+          rowType='is-bold'
+          cols={['CREDIT PAYMENT']} />
+
+        {
+          credits.map((payment, index) => {
+            const key = `${keyPref}payment-${payment.id || index + 10}`
+
+            return (
+              <span>
+                <ReceiptPreviewRow
+                  key={`${key}-amount`}
+                  keyPrefix={`${key}-amount`}
+                  cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
+                <ReceiptPreviewRow
+                  key={`${key}-card-type`}
+                  keyPrefix={`${key}-card-type`}
+                  cols={['CARD TYPE:', payment.provider ? payment.provider.toUpperCase() : '--']} />
+                <ReceiptPreviewRow
+                  key={`${key}-transnum`}
+                  keyPrefix={`${key}-transnum`}
+                  cols={['TRANS#:', payment.transNumber]} />
+              </span>
+            )
+          })
+        }
+      </span>
+    )
+  }
+
+  renderCashPayment (keyPref, payment, deductSign) {
+    const key = `${keyPref}payment-${payment.id || 80}`
+    return (
+      <span key={`cash-cont`}>
+        <ReceiptPreviewRow
+          key={`header-type-cash`}
+          keyPrefix={`header-type-cash`}
+          rowType='is-bold'
+          cols={['CASH PAYMENT']} />
+
+        <ReceiptPreviewRow
+          key={`${key}-cash`}
+          keyPrefix={`${key}-cash`}
+          cols={['CASH GIVEN:', formatCurrency(payment.cash)]} />
+        <ReceiptPreviewRow
+          key={`${key}-amount`}
+          keyPrefix={`${key}-amount`}
+          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
+      </span>
+    )
+  }
+
+  renderVouchersPayment (keyPref, vouchers, deductSign) {
+    return (
+      <span>
+        {/* Vouchers */}
+        {vouchers.length > 0
+          ? <ReceiptPreviewRow
+            keyPrefix={`${keyPref}vouchers`}
+            rowType='is-bold'
+            cols={['VOUCHER PAYMENT:']} />
+          : null
+        }
+        {vouchers.map((voucher, i) => {
+          const key = `${keyPref}voucher-${voucher.id || i}`
+          const voucherRemarks = `voucher[${voucher.remarks}]`
+          return (
+            <ReceiptPreviewRow
+              key={`${key}-amount`}
+              keyPrefix={`${key}-amount`}
+              cols={[voucherRemarks, `${deductSign}${formatCurrency(Number(voucher.deduction))}`]} />
+          )
+        })
+        }
+      </span>
+    )
+  }
+
+  renderOdboPayment (keyPref, user, payment) {
+    const key = `${keyPref}payment-${payment.id || 100}`
+    return (
+      <span key={`${key}-cont`}>
+        <ReceiptPreviewRow
+          key={`${key}-type-odbo`}
+          keyPrefix={`${key}-type-odbo`}
+          rowType='is-bold'
+          cols={['ODBO PAYMENT']} />
+        <ReceiptPreviewRow
+          key={`${key}-cash`}
+          keyPrefix={`${key}-cash`}
+          cols={['ODBO COINS:', user.odboCoins + Number(payment.amount)]} />
+        <ReceiptPreviewRow
+          key={`${key}-amount`}
+          keyPrefix={`${key}-amount`}
+          cols={['AMOUNT PAID:', Number(payment.amount).toFixed(0)]} />
+        <ReceiptPreviewRow
+          key={`${key}-change`}
+          keyPrefix={`${key}-change`}
+          cols={['REMAINING BALANCE:', user.odboCoins]} />
+      </span>
+    )
+  }
+
+  renderOdboCoinBalanceSection (keyPref, order) {
+    const isRefund = order.refundId && order.duplicate
+    const deductSign = isRefund ? '-' : ''
+    const odbo = isRefund ? processRefundOdbo(order.currency, order.users, order.total, order.bonusPoints, order.userPrevCoins)
+            : processOdbo(order.currency, order.users, order.total, order.bonusPoints, order.userPrevCoins)
+
+    return (
+      <span key={`${keyPref}-coin-balance-section`}>
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}coinbalance`}
+          rowType='is-bold centered'
+          cols={['THE ODBO COIN BALANCE']} />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}prevcoins`}
+          cols={[`PREVIOUS BALANCE:`, `${odbo.prevCoins}`]} />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}earnedpoints`}
+          cols={[`EARNED POINTS${odbo.bonus ? ' ' + odbo.bonus : ''}:`, `${deductSign}${odbo.earnedPts}`]} />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}newbalance`}
+          cols={['NEW BALANCE', odbo.newCoins]} />
+      </span>
+    )
+  }
+
   renderNewViewBillReceipt () {
     const { orders, stores, idTo, idFrom } = this.props
-    const dateOptions = {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }
 
     let modifiedOrdersList = []
     orders.forEach((order) => {
@@ -205,231 +445,33 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
     return (
       <span ref='preview'>
         {modifiedOrdersList.reverse().map((order) => {
-          const addrList = this.splitAddr(order.source, stores)
-          const staff = order.staff
-          let orderSalesPerson = ''
           const refundAmt = compPaymentsSum(order.payments, false, order.vouchers) - compCashChange(order.payments)
-          const deductSign = order.refundId && order.duplicate ? '-' : ''
-
-          if (staff) {
-            orderSalesPerson += staff.firstName && `${staff.firstName.toUpperCase()} `
-            orderSalesPerson += staff.lastName && `${staff.lastName.toUpperCase()}` || ''
-          } else {
-            orderSalesPerson = 'N/A'
-          }
-
-          const orderStore = stores.find((st) => st.source === order.source)
-
           const keyPref = `rcptprev-vb-${order.duplicate ? order.refundId : order.id}-`
           return (
             <span key={`${keyPref}`}>
-              {/* "The odbo" */}
-              <ReceiptPreviewRow
-                key={`${keyPref}-header`}
-                keyPrefix={`${keyPref}-header`}
-                rowType='centered is-title'
-                cols={['The odbo']} />
-
-              {/* Store name */}
-              <ReceiptPreviewRow
-                key={`${keyPref}-stname`}
-                keyPrefix={`${keyPref}-stname`}
-                rowType='centered'
-                cols={[orderStore.name]} />
-
-              {/* Address */}
-              {addrList.map((addr, i) => {
-                const key = `${keyPref}addr-${i}`
-
-                return <ReceiptPreviewRow
-                  key={key}
-                  keyPrefix={key}
-                  rowType='centered'
-                  cols={[addr]} />
-              })}
-              <ReceiptRowDivider />
-
-              {/* Order ID */}
-              <span>
-                {order.refundId && order.duplicate &&
-                  <ReceiptPreviewRow
-                    keyPrefix={`${keyPref}refund-id`}
-                    rowType='is-bold'
-                    cols={[`Refund ID: ${order.refundId}`]} />}
-                <ReceiptPreviewRow
-                  keyPrefix={`${keyPref}order-id`}
-                  cols={[`Order ID: ${order.id}`]} />
-              </span>
-
-              {/* Order sales person */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}sales-person`}
-                cols={[`STAFF: ${orderSalesPerson}`]} />
-
-              {/* Date */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}order-id`}
-                cols={[formatDate(new Date(order.refundId && order.duplicate ? order.dateRefunded : order.dateOrdered), dateOptions)]} />
-              <ReceiptRowDivider />
-
-              {/* Items list */}
-              {order.items.map((item, i) => {
-                const key = `${keyPref}item-${item.id || i}`
-                const discountLabel = item.product.isDiscounted
-                  ? order.currency === 'sgd'
-                    ? item.product.priceDiscount !== 0 ? `[less %${item.product.priceDiscount}]` : ''
-                    : item.product.odboPriceDiscount !== 0 ? `[less %${item.product.odboPriceDiscount}]` : ''
-                  : ''
-                return (
-                  <span key={key} className='item'>
-                    <ReceiptPreviewRow
-                      keyPrefix={key}
-                      rowType='qty-name-total'
-                      cols={[
-                        `${item.quantity}x`,
-                        `${item.product.nameEn} ${discountLabel}`,
-                        order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
-                      ]} />
-
-                    <ReceiptPreviewRow
-                      keyPrefix={key}
-                      rowType='qty-name-total'
-                      cols={['', item.product.barcodeInfo, '']} />
-                  </span>
-                )
-              })}
-              <ReceiptRowDivider />
-
-              {/* Product Subtotal */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}gst`}
-                cols={['GST:', formatCurrency(0)]} />
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}subtotal`}
-                cols={['SUBTOTAL:', order.currency === 'sgd' ? formatCurrency(order.subtotal) : order.subtotal]} />
-              {/* Vouchers */}
-              {order.vouchers.length > 0
-                ? <ReceiptPreviewRow
-                  keyPrefix={`${keyPref}vouchers`}
-                  cols={['VOUCHERS:']} />
-                : null
-              }
-              {order.vouchers.map((voucher, i) => {
-                const key = `${keyPref}voucher-${voucher.id || i}`
-                const voucherRemarks = `voucher[${voucher.remarks}]`
-                return (
-                  <ReceiptPreviewRow
-                    key={`${key}-amount`}
-                    keyPrefix={`${key}-amount`}
-                    cols={[voucherRemarks, '-' + formatCurrency(Number(voucher.deduction))]} />
-                )
-              })
+              {
+                this.renderReceiptHeader(keyPref, order, stores)
               }
               <ReceiptRowDivider />
-              {/* Order Total */}
-              <ReceiptPreviewRow
-                keyPrefix={`${keyPref}total`}
-                cols={['TOTAL:', order.currency === 'sgd' ? formatCurrency(order.total) : order.total]} />
+              {
+                this.renderOrderNumberSection(keyPref, order)
+              }
               <ReceiptRowDivider />
-              {/* Payments */}
-              {order.payments.map((payment, i) => {
-                let type = ''
-                const key = `${keyPref}payment-${payment.id || i}`
-
-                // Figure out the type of payment
-                if (order.currency === 'sgd') {
-                  if (payment.provider && payment.type === 'debit') {
-                    type = 'NETS'
-                    return (
-                      <span key={`${key}-cont`}>
-                        <ReceiptPreviewRow
-                          key={`${key}-type-${type}`}
-                          keyPrefix={`${key}-type-${type}`}
-                          rowType='is-bold'
-                          cols={[type]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-amount`}
-                          keyPrefix={`${key}-amount`}
-                          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-cardtype`}
-                          keyPrefix={`${key}-cardtype`}
-                          cols={['CARD TYPE:', payment.provider]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-transnum`}
-                          keyPrefix={`${key}-transnum`}
-                          cols={['TRANS#:', payment.transNumber]} />
-                      </span>
-                    )
-                  } else if (payment.provider && payment.type === 'credit') {
-                    type = payment.provider.toUpperCase()
-                    return (
-                      <span key={`${key}-cont`}>
-                        <ReceiptPreviewRow
-                          key={`${key}-type-${type}`}
-                          keyPrefix={`${key}-type-${type}`}
-                          rowType='is-bold'
-                          cols={[type]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-amount`}
-                          keyPrefix={`${key}-amount`}
-                          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-transnum`}
-                          keyPrefix={`${key}-transnum`}
-                          cols={['TRANS#:', payment.transNumber]} />
-                      </span>
-                    )
-                  } else {
-                    type = payment.type && payment.type.toUpperCase()
-                    return (
-                      <span key={`${key}-cont`}>
-                        <ReceiptPreviewRow
-                          key={`${key}-type-${type}`}
-                          keyPrefix={`${key}-type-${type}`}
-                          rowType='is-bold'
-                          cols={[type]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-cash`}
-                          keyPrefix={`${key}-cash`}
-                          cols={['CASH GIVEN:', formatCurrency(payment.cash)]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-amount`}
-                          keyPrefix={`${key}-amount`}
-                          cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
-                        <ReceiptPreviewRow
-                          key={`${key}-change`}
-                          keyPrefix={`${key}-change`}
-                          cols={['CASH CHANGE:', formatCurrency(payment.change)]} />
-                      </span>
-                    )
-                  }
-                } else {
-                  type = payment.type && payment.type.toUpperCase()
-                  return (
-                    <span key={`${key}-cont`}>
-                      <ReceiptPreviewRow
-                        key={`${key}-type-${type}`}
-                        keyPrefix={`${key}-type-${type}`}
-                        rowType='is-bold'
-                        cols={[type]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-cash`}
-                        keyPrefix={`${key}-cash`}
-                        cols={['ODBO COINS:', order.users.odboCoins + Number(payment.amount)]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-amount`}
-                        keyPrefix={`${key}-amount`}
-                        cols={['AMOUNT PAID:', Number(payment.amount).toFixed(0)]} />
-                      <ReceiptPreviewRow
-                        key={`${key}-change`}
-                        keyPrefix={`${key}-change`}
-                        cols={['REMAINING BALANCE:', order.users.odboCoins]} />
-                    </span>
-                  )
-                }
-              })}
-
+              {
+                this.renderItemsListSection(keyPref, order)
+              }
+              <ReceiptRowDivider />
+              {
+                this.renderSubtotalSection(keyPref, order)
+              }
+              <ReceiptRowDivider />
+              {
+                this.renderTotalSection(keyPref, order)
+              }
+              <ReceiptRowDivider />
+              {
+                this.renderPaymentsSection(keyPref, order)
+              }
               {/* Refund details */}
               {order.refundId && order.duplicate &&
                 <span>
@@ -439,6 +481,14 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                     rowType='is-bold'
                     cols={['REFUNDED AMOUNT:', formatCurrency(refundAmt, order.currency)]} />
                 </span>
+              }
+              {
+                order.users &&
+                <ReceiptRowDivider />
+              }
+              {
+                order.users &&
+                this.renderOdboCoinBalanceSection(keyPref, order)
               }
 
               {/* Footer */}

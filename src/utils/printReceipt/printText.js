@@ -76,9 +76,9 @@ export const buildExtraInfo = (type, info, duplicate) => {
   let extra = ''
   let custLbl = customer ? `<div style="${TOTAL_DIV_STYLE_2}">CUSTOMER[ID#${processOdboID(customer.odboId)}] : ${customer.firstName || ''} ${customer.lastName || ''}</div>` : ''
   let orderId = type === 'reprint' && refundId && duplicate
-    ? `<div style="${TOTAL_DIV_STYLE_1}">Refund ID : ${refundId}</div>`
+    ? `<div style="${TOTAL_DIV_STYLE_1}">REFUND ID: ${refundId}</div>` + `<div style="${TOTAL_DIV_STYLE_1}">ORDER ID: ${id}</div>`
     : id
-      ? `<div style="${TOTAL_DIV_STYLE_1}">Order ID : ${id}</div>`
+      ? `<div style="${TOTAL_DIV_STYLE_1}">ORDER ID: ${id}</div>`
       : ''
   let dateToShow = refundId && duplicate ? dateRefunded : !date ? null : date
   extra += `<div>
@@ -169,7 +169,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
   let comp = ''
 
   if (paymentInfo) {
-    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, refundAmt, dateRefunded } = paymentInfo
+    const { currency, payments, subtotal, orderTotal, orderDisccount, notes, vouchers, odbo, refundId, orderId, refundAmt, dateRefunded } = paymentInfo
     let deductSign = refundId && duplicate ? '-' : ''
     comp += '<div>'
     if (currency === 'sgd') {
@@ -183,7 +183,19 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
 
     comp += RECEIPT_DIVIDER
 
-    payments.map(payment => {
+    payments.filter(payment => payment.type === 'nets').map(payment => {
+      if (currency === 'sgd') {
+        if (payment.type === 'nets') {
+          if (payment.amount) {
+            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS PAYMENT</div></div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${formatCurrency(payment.amount)}</div>
+                     <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
+          }
+        }
+      }
+    })
+
+    payments.filter(payment => payment.type === 'credit' || payment.type === 'debit').map(payment => {
       if (currency === 'sgd') {
         if (payment.type === 'credit') {
           if (payment.amount) {
@@ -193,13 +205,11 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
                      <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
           }
         }
-        if (payment.type === 'nets') {
-          if (payment.amount) {
-            comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>NETS PAYMENT</div></div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID: </div>${deductSign}${formatCurrency(payment.amount)}</div>
-                     <div style="${TOTAL_DIV_STYLE_2}"><div>TRANS#: </div>${payment.transNumber}</div>`
-          }
-        }
+      }
+    })
+
+    payments.filter(payment => payment.type === 'cash').map(payment => {
+      if (currency === 'sgd') {
         if (payment.type === 'cash') {
           if (payment.amount) {
             comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>CASH PAYMENT</div></div>
@@ -207,7 +217,11 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
                      <div style="${TOTAL_DIV_STYLE_2}"><div>AMOUNT PAID : </div>${deductSign}${formatCurrency(payment.amount)}</div>`
           }
         }
-      } else if (currency === 'odbo') {
+      }
+    })
+
+    payments.filter(payment => payment.type === 'odbo').map(payment => {
+      if (currency === 'odbo') {
         if (payment.amount) {
           comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>ODBO PAYMENT</div></div>
                    <div style="${TOTAL_DIV_STYLE_2}"><div>ODBO COINS: </div>${odbo.prevCoins}</div>
@@ -260,6 +274,7 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
       comp += RECEIPT_DIVIDER
       comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED ORDER: </div></div>
               <div style="${TOTAL_DIV_STYLE_1}"><div>REFUND ID: </div> ${refundId}</div>
+              <div style="${TOTAL_DIV_STYLE_1}"><div>ORDER ID: </div> ${orderId}</div>
               <div style="${TOTAL_DIV_STYLE_2}">${formatDate(dateRefunded)}</div>
               <div style="${TOTAL_DIV_STYLE_1}"><div>REFUNDED AMOUNT: </div>${formatCurrency(refundAmt, currency)}</div>
               </div>`
