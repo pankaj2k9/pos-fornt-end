@@ -142,44 +142,35 @@ export const processProducts = (data, currency) => {
   return products
 }
 
-export const processReceiptProducts = (data, currency) => {
-  let products = data.map(item => {
-    let discount = item.overallDiscount === 0
-      ? item.customDiscount === 0
-        ? item.isDiscounted
-          ? currency === 'sgd'
-            ? item.priceDiscount // isDiscounted and sgd
-            : item.odboPriceDiscount // isDiscounted and odbo
-          : 0 // overall and item is not discount
-        : item.customDiscount // customDiscount is not 0
-      : item.overallDiscount // overallDiscount is not 0
-    let discountLbl = discount !== 0
-      ? `(less ${discount}%)`
-      : ''
-    let name = `${item.nameEn}\n${item.barcodeInfo || ''}\n${discountLbl}`
+export const processReceiptProducts = (discountPercentOverall, items, currency) => {
+  discountPercentOverall = Number(discountPercentOverall)
+
+  let products = items.map(item => {
+    let customDiscountPercent = Number(item.discountPercent)
+    const price = Number(item.itemCost || item.price || 0)
+    const totalCost = Number(item.totalCost || (currency === 'sgd' ? item.subTotalPrice : item.subTotalOdboPrice) || 0)
+    const finalPR = compDiscount(customDiscountPercent, price)
+
+    let discountLbl = customDiscountPercent !== 0 || discountPercentOverall !== 0
+      ? `(less ${discountPercentOverall || customDiscountPercent || 0}%)`
+      : undefined
+    let name = `${item.nameEn || item.product.nameEn}`
     return {
       productId: Number(item.id),
+      product: item.product,
+      barcodeInfo: (item.barcodeInfo || (item.product ? item.product.barcodeInfo : undefined)),
+      discountLabel: discountLbl,
       name: name,
-      quantity: item.qty,
-      itemCost: currency === 'sgd' ? formatCurrency(item.finalPR) : item.finalOdboPR,
-      totalCost: currency === 'sgd' ? formatCurrency(item.subTotalPrice) : item.subTotalOdboPrice
+      quantity: item.qty || item.quantity,
+      itemCost: currency === 'sgd' ? formatCurrency(finalPR) : item.finalOdboPR,
+      totalCost: currency === 'sgd' ? formatCurrency(totalCost) : totalCost
     }
   })
   return products
 }
 
 export const processOrderSearchReceipt = (type, data, storeAddress, lastId) => {
-  let currency = data.currency
-  let products = data.items.map(item => {
-    let name = `${item.product.nameEn}\n${item.product.barcodeInfo || ''}`
-    return {
-      productId: Number(item.productId),
-      name: name,
-      quantity: item.quantity,
-      itemCost: currency === 'sgd' ? formatCurrency(item.itemCost) : item.itemCost,
-      totalCost: currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
-    }
-  })
+  let products = processReceiptProducts(data.discountPercentOverall || data.overallDiscount || 0, data.items, data.currency)
 
   let isRefund = false
   if (data.duplicate && data.refundId) {

@@ -106,7 +106,7 @@ export function setOrderInfo (data, otherData) {
   const receipt = {
     type: 'order',
     storeAddress: processStoreAddress(activeStore),
-    items: processReceiptProducts(orderItems, currency),
+    items: processReceiptProducts(overallDiscount || 0, orderItems, currency),
     extraInfo: {
       id: getNextOrderId(code, lastOrderId),
       randId: randomId,

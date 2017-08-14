@@ -21,6 +21,14 @@
     &.col3.qty-name-total .col:nth-child(2) { width: 125px; text-align: left; }
     &.col3.qty-name-total .col:nth-child(3) { width: 90px; text-align: right; }
 
+    &.col3.barcode-name .col:nth-child(1) { width: 25px; }
+    &.col3.barcode-name .col:nth-child(2) { width: 125px; text-align: left; }
+    &.col3.barcode-name .col:nth-child(3) { width: 90px; text-align: right; }
+
+    &.col3.discount-name .col:nth-child(1) { width: 25px; }
+    &.col3.discount-name .col:nth-child(2) { width: 125px; text-align: left; }
+    &.col3.discount-name .col:nth-child(3) { width: 90px; text-align: right; }
+
     &.row.col4 > div { width: 55px; text-align: right; }
     &.row.col4 .col:nth-child(1) { width: 60px; text-align: left; }
 

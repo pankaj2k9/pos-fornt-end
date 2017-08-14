@@ -110,6 +110,20 @@ const buildItemList = (items) => {
                     ${stringifyItemName(item.name)}
                     ${stringifyItemSubtotal(item.totalCost)}
                   </div>`
+      if (item.discountLabel) {
+        itemList += `<div style="${ITEM_LIST_STYLE}">
+                ${stringifyItemQty('')}
+                ${stringifyItemName(item.discountLabel)}
+                ${stringifyItemSubtotal('')}
+              </div>`
+      }
+      if (item.barcodeInfo) {
+        itemList += `<div style="${ITEM_LIST_STYLE}">
+                ${stringifyItemQty('')}
+                ${stringifyItemName(item.barcodeInfo)}
+                ${stringifyItemSubtotal('')}
+              </div>`
+      }
     })
   }
   return itemList
@@ -173,12 +187,12 @@ export const buildComputation = (type, paymentInfo, extraInfo, duplicate) => {
     let deductSign = refundId && duplicate ? '-' : ''
     comp += '<div>'
     if (currency === 'sgd') {
-      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>
-               <div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(subtotal)}</div>
-               ${RECEIPT_DIVIDER}`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>GST: </div>${formatCurrency(0)}</div>`
+      comp += `<div style="${TOTAL_DIV_STYLE_2}"><div>SUBTOTAL: </div>${formatCurrency(subtotal)}</div>`
+      comp += orderDisccount ? `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(-1*orderDisccount, currency)}</div>` : ''
+      comp += `${RECEIPT_DIVIDER}`
     }
 
-    comp += orderDisccount ? `<div style="${TOTAL_DIV_STYLE_2}"><div>DISCOUNTS : </div>${formatCurrency(orderDisccount, currency)}</div>` : ''
     comp += `<div style="${TOTAL_DIV_STYLE_1}"><div>TOTAL: </div>${formatCurrency(orderTotal, currency)}</div>`
 
     comp += RECEIPT_DIVIDER

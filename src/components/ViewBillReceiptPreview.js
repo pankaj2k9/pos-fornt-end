@@ -15,7 +15,8 @@ import {
   compCashChange,
   processOdboID,
   processRefundOdbo,
-  processOdbo
+  processOdbo,
+  processReceiptProducts
 } from '../utils/computations'
 
 import { formatCurrency, formatDate, formatNumber } from '../utils/string'
@@ -147,16 +148,13 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
   }
 
   renderItemsListSection (keyPref, order) {
+    const items = processReceiptProducts(order.discountPercentOverall, order.items, order.currency)
+
     return (
       <span key={`${keyPref}-items-section`}>
         {/* Items list */}
-        {order.items.map((item, i) => {
+        {items.map((item, i) => {
           const key = `${keyPref}item-${item.id || i}`
-          const discountLabel = item.product.isDiscounted
-            ? order.currency === 'sgd'
-              ? item.product.priceDiscount !== 0 ? `[less %${item.product.priceDiscount}]` : ''
-              : item.product.odboPriceDiscount !== 0 ? `[less %${item.product.odboPriceDiscount}]` : ''
-            : ''
           return (
             <span key={key} className='item'>
               <ReceiptPreviewRow
@@ -164,14 +162,32 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 rowType='qty-name-total'
                 cols={[
                   `${item.quantity}x`,
-                  `${item.product.nameEn} ${discountLabel}`,
-                  order.currency === 'sgd' ? formatCurrency(item.totalCost) : item.totalCost
+                  `${item.name}`,
+                  item.totalCost
                 ]} />
+              {
+                item.discountLabel &&
+                <ReceiptPreviewRow
+                  keyPrefix={key}
+                  rowType='discount-name'
+                  cols={[
+                    '',
+                    item.discountLabel,
+                    ''
+                  ]} />
+              }
 
-              <ReceiptPreviewRow
-                keyPrefix={key}
-                rowType='qty-name-total'
-                cols={['', item.product.barcodeInfo, '']} />
+              {
+                item.barcodeInfo &&
+                <ReceiptPreviewRow
+                  keyPrefix={key}
+                  rowType='barcode-name'
+                  cols={[
+                    '',
+                    item.barcodeInfo,
+                    ''
+                  ]} />
+              }
             </span>
           )
         })}
@@ -189,6 +205,9 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
         <ReceiptPreviewRow
           keyPrefix={`${keyPref}subtotal`}
           cols={['SUBTOTAL:', order.currency === 'sgd' ? formatCurrency(Number(subtotal)) : subtotal.toFixed(0)]} />
+        <ReceiptPreviewRow
+          keyPrefix={`${keyPref}discount`}
+          cols={['DISCOUNTS:', order.currency === 'sgd' ? formatCurrency(-order.discount) : -order.discount]} />
       </span>
     )
   }
@@ -196,9 +215,6 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
   renderTotalSection (keyPref, order) {
     return (
       <span key={`${keyPref}-total-section`}>
-        <ReceiptPreviewRow
-          keyPrefix={`${keyPref}discount`}
-          cols={['DISCOUNTS:', order.currency === 'sgd' ? formatCurrency(order.discount) : order.discount]} />
         <ReceiptPreviewRow
           keyPrefix={`${keyPref}total`}
           rowType='is-bold'
@@ -228,7 +244,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
       <span key={`${keyPref}-payments-section`}>
         {
           netPayments.length > 0 &&
-          this.renderNetsPayments(keyPref, netPayments)
+          this.renderNetsPayments(keyPref, netPayments, deductSign)
         }
         {
           creditPayments.length > 0 &&
@@ -256,7 +272,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
     )
   }
 
-  renderNetsPayments (keyPref, nets) {
+  renderNetsPayments (keyPref, nets, deductSign) {
     return (
       <span key={`nets-cont`}>
         {
@@ -273,7 +289,7 @@ export default class ViewBillReceiptPreview extends React.PureComponent {
                 <ReceiptPreviewRow
                   key={`${key}-amount`}
                   keyPrefix={`${key}-amount`}
-                  cols={['AMOUNT PAID:', formatCurrency(Number(payment.amount).toFixed(0))]} />
+                  cols={['AMOUNT PAID:', `${deductSign}${formatCurrency(payment.amount)}`]} />
                 <ReceiptPreviewRow
                   key={`${key}-transnum`}
                   keyPrefix={`${key}-transnum`}

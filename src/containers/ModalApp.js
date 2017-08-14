@@ -136,7 +136,7 @@ class ModalApp extends Component {
   }
 
   _printReceipt () {
-    const { activeOD, mainUI } = this.props
+    const { activeOD, mainUI, dispatch } = this.props
     if (!activeOD.storeAddress) {
       let storeAddress = processStoreAddress(mainUI.activeStore)
       let receipt = processOrderSearchReceipt('refund', activeOD, storeAddress, activeOD.refundId)
@@ -144,6 +144,7 @@ class ModalApp extends Component {
     } else {
       print(activeOD)
     }
+    dispatch(closeActiveModal())
   }
 
   renderEmptyListLbl (lbl, isProcessing) {
